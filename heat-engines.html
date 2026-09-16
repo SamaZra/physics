@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>КПД тепловых двигателей. Второе начало термодинамики</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:160px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .favorite-btn{position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1000;color:var(--text-secondary);transition:all 0.2s;backdrop-filter:blur(4px);}
+        .favorite-btn:hover{transform:scale(1.1);}
+        .favorite-btn.active{color:#facc15;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:120px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>КПД тепловых двигателей.<br>Второе начало термодинамики</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Принцип действия теплового двигателя</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Тепловой двигатель</strong> — устройство, которое превращает внутреннюю энергию топлива в механическую работу.</p>
+                <p><strong>Основные элементы теплового двигателя:</strong></p>
+                <ul>
+                    <li><strong>Рабочее тело</strong> — газ или пар, который совершает работу (расширяясь, толкает поршень).</li>
+                    <li><strong>Нагреватель</strong> — источник энергии с температурой $T_1$. Сообщает рабочему телу количество теплоты $Q_1$.</li>
+                    <li><strong>Холодильник</strong> — тело с температурой $T_2 < T_1$, которому рабочее тело отдаёт часть теплоты $Q_2$.</li>
+                </ul>
+                <p><strong>Цикл работы:</strong> рабочее тело периодически возвращается в исходное состояние. За цикл:</p>
+                <ul>
+                    <li>получает от нагревателя $Q_1$;</li>
+                    <li>отдаёт холодильнику $Q_2$;</li>
+                    <li>совершает полезную работу $A = Q_1 - Q_2$.</li>
+                </ul>
+                <div class="formula-block">
+                    <span class="f">$A = Q_1 - Q_2$</span>
+                    <span class="f-label">— полезная работа за цикл</span>
+                </div>
+                <p><strong>Важно:</strong> не вся теплота превращается в работу — часть обязательно отдаётся холодильнику. Это следствие второго начала термодинамики.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 КПД теплового двигателя</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Коэффициент полезного действия (КПД)</strong> — отношение полезной работы к количеству теплоты, полученному от нагревателя:</p>
+                <div class="formula-block">
+                    <span class="f">$\eta = \dfrac{A}{Q_1} = \dfrac{Q_1 - Q_2}{Q_1} = 1 - \dfrac{Q_2}{Q_1}$</span>
+                    <span class="f-label">— КПД теплового двигателя</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$A$ — полезная работа за цикл (Дж);</li>
+                    <li>$Q_1$ — теплота, полученная от нагревателя (Дж);</li>
+                    <li>$Q_2$ — теплота, отданная холодильнику (Дж).</li>
+                </ul>
+                <p>КПД обычно выражают в процентах: $\eta = \left(1 - \dfrac{Q_2}{Q_1}\right) \cdot 100\%$.</p>
+                <p><strong>КПД всегда меньше 100%</strong> — часть теплоты неизбежно уходит в холодильник.</p>
+
+                <p><strong>Максимальный КПД (цикл Карно):</strong></p>
+                <div class="formula-block">
+                    <span class="f">$\eta_{max} = \dfrac{T_1 - T_2}{T_1} = 1 - \dfrac{T_2}{T_1}$</span>
+                    <span class="f-label">— КПД цикла Карно</span>
+                </div>
+                <p>где $T_1$ — температура нагревателя, $T_2$ — температура холодильника (в кельвинах).</p>
+                <p><strong>Никакой тепловой двигатель не может иметь КПД больше, чем КПД цикла Карно</strong> при тех же температурах.</p>
+                <p>Чтобы повысить КПД, нужно:</p>
+                <ul>
+                    <li>увеличить температуру нагревателя $T_1$;</li>
+                    <li>уменьшить температуру холодильника $T_2$.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Второе начало термодинамики</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Второе начало термодинамики</strong> указывает направление, в котором могут происходить тепловые процессы. Существует несколько эквивалентных формулировок.</p>
+
+                <p><strong>Формулировка Клаузиуса:</strong> невозможно самопроизвольный переход теплоты от менее нагретого тела к более нагретому. Теплота всегда переходит от горячего к холодному, а не наоборот.</p>
+
+                <p><strong>Формулировка Кельвина:</strong> невозможно создать периодически действующий двигатель, который полностью превращал бы теплоту в работу (без отдачи части её холодильнику).</p>
+
+                <p><strong>Формулировка через КПД:</strong> КПД любого реального теплового двигателя всегда меньше 100%. КПД идеального цикла Карно не может быть больше $\eta = 1 - \dfrac{T_2}{T_1}$.</p>
+
+                <p><strong>Что это означает на практике:</strong></p>
+                <ul>
+                    <li>Нельзя построить «вечный двигатель второго рода» — двигатель, работающий только за счёт охлаждения одного источника тепла.</li>
+                    <li>В любом реальном процессе часть энергии рассеивается (переходит в менее полезные формы, обычно в теплоту).</li>
+                    <li>Все реальные процессы необратимы: теплота переходит от горячего к холодному, газы смешиваются, но не разделяются сами.</li>
+                </ul>
+
+                <p><strong>Примеры тепловых двигателей:</strong></p>
+                <ul>
+                    <li><strong>Двигатель внутреннего сгорания</strong> (ДВС): $T_1$ — температура сгорания топлива (2000+ К), $T_2$ — температура выхлопных газов (~700 К). КПД ≈ 25–40%.</li>
+                    <li><strong>Паровая турбина:</strong> $T_1$ — пар из котла (~800 К), $T_2$ — конденсатор (~300 К). КПД ≈ 35–45%.</li>
+                    <li><strong>Газовая турбина:</strong> $T_1$ — ~1500 К, $T_2$ — ~700 К. КПД ≈ 30–40%.</li>
+                    <li><strong>Реактивный двигатель:</strong> КПД ≈ 20–30%.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="engine" onclick="switchModel('engine')">🔥 Тепловой двигатель</div>
+                <div class="model-tab" data-model="carnot" onclick="switchModel('carnot')">🔄 Цикл Карно</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: ТЕПЛОВОЙ ДВИГАТЕЛЬ -->
+            <div id="model-engine" class="model-content">
+                <div class="model-container" id="container-engine">
+                    <canvas id="canvas-engine" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-engine">⛶</button>
+                    <div class="info-display">
+                        <div>$T_1$ = <span class="val" id="eng-T1">600</span> К</div>
+                        <div>$T_2$ = <span class="val" id="eng-T2">300</span> К</div>
+                        <div>$Q_1$ = <span class="val" id="eng-Q1">1000</span> Дж</div>
+                        <div>$A$ = <span class="val" id="eng-A">500</span> Дж</div>
+                        <div>$\eta$ = <span class="val" id="eng-eta">50</span> %</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>$T_1$ (К)</label>
+                        <input type="range" id="eng-t1" min="400" max="1200" step="10" value="600">
+                        <span class="control-value" id="eng-t1-value">600</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$T_2$ (К)</label>
+                        <input type="range" id="eng-t2" min="200" max="500" step="10" value="300">
+                        <span class="control-value" id="eng-t2-value">300</span>
+                    </div>
+                    <button class="btn-reset" id="eng-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ $\eta = 1 - T_2/T_1$ — растёт при увеличении $T_1$ и уменьшении $T_2$</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель теплового двигателя.</strong> Слева — <strong>нагреватель</strong> (красный, горячий), справа — <strong>холодильник</strong> (синий, холодный). В центре — рабочее тело (жёлтый цилиндр).</p>
+                    <p><span class="important">Ползунки $T_1$ и $T_2$</span> меняют температуры. Чем больше разница $T_1 - T_2$, тем выше КПД $\eta$. Смотрите на табло.</p>
+                    <p>При $T_1 = T_2$ КПД = 0% — двигатель не работает.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: ЦИКЛ КАРНО -->
+            <div id="model-carnot" class="model-content" style="display:none;">
+                <div class="model-container" id="container-carnot">
+                    <canvas id="canvas-carnot" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-carnot">⛶</button>
+                    <div class="info-display">
+                        <div>Этап: <span class="val" id="car-stage">1</span></div>
+                        <div>$T_1$ = <span class="val" id="car-T1">600</span> К</div>
+                        <div>$T_2$ = <span class="val" id="car-T2">300</span> К</div>
+                        <div>$\eta$ = <span class="val" id="car-eta">50</span> %</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>$T_1$ (К)</label>
+                        <input type="range" id="car-t1" min="400" max="1200" step="10" value="600">
+                        <span class="control-value" id="car-t1-value">600</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$T_2$ (К)</label>
+                        <input type="range" id="car-t2" min="200" max="500" step="10" value="300">
+                        <span class="control-value" id="car-t2-value">300</span>
+                    </div>
+                    <button class="btn-reset" id="car-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ 4 этапа цикла Карно: 2 изотермы + 2 адиабаты</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Цикл Карно</strong> — идеальный круговой процесс, состоящий из 4 этапов:</p>
+                    <ul>
+                        <li><strong>1 → 2:</strong> изотермическое расширение при $T_1$ (газ получает $Q_1$ от нагревателя).</li>
+                        <li><strong>2 → 3:</strong> адиабатное расширение (газ охлаждается до $T_2$).</li>
+                        <li><strong>3 → 4:</strong> изотермическое сжатие при $T_2$ (газ отдаёт $Q_2$ холодильнику).</li>
+                        <li><strong>4 → 1:</strong> адиабатное сжатие (газ нагревается до $T_1$).</li>
+                    </ul>
+                    <p>КПД цикла Карно: $\eta = 1 - \dfrac{T_2}{T_1}$ — максимально возможный для данных температур.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. КПД через теплоты</div>
+                <div class="task-condition"><strong>Условие:</strong> Тепловой двигатель получает от нагревателя $Q_1 = 800$ Дж и отдаёт холодильнику $Q_2 = 600$ Дж. Найдите КПД двигателя.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q_1 = 800$ Дж, $Q_2 = 600$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $\eta = \dfrac{Q_1 - Q_2}{Q_1}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta = \dfrac{800 - 600}{800} = \dfrac{200}{800} = 0{,}25 = 25\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Из 800 Дж теплоты только 200 Дж превратились в полезную работу. Остальные 600 Дж ушли в холодильник.</div>
+                    <div class="answer">✅ Ответ: $\eta = 25\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Полезная работа</div>
+                <div class="task-condition"><strong>Условие:</strong> КПД теплового двигателя $\eta = 40\%$. Он получает от нагревателя $Q_1 = 500$ Дж. Найдите полезную работу.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\eta = 40\% = 0{,}4$, $Q_1 = 500$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta = \dfrac{A}{Q_1}$, отсюда $A = \eta \cdot Q_1$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$A = 0{,}4 \cdot 500 = 200 \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 40% от 500 Дж — это 200 Дж, которые идут в работу. Остальные 300 Дж уходят в холодильник.</div>
+                    <div class="answer">✅ Ответ: $A = 200$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. КПД цикла Карно</div>
+                <div class="task-condition"><strong>Условие:</strong> Температура нагревателя $T_1 = 700$ К, температура холодильника $T_2 = 350$ К. Найдите максимально возможный КПД.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 700$ К, $T_2 = 350$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta_{max}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула Карно: $\eta_{max} = \dfrac{T_1 - T_2}{T_1}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta_{max} = \dfrac{700 - 350}{700} = \dfrac{350}{700} = 0{,}5 = 50\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Никакой реальный двигатель при этих температурах не может иметь КПД выше 50%. Реальные двигатели дают 30–40%.</div>
+                    <div class="answer">✅ Ответ: $\eta_{max} = 50\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Теплота, отданная холодильнику</div>
+                <div class="task-condition"><strong>Условие:</strong> Тепловой двигатель получает от нагревателя $Q_1 = 1000$ Дж и совершает работу $A = 350$ Дж. Найдите количество теплоты, отданное холодильнику.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q_1 = 1000$ Дж, $A = 350$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $A = Q_1 - Q_2$ выражаем $Q_2 = Q_1 - A$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q_2 = 1000 - 350 = 650 \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Из 1000 Дж теплоты 350 Дж превратились в работу, а 650 Дж отданы холодильнику. Это неизбежно по второму началу термодинамики.</div>
+                    <div class="answer">✅ Ответ: $Q_2 = 650$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. КПД ДВС</div>
+                <div class="task-condition"><strong>Условие:</strong> Двигатель внутреннего сгорания имеет температуру нагревателя (сгорания топлива) $T_1 = 1800$ К и температуру выхлопных газов $T_2 = 700$ К. Найдите максимально возможный КПД.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 1800$ К, $T_2 = 700$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta_{max}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta_{max} = \dfrac{T_1 - T_2}{T_1}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta_{max} = \dfrac{1800 - 700}{1800} = \dfrac{1100}{1800} \approx 0{,}611 = 61{,}1\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Идеальный цикл Карно даёт КПД ~61%, но реальные ДВС из-за трения, потерь тепла и неидеального сгорания топлива имеют КПД всего 25–40%.</div>
+                    <div class="answer">✅ Ответ: $\eta_{max} \approx 61{,}1\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Температура холодильника</div>
+                <div class="task-condition"><strong>Условие:</strong> КПД цикла Карно $\eta = 60\%$, температура нагревателя $T_1 = 500$ К. Найдите температуру холодильника.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\eta = 0{,}6$, $T_1 = 500$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $T_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta = 1 - \dfrac{T_2}{T_1}$, значит $\dfrac{T_2}{T_1} = 1 - \eta$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $T_2 = T_1 \cdot (1 - \eta) = 500 \cdot 0{,}4$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$T_2 = 200 \text{ К}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Чтобы получить КПД 60% при нагревателе 500 К, холодильник должен быть охлаждён до 200 К ($-73$ °C). Технически это очень сложно.</div>
+                    <div class="answer">✅ Ответ: $T_2 = 200$ К</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Сравнение КПД</div>
+                <div class="task-condition"><strong>Условие:</strong> Идеальный цикл Карно имеет $T_1 = 800$ К, $T_2 = 300$ К. Реальный двигатель при тех же температурах имеет КПД 30%. Во сколько раз КПД идеального двигателя больше?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 800$ К, $T_2 = 300$ К, $\eta_{реал} = 30\%$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{\eta_{max}}{\eta_{реал}}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta_{max} = \dfrac{800 - 300}{800} = \dfrac{500}{800} = 0{,}625 = 62{,}5\%$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $\dfrac{\eta_{max}}{\eta_{реал}} = \dfrac{62{,}5}{30} \approx 2{,}08$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Реальный двигатель при тех же температурах даёт лишь 30% вместо теоретических 62,5%. Разница — потери на трение, теплообмен, неидеальность процессов.</div>
+                    <div class="answer">✅ Ответ: $\eta_{max}$ больше в ~2,08 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Полная энергия топлива</div>
+                <div class="task-condition"><strong>Условие:</strong> Двигатель совершает полезную работу $A = 3 \cdot 10^7$ Дж, КПД $\eta = 25\%$. Сколько теплоты выделилось при сгорании топлива?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $A = 3 \cdot 10^7$ Дж, $\eta = 0{,}25$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_1$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta = \dfrac{A}{Q_1}$, отсюда $Q_1 = \dfrac{A}{\eta}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q_1 = \dfrac{3 \cdot 10^7}{0{,}25} = 1{,}2 \cdot 10^8 \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Чтобы получить 30 МДж работы, нужно сжечь топливо, выделяющее 120 МДж. Остальные 90 МДж уходят в виде теплоты в атмосферу.</div>
+                    <div class="answer">✅ Ответ: $Q_1 = 1{,}2 \cdot 10^8$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Невозможность 100% КПД</div>
+                <div class="task-condition"><strong>Условие:</strong> Может ли тепловой двигатель работать с КПД 100%, если $T_1 = 500$ К? Обоснуйте ответ.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 500$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> возможно ли $\eta = 100\%$?</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta = 1 - \dfrac{T_2}{T_1}$. Чтобы $\eta = 1$, нужно $\dfrac{T_2}{T_1} = 0$, то есть $T_2 = 0$ К.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Но абсолютный нуль ($T = 0$ К) недостижим (третье начало термодинамики).</div>
+                    <div class="step"><strong>Шаг 3.</strong> Значит, $\eta < 100\%$ для любого реального двигателя.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Это прямое следствие второго начала термодинамики. Часть теплоты обязательно должна уйти в холодильник — иначе процесс не будет циклическим.</div>
+                    <div class="answer">✅ Ответ: нет, $\eta < 100\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Комплексная задача</div>
+                <div class="task-condition"><strong>Условие:</strong> Идеальный тепловой двигатель работает по циклу Карно между $T_1 = 600$ К и $T_2 = 300$ К. За цикл он получает от нагревателя $Q_1 = 1200$ Дж. Найдите: а) КПД; б) полезную работу; в) количество теплоты, отданное холодильнику; г) во сколько раз работа меньше подведённой теплоты.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 600$ К, $T_2 = 300$ К, $Q_1 = 1200$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta$, $A$, $Q_2$, отношение</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (КПД).</strong> <span class="formula">$\eta = \dfrac{600 - 300}{600} = \dfrac{300}{600} = 0{,}5 = 50\%$</span></div>
+                    <div class="step"><strong>Шаг 2 (работа).</strong> $A = \eta \cdot Q_1 = 0{,}5 \cdot 1200 = 600$ Дж.</div>
+                    <div class="step"><strong>Шаг 3 (теплота холодильнику).</strong> $Q_2 = Q_1 - A = 1200 - 600 = 600$ Дж.</div>
+                    <div class="step"><strong>Шаг 4 (отношение).</strong> $\dfrac{Q_1}{A} = \dfrac{1200}{600} = 2$ — работа в 2 раза меньше подведённой теплоты.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Половина теплоты превратилась в работу, половина ушла в холодильник. Это соответствует КПД 50%.</div>
+                    <div class="answer">✅ Ответ: $\eta = 50\%$; $A = 600$ Дж; $Q_2 = 600$ Дж; $\dfrac{Q_1}{A} = 2$</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-engine').style.display = model === 'engine' ? 'block' : 'none';
+        document.getElementById('model-carnot').style.display = model === 'carnot' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- ===== МОДЕЛЬ 1: ТЕПЛОВОЙ ДВИГАТЕЛЬ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-engine');
+        const canvas = document.getElementById('canvas-engine');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(0, 5, 14);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.8rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // НАГРЕВАТЕЛЬ (слева, красный)
+        const heaterMat = new THREE.MeshStandardMaterial({
+            color: 0xff3322, emissive: 0x661100, roughness: 0.3, metalness: 0.2
+        });
+        const heater = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.5), heaterMat);
+        heater.position.set(-5, 0, 0);
+        group.add(heater);
+        const heaterLabel = makeLabel('Нагреватель T₁', '#ff3322', new THREE.Vector3(-5, 1.8, 0), '0.75rem');
+        group.add(heaterLabel);
+
+        // ХОЛОДИЛЬНИК (справа, синий)
+        const coolerMat = new THREE.MeshStandardMaterial({
+            color: 0x3399ff, emissive: 0x001133, roughness: 0.3, metalness: 0.2
+        });
+        const cooler = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.5), coolerMat);
+        cooler.position.set(5, 0, 0);
+        group.add(cooler);
+        const coolerLabel = makeLabel('Холодильник T₂', '#3399ff', new THREE.Vector3(5, 1.8, 0), '0.75rem');
+        group.add(coolerLabel);
+
+        // РАБОЧЕЕ ТЕЛО (в центре, жёлтый цилиндр)
+        const workMat = new THREE.MeshStandardMaterial({
+            color: 0xffaa00, emissive: 0x664400, roughness: 0.4, metalness: 0.3
+        });
+        const work = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 2, 24), workMat);
+        work.position.set(0, 0, 0);
+        group.add(work);
+        const workLabel = makeLabel('Рабочее тело', '#ffaa00', new THREE.Vector3(0, 1.5, 0), '0.75rem');
+        group.add(workLabel);
+
+        // Стрелки потоков теплоты
+        function createArrow(from, to, color) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                new THREE.LineBasicMaterial({ color, linewidth: 3 })
+            );
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.15, 0.35, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.4) })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.18)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        // Поток от нагревателя к рабочему телу (Q1)
+        const flowQ1 = createArrow(new THREE.Vector3(-3.5, 0, 0), new THREE.Vector3(-0.9, 0, 0), 0xff6644);
+        group.add(flowQ1);
+        const q1Label = makeLabel('Q₁', '#ff6644', new THREE.Vector3(-2.2, 0.6, 0), '0.85rem');
+        group.add(q1Label);
+
+        // Поток от рабочего тела к холодильнику (Q2)
+        const flowQ2 = createArrow(new THREE.Vector3(0.9, 0, 0), new THREE.Vector3(3.5, 0, 0), 0x66aaff);
+        group.add(flowQ2);
+        const q2Label = makeLabel('Q₂', '#66aaff', new THREE.Vector3(2.2, 0.6, 0), '0.85rem');
+        group.add(q2Label);
+
+        // Стрелка работы (вверх)
+        const flowA = createArrow(new THREE.Vector3(0, 1.1, 0), new THREE.Vector3(0, 2.5, 0), 0xffcc00);
+        group.add(flowA);
+        const aLabel = makeLabel('A', '#ffcc00', new THREE.Vector3(0.5, 1.8, 0), '0.85rem');
+        group.add(aLabel);
+
+        // Параметры
+        let T1 = 600, T2 = 300;
+        const Q1 = 1000;
+
+        const t1Slider = document.getElementById('eng-t1');
+        const t2Slider = document.getElementById('eng-t2');
+        const t1Value = document.getElementById('eng-t1-value');
+        const t2Value = document.getElementById('eng-t2-value');
+        const T1Display = document.getElementById('eng-T1');
+        const T2Display = document.getElementById('eng-T2');
+        const Q1Display = document.getElementById('eng-Q1');
+        const ADisplay = document.getElementById('eng-A');
+        const etaDisplay = document.getElementById('eng-eta');
+
+        function updateEngine() {
+            T1 = parseFloat(t1Slider.value);
+            T2 = parseFloat(t2Slider.value);
+            if (T2 >= T1) T2 = T1 - 10;
+            t1Value.textContent = T1;
+            t2Value.textContent = T2;
+            T1Display.textContent = T1;
+            T2Display.textContent = T2;
+            Q1Display.textContent = Q1;
+
+            const eta = Math.max(0, (T1 - T2) / T1);
+            const A = eta * Q1;
+            ADisplay.textContent = A.toFixed(0);
+            etaDisplay.textContent = (eta * 100).toFixed(0);
+
+            // Изменяем яркость нагревателя и холодильника
+            const t1Ratio = (T1 - 400) / 800;
+            heaterMat.emissive.setRGB(0.4 + t1Ratio * 0.4, 0.1 + t1Ratio * 0.15, 0.05);
+
+            const t2Ratio = 1 - (T2 - 200) / 300;
+            coolerMat.emissive.setRGB(0, 0.07 + t2Ratio * 0.1, 0.2 + t2Ratio * 0.15);
+
+            // Масштаб стрелки A по КПД
+            const scale = Math.max(0.3, eta);
+            flowA.scale.set(scale, scale, scale);
+        }
+
+        t1Slider.addEventListener('input', updateEngine);
+        t2Slider.addEventListener('input', updateEngine);
+        document.getElementById('eng-reset').addEventListener('click', () => {
+            t1Slider.value = 600;
+            t2Slider.value = 300;
+            updateEngine();
+        });
+
+        document.getElementById('fs-engine').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateEngine();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            // Вращение рабочего тела
+            work.rotation.y += 0.01;
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 2: ЦИКЛ КАРНО ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-carnot');
+        const canvas = document.getElementById('canvas-carnot');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(0, 3, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.75rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Рисуем цикл Карно в координатах p-V (упрощённо, как замкнутый контур)
+        // Этап 1-2: изотерма при T1 (горизонталь наверху)
+        // Этап 2-3: адиабата (спуск вправо)
+        // Этап 3-4: изотерма при T2 (горизонталь внизу)
+        // Этап 4-1: адиабата (подъём влево)
+
+        const pts = [
+            new THREE.Vector3(-3, 2, 0),   // 1
+            new THREE.Vector3(1, 2, 0),    // 2
+            new THREE.Vector3(3, -2, 0),   // 3
+            new THREE.Vector3(-1, -2, 0)   // 4
+        ];
+
+        // Контур цикла
+        const cycleGeo = new THREE.BufferGeometry().setFromPoints([...pts, pts[0]]);
+        const cycleLine = new THREE.Line(cycleGeo, new THREE.LineBasicMaterial({ color: 0xffaa00, linewidth: 3 }));
+        group.add(cycleLine);
+
+        // Точки вершин
+        pts.forEach((p, i) => {
+            const dot = new THREE.Mesh(
+                new THREE.SphereGeometry(0.15, 12, 12),
+                new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x664400 })
+            );
+            dot.position.copy(p);
+            group.add(dot);
+            const label = makeLabel((i + 1).toString(), '#ffaa00', p.clone().add(new THREE.Vector3(0, 0.4, 0)), '0.8rem');
+            group.add(label);
+        });
+
+        // Стрелки вдоль контура (направление движения)
+        function createArrowAlong(from, to, color) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            const mid = from.clone().lerp(to, 0.7);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.15, 0.35, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.4) })
+            );
+            cone.position.copy(mid);
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        group.add(createArrowAlong(pts[0], pts[1], 0xff6644));  // 1→2 изотерма T1
+        group.add(createArrowAlong(pts[1], pts[2], 0xffaa00));  // 2→3 адиабата
+        group.add(createArrowAlong(pts[2], pts[3], 0x66aaff));  // 3→4 изотерма T2
+        group.add(createArrowAlong(pts[3], pts[0], 0xffaa00));  // 4→1 адиабата
+
+        // Подписи этапов
+        const label12 = makeLabel('1→2: изотерма T₁ (Q₁)', '#ff6644', new THREE.Vector3(-1, 2.5, 0), '0.7rem');
+        group.add(label12);
+        const label23 = makeLabel('2→3: адиабата', '#ffaa00', new THREE.Vector3(2.4, 0.3, 0), '0.7rem');
+        group.add(label23);
+        const label34 = makeLabel('3→4: изотерма T₂ (Q₂)', '#66aaff', new THREE.Vector3(1, -2.7, 0), '0.7rem');
+        group.add(label34);
+        const label41 = makeLabel('4→1: адиабата', '#ffaa00', new THREE.Vector3(-2.4, 0.3, 0), '0.7rem');
+        group.add(label41);
+
+        // Рабочее тело — движущаяся точка по контуру
+        const workBody = new THREE.Mesh(
+            new THREE.SphereGeometry(0.25, 16, 16),
+            new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x664400 })
+        );
+        group.add(workBody);
+
+        let T1 = 600, T2 = 300;
+        const t1Slider = document.getElementById('car-t1');
+        const t2Slider = document.getElementById('car-t2');
+        const t1Value = document.getElementById('car-t1-value');
+        const t2Value = document.getElementById('car-t2-value');
+        const T1Display = document.getElementById('car-T1');
+        const T2Display = document.getElementById('car-T2');
+        const etaDisplay = document.getElementById('car-eta');
+        const stageDisplay = document.getElementById('car-stage');
+
+        function updateCarnot() {
+            T1 = parseFloat(t1Slider.value);
+            T2 = parseFloat(t2Slider.value);
+            if (T2 >= T1) T2 = T1 - 10;
+            t1Value.textContent = T1;
+            t2Value.textContent = T2;
+            T1Display.textContent = T1;
+            T2Display.textContent = T2;
+            const eta = Math.max(0, (T1 - T2) / T1);
+            etaDisplay.textContent = (eta * 100).toFixed(0);
+        }
+
+        t1Slider.addEventListener('input', updateCarnot);
+        t2Slider.addEventListener('input', updateCarnot);
+        document.getElementById('car-reset').addEventListener('click', () => {
+            t1Slider.value = 600;
+            t2Slider.value = 300;
+            updateCarnot();
+        });
+
+        document.getElementById('fs-carnot').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateCarnot();
+
+        // Анимация движения рабочего тела по контуру
+        let t = 0;
+        const totalLength = 4; // 4 этапа
+        const speed = 0.15;
+
+        function getPosOnCycle(progress) {
+            // progress от 0 до 4
+            const stage = Math.floor(progress) % 4;
+            const local = progress - Math.floor(progress);
+            const from = pts[stage];
+            const to = pts[(stage + 1) % 4];
+            return from.clone().lerp(to, local);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            t += speed * 0.016;
+            if (t >= 4) t = 0;
+            const pos = getPosOnCycle(t);
+            workBody.position.copy(pos);
+
+            const stage = Math.floor(t) + 1;
+            if (stageDisplay) stageDisplay.textContent = stage;
+
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

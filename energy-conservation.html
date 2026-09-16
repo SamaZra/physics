@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Механическая энергия. Закон сохранения энергии</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(46, 204, 113, 0.1);
+            --special-border: #10b981;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #10b981;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #10b981;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --label-bg: rgba(26,45,60,0.85);
+            --label-color: #ffffff;
+            --card-shadow: rgba(0,0,0,0.2);
+            --ground-color: #3a4a5a;
+            --ek-color: #f59e0b;
+            --ep-color: #10b981;
+            --q-color: #ef4444;
+            --full-color: #60a5fa;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #059669;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #059669;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #059669;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --label-bg: rgba(255,255,255,0.92);
+            --label-color: #1a2a3f;
+            --card-shadow: rgba(0,0,0,0.08);
+            --ground-color: #b0c8d8;
+            --ek-color: #d97706;
+            --ep-color: #059669;
+            --q-color: #dc2626;
+            --full-color: #2563eb;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card li{margin-bottom:4px;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container {
+            text-align: center;
+            margin: 16px 0;
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            background: var(--canvas-bg);
+            box-shadow: 0 4px 12px var(--card-shadow);
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            min-height: 420px;
+            transition: background 0.3s;
+        }
+        .model-canvas { display: block; width: 100%; height: 100%; background: transparent; border-radius: 20px; touch-action: none; }
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 20;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .fullscreen-btn:hover { background: var(--special-border); transform: scale(1.05); }
+        .controls-panel {
+            background: var(--info-bg);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin: 8px 0 12px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            align-items: center;
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+        .control-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .control-group label { color: var(--text); font-size: 0.85rem; font-weight: 600; min-width: 20px; transition: color 0.3s; }
+        .control-group input[type="range"] { width: 120px; height: 6px; -webkit-appearance: none; background: var(--slider-track); border-radius: 3px; outline: none; transition: background 0.3s; }
+        .control-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--slider-thumb); cursor: pointer; border: 2px solid var(--special-border); }
+        .control-group input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--slider-thumb); cursor: pointer; border: 2px solid var(--special-border); }
+        .control-value { color: var(--text); font-size: 0.85rem; font-weight: 600; min-width: 32px; text-align: center; background: var(--input-bg); padding: 2px 8px; border-radius: 12px; transition: color 0.3s,background 0.3s; }
+        .control-label { color: var(--text-secondary); font-size: 0.75rem; transition: color 0.3s; }
+        .btn-action { background: var(--special-border); color: white; border: none; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; min-height: 34px; }
+        .btn-action:hover { transform: scale(1.05); opacity: 0.9; }
+        .btn-reset { background: #666; color: white; border: none; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; min-height: 34px; }
+        .btn-reset:hover { transform: scale(1.05); opacity: 0.9; }
+        .back-link-wrapper { display: flex; justify-content: center; margin: 16px 0 8px; }
+        .back-link{ display:inline-block; padding:10px 20px; background:var(--special-border); color:white; text-decoration:none; font-weight:bold; border-radius:20px; font-size:0.95rem; transition:background 0.2s; }
+        .back-link:hover{background:#047857;}
+        .task-block { background: var(--task-bg); border-radius: 18px; padding: 16px 18px; margin: 16px 0; border-left: 4px solid var(--task-border); border: 1px solid var(--border); transition: background 0.3s,border 0.3s; }
+        .task-block .task-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; transition: color 0.3s; }
+        .task-block .task-condition { font-size: 0.95rem; color: var(--text); line-height: 1.8; padding: 10px 14px; background: var(--card-bg); border-radius: 12px; margin-bottom: 12px; transition: color 0.3s,background 0.3s; }
+        .task-block .task-condition strong { color: var(--special-border); }
+        .task-block .task-condition mjx-container { font-size: 1.1rem !important; }
+        .task-given-find { display: flex; flex-wrap: wrap; gap: 20px 40px; padding: 10px 14px; background: var(--card-bg); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); transition: background 0.3s,border 0.3s; }
+        .task-given-find .given { color: var(--given-color); }
+        .task-given-find .find { color: var(--find-color); }
+        .task-given-find .given strong, .task-given-find .find strong { font-weight: 700; font-size: 1rem; }
+        .task-given-find mjx-container { font-size: 1.1rem !important; }
+        .show-solution-btn { background: var(--special-border); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
+        .task-solution { display: none; margin-top: 12px; }
+        .task-solution.open { display: block; }
+        .task-solution .step { padding: 12px 16px; margin: 8px 0; background: var(--card-bg); border-radius: 10px; border-left: 3px solid var(--special-border); font-size: 0.95rem; color: var(--text); line-height: 1.9; overflow-x: auto; transition: background 0.3s,color 0.3s; }
+        .task-solution .step .formula { display: block; text-align: center; font-size: 1.25rem; padding: 8px 0; font-family: 'Times New Roman', serif; font-style: italic; color: var(--special-border); }
+        .task-solution .step .formula mjx-container { font-size: 1.25rem !important; }
+        .task-solution .step .explanation { background: var(--info-bg); padding: 8px 12px; border-radius: 6px; margin: 8px 0; font-style: italic; color: var(--text-secondary); font-size: 0.9rem; border-left: 2px solid var(--special-border); transition: background 0.3s,color 0.3s; }
+        .task-solution .step strong { color: var(--special-border); }
+        .task-solution .answer { padding: 12px 18px; background: var(--special-border); color: white; border-radius: 12px; font-weight: 700; font-size: 1.15rem; text-align: center; margin-top: 10px; }
+        .favorite-btn { position: fixed; bottom: 20px; left: 20px; width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border); cursor: pointer; font-size: 26px; display: flex; align-items: center; justify-content: center; z-index: 1000; color: var(--text-secondary); transition: all 0.2s; backdrop-filter: blur(4px); }
+        .favorite-btn:hover { transform: scale(1.1); }
+        .favorite-btn.active { color: #facc15; }
+        .info-display { position: absolute; top: 12px; right: 12px; background: var(--label-bg); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 12px; color: var(--label-color); font-size: 0.7rem; z-index: 15; text-align: left; border: 1px solid var(--special-border); box-shadow: 0 2px 10px var(--card-shadow); transition: background 0.3s,color 0.3s,border 0.3s; min-width: 100px; }
+        .info-display div { margin: 2px 0; }
+        .info-display .val { font-weight: 700; color: var(--special-border); }
+        .info-display .ek-val { font-weight: 700; color: var(--ek-color); }
+        .info-display .ep-val { font-weight: 700; color: var(--ep-color); }
+        .info-display .q-val { font-weight: 700; color: var(--q-color); }
+        .info-display .full-val { font-weight: 700; color: var(--full-color); }
+        .force-legend {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--label-bg);
+            backdrop-filter: blur(8px);
+            padding: 4px 14px;
+            border-radius: 20px;
+            color: var(--label-color);
+            font-size: 0.6rem;
+            z-index: 10;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            border: 1px solid var(--special-border);
+            box-shadow: 0 2px 10px var(--card-shadow);
+            transition: background 0.3s,color 0.3s,border 0.3s;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .force-legend span { display: inline-flex; align-items: center; gap: 4px; }
+        .force-legend .color-dot { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+        .model-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
+        .model-tab { padding: 8px 20px; border-radius: 20px; background: var(--card-bg); color: var(--text-secondary); border: 1px solid var(--border); cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s; }
+        .model-tab:hover { background: var(--special-border); color: white; border-color: var(--special-border); }
+        .model-tab.active { background: var(--special-border); color: white; border-color: var(--special-border); }
+        mjx-container { font-size: 1em !important; vertical-align: baseline !important; overflow-x: auto !important; max-width: 100% !important; }
+        mjx-container[display="true"] { font-size: 1.2em !important; display: block !important; margin: 8px 0 !important; }
+        .model-container:fullscreen { width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; border-radius: 0; background: var(--canvas-bg) !important; aspect-ratio: auto; }
+        .model-container:fullscreen .model-canvas { width: 100vw; height: 100vh; border-radius: 0; }
+        @media(max-width:700px){
+            .model-container { min-height: 320px; }
+            .fullscreen-btn { width: 38px; height: 38px; font-size: 18px; bottom: 12px; right: 12px; }
+            .controls-panel { flex-direction: column; gap: 10px; align-items: stretch; }
+            .control-group { justify-content: space-between; }
+            .control-group input[type="range"] { width: 100%; max-width: 200px; }
+            .task-solution .step .formula { font-size: 1.05rem; white-space: normal; }
+            .task-given-find { flex-direction: column; gap: 6px; }
+            .info-display { font-size: 0.6rem; padding: 4px 10px; min-width: 80px; top: 8px; right: 8px; }
+            .force-legend { font-size: 0.5rem; padding: 3px 10px; gap: 6px; bottom: 8px; }
+            .formula-block { font-size: 0.95rem; padding: 10px 12px; }
+            .formula-block .f { font-size: 1.1rem; }
+            .task-block .task-condition mjx-container { font-size: 0.95rem !important; }
+            .task-solution .step .formula mjx-container { font-size: 1.05rem !important; }
+            .model-tabs { gap: 4px; }
+            .model-tab { padding: 6px 12px; font-size: 0.75rem; }
+        }
+        @media(max-width:450px){
+            .model-container { min-height: 260px; }
+            .container { padding: 10px; padding-top: 44px; }
+            h1 { font-size: 1.2rem; }
+            .section-title { font-size: 0.95rem; }
+            .control-group input[type="range"] { max-width: 120px; }
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>⚡ Механическая энергия. Закон сохранения энергии</h1>
+
+    <!-- ТЕОРИЯ 1 -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Кинетическая и потенциальная энергия</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Что такое энергия?</strong> Энергия — это <span class="important">способность тела совершать работу</span>. Если тело может толкнуть другое тело, поднять груз, сжать пружину — значит, оно обладает энергией. Энергия измеряется в <strong>джоулях (Дж)</strong>.</p>
+                <p>В механике рассматривают два вида энергии: <strong>кинетическую</strong> (энергия движения) и <strong>потенциальную</strong> (энергия положения или взаимодействия).</p>
+
+                <p><strong>Кинетическая энергия</strong> — это энергия, которой обладает тело <em>из-за своего движения</em>. Чем быстрее движется тело и чем больше его масса, тем больше его кинетическая энергия:</p>
+                <p>$E_k = \dfrac{mv^2}{2}$</p>
+                <ul>
+                    <li>$m$ — масса тела (кг),</li>
+                    <li>$v$ — скорость тела (м/с),</li>
+                    <li>обратите внимание: скорость входит <strong>в квадрате</strong> — значит, при увеличении скорости в 2 раза энергия вырастет в 4 раза.</li>
+                </ul>
+                <p><em>Пример:</em> автомобиль массой 1000 кг, движущийся со скоростью 20 м/с, имеет $E_k = 1000 \cdot 400 / 2 = 200\,000$ Дж = 200 кДж. Этого достаточно, чтобы поднять груз 1 тонну на 20 метров.</p>
+
+                <p><strong>Потенциальная энергия</strong> — это энергия, которой обладает тело <em>из-за своего положения</em> или <em>из-за взаимодействия</em> с другими телами. В школьном курсе обычно рассматривают два случая:</p>
+                <ul>
+                    <li><strong>В поле тяжести Земли:</strong> $E_p = mgh$, где $h$ — высота над выбранным нулевым уровнем.</li>
+                    <li><strong>Упруго деформированная пружина:</strong> $E_p = \dfrac{kx^2}{2}$, где $k$ — жёсткость, $x$ — деформация.</li>
+                </ul>
+                <p><span class="important">Важно:</span> потенциальная энергия <em>зависит от выбора нулевого уровня</em>. Если мы скажем «тело на высоте 5 м», нужно уточнить: «на высоте 5 м <em>над полом</em>» или «над землёй». Физический смысл имеет не сама потенциальная энергия, а её <strong>изменение</strong>: $\Delta E_p = mg \cdot \Delta h$. Именно это изменение превращается в работу или в кинетическую энергию.</p>
+            </div>
+            <div class="formula-block">
+                <span class="f">$E_k = \dfrac{mv^2}{2}$</span>
+                <span class="f-label">— кинетическая энергия (энергия движения)</span>
+                <span class="f">$E_p = mgh$</span>
+                <span class="f-label">— потенциальная энергия в поле тяжести</span>
+                <span class="f">$E_p = \dfrac{kx^2}{2}$</span>
+                <span class="f-label">— потенциальная энергия упругой пружины</span>
+                <span class="f">$E = E_k + E_p$</span>
+                <span class="f-label">— полная механическая энергия</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ТЕОРИЯ 2 -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Закон сохранения механической энергии</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Идея закона:</strong> в замкнутой системе, где действуют только «хорошие» силы — сила тяжести и сила упругости (их называют <span class="important">консервативными</span>), — полная механическая энергия сохраняется. Энергия не появляется и не исчезает, она лишь <em>переходит из одного вида в другой</em>.</p>
+
+                <p><strong>Формулировка:</strong> если в замкнутой системе действуют только консервативные силы, то сумма кинетической и потенциальной энергии остаётся постоянной:</p>
+                <p>$E_k + E_p = \text{const}$</p>
+                <p>Или, что то же самое, для любых двух моментов времени:</p>
+                <p>$E_{k1} + E_{p1} = E_{k2} + E_{p2}$</p>
+
+                <p><em>Пример (маятник):</em> в крайней точке маятник замирает — вся энергия потенциальная ($E_k = 0$, $E_p$ максимальна). В нижней точке он движется быстрее всего — вся энергия стала кинетической ($E_p = 0$, $E_k$ максимальна). Но сумма $E_k + E_p$ в любой момент одна и та же.</p>
+
+                <p><strong>Что если есть трение?</strong> Сила трения — <span class="important">неконсервативная</span> сила. Она «съедает» часть механической энергии, превращая её во внутреннюю (теплоту). Тогда закон сохранения записывается так:</p>
+                <p>$E_{k1} + E_{p1} = E_{k2} + E_{p2} + Q$</p>
+                <p>где $Q$ — количество теплоты, выделившееся из-за трения. Механическая энергия <em>не сохраняется</em>, но сохраняется <strong>полная энергия</strong> (механическая + внутренняя).</p>
+
+                <p><strong>Почему это важно:</strong></p>
+                <ul>
+                    <li>Энергия не исчезает — она лишь переходит из одной формы в другую (это <span class="important">всеобщий закон природы</span>).</li>
+                    <li>Задачи на движение можно решать, <em>не рассматривая силы и ускорения</em> — только через энергию. Это часто гораздо проще.</li>
+                    <li>Работа — это мера изменения энергии: $A = \Delta E = E_2 - E_1$.</li>
+                </ul>
+            </div>
+            <div class="formula-block">
+                <span class="f">$E_k + E_p = \text{const}$</span>
+                <span class="f-label">— закон сохранения механической энергии (без трения)</span>
+                <span class="f">$E_{k1} + E_{p1} = E_{k2} + E_{p2} + Q$</span>
+                <span class="f-label">— с учётом потерь на трение</span>
+                <span class="f">$A = \Delta E = E_2 - E_1$</span>
+                <span class="f-label">— связь работы и энергии (теорема о кинетической энергии)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ТЕОРИЯ 3 -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Применение законов сохранения</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Зачем нужны законы сохранения?</strong> Прямое решение через силы и ускорения часто громоздко: нужно выписывать второй закон Ньютона, искать ускорение, подставлять в кинематику. Законы сохранения позволяют <span class="important">прыгнуть сразу к ответу</span>, связав начальное и конечное состояния системы. Они работают, даже если мы не знаем деталей движения (например, как именно менялась сила трения по пути).</p>
+
+                <p><strong>Когда применять закон сохранения энергии:</strong></p>
+                <ul>
+                    <li>Если в системе действуют только консервативные силы (тяжести, упругости) — используйте $E_1 = E_2$.</li>
+                    <li>Если есть трение — используйте $E_1 = E_2 + Q$, где $Q = F_{тр} \cdot S$.</li>
+                    <li>Если энергия переходит из одного вида в другой (например, при падении, при колебаниях) — это как раз про ЗСЭ.</li>
+                </ul>
+
+                <p><strong>Алгоритм решения задач на ЗСЭ:</strong></p>
+                <ul>
+                    <li>1. <span class="important">Выбрать нулевой уровень</span> потенциальной энергии. Обычно это самая низкая точка траектории. Это произвольный выбор — важно потом не путаться.</li>
+                    <li>2. Записать полную механическую энергию в <strong>начальном</strong> состоянии $E_1 = E_{k1} + E_{p1}$.</li>
+                    <li>3. Записать полную механическую энергию в <strong>конечном</strong> состоянии $E_2 = E_{k2} + E_{p2}$.</li>
+                    <li>4. Если трения нет — приравнять $E_1 = E_2$. Если есть — $E_1 = E_2 + Q$.</li>
+                    <li>5. Решить полученное уравнение относительно искомой величины.</li>
+                    <li>6. <strong>Проверка:</strong> убедиться, что размерность ответа правильная (м/с, Дж, м, Н и т.д.), и что численный ответ физически разумный.</li>
+                </ul>
+
+                <p><strong>Совместное применение ЗСИ и ЗСЭ.</strong> В задачах на удары используются оба закона:</p>
+                <ul>
+                    <li>ЗСИ работает <em>всегда</em>, если система замкнута (нет внешних сил по направлению удара).</li>
+                    <li>ЗСЭ работает <em>только при упругом ударе</em>. При неупругом часть энергии уходит в теплоту, и ЗСЭ записывается с учётом $Q$.</li>
+                </ul>
+                <p><em>Классический пример:</em> баллистический маятник — пуля застревает в бруске (неупругий удар, сначала применяем ЗСИ), а потом брусок с пулей поднимается (ЗСЭ).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ИНТЕРАКТИВНЫЕ МОДЕЛИ -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные модели</div>
+        <div class="section-content">
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="pendulum" onclick="switchModel('pendulum')">🔄 Маятник (ЗСЭ)</div>
+                <div class="model-tab" data-model="slide" onclick="switchModel('slide')">🎢 Горка с трением</div>
+            </div>
+
+            <!-- Модель 1: Маятник -->
+            <div id="model-pendulum" class="model-content">
+                <div class="model-container" id="container-pendulum">
+                    <canvas id="canvas-pendulum" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-pendulum">⛶</button>
+                    <div class="info-display">
+                        <div>$E_k$ = <span class="ek-val" id="pend-ek">0.00</span> Дж</div>
+                        <div>$E_p$ = <span class="ep-val" id="pend-ep">0.00</span> Дж</div>
+                        <div>$E$ = <span class="full-val" id="pend-full">0.00</span> Дж</div>
+                        <div>$v$ = <span class="val" id="pend-v">0.00</span> м/с</div>
+                    </div>
+                    <div class="force-legend">
+                        <span><span class="color-dot" style="background:var(--ek-color);"></span> $E_k$ — кинетическая</span>
+                        <span><span class="color-dot" style="background:var(--ep-color);"></span> $E_p$ — потенциальная</span>
+                        <span><span class="color-dot" style="background:var(--full-color);"></span> $E$ — полная</span>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>$m$ (кг)</label>
+                        <input type="range" id="pend-mass" min="0.5" max="5" step="0.5" value="2">
+                        <span class="control-value" id="pend-mass-val">2.0</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$L$ (м)</label>
+                        <input type="range" id="pend-length" min="1" max="3" step="0.1" value="2">
+                        <span class="control-value" id="pend-length-val">2.0</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$\alpha_0$ (°)</label>
+                        <input type="range" id="pend-angle" min="10" max="80" step="5" value="60">
+                        <span class="control-value" id="pend-angle-val">60</span>
+                    </div>
+                    <button class="btn-action" id="pend-start-btn">▶ Пуск</button>
+                    <button class="btn-reset" id="pend-reset-btn">⟳ Сброс</button>
+                    <span class="control-label">⬤ $E_k + E_p = \text{const}$</span>
+                </div>
+                <div class="def-card">
+                    <p><span class="important">Математический маятник</span> — небольшое тело на невесомой нерастяжимой нити.</p>
+                    <p>В <strong>крайних точках</strong> маятник замирает на мгновение: скорость = 0, значит $E_k = 0$, а вся энергия — <span class="important">потенциальная</span> (тело поднято на высоту $H$).</p>
+                    <p>В <strong>нижней точке</strong> тело движется быстрее всего, высота = 0, значит $E_p = 0$, а вся энергия — <span class="important">кинетическая</span>.</p>
+                    <p>В любой промежуточной точке часть энергии потенциальная, часть — кинетическая. <span class="important">Полная энергия $E = E_k + E_p$ всё время одна и та же</span> — это и есть ЗСЭ.</p>
+                    <p>Столбики в левой части сцены наглядно показывают: жёлтый ($E_k$) и зелёный ($E_p$) меняются, а синий ($E$) стоит на месте.</p>
+                </div>
+            </div>
+
+            <!-- Модель 2: Горка с трением -->
+            <div id="model-slide" class="model-content" style="display:none;">
+                <div class="model-container" id="container-slide">
+                    <canvas id="canvas-slide" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-slide">⛶</button>
+                    <div class="info-display">
+                        <div>$E_k$ = <span class="ek-val" id="slide-ek">0.00</span> Дж</div>
+                        <div>$E_p$ = <span class="ep-val" id="slide-ep">0.00</span> Дж</div>
+                        <div>$Q$ = <span class="q-val" id="slide-q">0.00</span> Дж</div>
+                        <div>$v$ = <span class="val" id="slide-v">0.00</span> м/с</div>
+                    </div>
+                    <div class="force-legend">
+                        <span><span class="color-dot" style="background:var(--ek-color);"></span> $E_k$</span>
+                        <span><span class="color-dot" style="background:var(--ep-color);"></span> $E_p$</span>
+                        <span><span class="color-dot" style="background:var(--q-color);"></span> $Q$ — теплота</span>
+                        <span><span class="color-dot" style="background:var(--full-color);"></span> $E$ (полная)</span>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>$m$ (кг)</label>
+                        <input type="range" id="slide-mass" min="0.5" max="5" step="0.5" value="2">
+                        <span class="control-value" id="slide-mass-val">2.0</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$h_0$ (м)</label>
+                        <input type="range" id="slide-height" min="1" max="4" step="0.1" value="2.5">
+                        <span class="control-value" id="slide-height-val">2.5</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$\alpha$ (°)</label>
+                        <input type="range" id="slide-angle" min="15" max="60" step="1" value="30">
+                        <span class="control-value" id="slide-angle-val">30</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$\mu$</label>
+                        <input type="range" id="slide-mu" min="0" max="0.3" step="0.01" value="0.1">
+                        <span class="control-value" id="slide-mu-val">0.10</span>
+                    </div>
+                    <button class="btn-action" id="slide-start-btn">▶ Пуск</button>
+                    <button class="btn-reset" id="slide-reset-btn">⟳ Сброс</button>
+                    <span class="control-label">⬤ $E_1 = E_2 + Q$</span>
+                </div>
+                <div class="def-card">
+                    <p><span class="important">Тело скатывается с горки</span> с учётом трения. В верхней точке вся энергия — потенциальная ($mgh_0$). По мере спуска:</p>
+                    <ul>
+                        <li>$E_p$ убывает (тело опускается),</li>
+                        <li>$E_k$ растёт (тело разгоняется),</li>
+                        <li>$Q$ накапливается (трение нагревает поверхность),</li>
+                        <li>полная механическая $E_k + E_p$ <strong>уменьшается</strong> — часть перешла в теплоту.</li>
+                    </ul>
+                    <p>Если $\mu = 0$ — трения нет, и полная механическая $E_k + E_p$ сохраняется (как у маятника). Если $\mu > 0$ — $E_k + E_p$ убывает, а $E_k + E_p + Q$ остаётся постоянной и равной $mgh_0$.</p>
+                    <p><span class="important">Меняйте угол α</span> — горка реально наклоняется (длина ската $L = h_0 / \sin\alpha$). <span class="important">Меняйте μ</span> — растёт или падает доля энергии, уходящей в теплоту.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ЗАДАЧИ -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением</div>
+        <div class="section-content">
+            <div style="margin:12px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Простые задачи</div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Кинетическая энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 2$ кг движется со скоростью $v = 6$ м/с. Найдите кинетическую энергию тела.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $v = 6$ м/с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E_k$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Формула.</strong> Кинетическая энергия вычисляется по формуле $E_k = \dfrac{mv^2}{2}$.</div>
+                    <div class="step"><strong>Шаг 2. Подставляем значения.</strong> $m = 2$ кг, $v = 6$ м/с. Тогда $v^2 = 6^2 = 36$ м²/с².<br><span class="formula">$E_k = \dfrac{2 \cdot 36}{2}$</span></div>
+                    <div class="step"><strong>Шаг 3. Считаем.</strong> Двойка в числителе и двойка в знаменателе сокращаются: $E_k = 36$ Дж.</div>
+                    <div class="step explanation"><strong>Проверка размерности:</strong> $[E_k] = \dfrac{\text{кг} \cdot \text{м}^2/\text{с}^2}{1} = \text{кг}\cdot\text{м}^2/\text{с}^2 = \text{Дж}$. Размерность совпала — всё верно.</div>
+                    <div class="answer">✅ Ответ: $E_k = 36$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Потенциальная энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 3$ кг поднято на высоту $h = 5$ м над поверхностью Земли. Найдите потенциальную энергию тела. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $h = 5$ м, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E_p$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Формула.</strong> Потенциальная энергия в поле тяжести Земли: $E_p = mgh$.</div>
+                    <div class="step"><strong>Шаг 2. Подставляем.</strong> $m = 3$ кг, $g = 9.8$ м/с², $h = 5$ м.<br><span class="formula">$E_p = 3 \cdot 9.8 \cdot 5$</span></div>
+                    <div class="step"><strong>Шаг 3. Считаем.</strong> Сначала $3 \cdot 9.8 = 29.4$, потом $29.4 \cdot 5 = 147$.</div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Мы выбрали нулевой уровень на поверхности Земли. Если бы тело было на высоте 5 м над столом высотой 1 м, потенциальная энергия относительно земли была бы больше ($h = 6$ м). <strong>Значение $E_p$ всегда относительно чего-то.</strong></div>
+                    <div class="answer">✅ Ответ: $E_p = 147$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Полная механическая энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 1$ кг находится на высоте $h = 10$ м и движется со скоростью $v = 4$ м/с. Найдите полную механическую энергию тела. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 1$ кг, $h = 10$ м, $v = 4$ м/с, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Что такое полная энергия.</strong> Полная механическая энергия — это сумма кинетической и потенциальной: $E = E_k + E_p$. Считаем каждую по отдельности.</div>
+                    <div class="step"><strong>Шаг 2. Кинетическая.</strong><br><span class="formula">$E_k = \dfrac{mv^2}{2} = \dfrac{1 \cdot 4^2}{2} = \dfrac{16}{2} = 8$ Дж</span></div>
+                    <div class="step"><strong>Шаг 3. Потенциальная.</strong><br><span class="formula">$E_p = mgh = 1 \cdot 9.8 \cdot 10 = 98$ Дж</span></div>
+                    <div class="step"><strong>Шаг 4. Складываем.</strong><br><span class="formula">$E = 8 + 98 = 106$ Дж</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Обратите внимание: тело одновременно и движется, и находится на высоте. Оба вида энергии «работают» вместе. Полная энергия — это «запас», который тело может потратить на совершение работы.</div>
+                    <div class="answer">✅ Ответ: $E = 106$ Дж</div>
+                </div>
+            </div>
+
+            <div style="margin:20px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Задачи повышенной сложности</div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Свободное падение и ЗСЭ</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело падает с высоты $H = 20$ м без начальной скорости. Найдите скорость тела на высоте $h = 5$ м над землёй. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $H = 20$ м, $h = 5$ м, $v_0 = 0$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Выбираем нулевой уровень.</strong> Пусть нулевая высота — на земле. Тогда начальная высота $H = 20$ м, конечная $h = 5$ м.</div>
+                    <div class="step"><strong>Шаг 2. Энергия в начальный момент.</strong> Тело покоится ($v_0 = 0$), значит $E_{k1} = 0$. Потенциальная: $E_{p1} = mgH$.<br><span class="formula">$E_1 = mgH$</span></div>
+                    <div class="step"><strong>Шаг 3. Энергия в конечный момент.</strong> На высоте $h$ тело имеет скорость $v$.<br><span class="formula">$E_2 = mgh + \dfrac{mv^2}{2}$</span></div>
+                    <div class="step"><strong>Шаг 4. ЗСЭ: приравниваем.</strong><br><span class="formula">$mgH = mgh + \dfrac{mv^2}{2}$</span></div>
+                    <div class="step"><strong>Шаг 5. Сокращаем $m$.</strong> Масса есть во всех членах — она сокращается! <em>Значит, ответ не зависит от массы.</em><br><span class="formula">$gH = gh + \dfrac{v^2}{2}$</span></div>
+                    <div class="step"><strong>Шаг 6. Выражаем $v$.</strong><br><span class="formula">$\dfrac{v^2}{2} = gH - gh = g(H - h)$</span><br><span class="formula">$v^2 = 2g(H - h)$</span></div>
+                    <div class="step"><strong>Шаг 7. Подставляем числа.</strong> $H - h = 20 - 5 = 15$ м.<br><span class="formula">$v = \sqrt{2 \cdot 9.8 \cdot 15} = \sqrt{294} \approx 17.15$ м/с</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Мы снова получили, что <strong>масса не влияет на скорость</strong> — это важное следствие ЗСЭ. Кинетическая энергия выросла за счёт убыли потенциальной. Разность потенциальных энергий $mg(H-h)$ перешла в кинетическую $\dfrac{mv^2}{2}$.</div>
+                    <div class="answer">✅ Ответ: $v \approx 17.15$ м/с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Маятник — высота подъёма</div>
+                <div class="task-condition"><strong>Условие:</strong> Математический маятник длиной $L = 1$ м отклонён на угол $\alpha = 60°$ от вертикали и отпущен. Найдите скорость груза в нижней точке траектории. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $L = 1$ м, $\alpha = 60°$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Нулевой уровень.</strong> Возьмём за нулевую высоту положение равновесия (нижнюю точку), то есть точку, где висит маятник в покое.</div>
+                    <div class="step"><strong>Шаг 2. Насколько тело поднято в крайней точке.</strong> В крайнем положении нить маятника отклонилась от вертикали на угол $\alpha$. Высота подъёма:<br><span class="formula">$H = L - L\cos\alpha = L(1 - \cos\alpha)$</span></div>
+                    <div class="step"><strong>Шаг 3. Подставляем.</strong> $\cos 60° = 0.5$, $L = 1$ м.<br><span class="formula">$H = 1 \cdot (1 - 0.5) = 0.5$ м</span></div>
+                    <div class="step"><strong>Шаг 4. ЗСЭ.</strong> В крайней точке $v = 0$, значит $E_k = 0$, а $E_p = mgH$. В нижней точке $h = 0$, значит $E_p = 0$, а $E_k = \dfrac{mv^2}{2}$.<br><span class="formula">$mgH = \dfrac{mv^2}{2}$</span></div>
+                    <div class="step"><strong>Шаг 5. Выражаем скорость.</strong><br><span class="formula">$v = \sqrt{2gH}$</span></div>
+                    <div class="step"><strong>Шаг 6. Считаем.</strong><br><span class="formula">$v = \sqrt{2 \cdot 9.8 \cdot 0.5} = \sqrt{9.8} \approx 3.13$ м/с</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Формула $H = L(1 - \cos\alpha)$ встречается во всех задачах про маятник. Она получается из простой геометрии: длина нити до точки подвеса минус вертикальная проекция нити в крайнем положении. Запомните её.</div>
+                    <div class="answer">✅ Ответ: $v \approx 3.13$ м/с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Горка с трением</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 2$ кг соскальзывает с горки высотой $h = 4$ м без начальной скорости. У основания горки скорость тела $v = 6$ м/с. Найдите работу силы трения и количество выделившейся теплоты. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $h = 4$ м, $v = 6$ м/с, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A_{тр}$, $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Энергия в начале.</strong> Тело на высоте $h$, скорость $v_0 = 0$. Значит:<br><span class="formula">$E_1 = mgh = 2 \cdot 9.8 \cdot 4 = 78.4$ Дж</span></div>
+                    <div class="step"><strong>Шаг 2. Энергия в конце.</strong> Тело внизу ($h = 0$), скорость $v = 6$ м/с. Значит, вся энергия кинетическая:<br><span class="formula">$E_2 = \dfrac{mv^2}{2} = \dfrac{2 \cdot 36}{2} = 36$ Дж</span></div>
+                    <div class="step"><strong>Шаг 3. Сравниваем.</strong> $E_1 = 78.4$ Дж, $E_2 = 36$ Дж. Механическая энергия <strong>уменьшилась</strong>. Куда делось $78.4 - 36 = 42.4$ Дж? Ушло в теплоту из-за трения.<br><span class="formula">$Q = E_1 - E_2 = 78.4 - 36 = 42.4$ Дж</span></div>
+                    <div class="step"><strong>Шаг 4. Работа силы трения.</strong> Сила трения направлена против движения, поэтому её работа отрицательна и равна по модулю теплоте:<br><span class="formula">$A_{тр} = -Q = -42.4$ Дж</span></div>
+                    <div class="step explanation"><strong>Проверка.</strong> $Q$ положительно — теплота выделилась (это правильно). $A_{тр}$ отрицательна — сила трения «отнимала» энергию у тела (это тоже правильно). Если бы горка была гладкой, $v$ была бы больше: $v = \sqrt{2gh} = \sqrt{2 \cdot 9.8 \cdot 4} \approx 8.85$ м/с. Реальная скорость 6 м/с — меньше, потому что часть энергии «съело» трение.</div>
+                    <div class="answer">✅ Ответ: $Q = 42.4$ Дж, $A_{тр} = -42.4$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Пружина — сжатие и выстрел</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружина жёсткостью $k = 400$ Н/м сжата на $\Delta x = 0.1$ м. К ней приставлен шарик массой $m = 0.05$ кг. Какую скорость приобретёт шарик после освобождения пружины? Трением пренебречь.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 400$ Н/м, $\Delta x = 0.1$ м, $m = 0.05$ кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Энергия в начале.</strong> Пружина сжата, шарик покоится. Вся энергия — потенциальная энергия пружины:<br><span class="formula">$E_1 = \dfrac{k \Delta x^2}{2} = \dfrac{400 \cdot (0.1)^2}{2} = \dfrac{400 \cdot 0.01}{2} = 2$ Дж</span></div>
+                    <div class="step"><strong>Шаг 2. Энергия в конце.</strong> Пружина распрямилась, шарик полетел со скоростью $v$. Вся энергия — кинетическая:<br><span class="formula">$E_2 = \dfrac{mv^2}{2}$</span></div>
+                    <div class="step"><strong>Шаг 3. ЗСЭ.</strong> Трения нет, значит $E_1 = E_2$:<br><span class="formula">$2 = \dfrac{0.05 \cdot v^2}{2}$</span></div>
+                    <div class="step"><strong>Шаг 4. Выражаем $v$.</strong><br><span class="formula">$v^2 = \dfrac{2 \cdot 2}{0.05} = \dfrac{4}{0.05} = 80$</span><br><span class="formula">$v = \sqrt{80} \approx 8.94$ м/с</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Здесь мы использовали «упругую» потенциальную энергию $E_p = k\Delta x^2/2$ — она превратилась в кинетическую. Обратите внимание: скорость большая (почти 9 м/с) при сжатии всего 10 см — пружина с жёсткостью 400 Н/м довольно сильная.</div>
+                    <div class="answer">✅ Ответ: $v \approx 8.94$ м/с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Превращения энергии при бросании вверх</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело брошено вертикально вверх со скоростью $v_0 = 15$ м/с. На какой высоте его кинетическая энергия уменьшится в 3 раза? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_0 = 15$ м/с, $E_k = E_{k0}/3$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $h$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Начальная энергия.</strong> Нулевой уровень — точка бросания.<br><span class="formula">$E_{k0} = \dfrac{mv_0^2}{2}$</span><br>$E_{p0} = 0$ (тело в точке бросания).</div>
+                    <div class="step"><strong>Шаг 2. Условие «$E_k$ уменьшилась в 3 раза».</strong><br>Значит $E_k = \dfrac{E_{k0}}{3}$ на искомой высоте.</div>
+                    <div class="step"><strong>Шаг 3. ЗСЭ.</strong><br><span class="formula">$E_{k0} = E_k + E_p = \dfrac{E_{k0}}{3} + mgh$</span></div>
+                    <div class="step"><strong>Шаг 4. Выражаем $mgh$.</strong><br><span class="formula">$mgh = E_{k0} - \dfrac{E_{k0}}{3} = \dfrac{2}{3} E_{k0}$</span></div>
+                    <div class="step"><strong>Шаг 5. Подставляем $E_{k0}$.</strong><br><span class="formula">$mgh = \dfrac{2}{3} \cdot \dfrac{mv_0^2}{2} = \dfrac{mv_0^2}{3}$</span></div>
+                    <div class="step"><strong>Шаг 6. Сокращаем $m$ и выражаем $h$.</strong><br><span class="formula">$h = \dfrac{v_0^2}{3g}$</span></div>
+                    <div class="step"><strong>Шаг 7. Считаем.</strong><br><span class="formula">$h = \dfrac{15^2}{3 \cdot 9.8} = \dfrac{225}{29.4} \approx 7.65$ м</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Масса снова сокращается. Интересно: если $E_k$ уменьшилась в 3 раза, то на эту высоту тело потратило $\dfrac{2}{3}$ начальной кинетической энергии — они превратились в потенциальную. Максимальная высота подъёма была бы $h_{max} = \dfrac{v_0^2}{2g} = \dfrac{225}{19.6} \approx 11.5$ м — значит, тело всё ещё движется вверх.</div>
+                    <div class="answer">✅ Ответ: $h \approx 7.65$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Баллистический маятник (ЗСИ + ЗСЭ)</div>
+                <div class="task-condition"><strong>Условие:</strong> Пуля массой $m = 0.01$ кг летит горизонтально со скоростью $v = 400$ м/с и застревает в деревянном бруске массой $M = 1.99$ кг, подвешенном на нити. На какую высоту поднимется брусок с пулей после удара? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0.01$ кг, $v = 400$ м/с, $M = 1.99$ кг, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $h$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Что происходит.</strong> Сначала удар: пуля влетает в брусок и застревает. Это <strong>неупругий удар</strong> — тела слипаются. Затем брусок с пулей поднимается как маятник. Это два разных этапа, и на каждом работает свой закон.</div>
+                    <div class="step"><strong>Шаг 2. ЗСИ для удара.</strong> Система «пуля + брусок» замкнута по горизонтали (внешних сил по горизонтали нет). Импульс до удара равен импульсу после:<br><span class="formula">$mv + M \cdot 0 = (m + M)u$</span></div>
+                    <div class="step"><strong>Шаг 3. Находим скорость после удара.</strong><br><span class="formula">$u = \dfrac{mv}{m + M} = \dfrac{0.01 \cdot 400}{0.01 + 1.99} = \dfrac{4}{2} = 2$ м/с</span></div>
+                    <div class="step"><strong>Шаг 4. ЗСЭ для подъёма.</strong> После удара брусок с пулей имеет скорость $u$ и кинетическую энергию $\dfrac{(m+M)u^2}{2}$. Поднимаясь на высоту $h$, эта энергия переходит в потенциальную $(m+M)gh$:<br><span class="formula">$\dfrac{(m+M)u^2}{2} = (m+M)gh$</span></div>
+                    <div class="step"><strong>Шаг 5. Сокращаем массу.</strong> $(m+M)$ сокращается:<br><span class="formula">$h = \dfrac{u^2}{2g} = \dfrac{4}{2 \cdot 9.8} = \dfrac{4}{19.6} \approx 0.204$ м</span></div>
+                    <div class="step explanation"><strong>Важно!</strong> Обратите внимание: мы <strong>не</strong> применяем ЗСЭ между «до удара» и «после удара» — потому что удар неупругий, часть энергии ушла в теплоту. Сначала ЗСИ (сохраняется всегда), потом ЗСЭ (для движения маятника — там механическая энергия сохраняется). Это классический приём решения задач на «удар + подъём».</div>
+                    <div class="answer">✅ Ответ: $h \approx 0.204$ м ≈ 20.4 см</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Сравнение энергий</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела одинаковой массы движутся со скоростями $v$ и $3v$. Во сколько раз отличаются их кинетические энергии?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = m_2 = m$, $v_1 = v$, $v_2 = 3v$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{E_{k2}}{E_{k1}}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Записываем энергии.</strong><br><span class="formula">$E_{k1} = \dfrac{mv^2}{2}$</span><br><span class="formula">$E_{k2} = \dfrac{m(3v)^2}{2}$</span></div>
+                    <div class="step"><strong>Шаг 2. Упрощаем $E_{k2}$.</strong> $(3v)^2 = 9v^2$, значит:<br><span class="formula">$E_{k2} = \dfrac{9mv^2}{2} = 9 \cdot \dfrac{mv^2}{2} = 9 E_{k1}$</span></div>
+                    <div class="step"><strong>Шаг 3. Отношение.</strong><br><span class="formula">$\dfrac{E_{k2}}{E_{k1}} = 9$</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Кинетическая энергия пропорциональна <strong>квадрату</strong> скорости. Именно поэтому при столкновении на большой скорости повреждения катастрофические: увеличение скорости в 3 раза увеличивает энергию в 9 раз.</div>
+                    <div class="answer">✅ Ответ: в 9 раз</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 11. Камень, брошенный под углом</div>
+                <div class="task-condition"><strong>Условие:</strong> Камень брошен под углом $\alpha = 30°$ к горизонту со скоростью $v_0 = 10$ м/с. Найдите скорость камня в верхней точке траектории. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\alpha = 30°$, $v_0 = 10$ м/с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$ (в верхней точке)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <div id="sol11" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Что такое верхняя точка.</strong> В верхней точке траектории вертикальная составляющая скорости обращается в нуль ($v_y = 0$). Остаётся только горизонтальная составляющая.</div>
+                    <div class="step"><strong>Шаг 2. Горизонтальная составляющая.</strong> Она не меняется во времени (по горизонтали нет сил):<br><span class="formula">$v_x = v_0 \cos\alpha$</span></div>
+                    <div class="step"><strong>Шаг 3. Подставляем.</strong> $\cos 30° = \dfrac{\sqrt{3}}{2} \approx 0.866$:<br><span class="formula">$v_x = 10 \cdot 0.866 \approx 8.66$ м/с</span></div>
+                    <div class="step"><strong>Шаг 4. Полная скорость в верхней точке.</strong> Поскольку $v_y = 0$, полная скорость равна горизонтальной:<br><span class="formula">$v = v_x \approx 8.66$ м/с</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Можно было решить и через ЗСЭ: полная энергия в момент бросания $\dfrac{mv_0^2}{2}$ переходит в момент верхней точки в $\dfrac{mv^2}{2} + mgH_{max}$. После подстановки $H_{max} = \dfrac{v_0^2 \sin^2\alpha}{2g}$ получим то же самое: $v = v_0\cos\alpha$. Это хорошая проверка.</div>
+                    <div class="answer">✅ Ответ: $v \approx 8.66$ м/с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 12. Потенциальная энергия пружины</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружину жёсткостью $k = 200$ Н/м сжали на $\Delta x_1 = 2$ см. Затем сжали на $\Delta x_2 = 6$ см. Во сколько раз изменилась потенциальная энергия пружины?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 200$ Н/м, $\Delta x_1 = 0.02$ м, $\Delta x_2 = 0.06$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{E_{p2}}{E_{p1}}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <div id="sol12" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Формула.</strong> Потенциальная энергия пружины $E_p = \dfrac{k \Delta x^2}{2}$.</div>
+                    <div class="step"><strong>Шаг 2. Первый случай.</strong><br><span class="formula">$E_{p1} = \dfrac{200 \cdot (0.02)^2}{2} = \dfrac{200 \cdot 0.0004}{2} = 0.04$ Дж</span></div>
+                    <div class="step"><strong>Шаг 3. Второй случай.</strong><br><span class="formula">$E_{p2} = \dfrac{200 \cdot (0.06)^2}{2} = \dfrac{200 \cdot 0.0036}{2} = 0.36$ Дж</span></div>
+                    <div class="step"><strong>Шаг 4. Отношение.</strong><br><span class="formula">$\dfrac{E_{p2}}{E_{p1}} = \dfrac{0.36}{0.04} = 9$</span></div>
+                    <div class="step explanation"><strong>Краткий путь.</strong> Можно было не считать числа: $\dfrac{E_{p2}}{E_{p1}} = \left(\dfrac{\Delta x_2}{\Delta x_1}\right)^2 = \left(\dfrac{6}{2}\right)^2 = 3^2 = 9$. Потенциальная энергия пружины пропорциональна <strong>квадрату</strong> деформации.</div>
+                    <div class="answer">✅ Ответ: увеличилась в 9 раз</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 13. Работа и изменение энергии</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг движется со скоростью $v_1 = 2$ м/с. Под действием силы оно разгоняется до скорости $v_2 = 5$ м/с. Найдите работу силы.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $v_1 = 2$ м/с, $v_2 = 5$ м/с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <div id="sol13" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Теорема о кинетической энергии.</strong> Работа равнодействующей силы равна изменению кинетической энергии:<br><span class="formula">$A = \Delta E_k = E_{k2} - E_{k1}$</span></div>
+                    <div class="step"><strong>Шаг 2. Начальная кинетическая энергия.</strong><br><span class="formula">$E_{k1} = \dfrac{4 \cdot 2^2}{2} = \dfrac{16}{2} = 8$ Дж</span></div>
+                    <div class="step"><strong>Шаг 3. Конечная кинетическая энергия.</strong><br><span class="formula">$E_{k2} = \dfrac{4 \cdot 5^2}{2} = \dfrac{100}{2} = 50$ Дж</span></div>
+                    <div class="step"><strong>Шаг 4. Работа.</strong><br><span class="formula">$A = 50 - 8 = 42$ Дж</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Работа положительна — сила разгоняла тело. Если бы тело тормозило, работа была бы отрицательной ($A = E_{k2} - E_{k1} < 0$). Теорема о кинетической энергии — это фактически «энергетическая» форма второго закона Ньютона. Она позволяет решать задачи, не зная ни ускорения, ни времени, ни пути.</div>
+                    <div class="answer">✅ Ответ: $A = 42$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 14. Прыжок с высоты</div>
+                <div class="task-condition"><strong>Условие:</strong> Человек массой $m = 60$ кг прыгает с высоты $H = 3$ м на батут и подпрыгивает вверх. На какую высоту он поднимется, если 20% энергии потеряно на деформацию батута и тепло? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 60$ кг, $H = 3$ м, потери 20%, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $h$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <div id="sol14" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Энергия в начале.</strong> Человек на высоте $H$, покоится. Вся энергия — потенциальная:<br><span class="formula">$E_1 = mgH = 60 \cdot 9.8 \cdot 3 = 1764$ Дж</span></div>
+                    <div class="step"><strong>Шаг 2. Потери энергии.</strong> Условие: 20% потеряно, значит остаётся 80%:<br><span class="formula">$E_2 = 0.8 \cdot E_1 = 0.8 \cdot 1764 = 1411.2$ Дж</span></div>
+                    <div class="step"><strong>Шаг 3. Куда идёт оставшаяся энергия.</strong> В верхней точке подъёма на высоте $h$ человек снова покоится — вся энергия потенциальная:<br><span class="formula">$E_2 = mgh$</span></div>
+                    <div class="step"><strong>Шаг 4. Выражаем $h$.</strong><br><span class="formula">$h = \dfrac{E_2}{mg} = \dfrac{1411.2}{60 \cdot 9.8} = \dfrac{1411.2}{588} \approx 2.4$ м</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> Если бы потерь не было, человек подпрыгнул бы на ту же высоту, с которой падал: $h = H = 3$ м (это следствие ЗСЭ). Потери 20% → высота 2.4 м (действительно 80% от 3 м = 2.4 м). Хорошее совпадение — проверка.</div>
+                    <div class="answer">✅ Ответ: $h \approx 2.4$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 15. Комбинированная задача (ЗСИ + ЗСЭ)</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m_1 = 1$ кг, движущееся со скоростью $v_1 = 6$ м/с, сталкивается с покоящимся телом массой $m_2 = 2$ кг. Удар неупругий. Найдите скорость тел после удара, кинетическую энергию до и после удара, количество выделившейся теплоты.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $v_1 = 6$ м/с, $m_2 = 2$ кг, $v_2 = 0$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $u$, $E_{k1}$, $E_{k2}$, $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <div id="sol15" class="task-solution">
+                    <div class="step"><strong>Шаг 1. ЗСИ.</strong> До удара импульс системы равен импульсу только первого тела (второе покоится). После удара оба тела движутся вместе со скоростью $u$:<br><span class="formula">$m_1 v_1 = (m_1 + m_2) u$</span></div>
+                    <div class="step"><strong>Шаг 2. Скорость после удара.</strong><br><span class="formula">$u = \dfrac{m_1 v_1}{m_1 + m_2} = \dfrac{1 \cdot 6}{1 + 2} = \dfrac{6}{3} = 2$ м/с</span></div>
+                    <div class="step"><strong>Шаг 3. Энергия до удара.</strong> Движется только первое тело:<br><span class="formula">$E_{k1} = \dfrac{m_1 v_1^2}{2} = \dfrac{1 \cdot 36}{2} = 18$ Дж</span></div>
+                    <div class="step"><strong>Шаг 4. Энергия после удара.</strong> Движутся оба тела с одинаковой скоростью $u$:<br><span class="formula">$E_{k2} = \dfrac{(m_1 + m_2) u^2}{2} = \dfrac{3 \cdot 4}{2} = 6$ Дж</span></div>
+                    <div class="step"><strong>Шаг 5. Теплота.</strong> Удар неупругий — механическая энергия уменьшилась, разность ушла в теплоту:<br><span class="formula">$Q = E_{k1} - E_{k2} = 18 - 6 = 12$ Дж</span></div>
+                    <div class="step explanation"><strong>Пояснение.</strong> ЗСИ работает всегда, ЗСЭ — только при упругом ударе. При неупругом мы видим, что 2/3 начальной энергии «улетучилось» в теплоту. Именно поэтому при столкновении реальных тел они нагреваются, деформируются, а иногда и разрушаются.</div>
+                    <div class="answer">✅ Ответ: $u = 2$ м/с, $E_{k1} = 18$ Дж, $E_{k2} = 6$ Дж, $Q = 12$ Дж</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="mechanics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-pendulum').style.display = model === 'pendulum' ? 'block' : 'none';
+        document.getElementById('model-slide').style.display = model === 'slide' ? 'block' : 'none';
+        setTimeout(() => {
+            if (typeof window.buildPendulum === 'function') window.buildPendulum();
+            if (typeof window.buildSlide === 'function') window.buildSlide();
+        }, 100);
+    }
+</script>
+
+<!-- 3D-модель 1: Маятник -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-pendulum');
+        const canvas = document.getElementById('canvas-pendulum');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(1.5, 2, 8);
+        camera.lookAt(0.5, 0.5, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function getLabelBg() {
+            const isLight = document.documentElement.classList.contains('light-mode');
+            return isLight ? 'rgba(255,255,255,0.92)' : 'rgba(10,15,26,0.88)';
+        }
+        function getLabelColor() {
+            const isLight = document.documentElement.classList.contains('light-mode');
+            return isLight ? '#1a2a3f' : '#ffffff';
+        }
+        function makeLabel(text, color, pos, fs = '0.65rem') {
+    const div = document.createElement('div');
+    div.textContent = text;
+    div.style.color = color;;
+    div.style.fontSize = fs;
+    div.style.fontWeight = 'bold';
+    div.style.fontFamily = "'Segoe UI', sans-serif";
+    div.style.background = 'transparent';
+    div.style.padding = '0';
+    div.style.border = 'none';
+    div.style.borderRadius = '0';
+    div.style.textShadow = '0 0 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.7), 0 1px 2px rgba(0,0,0,0.6)';
+    div.style.transition = 'color 0.3s ease';
+    const lbl = new CSS2DObject(div);
+    lbl.position.copy(pos);
+    return lbl;
+        }
+        function updateSize3D() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize3D()).observe(container);
+        setTimeout(updateSize3D, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const massSlider = document.getElementById('pend-mass');
+        const lengthSlider = document.getElementById('pend-length');
+        const angleSlider = document.getElementById('pend-angle');
+        const startBtn = document.getElementById('pend-start-btn');
+        const resetBtn = document.getElementById('pend-reset-btn');
+        const ekDisp = document.getElementById('pend-ek');
+        const epDisp = document.getElementById('pend-ep');
+        const fullDisp = document.getElementById('pend-full');
+        const vDisp = document.getElementById('pend-v');
+
+        let animating = false;
+        let physTime = 0;
+        let m = 2, L = 2, alpha0 = 60;
+        const g = 9.8;
+        const TIME_SCALE = 0.35;
+
+        const pivot = new THREE.Vector3(1.4, 1.5, 0);
+
+        const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.2, 24, 24),
+            new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0x442200 })
+        );
+        group.add(sphere);
+
+        let threadLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([pivot, pivot]),
+            new THREE.LineBasicMaterial({ color: 0x888888 })
+        );
+        group.add(threadLine);
+
+        const pivotSphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.06, 12, 12),
+            new THREE.MeshStandardMaterial({ color: 0x60a5fa })
+        );
+        pivotSphere.position.copy(pivot);
+        group.add(pivotSphere);
+
+        const pendShadow = new THREE.Mesh(
+            new THREE.CircleGeometry(0.25, 20),
+            new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.25, depthWrite: false })
+        );
+        pendShadow.rotation.x = -Math.PI / 2;
+        pendShadow.position.set(pivot.x, -0.95, 0);
+        group.add(pendShadow);
+
+        const barGroup = new THREE.Group();
+        barGroup.position.set(-2.2, -1.0, 0);
+        group.add(barGroup);
+
+        function createBar(x, color, label, labelColor) {
+            const bar = new THREE.Mesh(
+                new THREE.BoxGeometry(0.32, 1, 0.32),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.25) })
+            );
+            bar.position.set(x, 0, 0);
+            barGroup.add(bar);
+            const lbl = makeLabel(label, labelColor, new THREE.Vector3(x, -0.55, 0), '0.55rem');
+            barGroup.add(lbl);
+            return bar;
+        }
+
+        const ekBar = createBar(-0.8, 0xf59e0b, 'Ek', '#f59e0b');
+        const epBar = createBar(0, 0x10b981, 'Ep', '#10b981');
+        const fullBar = createBar(0.8, 0x60a5fa, 'E', '#60a5fa');
+
+        const baseLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-1.3, 0, 0), new THREE.Vector3(1.3, 0, 0)]),
+            new THREE.LineBasicMaterial({ color: 0x666666 })
+        );
+        barGroup.add(baseLine);
+
+        function updateBars(ek, ep, full) {
+            const maxE = m * g * L * (1 - Math.cos(alpha0 * Math.PI / 180)) || 1;
+            const heightScale = 2.2;
+            const ekH = (ek / maxE) * heightScale;
+            const epH = (ep / maxE) * heightScale;
+            const fullH = (full / maxE) * heightScale;
+
+            ekBar.scale.y = Math.max(0.01, ekH);
+            ekBar.position.y = ekH / 2;
+            epBar.scale.y = Math.max(0.01, epH);
+            epBar.position.y = epH / 2;
+            fullBar.scale.y = Math.max(0.01, fullH);
+            fullBar.position.y = fullH / 2;
+        }
+
+        function getPosition(t) {
+            const omega = Math.sqrt(g / L);
+            const a0 = alpha0 * Math.PI / 180;
+            const a = a0 * Math.cos(omega * t);
+            const x = pivot.x + L * Math.sin(a);
+            const y = pivot.y - L * Math.cos(a);
+            return { x, y, a };
+        }
+
+        function resetPendulum() {
+            m = parseFloat(massSlider.value);
+            L = parseFloat(lengthSlider.value);
+            alpha0 = parseFloat(angleSlider.value);
+            document.getElementById('pend-mass-val').textContent = m.toFixed(1);
+            document.getElementById('pend-length-val').textContent = L.toFixed(1);
+            document.getElementById('pend-angle-val').textContent = alpha0;
+            animating = false;
+            physTime = 0;
+            startBtn.textContent = '▶ Пуск';
+
+            const p = getPosition(0);
+            sphere.position.set(p.x, p.y, 0);
+            sphere.geometry.dispose();
+            sphere.geometry = new THREE.SphereGeometry(0.12 + m * 0.04, 24, 24);
+            threadLine.geometry.dispose();
+            threadLine.geometry = new THREE.BufferGeometry().setFromPoints([pivot, sphere.position.clone()]);
+            pendShadow.position.set(p.x, -0.95, 0);
+
+            const H = L * (1 - Math.cos(alpha0 * Math.PI / 180));
+            const fullE = m * g * H;
+            ekDisp.textContent = '0.00';
+            epDisp.textContent = fullE.toFixed(2);
+            fullDisp.textContent = fullE.toFixed(2);
+            vDisp.textContent = '0.00';
+            updateBars(0, fullE, fullE);
+        }
+
+        function updatePendulum() {
+            if (!animating) return;
+            physTime += 0.016 * TIME_SCALE;
+
+            const p = getPosition(physTime);
+            sphere.position.set(p.x, p.y, 0);
+            threadLine.geometry.dispose();
+            threadLine.geometry = new THREE.BufferGeometry().setFromPoints([pivot, sphere.position.clone()]);
+            pendShadow.position.set(p.x, -0.95, 0);
+
+            const H = L * (1 - Math.cos(alpha0 * Math.PI / 180));
+            const fullE = m * g * H;
+            const h = p.y - (pivot.y - L);
+            const ep = m * g * Math.max(0, h);
+            const ek = Math.max(0, fullE - ep);
+            const v = Math.sqrt(2 * ek / m);
+
+            ekDisp.textContent = ek.toFixed(2);
+            epDisp.textContent = ep.toFixed(2);
+            fullDisp.textContent = fullE.toFixed(2);
+            vDisp.textContent = v.toFixed(2);
+            updateBars(ek, ep, fullE);
+        }
+
+        massSlider.addEventListener('input', () => { if (!animating) resetPendulum(); });
+        lengthSlider.addEventListener('input', () => { if (!animating) resetPendulum(); });
+        angleSlider.addEventListener('input', () => { if (!animating) resetPendulum(); });
+        startBtn.addEventListener('click', () => {
+            if (animating) { animating = false; startBtn.textContent = '▶ Продолжить'; }
+            else {
+                if (startBtn.textContent === '▶ Продолжить') { animating = true; startBtn.textContent = '⏹ Стоп'; }
+                else { resetPendulum(); animating = true; startBtn.textContent = '⏹ Стоп'; }
+            }
+        });
+        resetBtn.addEventListener('click', resetPendulum);
+
+        document.getElementById('fs-pendulum').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); } else { await document.exitFullscreen(); }
+            updateSize3D();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0.2, 0.3, 0);
+        controls.update();
+
+        window.buildPendulum = resetPendulum;
+        resetPendulum();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            if (animating) updatePendulum();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- 3D-модель 2: Горка с трением. Дорожка на месте, горка и тело — с левого края дорожки, столбцы ещё левее -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-slide');
+        const canvas = document.getElementById('canvas-slide');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(0.5, 3, 10);
+        camera.lookAt(-1.5, 1, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function getLabelBg() {
+            const isLight = document.documentElement.classList.contains('light-mode');
+            return isLight ? 'rgba(255,255,255,0.92)' : 'rgba(10,15,26,0.88)';
+        }
+        function getLabelColor() {
+            const isLight = document.documentElement.classList.contains('light-mode');
+            return isLight ? '#1a2a3f' : '#ffffff';
+        }
+        function makeLabel(text, color, pos, fs = '0.6rem') {
+    const div = document.createElement('div');
+    div.textContent = text;
+    div.style.color = color;;
+    div.style.fontSize = fs;
+    div.style.fontWeight = 'bold';
+    div.style.fontFamily = "'Segoe UI', sans-serif";
+    div.style.background = 'transparent';
+    div.style.padding = '0';
+    div.style.border = 'none';
+    div.style.borderRadius = '0';
+    div.style.textShadow = '0 0 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.7), 0 1px 2px rgba(0,0,0,0.6)';
+    div.style.transition = 'color 0.3s ease';
+    const lbl = new CSS2DObject(div);
+    lbl.position.copy(pos);
+    return lbl;
+}
+        function updateSize3D() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize3D()).observe(container);
+        setTimeout(updateSize3D, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const massSlider = document.getElementById('slide-mass');
+        const heightSlider = document.getElementById('slide-height');
+        const angleSlider = document.getElementById('slide-angle');
+        const muSlider = document.getElementById('slide-mu');
+        const startBtn = document.getElementById('slide-start-btn');
+        const resetBtn = document.getElementById('slide-reset-btn');
+        const ekDisp = document.getElementById('slide-ek');
+        const epDisp = document.getElementById('slide-ep');
+        const qDisp = document.getElementById('slide-q');
+        const vDisp = document.getElementById('slide-v');
+
+        let animating = false;
+        let time = 0;
+        let m = 2, h0 = 2.5, angleDeg = 30, mu = 0.1;
+        const g = 9.8;
+        const TIME_SCALE = 0.55;
+
+        // ===== ДОРОЖКА (земля) — ОСТАВЛЕНА НА МЕСТЕ =====
+        const groundLeftX = -3.5;
+        const groundRightX = 2.5;
+        const groundCenterX = (groundLeftX + groundRightX) / 2;
+        const groundWidth = groundRightX - groundLeftX;
+
+        const ground = new THREE.Mesh(
+            new THREE.BoxGeometry(groundWidth, 0.05, 1.5),
+            new THREE.MeshStandardMaterial({ color: 0x3a4a5a, transparent: true, opacity: 0.3 })
+        );
+        ground.position.set(groundCenterX, -0.025, 0);
+        group.add(ground);
+
+        const slopeGroup = new THREE.Group();
+        group.add(slopeGroup);
+
+        const body = new THREE.Mesh(
+            new THREE.BoxGeometry(0.4, 0.25, 0.4),
+            new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0x442200 })
+        );
+        group.add(body);
+
+        const bodyShadow = new THREE.Mesh(
+            new THREE.CircleGeometry(0.28, 20),
+            new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3, depthWrite: false })
+        );
+        bodyShadow.rotation.x = -Math.PI / 2;
+        group.add(bodyShadow);
+
+        // Вершина горки — на ЛЕВОМ КРАЮ ДОРОЖКИ
+        const slopeTopX = groundLeftX;
+        let slopeTopY = h0;
+        let slopeLength = 0;
+
+        function clearSlopeGroup() {
+            while (slopeGroup.children.length) {
+                const c = slopeGroup.children[0];
+                slopeGroup.remove(c);
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) c.material.dispose();
+            }
+        }
+
+        function rebuildSlope() {
+            clearSlopeGroup();
+            const angleRad = angleDeg * Math.PI / 180;
+            slopeLength = h0 / Math.sin(angleRad);
+            slopeTopY = h0;
+            const slopeBottomX = slopeTopX + slopeLength * Math.cos(angleRad);
+
+            const slopeMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(slopeLength, 0.06, 1.2),
+                new THREE.MeshStandardMaterial({ color: 0x446688, transparent: true, opacity: 0.45 })
+            );
+            const cx = (slopeTopX + slopeBottomX) / 2;
+            const cy = (slopeTopY + 0) / 2;
+            slopeMesh.position.set(cx, cy, 0);
+            slopeMesh.rotation.z = -angleRad;
+            slopeGroup.add(slopeMesh);
+        }
+
+        // ===== СТОЛБЦЫ ЭНЕРГИИ — ЛЕВЕЕ ГОРКИ, ЗА ЛЕВЫМ КРАЕМ ДОРОЖКИ =====
+        const barGroup = new THREE.Group();
+        barGroup.position.set(groundLeftX - 2.5, -1.0, 0);
+        group.add(barGroup);
+
+        function createBar(x, color, label, labelColor) {
+            const bar = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 1, 0.3),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.25) })
+            );
+            bar.position.set(x, 0, 0);
+            barGroup.add(bar);
+            const lbl = makeLabel(label, labelColor, new THREE.Vector3(x, -0.55, 0), '0.5rem');
+            barGroup.add(lbl);
+            return bar;
+        }
+
+        const ekBar = createBar(-1.05, 0xf59e0b, 'Ek', '#f59e0b');
+        const epBar = createBar(-0.35, 0x10b981, 'Ep', '#10b981');
+        const qBar = createBar(0.35, 0xef4444, 'Q', '#ef4444');
+        const fullBar = createBar(1.05, 0x60a5fa, 'E', '#60a5fa');
+
+        const baseLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-1.45, 0, 0), new THREE.Vector3(1.45, 0, 0)]),
+            new THREE.LineBasicMaterial({ color: 0x666666 })
+        );
+        barGroup.add(baseLine);
+
+        function updateBars(ek, ep, q, full) {
+            const maxE = m * g * h0 || 1;
+            const heightScale = 2.2;
+            const ekH = (ek / maxE) * heightScale;
+            const epH = (ep / maxE) * heightScale;
+            const qH = (q / maxE) * heightScale;
+            const fullH = (full / maxE) * heightScale;
+
+            ekBar.scale.y = Math.max(0.01, ekH);
+            ekBar.position.y = ekH / 2;
+            epBar.scale.y = Math.max(0.01, epH);
+            epBar.position.y = epH / 2;
+            qBar.scale.y = Math.max(0.01, qH);
+            qBar.position.y = qH / 2;
+            fullBar.scale.y = Math.max(0.01, fullH);
+            fullBar.position.y = fullH / 2;
+        }
+
+        function getState(t) {
+            const angleRad = angleDeg * Math.PI / 180;
+            const a = g * (Math.sin(angleRad) - mu * Math.cos(angleRad));
+            if (a <= 0) return null;
+            const S = 0.5 * a * t * t;
+            const v = a * t;
+            const S_max = h0 / Math.sin(angleRad);
+            return { S: Math.min(S, S_max), v: Math.min(v, Math.sqrt(2 * a * S_max)), a };
+        }
+
+        function resetSlide() {
+            m = parseFloat(massSlider.value);
+            h0 = parseFloat(heightSlider.value);
+            angleDeg = parseFloat(angleSlider.value);
+            mu = parseFloat(muSlider.value);
+            document.getElementById('slide-mass-val').textContent = m.toFixed(1);
+            document.getElementById('slide-height-val').textContent = h0.toFixed(1);
+            document.getElementById('slide-angle-val').textContent = angleDeg;
+            document.getElementById('slide-mu-val').textContent = mu.toFixed(2);
+            animating = false;
+            time = 0;
+            startBtn.textContent = '▶ Пуск';
+
+            rebuildSlope();
+
+            body.position.set(slopeTopX, h0 + 0.15, 0);
+            bodyShadow.position.set(slopeTopX, 0.02, 0);
+
+            const fullE = m * g * h0;
+            ekDisp.textContent = '0.00';
+            epDisp.textContent = fullE.toFixed(2);
+            qDisp.textContent = '0.00';
+            vDisp.textContent = '0.00';
+            updateBars(0, fullE, 0, fullE);
+        }
+
+        function updateSlide() {
+            if (!animating) return;
+            time += 0.016 * TIME_SCALE;
+
+            const st = getState(time);
+            if (!st) { animating = false; startBtn.textContent = '▶ Пуск'; return; }
+
+            const angleRad = angleDeg * Math.PI / 180;
+            const x = slopeTopX + st.S * Math.cos(angleRad);
+            const y = h0 - st.S * Math.sin(angleRad);
+            body.position.set(x, y + 0.15, 0);
+            bodyShadow.position.set(x, 0.02, 0);
+
+            const ep = m * g * Math.max(0, y);
+            const ek = 0.5 * m * st.v * st.v;
+            const full = m * g * h0;
+            const q = Math.max(0, full - ek - ep);
+
+            ekDisp.textContent = ek.toFixed(2);
+            epDisp.textContent = ep.toFixed(2);
+            qDisp.textContent = q.toFixed(2);
+            vDisp.textContent = st.v.toFixed(2);
+
+            updateBars(ek, ep, q, ek + ep);
+
+            const S_max = h0 / Math.sin(angleRad);
+            if (st.S >= S_max - 0.01) {
+                animating = false;
+                startBtn.textContent = '▶ Пуск';
+            }
+        }
+
+        massSlider.addEventListener('input', () => { if (!animating) resetSlide(); });
+        heightSlider.addEventListener('input', () => { if (!animating) resetSlide(); });
+        angleSlider.addEventListener('input', () => { if (!animating) resetSlide(); });
+        muSlider.addEventListener('input', () => { if (!animating) resetSlide(); });
+        startBtn.addEventListener('click', () => {
+            if (animating) { animating = false; startBtn.textContent = '▶ Продолжить'; }
+            else {
+                if (startBtn.textContent === '▶ Продолжить') { animating = true; startBtn.textContent = '⏹ Стоп'; }
+                else { resetSlide(); animating = true; startBtn.textContent = '⏹ Стоп'; }
+            }
+        });
+        resetBtn.addEventListener('click', resetSlide);
+
+        document.getElementById('fs-slide').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); } else { await document.exitFullscreen(); }
+            updateSize3D();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(-1.5, 1, 0);
+        controls.update();
+
+        window.buildSlide = resetSlide;
+        resetSlide();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            if (animating) updateSlide();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Физика в кармане</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PhysicsHelper">
+    <meta name="theme-color" content="#3b82f6">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --border: rgba(59, 130, 246, 0.15);
+            --icon-color: #8ba5b8;
+            --header-bg: linear-gradient(135deg, #1e3545, #162a38);
+            --menu-card-bg: #1e3545;
+            --menu-item-bg: #1e3545;
+            --menu-item-hover: #233e50;
+            --group-header-bg: #1a3a5a;
+            --search-bg: #1a2d3c;
+            --label-bg: rgba(26,45,60,0.85);
+            --label-color: #ffffff;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --accent: #2563eb;
+            --accent-hover: #3b82f6;
+            --border: #d0d8e0;
+            --icon-color: #1a2d3c;
+            --header-bg: linear-gradient(135deg, #ffffff, #f8fafc);
+            --menu-card-bg: white;
+            --menu-item-bg: white;
+            --menu-item-hover: #f0f4fa;
+            --group-header-bg: #e8edf5;
+            --search-bg: #f1f5f9;
+            --label-bg: rgba(255,255,255,0.92);
+            --label-color: #1a2a3f;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            transition: background 0.3s;
+        }
+
+        /* ===== ЗАСТАВКА ===== */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a1620;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.6s ease-out;
+            overflow: hidden;
+        }
+        .splash-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('заставка1.jpeg') center center / cover no-repeat;
+            opacity: 0.85;
+            z-index: 0;
+        }
+        .splash-screen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+        .splash-screen.fade-out { opacity: 0; pointer-events: none; }
+
+        .aktt-badge {
+            position: absolute;
+            top: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 0 20px;
+            z-index: 10;
+        }
+        .aktt-badge span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.8);
+            background: rgba(20,40,50,0.5);
+            backdrop-filter: blur(8px);
+            padding: 10px 24px;
+            border-radius: 40px;
+            border: 1px solid rgba(59,130,246,0.2);
+            display: inline-block;
+        }
+        /* Содержимое заставки — опущено ниже через margin-top */
+        .splash-content {
+            text-align: center;
+            z-index: 10;
+            padding: 0 20px;
+            position: relative;
+            margin-top: 120px;
+        }
+        .splash-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 60px;
+            object-fit: cover;
+            border: 2px solid rgba(59,130,246,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            margin-bottom: 32px;
+            animation: float 3.5s ease-in-out infinite;
+        }
+        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+        .splash-title {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: white;
+            margin-bottom: 12px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            margin-top: 30px;
+        }
+        .splash-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+            margin-top: 18px;
+        }
+
+        /* ===== ПРОГРЕСС-БАР — как в математике (с жёлтой вставкой) ===== */
+        .progress-wrapper {
+            width: 260px;
+            margin: 40px auto 0 auto;
+            position: relative;
+        }
+        .progress-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2563eb, #3b82f6, #fbbf24, #3b82f6, #2563eb);
+            background-size: 300% 100%;
+            border-radius: 4px;
+            transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            animation: shimmerProgress 2s linear infinite;
+            box-shadow: 0 0 24px rgba(59, 130, 246, 0.55);
+            position: relative;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+            animation: glowSweep 1.5s ease-in-out infinite;
+        }
+        .progress-label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 14px;
+            text-align: center;
+            font-weight: 400;
+        }
+        .progress-percent {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-top: 6px;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+        }
+
+        @keyframes shimmerProgress {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 300% 0%; }
+        }
+        @keyframes glowSweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .light-mode .progress-track {
+            background: rgba(0, 0, 0, 0.08);
+        }
+        .light-mode .progress-label {
+            color: rgba(0, 0, 0, 0.45);
+        }
+        .light-mode .progress-percent {
+            color: rgba(0, 0, 0, 0.75);
+        }
+
+        .splash-footer {
+            position: absolute;
+            bottom: 40px;
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            z-index: 10;
+        }
+
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        .main-content { padding: 80px 20px 48px; min-height: 100vh; background: var(--bg); transition: background 0.3s; }
+        .container { max-width: 720px; margin: 0 auto; position: relative; padding-top: 30px; }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px var(--card-shadow);
+            transition: all 0.2s ease;
+            z-index: 100;
+            color: var(--text);
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+
+        /* .header опущен ниже через margin-top */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            margin-top: 60px;
+            padding: 40px 24px 30px;
+            background: var(--header-bg);
+            border-radius: 40px;
+            box-shadow: 0 8px 24px var(--card-shadow);
+            border: 1px solid var(--border);
+            transition: background 0.3s;
+        }
+        .header-img {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 4px 8px var(--card-shadow);
+            border: 2px solid rgba(59,130,246,0.3);
+            margin-bottom: 12px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        :root.light-mode .header h1 {
+            background: linear-gradient(135deg, #1a2a3f, #2c5a77);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        /* ===== ПОИСК ===== */
+        .search-bar {
+            background: var(--menu-card-bg);
+            border-radius: 32px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            animation: fadeInUp 0.4s ease-out 0.1s backwards;
+            transition: background 0.3s,border 0.3s;
+        }
+        .search-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: var(--search-bg);
+            border-radius: 48px;
+            padding: 4px 4px 4px 20px;
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+        .search-input-wrapper .search-icon { font-size: 20px; color: var(--text-secondary); }
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 14px 0;
+            font-size: 1rem;
+            color: var(--text);
+            outline: none;
+        }
+        .search-input::placeholder { color: var(--text-secondary); font-size: 0.9rem; }
+        .search-clear {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 40px;
+            transition: all 0.2s;
+        }
+        .search-clear:hover { color: var(--accent); }
+        .search-results {
+            margin-top: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+        .search-results.show { display: block; }
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            transition: all 0.2s;
+            gap: 12px;
+            color: var(--text);
+        }
+        .search-result-item:hover {
+            background: var(--menu-item-hover);
+            transform: translateX(4px);
+        }
+        .search-result-icon { font-size: 24px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+        .search-result-content { flex: 1; }
+        .search-result-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+        .search-result-category { font-size: 0.7rem; color: var(--accent); }
+        .search-result-desc { font-size: 0.7rem; color: var(--text-secondary); }
+        .search-no-results { padding: 20px; text-align: center; color: var(--text-secondary); }
+
+        /* ===== МЕНЮ ===== */
+        .menu-card {
+            background: var(--menu-card-bg);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px -12px var(--card-shadow);
+            border: 1px solid var(--border);
+            animation: fadeInUp 0.4s ease-out 0.15s backwards;
+            transition: background 0.3s,border 0.3s,box-shadow 0.3s;
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--group-header-bg);
+        }
+        .group-header:hover { background: var(--menu-item-hover); }
+        .group-icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-size: 24px; font-weight: 400; color: var(--icon-color); flex-shrink: 0; }
+        .group-content { flex: 1; }
+        .group-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 4px; letter-spacing: -0.2px; }
+        .group-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; }
+        .group-arrow { font-size: 22px; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
+        .group-header.open .group-arrow { transform: rotate(90deg); }
+        .submenu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .submenu.open { max-height: 1200px; }
+
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 22px 14px 52px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            background: var(--menu-item-bg);
+            color: var(--text);
+        }
+        .submenu-item:hover { background: var(--menu-item-hover); transform: translateX(4px); }
+        .submenu-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 20px; color: var(--icon-color); flex-shrink: 0; }
+        .submenu-content { flex: 1; }
+        .submenu-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+        .submenu-desc { font-size: 0.7rem; color: var(--text-secondary); line-height: 1.3; }
+        .submenu-arrow { font-size: 20px; color: var(--text-secondary); flex-shrink: 0; }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: var(--menu-item-bg);
+            color: var(--text);
+        }
+        .menu-item:hover { background: var(--menu-item-hover); transform: translateX(4px); }
+        .menu-icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-size: 24px; font-weight: 400; color: var(--icon-color); flex-shrink: 0; }
+        .menu-item:hover .menu-icon { color: var(--accent); }
+        .item-content { flex: 1; }
+        .item-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 4px; letter-spacing: -0.2px; }
+        .item-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; }
+        .arrow { font-size: 22px; color: var(--text-secondary); transition: all 0.2s ease; flex-shrink: 0; }
+        .menu-item:hover .arrow { transform: translateX(5px); color: var(--accent); }
+
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            padding: 14px 20px;
+        }
+        .footer p {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-weight: 400;
+        }
+
+        .favorite-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .favorite-btn:hover { transform: scale(1.1); }
+        .favorite-btn.active { color: #facc15; }
+
+        @media (max-width: 550px) {
+            .main-content { padding: 60px 14px 36px; }
+            .container { padding-top: 20px; }
+            .header { margin-top: 40px; padding: 30px 20px 24px; }
+            .header h1 { font-size: 1.3rem; }
+            .group-header { padding: 14px 16px; }
+            .submenu-item { padding: 12px 16px 12px 40px; }
+            .menu-item { padding: 14px 16px; }
+            .group-icon, .menu-icon { width: 40px; height: 40px; font-size: 20px; margin-right: 12px; }
+            .submenu-icon { width: 32px; height: 32px; font-size: 18px; margin-right: 10px; }
+            .splash-content { margin-top: 90px; }
+            .splash-icon { width: 100px; height: 100px; }
+            .splash-title { font-size: 1.6rem; letter-spacing: 3px; }
+            .search-bar { padding: 12px 16px; }
+            .search-input-wrapper { padding: 2px 2px 2px 16px; }
+            .search-input { padding: 10px 0; font-size: 0.9rem; }
+            .progress-wrapper { width: 200px; margin-top: 30px; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .header { animation: fadeInUp 0.4s ease-out 0.2s backwards; }
+    </style>
+</head>
+<body>
+
+<!-- ===== ЗАСТАВКА ===== -->
+<div id="splash" class="splash-screen">
+    <div class="aktt-badge"><span>АКТТ</span></div>
+    <div class="splash-content">
+
+        <div class="splash-title">ФИЗИКА<br>В КАРМАНЕ</div>
+        <div class="splash-subtitle">доступно · просто · понятно</div>
+
+        <div class="progress-wrapper">
+            <div class="progress-track">
+                <div class="progress-fill" id="splashProgress"></div>
+            </div>
+            <div class="progress-label">Загрузка</div>
+            <div class="progress-percent" id="progressPercent">0%</div>
+        </div>
+    </div>
+    <div class="splash-footer"></div>
+</div>
+
+<div class="main-content">
+    <div class="container" style="position: relative;">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Сменить тему" id="themeBtn">🌙</button>
+
+        <div class="header">
+            <h1>ФИЗИКА В КАРМАНЕ</h1>
+            <div class="subtitle">доступно · просто · понятно</div>
+        </div>
+
+        <!-- ===== ПОИСК ===== -->
+        <div class="search-bar">
+            <div class="search-input-wrapper">
+                <span class="search-icon">⌕</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Поиск... например: механика, закон Ньютона, сила" autocomplete="off">
+                <button class="search-clear" id="searchClearBtn" onclick="clearSearch()">✖</button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <div class="menu-card" id="menuCard">
+
+            <!-- ===== ВВЕДЕНИЕ ===== -->
+            <a href="physics-intro-safety.html" class="menu-item" style="border-left: 4px solid var(--accent);">
+                <div class="item-content">
+                    <div class="item-title">Введение</div>
+                    <div class="item-desc">Физика и методы научного познания. Техника безопасности</div>
+                </div>
+                <div class="arrow">›</div>
+            </a>
+
+            <!-- ===== МЕХАНИКА ===== -->
+            <a href="mechanics.html" class="menu-item">
+                <div class="item-content">
+                    <div class="item-title">Механика</div>
+                    <div class="item-desc">Кинематика, динамика, законы сохранения</div>
+                </div>
+                <div class="arrow">›</div>
+            </a>
+
+            <!-- ===== МОЛЕКУЛЯРНАЯ ФИЗИКА ===== -->
+            <a href="molecular-physics.html" class="menu-item">
+                <div class="item-content">
+                    <div class="item-title">Молекулярная физика и термодинамика</div>
+                    <div class="item-desc">Основы МКТ, газовые законы, термодинамика</div>
+                </div>
+                <div class="arrow">›</div>
+            </a>
+
+            <!-- ===== ЭЛЕКТРОДИНАМИКА ===== -->
+            <div class="group-header" onclick="toggleGroup(this)">
+                <div class="group-content">
+                    <div class="group-title">Электродинамика</div>
+                    <div class="group-desc">Электростатика, постоянный ток, магнитное поле</div>
+                </div>
+                <div class="group-arrow">›</div>
+            </div>
+            <div class="submenu">
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Электростатика</div>
+                        <div class="submenu-desc">Закон Кулона, напряжённость, потенциал</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Постоянный ток</div>
+                        <div class="submenu-desc">Закон Ома, мощность, соединения</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Магнитное поле</div>
+                        <div class="submenu-desc">Сила Ампера, сила Лоренца, индукция</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+            </div>
+
+            <!-- ===== КОЛЕБАНИЯ И ВОЛНЫ ===== -->
+            <div class="group-header" onclick="toggleGroup(this)">
+                <div class="group-content">
+                    <div class="group-title">Колебания и волны</div>
+                    <div class="group-desc">Механические и электромагнитные колебания</div>
+                </div>
+                <div class="group-arrow">›</div>
+            </div>
+            <div class="submenu">
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Механические колебания</div>
+                        <div class="submenu-desc">Математический маятник, пружинный маятник</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Электромагнитные колебания</div>
+                        <div class="submenu-desc">Колебательный контур, резонанс</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Волны</div>
+                        <div class="submenu-desc">Длина волны, интерференция, дифракция</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+            </div>
+
+            <!-- ===== ОПТИКА ===== -->
+            <div class="group-header" onclick="toggleGroup(this)">
+                <div class="group-content">
+                    <div class="group-title">Оптика</div>
+                    <div class="group-desc">Геометрическая и волновая оптика</div>
+                </div>
+                <div class="group-arrow">›</div>
+            </div>
+            <div class="submenu">
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Геометрическая оптика</div>
+                        <div class="submenu-desc">Закон отражения, закон преломления, линзы</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Волновая оптика</div>
+                        <div class="submenu-desc">Интерференция, дифракция, дисперсия</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+            </div>
+
+            <!-- ===== КВАНТОВАЯ ФИЗИКА ===== -->
+            <div class="group-header" onclick="toggleGroup(this)">
+                <div class="group-content">
+                    <div class="group-title">Квантовая физика</div>
+                    <div class="group-desc">Фотоэффект, атом, ядерная физика</div>
+                </div>
+                <div class="group-arrow">›</div>
+            </div>
+            <div class="submenu">
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Фотоэффект</div>
+                        <div class="submenu-desc">Законы внешнего фотоэффекта</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+                <a href="#" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Атомная и ядерная физика</div>
+                        <div class="submenu-desc">Радиоактивность, ядерные реакции</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+            </div>
+
+            <!-- ===== ИНСТРУМЕНТЫ ===== -->
+            <div class="group-header" onclick="toggleGroup(this)">
+                <div class="group-icon">⚙</div>
+                <div class="group-content">
+                    <div class="group-title">Инструменты</div>
+                    <div class="group-desc">Калькуляторы и конвертеры</div>
+                </div>
+                <div class="group-arrow">›</div>
+            </div>
+            <div class="submenu">
+                <a href="favorites.html" class="submenu-item">
+                    <div class="submenu-icon">⭐</div>
+                    <div class="submenu-content">
+                        <div class="submenu-title">Избранное</div>
+                        <div class="submenu-desc">Ваши сохранённые страницы</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+                <a href="calculator.html" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Калькулятор</div>
+                        <div class="submenu-desc">Обычный · Инженерный · Программист</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+                <a href="конвертер.html" class="submenu-item">
+                    <div class="submenu-content">
+                        <div class="submenu-title">Конвертер величин</div>
+                        <div class="submenu-desc">Валюта, длина, масса, площадь, температура</div>
+                    </div>
+                    <div class="submenu-arrow">›</div>
+                </a>
+            </div>
+
+            <!-- ===== О ПРИЛОЖЕНИИ ===== -->
+            <a href="about.html" class="menu-item">
+                <div class="menu-icon">ⓘ</div>
+                <div class="item-content">
+                    <div class="item-title">О приложении</div>
+                    <div class="item-desc">Версия, контакты, лицензия</div>
+                </div>
+                <div class="arrow">›</div>
+            </a>
+
+        </div>
+
+        <div class="footer">
+            <p>© Михаил Валентинович Куклин, преподаватель физики АКТТ, 2026.<br>Для личного образовательного использования.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. АНИМАЦИЯ ПРОГРЕСС-БАРА (3.5 СЕКУНДЫ)
+    // ============================================================
+    (function() {
+        const progressBar = document.getElementById('splashProgress');
+        const percentDisplay = document.getElementById('progressPercent');
+        const splash = document.getElementById('splash');
+
+        let progress = 0;
+        const duration = 3500;
+        const startTime = Date.now();
+
+        function updateProgress() {
+            const elapsed = Date.now() - startTime;
+            const rawProgress = Math.min((elapsed / duration) * 100, 100);
+            const t = rawProgress / 100;
+            const eased = 1 - Math.pow(1 - t, 2.5);
+            const currentProgress = Math.round(eased * 100);
+
+            if (progressBar) progressBar.style.width = currentProgress + '%';
+            if (percentDisplay) percentDisplay.textContent = currentProgress + '%';
+
+            if (elapsed < duration) {
+                requestAnimationFrame(updateProgress);
+            } else {
+                if (progressBar) progressBar.style.width = '100%';
+                if (percentDisplay) percentDisplay.textContent = '100%';
+                setTimeout(function() {
+                    if (splash) {
+                        splash.classList.add('fade-out');
+                        setTimeout(function() {
+                            if (splash) splash.remove();
+                            sessionStorage.setItem('splashShown', 'true');
+                        }, 600);
+                    }
+                }, 200);
+            }
+        }
+
+        if (sessionStorage.getItem('splashShown')) {
+            if (splash) splash.remove();
+            return;
+        }
+
+        requestAnimationFrame(updateProgress);
+
+        setTimeout(function() {
+            if (splash && !splash.classList.contains('fade-out')) {
+                if (progressBar) progressBar.style.width = '100%';
+                if (percentDisplay) percentDisplay.textContent = '100%';
+                splash.classList.add('fade-out');
+                setTimeout(function() {
+                    if (splash) splash.remove();
+                    sessionStorage.setItem('splashShown', 'true');
+                }, 600);
+            }
+        }, 4000);
+    })();
+
+    // ============================================================
+    // 2. ДАННЫЕ ДЛЯ ПОИСКА
+    // ============================================================
+    const PHYSICS_DATA = [
+        { "title": "Введение. Физика и методы научного познания", "url": "physics-intro-safety.html", "category": "Введение", "icon": "🔬", "desc": "Физика как наука, методы познания, техника безопасности", "keywords": ["введение", "физика", "наука", "метод", "познание", "безопасность"] },
+        { "title": "Основы кинематики", "url": "kinematics-graphs-freefall.html", "category": "Механика → Кинематика", "icon": "📐", "desc": "Путь, перемещение, скорость, ускорение, графики", "keywords": ["кинематика", "путь", "перемещение", "скорость", "ускорение", "график"] },
+        { "title": "Свободное падение тел", "url": "kinematics-graphs-freefall.html", "category": "Механика → Кинематика", "icon": "🪂", "desc": "Ускорение свободного падения, формулы, графики", "keywords": ["свободное падение", "g", "высота", "время", "падение"] },
+        { "title": "Движение тела, брошенного под углом", "url": "projectile-motion.html", "category": "Механика → Кинематика", "icon": "🎯", "desc": "Параболическое движение, дальность, высота, время", "keywords": ["бросок под углом", "парабола", "дальность", "высота", "баллистика"] },
+        { "title": "Масса. Сила. Силы в природе", "url": "mass-force-forces-in-nature.html", "category": "Механика → Динамика", "icon": "⚖️", "desc": "Масса, сила тяжести, упругости, трения", "keywords": ["масса", "сила", "тяжесть", "трение", "упругость"] },
+        { "title": "Законы Ньютона", "url": "newtons-laws.html", "category": "Механика → Динамика", "icon": "📜", "desc": "Три закона Ньютона, инерция, взаимодействие", "keywords": ["Ньютон", "законы Ньютона", "инерция", "сила", "ускорение"] },
+        { "title": "Закон всемирного тяготения", "url": "gravity-law.html", "category": "Механика → Динамика", "icon": "🌍", "desc": "Закон тяготения, сила тяжести, вес, невесомость", "keywords": ["тяготение", "гравитация", "вес", "невесомость", "Ньютон"] },
+        { "title": "Импульс тела. Закон сохранения импульса", "url": "impulse-conservation.html", "category": "Механика → Законы сохранения", "icon": "🚀", "desc": "Импульс, замкнутая система, реактивное движение", "keywords": ["импульс", "сохранение импульса", "реактивное движение"] },
+        { "title": "Механическая энергия и закон сохранения", "url": "energy-conservation.html", "category": "Механика → Законы сохранения", "icon": "⚡", "desc": "Кинетическая, потенциальная энергия, ЗСЭ, маятник, горка с трением", "keywords": ["энергия", "кинетическая", "потенциальная", "сохранение энергии", "ЗСЭ", "маятник", "горка", "трение", "теплота"] },
+        { "title": "Механика", "url": "mechanics.html", "category": "Механика", "icon": "⚙️", "desc": "Кинематика, динамика, законы сохранения — общий раздел", "keywords": ["механика", "раздел", "кинематика", "динамика", "сохранение"] },
+
+        { "title": "Молекулярная физика и термодинамика", "url": "molecular-physics.html", "category": "Молекулярная физика", "icon": "🌡️", "desc": "Основы МКТ, газовые законы, термодинамика", "keywords": ["молекулярная физика", "термодинамика", "раздел"] },
+        { "title": "Основные положения МКТ", "url": "mkt-basics.html", "category": "Молекулярная физика → Основы МКТ", "icon": "⚛️", "desc": "Три положения МКТ, опытное обоснование, строение газов, жидкостей и твёрдых тел", "keywords": ["МКТ", "молекулярно-кинетическая теория", "броуновское движение", "диффузия", "строение тел", "молекулы", "Авогадро"] },
+        { "title": "Идеальный газ. Основное уравнение МКТ", "url": "ideal-gas.html", "category": "Молекулярная физика → Основы МКТ", "icon": "💨", "desc": "Идеальный газ, основное уравнение МКТ, температура", "keywords": ["идеальный газ", "основное уравнение МКТ", "температура", "Кельвин", "Больцман", "давление газа"] },
+        { "title": "Уравнение состояния идеального газа. Изопроцессы", "url": "gas-laws.html", "category": "Молекулярная физика → Основы МКТ", "icon": "📊", "desc": "Уравнение Менделеева-Клапейрона, газовые законы, изопроцессы", "keywords": ["уравнение состояния", "Менделеев", "Клапейрон", "изопроцессы", "изотермический", "изобарный", "изохорный", "Бойль", "Мариотт", "Гей-Люссак", "Шарль"] },
+        { "title": "Задачи по МКТ с профессиональной направленностью", "url": "mkt-prof-problems.html", "category": "Молекулярная физика → Основы МКТ", "icon": "🔧", "desc": "Сварщик, электрик, автомеханик, машиностроение, ИС", "keywords": ["задачи", "профессиональные", "сварщик", "электрик", "автомеханик", "МКТ"] },
+        { "title": "Внутренняя энергия идеального газа", "url": "internal-energy.html", "category": "Молекулярная физика → Термодинамика", "icon": "🔋", "desc": "Внутренняя энергия, степени свободы, способы изменения", "keywords": ["внутренняя энергия", "степени свободы", "одноатомный", "двухатомный", "многоатомный"] },
+        { "title": "Первое начало термодинамики. Адиабатный процесс", "url": "first-law-thermo.html", "category": "Молекулярная физика → Термодинамика", "icon": "🌡️", "desc": "I начало термодинамики, работа газа, адиабатный процесс", "keywords": ["первое начало", "I начало", "адиабатный", "работа газа", "теплота", "изменение энергии"] },
+        { "title": "КПД тепловых двигателей. Второе начало термодинамики", "url": "heat-engines.html", "category": "Молекулярная физика → Термодинамика", "icon": "🔥", "desc": "Принцип действия тепловых двигателей, КПД, цикл Карно", "keywords": ["КПД", "тепловой двигатель", "второе начало", "цикл Карно", "холодильник"] },
+        { "title": "Задачи по термодинамике с профессиональной направленностью", "url": "thermo-prof-problems.html", "category": "Молекулярная физика → Термодинамика", "icon": "🔧", "desc": "Сварщик, электрик, автомеханик, машиностроение, ИС", "keywords": ["задачи", "профессиональные", "термодинамика", "сварщик", "электрик", "автомеханик"] },
+        { "title": "Свойства паров. Испарение и конденсация", "url": "vapors.html", "category": "Молекулярная физика → Агрегатные состояния", "icon": "💧", "desc": "Пары, испарение, кипение, влажность воздуха", "keywords": ["пары", "испарение", "конденсация", "кипение", "влажность", "насыщенный пар"] },
+        { "title": "Свойства жидкостей. Поверхностное натяжение", "url": "liquids.html", "category": "Молекулярная физика → Агрегатные состояния", "icon": "🌊", "desc": "Поверхностное натяжение, смачивание, капиллярные явления", "keywords": ["жидкости", "поверхностное натяжение", "смачивание", "капилляры", "мениск"] },
+        { "title": "Свойства твёрдых тел. Закон Гука", "url": "solids.html", "category": "Молекулярная физика → Агрегатные состояния", "icon": "💎", "desc": "Кристаллические и аморфные тела, упругие свойства, закон Гука", "keywords": ["твёрдые тела", "кристаллы", "аморфные", "упругость", "закон Гука", "деформация"] },
+        { "title": "Плавление и кристаллизация", "url": "melting.html", "category": "Молекулярная физика → Агрегатные состояния", "icon": "🧊", "desc": "Удельная теплота плавления, фазовые переходы", "keywords": ["плавление", "кристаллизация", "удельная теплота плавления", "фазовый переход"] },
+        { "title": "Задачи по агрегатным состояниям с профессиональной направленностью", "url": "states-prof-problems.html", "category": "Молекулярная физика → Агрегатные состояния", "icon": "🔧", "desc": "Сварщик, электрик, автомеханик, машиностроение, ИС", "keywords": ["задачи", "профессиональные", "агрегатные состояния", "сварщик", "электрик", "автомеханик"] },
+    ];
+
+    let pagesData = [];
+    let searchTimeout;
+
+    function loadPagesData() {
+        pagesData = PHYSICS_DATA;
+        performSearch();
+    }
+
+    // ============================================================
+    // 3. ПОИСК
+    // ============================================================
+    function performSearch() {
+        var query = document.getElementById('searchInput').value.toLowerCase().trim();
+        var resultsContainer = document.getElementById('searchResults');
+        var menuCard = document.getElementById('menuCard');
+
+        if (query === '') {
+            resultsContainer.classList.remove('show');
+            menuCard.style.display = 'block';
+            return;
+        }
+
+        var results = pagesData.filter(function(page) {
+            return page.title.toLowerCase().includes(query) ||
+                   (page.keywords && page.keywords.some(function(kw) { return kw.toLowerCase().includes(query); })) ||
+                   page.category.toLowerCase().includes(query) ||
+                   (page.desc && page.desc.toLowerCase().includes(query));
+        });
+
+        if (results.length === 0) {
+            resultsContainer.innerHTML = '<div class="search-no-results">😕 Ничего не найдено</div>';
+            resultsContainer.classList.add('show');
+            menuCard.style.display = 'none';
+            return;
+        }
+
+        resultsContainer.innerHTML = results.map(function(page) {
+            return '<a href="' + page.url + '" class="search-result-item">' +
+                '<div class="search-result-icon">' + (page.icon || '📄') + '</div>' +
+                '<div class="search-result-content">' +
+                '<div class="search-result-title">' + highlightText(page.title, query) + '</div>' +
+                '<div class="search-result-category">' + page.category + '</div>' +
+                '<div class="search-result-desc">' + (page.desc || '') + '</div>' +
+                '</div>' +
+                '<div class="submenu-arrow">›</div>' +
+                '</a>';
+        }).join('');
+
+        resultsContainer.classList.add('show');
+        menuCard.style.display = 'none';
+    }
+
+    function highlightText(text, query) {
+        if (!query) return text;
+        var regex = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        return text.replace(regex, '<mark style="background: var(--accent); color: white; padding: 0 4px; border-radius: 4px;">$1</mark>');
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchResults').classList.remove('show');
+        document.getElementById('menuCard').style.display = 'block';
+    }
+
+    // ============================================================
+    // 4. ТЕМА
+    // ============================================================
+    (function() {
+        var savedTheme = localStorage.getItem('physicsTheme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.add('light-mode');
+            var btn = document.getElementById('themeBtn');
+            if (btn) btn.textContent = '☀️';
+        }
+    })();
+
+    function toggleTheme() {
+        var html = document.documentElement;
+        var btn = document.getElementById('themeBtn');
+        if (html.classList.contains('light-mode')) {
+            html.classList.remove('light-mode');
+            localStorage.setItem('physicsTheme', 'dark');
+            if (btn) btn.textContent = '🌙';
+        } else {
+            html.classList.add('light-mode');
+            localStorage.setItem('physicsTheme', 'light');
+            if (btn) btn.textContent = '☀️';
+        }
+    }
+
+    // ============================================================
+    // 5. ГРУППЫ МЕНЮ
+    // ============================================================
+    function toggleGroup(header) {
+        header.classList.toggle('open');
+        var submenu = header.nextElementSibling;
+        if (submenu && submenu.classList.contains('submenu')) submenu.classList.toggle('open');
+    }
+
+    (function() {
+        var savedGroups = localStorage.getItem('physicsOpenGroups');
+        if (savedGroups) {
+            var openIndices = JSON.parse(savedGroups);
+            var groups = document.querySelectorAll('.group-header');
+            groups.forEach(function(group, idx) {
+                if (openIndices.includes(idx)) {
+                    group.classList.add('open');
+                    var submenu = group.nextElementSibling;
+                    if (submenu && submenu.classList.contains('submenu')) submenu.classList.add('open');
+                }
+            });
+        }
+    })();
+
+    var allGroups = document.querySelectorAll('.group-header');
+    allGroups.forEach(function(group, idx) {
+        group.addEventListener('click', function() {
+            setTimeout(function() {
+                var openGroups = [];
+                document.querySelectorAll('.group-header').forEach(function(g, i) {
+                    if (g.classList.contains('open')) openGroups.push(i);
+                });
+                localStorage.setItem('physicsOpenGroups', JSON.stringify(openGroups));
+            }, 50);
+        });
+    });
+
+    // ============================================================
+    // 6. ОБРАБОТЧИКИ ПОИСКА
+    // ============================================================
+    document.getElementById('searchInput').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(performSearch, 300);
+    });
+
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            clearTimeout(searchTimeout);
+            performSearch();
+        }
+    });
+
+    // ============================================================
+    // 7. ИЗБРАННОЕ
+    // ============================================================
+    const FAV_KEY = 'physics_favorites';
+    function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}
+    function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}
+    function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}
+    function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}
+    function updateFavoriteBtn(){const btn=document.getElementById('favoriteBtn');if(btn){if(isFavorite()){btn.textContent='★';btn.classList.add('active');}else{btn.textContent='☆';btn.classList.remove('active');}}}
+    updateFavoriteBtn();
+
+    // ============================================================
+    // 8. ИНИЦИАЛИЗАЦИЯ
+    // ============================================================
+    loadPagesData();
+</script>
+</body>
+</html>

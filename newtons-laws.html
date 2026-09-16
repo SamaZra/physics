@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Законы Ньютона — Интерактивные модели</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(46, 204, 113, 0.1);
+            --special-border: #3b82f6;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #3b82f6;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #3b82f6;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --label-bg: rgba(26,45,60,0.85);
+            --label-color: #ffffff;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #2563eb;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #2563eb;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #2563eb;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --label-bg: rgba(255,255,255,0.92);
+            --label-color: #1a2a3f;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
+        .model-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
+        .model-tab { padding: 8px 16px; border-radius: 20px; background: var(--card-bg); color: var(--text-secondary); border: 1px solid var(--border); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.3s; }
+        .model-tab:hover { background: var(--special-border); color: white; border-color: var(--special-border); }
+        .model-tab.active { background: var(--special-border); color: white; border-color: var(--special-border); }
+        .model-container { text-align: center; margin: 16px 0; position: relative; border-radius: 24px; overflow: hidden; background: var(--canvas-bg); box-shadow: 0 4px 12px var(--card-shadow); width: 100%; aspect-ratio: 16 / 9; min-height: 450px; transition: background 0.3s; }
+        .model-container.hidden { display: none; }
+        .model-canvas { display: block; width: 100%; height: 100%; background: transparent; border-radius: 20px; touch-action: none; }
+        .fullscreen-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; border-radius: 50%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 20; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .fullscreen-btn:hover { background: var(--special-border); transform: scale(1.05); }
+        .controls-panel { background: var(--info-bg); border-radius: 16px; padding: 12px 16px; margin: 8px 0 12px 0; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; border: 1px solid var(--border); transition: background 0.3s,border 0.3s; }
+        .control-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .control-group label { color: var(--text); font-size: 0.85rem; font-weight: 600; min-width: 20px; transition: color 0.3s; }
+        .control-group input[type="range"] { width: 120px; height: 6px; -webkit-appearance: none; background: var(--slider-track); border-radius: 3px; outline: none; transition: background 0.3s; }
+        .control-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--slider-thumb); cursor: pointer; border: 2px solid var(--special-border); }
+        .control-group input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--slider-thumb); cursor: pointer; border: 2px solid var(--special-border); }
+        .control-value { color: var(--text); font-size: 0.85rem; font-weight: 600; min-width: 32px; text-align: center; background: var(--input-bg); padding: 2px 8px; border-radius: 12px; transition: color 0.3s,background 0.3s; }
+        .control-label { color: var(--text-secondary); font-size: 0.75rem; transition: color 0.3s; }
+        .btn-action { background: var(--special-border); color: white; border: none; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; min-height: 34px; }
+        .btn-action:hover { transform: scale(1.05); opacity: 0.9; }
+        .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-reset { background: #666; color: white; border: none; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; min-height: 34px; }
+        .btn-reset:hover { transform: scale(1.05); opacity: 0.9; }
+        .info-display { position: absolute; top: 12px; right: 12px; background: var(--label-bg); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 12px; color: var(--label-color); font-size: 0.7rem; z-index: 15; text-align: left; border: 1px solid var(--special-border); box-shadow: 0 2px 10px var(--card-shadow); transition: background 0.3s,color 0.3s,border 0.3s; min-width: 100px; }
+        .info-display div { margin: 2px 0; }
+        .info-display .val { font-weight: 700; color: var(--special-border); }
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:5000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .back-link-wrapper { display: flex; justify-content: center; margin: 16px 0 8px; }
+        .back-link{ display:inline-block; padding:10px 20px; background:var(--special-border); color:white; text-decoration:none; font-weight:bold; border-radius:20px; font-size:0.95rem; transition:background 0.2s; }
+        .back-link:hover{opacity:0.8;}
+        .favorite-btn { position: fixed; bottom: 20px; left: 20px; width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border); cursor: pointer; font-size: 26px; display: flex; align-items: center; justify-content: center; z-index: 1000; color: var(--text-secondary); transition: all 0.2s; backdrop-filter: blur(4px); }
+        .favorite-btn:hover { transform: scale(1.1); }
+        .favorite-btn.active { color: #facc15; }
+        .note-box { background: var(--info-bg); border-left: 4px solid var(--special-border); border-radius: 18px; padding: 16px 18px; margin: 16px 0; font-size: 1rem; line-height: 1.8; color: var(--text); transition: background 0.3s,color 0.3s; }
+        .note-box .important { color: var(--special-border); font-weight: 700; }
+        .force-legend { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: var(--label-bg); backdrop-filter: blur(8px); padding: 4px 14px; border-radius: 20px; color: var(--label-color); font-size: 0.6rem; z-index: 10; display: flex; gap: 16px; align-items: center; border: 1px solid var(--special-border); box-shadow: 0 2px 10px var(--card-shadow); transition: background 0.3s,color 0.3s,border 0.3s; flex-wrap: wrap; justify-content: center; }
+        .force-legend span { display: inline-flex; align-items: center; gap: 4px; }
+        .force-legend .color-dot { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+        .task-block { background: var(--task-bg); border-radius: 18px; padding: 16px 18px; margin: 16px 0; border-left: 4px solid var(--task-border); border: 1px solid var(--border); transition: background 0.3s,border 0.3s; }
+        .task-block .task-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; transition: color 0.3s; }
+        .task-block .task-condition { font-size: 0.95rem; color: var(--text); line-height: 1.8; padding: 10px 14px; background: var(--card-bg); border-radius: 12px; margin-bottom: 12px; transition: color 0.3s,background 0.3s; }
+        .task-block .task-condition strong { color: var(--special-border); }
+        .task-block .task-condition mjx-container { font-size: 1.1rem !important; }
+        .task-given-find { display: flex; flex-wrap: wrap; gap: 20px 40px; padding: 10px 14px; background: var(--card-bg); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); transition: background 0.3s,border 0.3s; }
+        .task-given-find .given { color: var(--given-color); }
+        .task-given-find .find { color: var(--find-color); }
+        .task-given-find .given strong, .task-given-find .find strong { font-weight: 700; font-size: 1rem; }
+        .task-given-find mjx-container { font-size: 1.1rem !important; }
+        .show-solution-btn { background: var(--special-border); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
+        .task-solution { display: none; margin-top: 12px; }
+        .task-solution.open { display: block; }
+        .task-solution .step { padding: 10px 16px; margin: 8px 0; background: var(--card-bg); border-radius: 10px; border-left: 3px solid var(--special-border); font-size: 0.95rem; color: var(--text); line-height: 1.8; overflow-x: auto; transition: background 0.3s,color 0.3s; }
+        .task-solution .step .formula { display: block; text-align: center; font-size: 1.3rem; padding: 6px 0; font-family: 'Times New Roman', serif; font-style: italic; color: var(--special-border); }
+        .task-solution .step .formula mjx-container { font-size: 1.3rem !important; }
+        .task-solution .step .explanation { background: var(--info-bg); padding: 6px 12px; border-radius: 6px; margin: 6px 0; font-style: italic; color: var(--text-secondary); font-size: 0.9rem; border-left: 2px solid var(--special-border); transition: background 0.3s,color 0.3s; }
+        .task-solution .answer { padding: 12px 18px; background: var(--special-border); color: white; border-radius: 12px; font-weight: 700; font-size: 1.15rem; text-align: center; margin-top: 10px; }
+        mjx-container { font-size: 1.2em !important; overflow-x: auto !important; max-width: 100% !important; }
+        .model-container:fullscreen { width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; border-radius: 0; background: var(--canvas-bg) !important; aspect-ratio: auto; }
+        .model-container:fullscreen .model-canvas { width: 100vw; height: 100vh; border-radius: 0; }
+        @media(max-width:700px){
+            .model-container { min-height: 350px; }
+            .fullscreen-btn { width: 38px; height: 38px; font-size: 18px; bottom: 12px; right: 12px; }
+            .controls-panel { flex-direction: column; gap: 10px; align-items: stretch; }
+            .control-group { justify-content: space-between; }
+            .control-group input[type="range"] { width: 100%; max-width: 200px; }
+            .model-tabs { gap: 4px; }
+            .model-tab { padding: 6px 12px; font-size: 0.75rem; }
+            .info-display { font-size: 0.6rem; padding: 4px 10px; min-width: 80px; top: 8px; right: 8px; }
+            .force-legend { font-size: 0.5rem; padding: 3px 10px; gap: 6px; bottom: 8px; }
+            .formula-block { font-size: 0.95rem; padding: 10px 12px; }
+            .formula-block .f { font-size: 1.1rem; }
+            .task-solution .step .formula { font-size: 1.1rem; white-space: normal; }
+            .task-given-find { flex-direction: column; gap: 6px; }
+        }
+        @media(max-width:450px){
+            .model-container { min-height: 260px; }
+            .container { padding: 10px; padding-top: 44px; }
+            h1 { font-size: 1.2rem; }
+            .section-title { font-size: 0.95rem; }
+            .control-group input[type="range"] { max-width: 120px; }
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>📜 Законы Ньютона</h1>
+
+    <!-- Вкладки -->
+    <div class="model-tabs">
+        <div class="model-tab active" data-model="law1" onclick="switchModel('law1')">📌 I закон — Инерция</div>
+        <div class="model-tab" data-model="law2" onclick="switchModel('law2')">📌 II закон — F = ma</div>
+        <div class="model-tab" data-model="law3" onclick="switchModel('law3')">📌 III закон — Действие и противодействие</div>
+    </div>
+
+    <!-- ===== МОДЕЛЬ 1: I ЗАКОН НЬЮТОНА ===== -->
+    <div id="model-law1" class="model-content">
+        <div class="model-container" id="container-law1">
+            <canvas id="canvas-law1" class="model-canvas"></canvas>
+            <button class="fullscreen-btn" id="fs-law1">⛶</button>
+            <div class="info-display">
+                <div>$v$ = <span class="val" id="law1-speed">0.0</span> м/с</div>
+                <div>$a$ = <span class="val" id="law1-accel">0.0</span> м/с²</div>
+                <div>$F_{рез}$ = <span class="val" id="law1-force">0.0</span> Н</div>
+            </div>
+            <div class="force-legend">
+                <span><span class="color-dot" style="background:#ff4444;"></span> $F_{тяги}$</span>
+                <span><span class="color-dot" style="background:#44ff88;"></span> $F_{тр}$</span>
+                <span><span class="color-dot" style="background:#ffaa00;"></span> Тело</span>
+            </div>
+        </div>
+        <div class="controls-panel">
+            <div class="control-group">
+                <label>$F_{тяги}$</label>
+                <input type="range" id="law1-force-slider" min="0" max="20" step="0.5" value="0">
+                <span class="control-value" id="law1-force-value">0.0</span>
+            </div>
+            <div class="control-group">
+                <label>$m$ (кг)</label>
+                <input type="range" id="law1-mass" min="0.5" max="10" step="0.5" value="3">
+                <span class="control-value" id="law1-mass-value">3.0</span>
+            </div>
+            <button class="btn-action" id="law1-push-btn">🚀 Толкнуть</button>
+            <button class="btn-reset" id="law1-reset-btn">⟳ Сброс</button>
+            <span class="control-label">⬤ $F_{тр} = \mu N$, $\mu = 0.15$</span>
+        </div>
+        <div class="def-card">
+            <p><strong>I закон Ньютона (закон инерции):</strong></p>
+            <p>Тело сохраняет состояние покоя или равномерного прямолинейного движения, если равнодействующая всех сил равна нулю.</p>
+            <p><span class="important">Почему при F=3 Н тело разгоняется, а при F=2 Н тормозит?</span></p>
+            <p>В модели есть сила трения $F_{тр} = \mu mg$. При $\mu = 0.15$ и $m = 3$ кг: $F_{тр} = 0.15 \cdot 3 \cdot 9.8 \approx 4.41$ Н.</p>
+            <ul>
+                <li>При $F_{тяги} > F_{тр}$ — тело <span class="important">разгоняется</span> (ускорение положительное).</li>
+                <li>При $F_{тяги} = F_{тр}$ — тело движется <span class="important">равномерно</span> (скорость постоянна).</li>
+                <li>При $F_{тяги} < F_{тр}$ — тело <span class="important">тормозит</span> (ускорение отрицательное).</li>
+                <li>При $F_{тяги} = 0$ — тело останавливается под действием трения (инерция + трение).</li>
+            </ul>
+            <p><span class="important">Инерция</span> проявляется в том, что тело не останавливается мгновенно, а продолжает двигаться, постепенно замедляясь.</p>
+        </div>
+    </div>
+
+    <!-- ===== МОДЕЛЬ 2: II ЗАКОН НЬЮТОНА ===== -->
+    <div id="model-law2" class="model-content" style="display:none;">
+        <div class="model-container" id="container-law2">
+            <canvas id="canvas-law2" class="model-canvas"></canvas>
+            <button class="fullscreen-btn" id="fs-law2">⛶</button>
+            <div class="info-display">
+                <div>$F$ = <span class="val" id="law2-force">0.0</span> Н</div>
+                <div>$a$ = <span class="val" id="law2-accel">0.0</span> м/с²</div>
+                <div>$m$ = <span class="val" id="law2-mass-display">3.0</span> кг</div>
+            </div>
+            <div class="force-legend">
+                <span><span class="color-dot" style="background:#ff4444;"></span> $F$ — сила</span>
+                <span><span class="color-dot" style="background:#44ff88;"></span> $a$ — ускорение</span>
+                <span><span class="color-dot" style="background:#ffaa00;"></span> Тело</span>
+            </div>
+        </div>
+        <div class="controls-panel">
+            <div class="control-group">
+                <label>$F$ (Н)</label>
+                <input type="range" id="law2-force-slider" min="0" max="30" step="0.5" value="10">
+                <span class="control-value" id="law2-force-value">10.0</span>
+            </div>
+            <div class="control-group">
+                <label>$m$ (кг)</label>
+                <input type="range" id="law2-mass" min="0.5" max="10" step="0.5" value="3">
+                <span class="control-value" id="law2-mass-value">3.0</span>
+            </div>
+            <button class="btn-action" id="law2-start-btn">▶ Пуск</button>
+            <button class="btn-reset" id="law2-reset-btn">⟳ Сброс</button>
+            <span class="control-label">⬤ $a = F/m$</span>
+        </div>
+        <div class="def-card">
+            <p><strong>II закон Ньютона:</strong></p>
+            <p>Ускорение тела прямо пропорционально равнодействующей сил и обратно пропорционально его массе.</p>
+            <p><span class="important">$\vec{F} = m\vec{a}$</span></p>
+            <p>Попробуйте изменить силу и массу — ускорение меняется в реальном времени.</p>
+        </div>
+    </div>
+
+    <!-- ===== МОДЕЛЬ 3: III ЗАКОН НЬЮТОНА ===== -->
+    <div id="model-law3" class="model-content" style="display:none;">
+        <div class="model-container" id="container-law3">
+            <canvas id="canvas-law3" class="model-canvas"></canvas>
+            <button class="fullscreen-btn" id="fs-law3">⛶</button>
+            <div class="info-display">
+                <div>$F_{12}$ = <span class="val" id="law3-f12">0.0</span> Н</div>
+                <div>$F_{21}$ = <span class="val" id="law3-f21">0.0</span> Н</div>
+                <div>$a_1$ = <span class="val" id="law3-a1">0.0</span> м/с²</div>
+                <div>$a_2$ = <span class="val" id="law3-a2">0.0</span> м/с²</div>
+            </div>
+            <div class="force-legend">
+                <span><span class="color-dot" style="background:#ff4444;"></span> $F_{12}$ — действие</span>
+                <span><span class="color-dot" style="background:#44ff88;"></span> $F_{21}$ — противодействие</span>
+                <span><span class="color-dot" style="background:#ff8800;"></span> Тело 1</span>
+                <span><span class="color-dot" style="background:#44aaff;"></span> Тело 2</span>
+                <span><span class="color-dot" style="background:#7a95aa;"></span> Пружина</span>
+            </div>
+        </div>
+        <div class="controls-panel">
+            <div class="control-group">
+                <label>$m_1$ (кг)</label>
+                <input type="range" id="law3-m1" min="0.5" max="10" step="0.5" value="2">
+                <span class="control-value" id="law3-m1-value">2.0</span>
+            </div>
+            <div class="control-group">
+                <label>$m_2$ (кг)</label>
+                <input type="range" id="law3-m2" min="0.5" max="10" step="0.5" value="4">
+                <span class="control-value" id="law3-m2-value">4.0</span>
+            </div>
+            <div class="control-group">
+                <label>$F$ (Н)</label>
+                <input type="range" id="law3-force-slider" min="1" max="30" step="0.5" value="10">
+                <span class="control-value" id="law3-force-value">10.0</span>
+            </div>
+            <button class="btn-action" id="law3-push-btn">💥 Оттолкнуть</button>
+            <button class="btn-reset" id="law3-reset-btn">⟳ Сброс</button>
+            <span class="control-label">⬤ $|F_{12}| = |F_{21}|$</span>
+        </div>
+        <div class="def-card">
+            <p><strong>III закон Ньютона:</strong></p>
+            <p>Силы, с которыми два тела действуют друг на друга, равны по модулю, противоположны по направлению и имеют одну природу.</p>
+            <p><span class="important">$\vec{F}_{12} = -\vec{F}_{21}$</span></p>
+            <p>Размер тела зависит от массы — чем больше масса, тем больше тело.</p>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Теория</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>I закон Ньютона (закон инерции):</strong></p>
+                <p>Существуют такие системы отсчёта, называемые <span class="important">инерциальными</span>, относительно которых тело, на которое не действуют силы или их действие скомпенсировано, сохраняет состояние покоя или равномерного прямолинейного движения.</p>
+                <p><strong>II закон Ньютона:</strong></p>
+                <p>Ускорение тела прямо пропорционально равнодействующей сил, приложенных к телу, и обратно пропорционально его массе.</p>
+                <p><span class="important">$\vec{F}_{рез} = m\vec{a}$</span></p>
+                <p><strong>III закон Ньютона:</strong></p>
+                <p>Силы, с которыми два тела действуют друг на друга, равны по модулю, противоположны по направлению и имеют одну природу.</p>
+                <p><span class="important">$\vec{F}_{12} = -\vec{F}_{21}$</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 15 ЗАДАЧ (первые 3 простые, остальные 12 сложнее) ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (15 задач)</div>
+        <div class="section-content">
+
+            <div style="margin:12px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Простые задачи (введение)</div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сила и ускорение</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело массой $m = 2$ кг действует сила $F = 8$ Н. Найдите ускорение тела.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $F = 8$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation">По второму закону Ньютона: $a = \frac{F}{m} = \frac{8}{2} = 4$ м/с².</div>
+                        <span class="formula">$a = 4 \text{ м/с}^2$</span>
+                    </div>
+                    <div class="answer">✅ Ответ: $a = 4$ м/с²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Масса по силе и ускорению</div>
+                <div class="task-condition"><strong>Условие:</strong> Под действием силы $F = 15$ Н тело приобретает ускорение $a = 3$ м/с². Найдите массу тела.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $F = 15$ Н, $a = 3$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation">$m = \frac{F}{a} = \frac{15}{3} = 5$ кг.</div>
+                        <span class="formula">$m = 5 \text{ кг}$</span>
+                    </div>
+                    <div class="answer">✅ Ответ: $m = 5$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Сила трения</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг движется по горизонтальной поверхности. Коэффициент трения $\mu = 0.2$. Найдите силу трения. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $\mu = 0.2$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_{тр}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation">$F_{тр} = \mu mg = 0.2 \cdot 4 \cdot 9.8 = 7.84$ Н.</div>
+                        <span class="formula">$F_{тр} = 7.84 \text{ Н}$</span>
+                    </div>
+                    <div class="answer">✅ Ответ: $F_{тр} = 7.84$ Н</div>
+                </div>
+            </div>
+
+            <div style="margin:20px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Задачи повышенной сложности</div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Движение с трением</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 3$ кг тянут по горизонтальной поверхности с силой $F = 18$ Н. Коэффициент трения $\mu = 0.15$. Найдите ускорение тела. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $F = 18$ Н, $\mu = 0.15$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Сила трения: $F_{тр} = \mu mg = 0.15 \cdot 3 \cdot 9.8 = 4.41$ Н.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> Равнодействующая: $F_{рез} = F - F_{тр} = 18 - 4.41 = 13.59$ Н.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> Ускорение: $a = \frac{F_{рез}}{m} = \frac{13.59}{3} = 4.53$ м/с².</div>
+                        <span class="formula">$a = 4.53 \text{ м/с}^2$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> Сила тяги частично расходуется на преодоление трения. Ускорение создаётся только разностью сил.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $a = 4.53$ м/с²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Торможение автомобиля</div>
+                <div class="task-condition"><strong>Условие:</strong> Автомобиль массой $m = 1200$ кг движется со скоростью $v = 90$ км/ч (25 м/с). Водитель нажимает на тормоз. Сила трения $F_{тр} = 6000$ Н. Найдите время до полной остановки и тормозной путь.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 1200$ кг, $v_0 = 25$ м/с, $F_{тр} = 6000$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t$, $S$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Ускорение (торможение): $a = \frac{F_{тр}}{m} = \frac{6000}{1200} = 5$ м/с².</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> Время остановки: $t = \frac{v_0}{a} = \frac{25}{5} = 5$ с.</div>
+                        <span class="formula">$t = 5 \text{ с}$</span>
+                        <div class="explanation"><strong>Шаг 3.</strong> Тормозной путь: $S = \frac{v_0^2}{2a} = \frac{25^2}{2 \cdot 5} = \frac{625}{10} = 62.5$ м.</div>
+                        <span class="formula">$S = 62.5 \text{ м}$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> При экстренном торможении на сухом асфальте тормозной путь может составлять 60–70 м при скорости 90 км/ч.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $t = 5$ с, $S = 62.5$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Движение по наклонной плоскости</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг находится на наклонной плоскости с углом $\alpha = 30°$ к горизонту. Коэффициент трения $\mu = 0.2$. Найдите ускорение тела, если оно скользит вниз. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $\alpha = 30°$, $\mu = 0.2$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Проекция силы тяжести вдоль плоскости: $F_{\parallel} = mg \sin\alpha = 4 \cdot 9.8 \cdot 0.5 = 19.6$ Н.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> Сила нормальной реакции: $N = mg \cos\alpha = 4 \cdot 9.8 \cdot 0.866 = 33.95$ Н.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> Сила трения: $F_{тр} = \mu N = 0.2 \cdot 33.95 = 6.79$ Н.</div>
+                        <div class="explanation"><strong>Шаг 4.</strong> Равнодействующая: $F_{рез} = F_{\parallel} - F_{тр} = 19.6 - 6.79 = 12.81$ Н.</div>
+                        <div class="explanation"><strong>Шаг 5.</strong> Ускорение: $a = \frac{F_{рез}}{m} = \frac{12.81}{4} \approx 3.20$ м/с².</div>
+                        <span class="formula">$a \approx 3.20 \text{ м/с}^2$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> Тело скользит вниз, так как проекция силы тяжести превышает силу трения.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $a \approx 3.20$ м/с²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Равномерное движение по наклонной плоскости</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг движется равномерно вверх по наклонной плоскости с углом $\alpha = 25°$ к горизонту. Коэффициент трения $\mu = 0.15$. Найдите силу тяги $F$. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $\alpha = 25°$, $\mu = 0.15$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $F_{\parallel} = mg \sin\alpha = 5 \cdot 9.8 \cdot 0.423 = 20.73$ Н.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> $N = mg \cos\alpha = 5 \cdot 9.8 \cdot 0.906 = 44.39$ Н.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> $F_{тр} = \mu N = 0.15 \cdot 44.39 = 6.66$ Н.</div>
+                        <div class="explanation"><strong>Шаг 4.</strong> При равномерном движении $F = F_{\parallel} + F_{тр} = 20.73 + 6.66 = 27.39$ Н.</div>
+                        <span class="formula">$F = 27.39 \text{ Н}$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> Сила тяги должна компенсировать как составляющую силы тяжести, так и силу трения.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $F = 27.39$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Два тела на пружине</div>
+                <div class="task-condition"><strong>Условие:</strong> Два груза массами $m_1 = 2$ кг и $m_2 = 3$ кг подвешены на пружине жёсткостью $k = 80$ Н/м последовательно. Найдите общее удлинение пружины. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $k = 80$ Н/м, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Суммарная масса: $m = m_1 + m_2 = 5$ кг.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> Сила тяжести: $F = mg = 5 \cdot 9.8 = 49$ Н.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> Удлинение: $\Delta x = \frac{F}{k} = \frac{49}{80} = 0.6125$ м.</div>
+                        <span class="formula">$\Delta x = 0.6125 \text{ м} = 61.25 \text{ см}$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> При последовательном соединении пружина растягивается под действием суммарного веса обоих грузов.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $\Delta x = 61.25$ см</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Ускорение связанных тел</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 3$ кг и $m_2 = 5$ кг связаны нитью и лежат на гладкой горизонтальной поверхности. К телу $m_1$ приложена сила $F = 24$ Н. Найдите ускорение системы и силу натяжения нити.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 3$ кг, $m_2 = 5$ кг, $F = 24$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$, $T$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $a = \frac{F}{m_1 + m_2} = \frac{24}{3 + 5} = \frac{24}{8} = 3$ м/с².</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> Сила натяжения нити: $T = m_2 \cdot a = 5 \cdot 3 = 15$ Н.</div>
+                        <span class="formula">$a = 3 \text{ м/с}^2$, $T = 15 \text{ Н}$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> Нить передаёт силу от первого тела ко второму. Сила натяжения равна силе, необходимой для движения второго тела с тем же ускорением.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $a = 3$ м/с², $T = 15$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Третий закон Ньютона — человек и лодка</div>
+                <div class="task-condition"><strong>Условие:</strong> Человек массой $m_1 = 70$ кг отталкивается от лодки массой $m_2 = 140$ кг с силой $F = 60$ Н. Найдите ускорения человека и лодки. Какое расстояние они пройдут за $t = 2$ с, если начальные скорости равны нулю?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 70$ кг, $m_2 = 140$ кг, $F = 60$ Н, $t = 2$ с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a_1$, $a_2$, $S_1$, $S_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $a_1 = \frac{F}{m_1} = \frac{60}{70} \approx 0.857$ м/с².</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> $a_2 = \frac{F}{m_2} = \frac{60}{140} \approx 0.429$ м/с².</div>
+                        <span class="formula">$a_1 \approx 0.857 \text{ м/с}^2$, $a_2 \approx 0.429 \text{ м/с}^2$</span>
+                        <div class="explanation"><strong>Шаг 3.</strong> Путь человека: $S_1 = \frac{a_1 t^2}{2} = \frac{0.857 \cdot 4}{2} = 1.714$ м.</div>
+                        <div class="explanation"><strong>Шаг 4.</strong> Путь лодки: $S_2 = \frac{a_2 t^2}{2} = \frac{0.429 \cdot 4}{2} = 0.858$ м.</div>
+                        <span class="formula">$S_1 \approx 1.71 \text{ м}$, $S_2 \approx 0.86 \text{ м}$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> Человек и лодка движутся в противоположные стороны. Лёгкое тело (человек) получает большее ускорение и проходит большее расстояние.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $a_1 \approx 0.857$ м/с², $a_2 \approx 0.429$ м/с², $S_1 \approx 1.71$ м, $S_2 \approx 0.86$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 11. Сила упругости и ускорение</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружина жёсткостью $k = 100$ Н/м имеет длину в недеформированном состоянии $l_0 = 30$ см. Под действием силы $F = 25$ Н пружина растягивается. Найдите новую длину пружины. Затем к пружине подвешивают груз массой $m = 2$ кг. Найдите удлинение и новую длину пружины. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 100$ Н/м, $l_0 = 0.30$ м, $F = 25$ Н, $m = 2$ кг, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $l_1$, $\Delta x_2$, $l_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <div id="sol11" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $\Delta x_1 = \frac{F}{k} = \frac{25}{100} = 0.25$ м.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> $l_1 = l_0 + \Delta x_1 = 0.30 + 0.25 = 0.55$ м.</div>
+                        <span class="formula">$l_1 = 55 \text{ см}$</span>
+                        <div class="explanation"><strong>Шаг 3.</strong> Сила тяжести груза: $F_{тяж} = mg = 2 \cdot 9.8 = 19.6$ Н.</div>
+                        <div class="explanation"><strong>Шаг 4.</strong> $\Delta x_2 = \frac{F_{тяж}}{k} = \frac{19.6}{100} = 0.196$ м.</div>
+                        <div class="explanation"><strong>Шаг 5.</strong> $l_2 = l_0 + \Delta x_2 = 0.30 + 0.196 = 0.496$ м.</div>
+                        <span class="formula">$\Delta x_2 = 19.6 \text{ см}$, $l_2 = 49.6 \text{ см}$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> При одной и той же силе удлинение прямо пропорционально силе. Чем больше сила, тем больше удлинение.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $l_1 = 55$ см, $\Delta x_2 = 19.6$ см, $l_2 = 49.6$ см</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 12. Сравнение сил трения</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 6$ кг движется по горизонтальной поверхности. Коэффициент трения $\mu = 0.25$. Найдите силу трения. Во сколько раз изменится сила трения, если на тело поставить груз массой $m_2 = 4$ кг? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 6$ кг, $m_2 = 4$ кг, $\mu = 0.25$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_{тр1}$, $F_{тр2}$, $\frac{F_{тр2}}{F_{тр1}}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <div id="sol12" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $F_{тр1} = \mu mg = 0.25 \cdot 6 \cdot 9.8 = 14.7$ Н.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> $m_{общ} = 6 + 4 = 10$ кг.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> $F_{тр2} = \mu m_{общ} g = 0.25 \cdot 10 \cdot 9.8 = 24.5$ Н.</div>
+                        <div class="explanation"><strong>Шаг 4.</strong> $\frac{F_{тр2}}{F_{тр1}} = \frac{24.5}{14.7} = \frac{10}{6} = \frac{5}{3} \approx 1.67$.</div>
+                        <span class="formula">$\frac{F_{тр2}}{F_{тр1}} = \frac{5}{3} \approx 1.67$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> Сила трения прямо пропорциональна силе нормального давления, которая равна весу тела.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $F_{тр1} = 14.7$ Н, $F_{тр2} = 24.5$ Н, $\frac{F_{тр2}}{F_{тр1}} = \frac{5}{3} \approx 1.67$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 13. Силы в лифте</div>
+                <div class="task-condition"><strong>Условие:</strong> Человек массой $m = 60$ кг находится в лифте. Лифт поднимается вверх с ускорением $a = 2$ м/с². Найдите вес человека. С каким ускорением должен двигаться лифт, чтобы человек оказался в состоянии невесомости? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 60$ кг, $a = 2$ м/с², $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $P$, $a_{невес}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <div id="sol13" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> При движении вверх: $P = m(g + a) = 60 \cdot (9.8 + 2) = 60 \cdot 11.8 = 708$ Н.</div>
+                        <span class="formula">$P = 708 \text{ Н}$</span>
+                        <div class="explanation"><strong>Шаг 2.</strong> Невесомость: $P = 0 \Rightarrow m(g - a) = 0 \Rightarrow a = g = 9.8$ м/с².</div>
+                        <span class="formula">$a_{невес} = 9.8 \text{ м/с}^2$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> При подъёме с ускорением вес увеличивается (перегрузка). Невесомость наступает при свободном падении.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $P = 708$ Н, $a_{невес} = 9.8$ м/с²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 14. Разгон и торможение</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 2$ кг движется по горизонтальной поверхности. Сначала на него действует сила $F = 12$ Н в течение $t_1 = 3$ с, затем сила перестаёт действовать. Коэффициент трения $\mu = 0.1$. Найдите максимальную скорость тела и полный путь до остановки. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $F = 12$ Н, $t_1 = 3$ с, $\mu = 0.1$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v_{max}$, $S_{полн}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <div id="sol14" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Сила трения: $F_{тр} = \mu mg = 0.1 \cdot 2 \cdot 9.8 = 1.96$ Н.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> Ускорение при разгоне: $a_1 = \frac{F - F_{тр}}{m} = \frac{12 - 1.96}{2} = 5.02$ м/с².</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> Максимальная скорость: $v_{max} = a_1 \cdot t_1 = 5.02 \cdot 3 = 15.06$ м/с.</div>
+                        <span class="formula">$v_{max} \approx 15.06 \text{ м/с}$</span>
+                        <div class="explanation"><strong>Шаг 4.</strong> Путь при разгоне: $S_1 = \frac{a_1 t_1^2}{2} = \frac{5.02 \cdot 9}{2} = 22.59$ м.</div>
+                        <div class="explanation"><strong>Шаг 5.</strong> Торможение: $a_2 = \frac{F_{тр}}{m} = \frac{1.96}{2} = 0.98$ м/с².</div>
+                        <div class="explanation"><strong>Шаг 6.</strong> Путь при торможении: $S_2 = \frac{v_{max}^2}{2a_2} = \frac{15.06^2}{2 \cdot 0.98} \approx 115.7$ м.</div>
+                        <div class="explanation"><strong>Шаг 7.</strong> Полный путь: $S_{полн} = S_1 + S_2 = 22.59 + 115.7 \approx 138.3$ м.</div>
+                        <span class="formula">$S_{полн} \approx 138.3 \text{ м}$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> Сначала тело разгоняется, затем движется по инерции, постепенно замедляясь под действием силы трения.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $v_{max} \approx 15.06$ м/с, $S_{полн} \approx 138.3$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 15. Комбинированная задача</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 3$ кг лежит на горизонтальной поверхности. К телу приложена сила $F = 15$ Н под углом $\alpha = 30°$ к горизонту. Коэффициент трения $\mu = 0.12$. Найдите ускорение тела. При каком угле $\alpha$ тело начнёт двигаться, если $F = 10$ Н и $\mu = 0.2$? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $F = 15$ Н, $\alpha = 30°$, $\mu = 0.12$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$, $\alpha_{крит}$ (для $F = 10$ Н, $\mu = 0.2$)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <div id="sol15" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $F_x = F \cos\alpha = 15 \cdot 0.866 = 12.99$ Н.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> $F_y = F \sin\alpha = 15 \cdot 0.5 = 7.5$ Н.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> $N = mg - F_y = 3 \cdot 9.8 - 7.5 = 29.4 - 7.5 = 21.9$ Н.</div>
+                        <div class="explanation"><strong>Шаг 4.</strong> $F_{тр} = \mu N = 0.12 \cdot 21.9 = 2.628$ Н.</div>
+                        <div class="explanation"><strong>Шаг 5.</strong> $a = \frac{F_x - F_{тр}}{m} = \frac{12.99 - 2.628}{3} = \frac{10.362}{3} \approx 3.45$ м/с².</div>
+                        <span class="formula">$a \approx 3.45 \text{ м/с}^2$</span>
+                        <div class="explanation"><strong>Шаг 6.</strong> Для $F = 10$ Н, $\mu = 0.2$: $10 \cos\alpha + 2 \sin\alpha > 5.88$.</div>
+                        <div class="explanation">При $\alpha = 60°$: $10 \cdot 0.5 + 2 \cdot 0.866 = 6.732 > 5.88$.</div>
+                        <div class="explanation">При $\alpha = 80°$: $10 \cdot 0.174 + 2 \cdot 0.985 = 3.71 < 5.88$.</div>
+                        <div class="explanation">Решая $10 \cos\alpha + 2 \sin\alpha = 5.88$, получаем $\alpha_{крит} \approx 65°$.</div>
+                        <span class="formula">$\alpha_{крит} \approx 65°$</span>
+                        <div class="explanation"><strong>💡 Пояснение:</strong> При увеличении угла горизонтальная составляющая силы уменьшается, а вертикальная составляющая уменьшает силу нормальной реакции.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $a \approx 3.45$ м/с², $\alpha_{крит} \approx 65°$</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="mechanics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}function updateFavoriteBtn(){const btn=document.getElementById('favoriteBtn');if(btn){if(isFavorite()){btn.textContent='★';btn.classList.add('active');}else{btn.textContent='☆';btn.classList.remove('active');}}}updateFavoriteBtn();
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-law1').style.display = model === 'law1' ? 'block' : 'none';
+        document.getElementById('model-law2').style.display = model === 'law2' ? 'block' : 'none';
+        document.getElementById('model-law3').style.display = model === 'law3' ? 'block' : 'none';
+        setTimeout(() => {
+            if (typeof window.buildLaw1 === 'function') window.buildLaw1();
+            if (typeof window.buildLaw2 === 'function') window.buildLaw2();
+            if (typeof window.buildLaw3 === 'function') window.buildLaw3();
+        }, 100);
+    }
+</script>
+
+<!-- 3D-модели -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    // ===== МОДЕЛЬ 1 =====
+    (function() {
+        const container = document.getElementById('container-law1');
+        const canvas = document.getElementById('canvas-law1');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+        camera.position.set(2, 2.5, 8);
+        camera.lookAt(0, 0.3, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.65rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function createArrow(from, to, color, thickness = 2) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                new THREE.LineBasicMaterial({ color, linewidth: thickness })
+            );
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.06, 0.14, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.3) })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.07)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const forceSlider = document.getElementById('law1-force-slider');
+        const massSlider = document.getElementById('law1-mass');
+        const forceVal = document.getElementById('law1-force-value');
+        const massVal = document.getElementById('law1-mass-value');
+        const speedDisplay = document.getElementById('law1-speed');
+        const accelDisplay = document.getElementById('law1-accel');
+        const forceDisplay = document.getElementById('law1-force');
+        const pushBtn = document.getElementById('law1-push-btn');
+        const resetBtn = document.getElementById('law1-reset-btn');
+
+        let box = null;
+        let ground = null;
+        let dynamicObjects = [];
+        let velocity = 0;
+        let position = -3.0;
+        let isMoving = false;
+        let friction = 0.15;
+        const ROAD_LEFT = -3.2;
+        const ROAD_RIGHT = 3.2;
+        const BOX_HALF = 0.3;
+
+        function clearDynamicObjects() {
+            dynamicObjects.forEach(obj => {
+                if (obj.parent) obj.parent.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) obj.material.dispose();
+            });
+            dynamicObjects = [];
+        }
+
+        function buildLaw1Scene() {
+            clearDynamicObjects();
+
+            if (box) { group.remove(box); box.geometry.dispose(); box.material.dispose(); box = null; }
+            if (ground) { group.remove(ground); ground.geometry.dispose(); ground.material.dispose(); ground = null; }
+
+            const mass = parseFloat(massSlider.value);
+            massVal.textContent = mass.toFixed(1);
+            const force = parseFloat(forceSlider.value);
+            forceVal.textContent = force.toFixed(1);
+
+            const groundGeo = new THREE.BoxGeometry(8, 0.08, 1.5);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x446688, transparent: true, opacity: 0.4 });
+            ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.position.set(0, -0.04, 0);
+            group.add(ground);
+
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xff4444, transparent: true, opacity: 0.3 });
+            const wall1 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.2, 1.5), wallMat);
+            wall1.position.set(ROAD_LEFT - 0.1, 0.1, 0);
+            group.add(wall1);
+            const wall2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.2, 1.5), wallMat);
+            wall2.position.set(ROAD_RIGHT + 0.1, 0.1, 0);
+            group.add(wall2);
+
+            const boxMat = new THREE.MeshStandardMaterial({
+                color: 0xffaa00,
+                roughness: 0.5,
+                metalness: 0.1
+            });
+            box = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.4, 0.5), boxMat);
+            box.position.set(position, 0.2, 0);
+            group.add(box);
+
+            const frictionForce = mass * 9.8 * friction;
+
+            if (force > 0.1 && position < ROAD_RIGHT - BOX_HALF) {
+                const forceLen = Math.min(force * 0.02, 1.2);
+                const forceEnd = new THREE.Vector3(position + 0.3 + forceLen, 0.2, 0);
+                const forceArrow = createArrow(new THREE.Vector3(position + 0.3, 0.2, 0), forceEnd, 0xff4444);
+                group.add(forceArrow);
+                dynamicObjects.push(forceArrow);
+                const fLabel = makeLabel('F', '#ff4444', new THREE.Vector3(position + 0.3 + forceLen * 0.5, 0.45, 0), '0.7rem');
+                group.add(fLabel);
+                dynamicObjects.push(fLabel);
+            }
+
+            if (Math.abs(velocity) > 0.01 || force < frictionForce) {
+                const fricLen = Math.min(frictionForce * 0.02, 0.8);
+                const fricEnd = new THREE.Vector3(position - 0.3 - fricLen, 0.2, 0);
+                const fricArrow = createArrow(new THREE.Vector3(position - 0.3, 0.2, 0), fricEnd, 0x44ff88);
+                group.add(fricArrow);
+                dynamicObjects.push(fricArrow);
+                const fLabel = makeLabel('Fтр', '#44ff88', new THREE.Vector3(position - 0.3 - fricLen * 0.5, 0.45, 0), '0.6rem');
+                group.add(fLabel);
+                dynamicObjects.push(fLabel);
+            }
+
+            const vLabel = makeLabel('v = ' + velocity.toFixed(2) + ' м/с', '#ffaa00', new THREE.Vector3(position, 0.7, 0), '0.7rem');
+            group.add(vLabel);
+            dynamicObjects.push(vLabel);
+
+            const accel = (force - (velocity > 0.01 ? frictionForce : 0)) / mass;
+            speedDisplay.textContent = velocity.toFixed(2);
+            accelDisplay.textContent = accel.toFixed(2);
+            forceDisplay.textContent = force.toFixed(1);
+        }
+
+        function updateLaw1() {
+            const mass = parseFloat(massSlider.value);
+            const force = parseFloat(forceSlider.value);
+            const frictionForce = mass * 9.8 * friction;
+
+            if (position >= ROAD_RIGHT - BOX_HALF) {
+                position = ROAD_RIGHT - BOX_HALF;
+                velocity = 0;
+                isMoving = false;
+                buildLaw1Scene();
+                return;
+            }
+            if (position <= ROAD_LEFT + BOX_HALF && velocity < 0) {
+                position = ROAD_LEFT + BOX_HALF;
+                velocity = 0;
+                isMoving = false;
+                buildLaw1Scene();
+                return;
+            }
+
+            let netForce = force;
+            if (velocity > 0.01) netForce -= frictionForce;
+            else if (velocity < -0.01) netForce += frictionForce;
+            else {
+                if (force < frictionForce) netForce = 0;
+                else netForce = force - frictionForce;
+            }
+
+            const accel = netForce / mass;
+            velocity += accel * 0.016;
+            position += velocity * 0.016;
+
+            if (force < 0.1 && Math.abs(velocity) < 0.001) {
+                velocity = 0;
+                isMoving = false;
+            }
+
+            buildLaw1Scene();
+        }
+
+        window.buildLaw1 = function() {
+            position = ROAD_LEFT + BOX_HALF;
+            velocity = 0;
+            isMoving = false;
+            buildLaw1Scene();
+        };
+
+        pushBtn.addEventListener('click', () => {
+            const force = parseFloat(forceSlider.value);
+            const mass = parseFloat(massSlider.value);
+            const frictionForce = mass * 9.8 * friction;
+            if (force > frictionForce && position < ROAD_RIGHT - BOX_HALF) {
+                isMoving = true;
+                if (velocity < 0.01) velocity = 0.3;
+            } else if (force > 0.1) {
+                isMoving = true;
+                if (velocity < 0.01) velocity = 0.2;
+            } else {
+                isMoving = true;
+                velocity = 0.5;
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            isMoving = false;
+            velocity = 0;
+            position = ROAD_LEFT + BOX_HALF;
+            buildLaw1Scene();
+        });
+
+        forceSlider.addEventListener('input', () => { if (!isMoving) buildLaw1Scene(); });
+        massSlider.addEventListener('input', () => { if (!isMoving) buildLaw1Scene(); });
+
+        document.getElementById('fs-law1').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); } else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 + 0.25;
+        controls.minPolarAngle = Math.PI / 2 - 0.25;
+        controls.target.set(0, 0.3, 0);
+        controls.update();
+
+        window.buildLaw1();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            if (isMoving) updateLaw1();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+
+    // ===== МОДЕЛЬ 2 =====
+    (function() {
+        const container = document.getElementById('container-law2');
+        const canvas = document.getElementById('canvas-law2');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+        camera.position.set(2, 2.5, 8);
+        camera.lookAt(0, 0.3, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.65rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function createArrow(from, to, color, thickness = 2) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                new THREE.LineBasicMaterial({ color, linewidth: thickness })
+            );
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.06, 0.14, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.3) })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.07)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const forceSlider = document.getElementById('law2-force-slider');
+        const massSlider = document.getElementById('law2-mass');
+        const forceVal = document.getElementById('law2-force-value');
+        const massVal = document.getElementById('law2-mass-value');
+        const forceDisplay = document.getElementById('law2-force');
+        const accelDisplay = document.getElementById('law2-accel');
+        const massDisplay = document.getElementById('law2-mass-display');
+        const startBtn = document.getElementById('law2-start-btn');
+        const resetBtn = document.getElementById('law2-reset-btn');
+
+        let box = null;
+        let ground = null;
+        let dynamicObjects = [];
+        let position = -3.0;
+        let velocity = 0;
+        let isRunning = false;
+        const ROAD_LEFT = -3.2;
+        const ROAD_RIGHT = 3.2;
+        const BOX_HALF = 0.3;
+
+        function clearDynamicObjects() {
+            dynamicObjects.forEach(obj => {
+                if (obj.parent) obj.parent.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) obj.material.dispose();
+            });
+            dynamicObjects = [];
+        }
+
+        function buildLaw2Scene() {
+            clearDynamicObjects();
+
+            if (box) { group.remove(box); box.geometry.dispose(); box.material.dispose(); box = null; }
+            if (ground) { group.remove(ground); ground.geometry.dispose(); ground.material.dispose(); ground = null; }
+
+            const mass = parseFloat(massSlider.value);
+            const force = parseFloat(forceSlider.value);
+            const accel = force / mass;
+
+            massVal.textContent = mass.toFixed(1);
+            forceVal.textContent = force.toFixed(1);
+            forceDisplay.textContent = force.toFixed(1);
+            accelDisplay.textContent = accel.toFixed(2);
+            massDisplay.textContent = mass.toFixed(1);
+
+            const groundGeo = new THREE.BoxGeometry(8, 0.08, 1.5);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x446688, transparent: true, opacity: 0.4 });
+            ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.position.set(0, -0.04, 0);
+            group.add(ground);
+
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xff4444, transparent: true, opacity: 0.3 });
+            const wall1 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.2, 1.5), wallMat);
+            wall1.position.set(ROAD_LEFT - 0.1, 0.1, 0);
+            group.add(wall1);
+            const wall2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.2, 1.5), wallMat);
+            wall2.position.set(ROAD_RIGHT + 0.1, 0.1, 0);
+            group.add(wall2);
+
+            const boxMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, roughness: 0.5 });
+            box = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.4, 0.5), boxMat);
+            box.position.set(position, 0.2, 0);
+            group.add(box);
+
+            if (force > 0.1 && position < ROAD_RIGHT - BOX_HALF) {
+                const forceLen = Math.min(force * 0.02, 1.2);
+                const fEnd = new THREE.Vector3(position + 0.3 + forceLen, 0.2, 0);
+                const fArrow = createArrow(new THREE.Vector3(position + 0.3, 0.2, 0), fEnd, 0xff4444);
+                group.add(fArrow);
+                dynamicObjects.push(fArrow);
+                const fLabel = makeLabel('F = ' + force.toFixed(1) + ' Н', '#ff4444', new THREE.Vector3(position + 0.3 + forceLen * 0.5, 0.5, 0), '0.7rem');
+                group.add(fLabel);
+                dynamicObjects.push(fLabel);
+            }
+
+            if (isRunning || accel > 0.1) {
+                const accelLen = Math.min(accel * 0.04, 1.2);
+                const aEnd = new THREE.Vector3(position + 0.3 + accelLen, 0.05, 0);
+                const aArrow = createArrow(new THREE.Vector3(position + 0.3, 0.05, 0), aEnd, 0x44ff88);
+                group.add(aArrow);
+                dynamicObjects.push(aArrow);
+                const aLabel = makeLabel('a = ' + accel.toFixed(2) + ' м/с²', '#44ff88', new THREE.Vector3(position + 0.3 + accelLen * 0.5, -0.2, 0), '0.7rem');
+                group.add(aLabel);
+                dynamicObjects.push(aLabel);
+            }
+
+            const vLabel = makeLabel('v = ' + velocity.toFixed(2) + ' м/с', '#ffaa00', new THREE.Vector3(position, 0.7, 0), '0.7rem');
+            group.add(vLabel);
+            dynamicObjects.push(vLabel);
+        }
+
+        function updateLaw2() {
+            const mass = parseFloat(massSlider.value);
+            const force = parseFloat(forceSlider.value);
+            const accel = force / mass;
+
+            if (position >= ROAD_RIGHT - BOX_HALF) {
+                position = ROAD_RIGHT - BOX_HALF;
+                velocity = 0;
+                isRunning = false;
+                startBtn.textContent = '▶ Пуск';
+                buildLaw2Scene();
+                return;
+            }
+
+            velocity += accel * 0.016;
+            position += velocity * 0.016;
+
+            if (force < 0.1 && Math.abs(velocity) < 0.001) {
+                velocity = 0;
+                isRunning = false;
+                startBtn.textContent = '▶ Пуск';
+            }
+
+            buildLaw2Scene();
+        }
+
+        window.buildLaw2 = function() {
+            position = ROAD_LEFT + BOX_HALF;
+            velocity = 0;
+            isRunning = false;
+            startBtn.textContent = '▶ Пуск';
+            buildLaw2Scene();
+        };
+
+        startBtn.addEventListener('click', () => {
+            const force = parseFloat(forceSlider.value);
+            if (position >= ROAD_RIGHT - BOX_HALF) {
+                position = ROAD_LEFT + BOX_HALF;
+                velocity = 0;
+            }
+            if (isRunning) {
+                isRunning = false;
+                startBtn.textContent = '▶ Продолжить';
+            } else {
+                isRunning = true;
+                startBtn.textContent = '⏹ Стоп';
+                if (velocity < 0.01 && position < 0.1) velocity = 0.1;
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            isRunning = false;
+            startBtn.textContent = '▶ Пуск';
+            position = ROAD_LEFT + BOX_HALF;
+            velocity = 0;
+            buildLaw2Scene();
+        });
+
+        forceSlider.addEventListener('input', () => { if (!isRunning) buildLaw2Scene(); });
+        massSlider.addEventListener('input', () => { if (!isRunning) buildLaw2Scene(); });
+
+        document.getElementById('fs-law2').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); } else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 + 0.25;
+        controls.minPolarAngle = Math.PI / 2 - 0.25;
+        controls.target.set(0, 0.3, 0);
+        controls.update();
+
+        window.buildLaw2();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            if (isRunning) updateLaw2();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+
+    // ===== МОДЕЛЬ 3 =====
+    (function() {
+        const container = document.getElementById('container-law3');
+        const canvas = document.getElementById('canvas-law3');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+        camera.position.set(0, 2, 10);
+        camera.lookAt(0, 0.3, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.65rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function createArrow(from, to, color, thickness = 2) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                new THREE.LineBasicMaterial({ color, linewidth: thickness })
+            );
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.06, 0.14, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.3) })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.07)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        function createSpring(start, end, coils = 10, radius = 0.12, color = 0xffffff) {
+            const group = new THREE.Group();
+            const dir = end.clone().sub(start);
+            const length = dir.length();
+            if (length < 0.01) return group;
+            dir.normalize();
+
+            const perp = new THREE.Vector3(0, 0, 1);
+            if (Math.abs(dir.dot(perp)) > 0.99) {
+                perp.set(1, 0, 0);
+            }
+            const right = new THREE.Vector3().crossVectors(dir, perp).normalize();
+            const up = new THREE.Vector3().crossVectors(right, dir).normalize();
+
+            const points = [];
+            const steps = coils * 2;
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const pos = start.clone().add(dir.clone().multiplyScalar(t * length));
+                const angle = t * coils * 2 * Math.PI;
+                const offset = right.clone().multiplyScalar(radius * Math.cos(angle))
+                    .add(up.clone().multiplyScalar(radius * Math.sin(angle)));
+                pos.add(offset);
+                points.push(pos);
+            }
+
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ color, linewidth: 1 });
+            const line = new THREE.Line(geometry, material);
+            group.add(line);
+            return group;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const m1Slider = document.getElementById('law3-m1');
+        const m2Slider = document.getElementById('law3-m2');
+        const forceSlider = document.getElementById('law3-force-slider');
+        const m1Val = document.getElementById('law3-m1-value');
+        const m2Val = document.getElementById('law3-m2-value');
+        const forceVal = document.getElementById('law3-force-value');
+        const f12Display = document.getElementById('law3-f12');
+        const f21Display = document.getElementById('law3-f21');
+        const a1Display = document.getElementById('law3-a1');
+        const a2Display = document.getElementById('law3-a2');
+        const pushBtn = document.getElementById('law3-push-btn');
+        const resetBtn = document.getElementById('law3-reset-btn');
+
+        let box1 = null, box2 = null;
+        let springGroup = null;
+        let ground = null;
+        let dynamicObjects = [];
+        let pos1 = -1.2, pos2 = 1.2;
+        let vel1 = 0, vel2 = 0;
+        let phase = 'idle';
+        let pushTimer = 0;
+
+        const COLOR1 = 0xff8800;
+        const COLOR2 = 0x44aaff;
+
+        function clearDynamicObjects() {
+            dynamicObjects.forEach(obj => {
+                if (obj.parent) obj.parent.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) obj.material.dispose();
+            });
+            dynamicObjects = [];
+        }
+
+        function buildLaw3Scene() {
+            clearDynamicObjects();
+
+            if (box1) { group.remove(box1); box1.geometry.dispose(); box1.material.dispose(); box1 = null; }
+            if (box2) { group.remove(box2); box2.geometry.dispose(); box2.material.dispose(); box2 = null; }
+            if (springGroup) { group.remove(springGroup); springGroup = null; }
+            if (ground) { group.remove(ground); ground.geometry.dispose(); ground.material.dispose(); ground = null; }
+
+            const m1 = parseFloat(m1Slider.value);
+            const m2 = parseFloat(m2Slider.value);
+            const F = parseFloat(forceSlider.value);
+
+            m1Val.textContent = m1.toFixed(1);
+            m2Val.textContent = m2.toFixed(1);
+            forceVal.textContent = F.toFixed(1);
+            f12Display.textContent = F.toFixed(1);
+            f21Display.textContent = F.toFixed(1);
+
+            const a1 = F / m1;
+            const a2 = F / m2;
+            a1Display.textContent = a1.toFixed(2);
+            a2Display.textContent = a2.toFixed(2);
+
+            const groundGeo = new THREE.BoxGeometry(8, 0.08, 1.5);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x446688, transparent: true, opacity: 0.4 });
+            ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.position.set(0, -0.04, 0);
+            group.add(ground);
+
+            const size1 = 0.25 + (m1 / 10) * 0.55;
+            const size2 = 0.25 + (m2 / 10) * 0.55;
+            const height1 = 0.2 + (m1 / 10) * 0.4;
+            const height2 = 0.2 + (m2 / 10) * 0.4;
+
+            const boxMat1 = new THREE.MeshStandardMaterial({ color: COLOR1, roughness: 0.4, metalness: 0.1 });
+            box1 = new THREE.Mesh(new THREE.BoxGeometry(size1, height1, 0.5), boxMat1);
+            box1.position.set(pos1, height1 / 2, 0);
+            group.add(box1);
+
+            const boxMat2 = new THREE.MeshStandardMaterial({ color: COLOR2, roughness: 0.4, metalness: 0.1 });
+            box2 = new THREE.Mesh(new THREE.BoxGeometry(size2, height2, 0.5), boxMat2);
+            box2.position.set(pos2, height2 / 2, 0);
+            group.add(box2);
+
+            const m1Label = makeLabel('m₁=' + m1.toFixed(1) + 'кг', '#ff8800', new THREE.Vector3(pos1, -0.4, 0), '0.6rem');
+            group.add(m1Label);
+            dynamicObjects.push(m1Label);
+            const m2Label = makeLabel('m₂=' + m2.toFixed(1) + 'кг', '#44aaff', new THREE.Vector3(pos2, -0.4, 0), '0.6rem');
+            group.add(m2Label);
+            dynamicObjects.push(m2Label);
+
+            const springStart = new THREE.Vector3(pos1 + size1 / 2, 0.15, 0);
+            const springEnd = new THREE.Vector3(pos2 - size2 / 2, 0.15, 0);
+            const spring = createSpring(springStart, springEnd, 8, 0.08, 0x7a95aa);
+            group.add(spring);
+            springGroup = spring;
+
+            if (phase === 'pushing' || phase === 'flying') {
+                const forceLen = Math.min(F * 0.03, 1.2);
+
+                const f12End = new THREE.Vector3(pos1 - size1 / 2 - forceLen, height1 / 2, 0);
+                const f12Arrow = createArrow(new THREE.Vector3(pos1 - size1 / 2, height1 / 2, 0), f12End, 0xff4444);
+                group.add(f12Arrow);
+                dynamicObjects.push(f12Arrow);
+                const f12Label = makeLabel('F₁₂', '#ff4444', new THREE.Vector3(pos1 - size1 / 2 - forceLen * 0.5, height1 / 2 + 0.25, 0), '0.7rem');
+                group.add(f12Label);
+                dynamicObjects.push(f12Label);
+
+                const f21End = new THREE.Vector3(pos2 + size2 / 2 + forceLen, height2 / 2, 0);
+                const f21Arrow = createArrow(new THREE.Vector3(pos2 + size2 / 2, height2 / 2, 0), f21End, 0x44ff88);
+                group.add(f21Arrow);
+                dynamicObjects.push(f21Arrow);
+                const f21Label = makeLabel('F₂₁', '#44ff88', new THREE.Vector3(pos2 + size2 / 2 + forceLen * 0.5, height2 / 2 + 0.25, 0), '0.7rem');
+                group.add(f21Label);
+                dynamicObjects.push(f21Label);
+
+                const eqLabel = makeLabel('|F₁₂| = |F₂₁| = ' + F.toFixed(1) + ' Н', '#ffff44', new THREE.Vector3(0, 0.9, 0), '0.8rem');
+                group.add(eqLabel);
+                dynamicObjects.push(eqLabel);
+
+                if (phase === 'flying') {
+                    const a1Len = Math.min(a1 * 0.03, 0.8);
+                    const a2Len = Math.min(a2 * 0.03, 0.8);
+
+                    const a1End = new THREE.Vector3(pos1 - size1 / 2 - a1Len, -0.05, 0);
+                    const a1Arrow = createArrow(new THREE.Vector3(pos1 - size1 / 2, -0.05, 0), a1End, 0xff8800);
+                    group.add(a1Arrow);
+                    dynamicObjects.push(a1Arrow);
+                    const a1Label2 = makeLabel('a₁=' + a1.toFixed(2), '#ff8800', new THREE.Vector3(pos1 - size1 / 2 - a1Len * 0.5, -0.3, 0), '0.55rem');
+                    group.add(a1Label2);
+                    dynamicObjects.push(a1Label2);
+
+                    const a2End = new THREE.Vector3(pos2 + size2 / 2 + a2Len, -0.05, 0);
+                    const a2Arrow = createArrow(new THREE.Vector3(pos2 + size2 / 2, -0.05, 0), a2End, 0x44aaff);
+                    group.add(a2Arrow);
+                    dynamicObjects.push(a2Arrow);
+                    const a2Label2 = makeLabel('a₂=' + a2.toFixed(2), '#44aaff', new THREE.Vector3(pos2 + size2 / 2 + a2Len * 0.5, -0.3, 0), '0.55rem');
+                    group.add(a2Label2);
+                    dynamicObjects.push(a2Label2);
+                }
+            }
+
+            if (phase === 'idle') {
+                const stateLabel = makeLabel('⏸ Пружина сжата', '#7a95aa', new THREE.Vector3(0, 0.5, 0), '0.7rem');
+                group.add(stateLabel);
+                dynamicObjects.push(stateLabel);
+            } else if (phase === 'pushing') {
+                const stateLabel = makeLabel('⚡ Разжимается...', '#ffff44', new THREE.Vector3(0, 0.5, 0), '0.7rem');
+                group.add(stateLabel);
+                dynamicObjects.push(stateLabel);
+            } else if (phase === 'flying') {
+                const stateLabel = makeLabel('🚀 Разлетаются!', '#1a7a3a', new THREE.Vector3(0, 0.5, 0), '0.7rem');
+                group.add(stateLabel);
+                dynamicObjects.push(stateLabel);
+            }
+        }
+
+        function updateLaw3() {
+            const m1 = parseFloat(m1Slider.value);
+            const m2 = parseFloat(m2Slider.value);
+            const F = parseFloat(forceSlider.value);
+            const a1 = F / m1;
+            const a2 = F / m2;
+
+            if (phase === 'pushing') {
+                pushTimer += 0.016;
+                if (pushTimer > 0.3) {
+                    phase = 'flying';
+                    vel1 = -a1 * 0.4;
+                    vel2 = a2 * 0.4;
+                    pushTimer = 0;
+                }
+            } else if (phase === 'flying') {
+                vel1 -= a1 * 0.016;
+                vel2 += a2 * 0.016;
+                pos1 += vel1 * 0.016;
+                pos2 += vel2 * 0.016;
+
+                if (pos1 < -3.5) { pos1 = -3.5; vel1 = 0; }
+                if (pos2 > 3.5) { pos2 = 3.5; vel2 = 0; }
+
+                if (Math.abs(vel1) < 0.001 && Math.abs(vel2) < 0.001) {
+                    phase = 'idle';
+                    pushBtn.textContent = '💥 Оттолкнуть';
+                }
+            }
+
+            buildLaw3Scene();
+        }
+
+        window.buildLaw3 = function() {
+            pos1 = -1.2;
+            pos2 = 1.2;
+            vel1 = 0;
+            vel2 = 0;
+            phase = 'idle';
+            pushTimer = 0;
+            pushBtn.textContent = '💥 Оттолкнуть';
+            buildLaw3Scene();
+        };
+
+        pushBtn.addEventListener('click', () => {
+            if (phase === 'idle') {
+                phase = 'pushing';
+                pushTimer = 0;
+                pos1 = -1.2;
+                pos2 = 1.2;
+                vel1 = 0;
+                vel2 = 0;
+                pushBtn.textContent = '⏳ Разжимаем...';
+                buildLaw3Scene();
+            } else {
+                phase = 'idle';
+                pos1 = -1.2;
+                pos2 = 1.2;
+                vel1 = 0;
+                vel2 = 0;
+                pushBtn.textContent = '💥 Оттолкнуть';
+                buildLaw3Scene();
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            phase = 'idle';
+            pos1 = -1.2;
+            pos2 = 1.2;
+            vel1 = 0;
+            vel2 = 0;
+            pushTimer = 0;
+            pushBtn.textContent = '💥 Оттолкнуть';
+            buildLaw3Scene();
+        });
+
+        m1Slider.addEventListener('input', () => { if (phase === 'idle') buildLaw3Scene(); });
+        m2Slider.addEventListener('input', () => { if (phase === 'idle') buildLaw3Scene(); });
+        forceSlider.addEventListener('input', () => { if (phase === 'idle') buildLaw3Scene(); });
+
+        document.getElementById('fs-law3').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); } else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 + 0.25;
+        controls.minPolarAngle = Math.PI / 2 - 0.25;
+        controls.target.set(0, 0.3, 0);
+        controls.update();
+
+        window.buildLaw3();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            if (phase !== 'idle') updateLaw3();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

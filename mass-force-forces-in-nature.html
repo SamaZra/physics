@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Масса. Сила. Силы в природе</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(46, 204, 113, 0.1);
+            --special-border: #ec489a;
+            --canvas-bg: #2a4a5a;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #ec489a;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #ec489a;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --label-bg: rgba(26,45,60,0.85);
+            --label-color: #ffffff;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #dce4ed;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #db2777;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #db2777;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #db2777;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --label-bg: rgba(255,255,255,0.92);
+            --label-color: #1a2a3f;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1400px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+
+        .model-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .model-tab {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .model-tab:hover { background: var(--special-border); color: white; border-color: var(--special-border); }
+        .model-tab.active { background: var(--special-border); color: white; border-color: var(--special-border); }
+
+        h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:5000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .def-card .formula-inline{color:var(--special-border);font-family:'Times New Roman',serif;font-style:italic;}
+
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+
+        .model-container {
+            text-align: center;
+            margin: 16px 0;
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            background: var(--canvas-bg);
+            box-shadow: 0 4px 12px var(--card-shadow);
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            min-height: 380px;
+            transition: background 0.3s;
+        }
+        .model-container.hidden { display: none; }
+        .model-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border-radius: 20px;
+            touch-action: none;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 20;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .fullscreen-btn:hover { background: var(--special-border); transform: scale(1.05); }
+
+        .projections-toggle-btn {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            width: auto;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 20;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            user-select: none;
+            font-weight: 600;
+            gap: 6px;
+        }
+        .projections-toggle-btn:hover { background: var(--special-border); transform: scale(1.03); }
+        .projections-toggle-btn.active { background: var(--special-border); }
+
+        .controls-panel {
+            background: var(--info-bg);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin: 8px 0 12px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            align-items: center;
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .control-group label {
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 20px;
+            transition: color 0.3s;
+        }
+        .control-group input[type="range"] {
+            width: 120px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--slider-track);
+            border-radius: 3px;
+            outline: none;
+            transition: background 0.3s;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: 2px solid var(--special-border);
+        }
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: 2px solid var(--special-border);
+        }
+        .control-value {
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 32px;
+            text-align: center;
+            background: var(--input-bg);
+            padding: 2px 8px;
+            border-radius: 12px;
+            transition: color 0.3s,background 0.3s;
+        }
+        .control-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            transition: color 0.3s;
+        }
+
+        .back-link-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0 8px;
+        }
+        .back-link{
+            display:inline-block;
+            padding:10px 20px;
+            background:var(--special-border);
+            color:white;
+            text-decoration:none;
+            font-weight:bold;
+            border-radius:20px;
+            font-size:0.95rem;
+            transition:background 0.2s;
+        }
+        .back-link:hover{background:#b45309;}
+
+        .task-block {
+            background: var(--task-bg);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin: 16px 0;
+            border-left: 4px solid var(--task-border);
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+        .task-block .task-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+        .task-block .task-condition {
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.8;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: color 0.3s,background 0.3s;
+        }
+        .task-block .task-condition strong {
+            color: var(--special-border);
+        }
+        .task-block .task-condition mjx-container {
+            font-size: 1.1rem !important;
+        }
+
+        .task-given-find {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 40px;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+        .task-given-find .given { color: var(--given-color); }
+        .task-given-find .find { color: var(--find-color); }
+        .task-given-find .given strong,
+        .task-given-find .find strong {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .task-given-find mjx-container {
+            font-size: 1.1rem !important;
+        }
+
+        .show-solution-btn {
+            background: var(--special-border);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
+
+        .task-solution {
+            display: none;
+            margin-top: 12px;
+        }
+        .task-solution.open { display: block; }
+        .task-solution .step {
+            padding: 10px 16px;
+            margin: 8px 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border-left: 3px solid var(--special-border);
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.8;
+            overflow-x: auto;
+            transition: background 0.3s,color 0.3s;
+        }
+        .task-solution .step .formula {
+            display: block;
+            text-align: center;
+            font-size: 1.3rem;
+            padding: 6px 0;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            color: var(--special-border);
+        }
+        .task-solution .step .formula mjx-container {
+            font-size: 1.3rem !important;
+        }
+        .task-solution .step .explanation {
+            background: var(--info-bg);
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-left: 2px solid var(--special-border);
+            transition: background 0.3s,color 0.3s;
+        }
+        .task-solution .answer {
+            padding: 12px 18px;
+            background: var(--special-border);
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .favorite-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .favorite-btn:hover { transform: scale(1.1); }
+        .favorite-btn.active { color: #facc15; }
+
+        .note-box {
+            background: var(--info-bg);
+            border-left: 4px solid var(--special-border);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin: 16px 0;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text);
+            transition: background 0.3s,color 0.3s;
+        }
+        .note-box .important { color: var(--special-border); font-weight: 700; }
+
+        .force-legend {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--label-bg);
+            backdrop-filter: blur(8px);
+            padding: 4px 14px;
+            border-radius: 20px;
+            color: var(--label-color);
+            font-size: 0.6rem;
+            z-index: 10;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            border: 1px solid var(--special-border);
+            box-shadow: 0 2px 10px var(--card-shadow);
+            transition: background 0.3s,color 0.3s,border 0.3s;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .force-legend span { display: inline-flex; align-items: center; gap: 4px; }
+        .force-legend .color-dot { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+
+        .spring-params {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--label-bg);
+            backdrop-filter: blur(8px);
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--special-border);
+            box-shadow: 0 2px 10px var(--card-shadow);
+            color: var(--label-color);
+            font-size: 0.75rem;
+            z-index: 15;
+            transition: background 0.3s,color 0.3s,border 0.3s;
+            line-height: 1.6;
+            min-width: 120px;
+            text-align: left;
+        }
+        .spring-params .param { display: flex; justify-content: space-between; gap: 16px; }
+        .spring-params .param .label { opacity: 0.7; }
+        .spring-params .param .value { font-weight: 600; color: var(--special-border); }
+
+        mjx-container { font-size: 1.2em !important; overflow-x: auto !important; max-width: 100% !important; }
+
+        .model-container:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            margin: 0;
+            border-radius: 0;
+            background: var(--canvas-bg) !important;
+            aspect-ratio: auto;
+        }
+        .model-container:fullscreen .model-canvas {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+        }
+
+        @media(max-width:700px){
+            .model-container { min-height: 300px; }
+            .fullscreen-btn { width: 38px; height: 38px; font-size: 18px; bottom: 12px; right: 12px; }
+            .projections-toggle-btn { padding: 6px 12px; font-size: 12px; bottom: 12px; left: 12px; }
+            .model-tabs { gap: 4px; }
+            .model-tab { padding: 6px 12px; font-size: 0.75rem; }
+            .controls-panel { flex-direction: column; gap: 10px; align-items: stretch; }
+            .control-group { justify-content: space-between; }
+            .control-group input[type="range"] { width: 100%; max-width: 200px; }
+            .task-solution .step .formula { font-size: 1.1rem; white-space: normal; }
+            .task-given-find { flex-direction: column; gap: 6px; }
+            .formula-block { font-size: 0.95rem; padding: 10px 12px; }
+            .formula-block .f { font-size: 1.1rem; }
+            .task-block .task-condition mjx-container { font-size: 0.95rem !important; }
+            .task-solution .step .formula mjx-container { font-size: 1.1rem !important; }
+            .force-legend { font-size: 0.5rem; padding: 3px 10px; gap: 6px; bottom: 8px; }
+            .spring-params { font-size: 0.65rem; padding: 6px 10px; min-width: 90px; top: 8px; left: 8px; }
+        }
+        @media(max-width:450px){
+            .model-container { min-height: 220px; }
+            .container { padding: 10px; padding-top: 44px; }
+            h1 { font-size: 1.2rem; }
+            .section-title { font-size: 0.95rem; }
+            .control-group input[type="range"] { max-width: 120px; }
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>⚖️ Масса. Сила. Силы в природе</h1>
+
+    <!-- ===== ТЕОРИЯ 1: МАССА ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Масса — мера инертности тела</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Масса</strong> — это фундаментальная физическая величина, которая является <span class="important">мерой инертности</span> тела. Чем больше масса тела, тем труднее изменить его скорость (придать ему ускорение) под действием силы.</p>
+                <p><strong>Масса — скалярная величина.</strong> Она не зависит от положения тела в пространстве, от скорости его движения и от взаимодействия с другими телами.</p>
+                <p><strong>Единица измерения:</strong> килограмм (кг) — основная единица массы в системе СИ.</p>
+                <p><strong>Основные свойства массы:</strong></p>
+                <ul>
+                    <li><span class="important">Аддитивность:</span> масса системы тел равна арифметической сумме масс всех тел, входящих в систему: $m = m_1 + m_2 + ... + m_n$.</li>
+                    <li><span class="important">Инвариантность:</span> масса не зависит от выбора системы отсчёта и остаётся постоянной при любых движениях тела (в классической механике).</li>
+                    <li><span class="important">Инертность:</span> чем больше масса тела, тем меньшее ускорение оно приобретает при действии одной и той же силы: $a = \frac{F}{m}$.</li>
+                    <li><span class="important">Гравитационная масса:</span> масса определяет силу гравитационного притяжения между телами: $F = G\frac{m_1 m_2}{r^2}$.</li>
+                </ul>
+                <p><strong>Инертная и гравитационная масса</strong> — в классической механике эти две величины численно равны (принцип эквивалентности Эйнштейна).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2: СИЛА ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Сила — причина изменения скорости</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Сила</strong> — это <span class="important">векторная</span> физическая величина, которая характеризует действие одного тела на другое. Сила является <span class="important">причиной изменения скорости</span> тела (т.е. причиной возникновения ускорения).</p>
+                <p><strong>Единица измерения:</strong> Ньютон (Н). $1$ Н $= 1$ кг·м/с² — это сила, которая сообщает телу массой 1 кг ускорение 1 м/с².</p>
+                <p><strong>Сила характеризуется тремя элементами:</strong></p>
+                <ul>
+                    <li><strong>Модулем</strong> (числовым значением) — показывает, насколько сильно действует сила.</li>
+                    <li><strong>Направлением</strong> — сила всегда имеет определённое направление в пространстве.</li>
+                    <li><strong>Точкой приложения</strong> — местом, где сила приложена к телу.</li>
+                </ul>
+                <p><strong>Равнодействующая сила</strong> — это <span class="important">геометрическая сумма</span> всех сил, действующих на тело. Если равнодействующая равна нулю, тело находится в равновесии (покоится или движется равномерно и прямолинейно).</p>
+                <p><strong>Второй закон Ньютона</strong> устанавливает связь между силой, массой и ускорением:</p>
+            </div>
+            <div class="formula-block">
+                <span class="f"><strong>Второй закон Ньютона:</strong></span>
+                <span class="f">$\vec{F} = m\vec{a}$</span>
+                <span class="f-label">— сила равна произведению массы на ускорение</span>
+                <span class="f" style="font-size:1rem;font-style:normal;margin-top:4px;">Ускорение тела прямо пропорционально приложенной силе и обратно пропорционально массе тела.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3: СИЛЫ В ПРИРОДЕ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🌍 Силы в природе</div>
+        <div class="section-content">
+
+            <!-- Вкладки -->
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="block" onclick="switchModel('block')">📦 Брусок на опоре</div>
+                <div class="model-tab" data-model="spring" onclick="switchModel('spring')">🌀 Пружина с грузом</div>
+            </div>
+
+            <!-- Модель 1: Брусок на опоре -->
+            <div id="model-block" class="model-content">
+                <div class="model-container" id="container-block">
+                    <canvas id="canvas-block" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-block">⛶</button>
+                    <button class="projections-toggle-btn" id="projections-toggle-block">📐 Показать проекции</button>
+                    <div class="force-legend">
+                        <span><span class="color-dot" style="background:#ff4444;"></span> mg</span>
+                        <span><span class="color-dot" style="background:#44ff88;"></span> N</span>
+                        <span><span class="color-dot" style="background:#ffaa44;"></span> Fтр</span>
+                        <span><span class="color-dot" style="background:#44aaff;"></span> Fтяги</span>
+                        <span class="projection-legend" style="display:none;"><span class="color-dot" style="background:#aa66ff;"></span> mg·cosα</span>
+                        <span class="projection-legend" style="display:none;"><span class="color-dot" style="background:#ff6644; border: 1px dashed #ff6644;"></span> mg·sinα</span>
+                        <span class="projection-legend" style="display:none;"><span class="color-dot" style="background:#ffff44;"></span> α</span>
+                        <span><span class="color-dot" style="background:#ffffff;"></span> Оси X,Y</span>
+                    </div>
+                </div>
+
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>μ</label>
+                        <input type="range" id="force-mu" min="0" max="0.8" step="0.05" value="0.3">
+                        <span class="control-value" id="force-mu-value">0.30</span>
+                        <span class="control-label">(коэффициент трения)</span>
+                    </div>
+                    <div class="control-group">
+                        <label>α (°)</label>
+                        <input type="range" id="force-angle" min="-45" max="45" step="1" value="20">
+                        <span class="control-value" id="force-angle-value">20</span>
+                        <span class="control-label">(угол наклона)</span>
+                    </div>
+                    <span class="control-label">⬤ g = 9.8 м/с²</span>
+                </div>
+
+                <div class="def-card">
+                    <p><strong>1. Сила тяжести</strong> — $F_{тяж} = mg$, направлена <span class="important">вертикально вниз</span> к центру Земли.</p>
+                    <p><strong>2. Сила нормальной реакции опоры</strong> ($N$) — возникает при контакте тела с опорой, направлена <span class="important">перпендикулярно</span> поверхности опоры.</p>
+                    <p><strong>3. Сила трения</strong> — $F_{тр} = \mu N$, направлена <span class="important">против движения</span> вдоль поверхности.</p>
+                    <p><strong>4. Сила тяги</strong> — внешняя сила, движущая тело.</p>
+                    <p><strong>Проекции силы тяжести на наклонной плоскости:</strong></p>
+                    <ul>
+                        <li>$F_{\parallel} = mg \cdot \sin\alpha$ — <span class="important">вдоль поверхности</span> (вниз по склону)</li>
+                        <li>$F_{\perp} = mg \cdot \cos\alpha$ — <span class="important">перпендикулярно поверхности</span> (прижимает тело к опоре)</li>
+                    </ul>
+                    <p><span class="important">Ползунок μ</span> управляет коэффициентом трения — чем он больше, тем длиннее вектор силы трения $F_{тр} = \mu N$.</p>
+                </div>
+            </div>
+
+            <!-- Модель 2: Пружина с грузом (вертикальная) -->
+            <div id="model-spring" class="model-content" style="display:none;">
+                <div class="model-container" id="container-spring">
+                    <canvas id="canvas-spring" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-spring">⛶</button>
+                    <div class="force-legend">
+                        <span><span class="color-dot" style="background:#ff4444;"></span> mg</span>
+                        <span><span class="color-dot" style="background:#44ff88;"></span> Fупр</span>
+                        <span><span class="color-dot" style="background:#ffaa44;"></span> Fтяги</span>
+                        <span><span class="color-dot" style="background:#ffffff;"></span> Оси X,Y</span>
+                    </div>
+                    <div class="spring-params" id="spring-params">
+                        <div class="param"><span class="label">⚖️ Масса</span><span class="value" id="spring-mass-label">3.0 кг</span></div>
+                        <div class="param"><span class="label">🔧 Жёсткость</span><span class="value" id="spring-k-label">50 Н/м</span></div>
+                        <div class="param"><span class="label">📏 Удлинение</span><span class="value" id="spring-delta-label">0.588 м</span></div>
+                    </div>
+                </div>
+
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>m (кг)</label>
+                        <input type="range" id="spring-mass" min="0.5" max="10" step="0.5" value="3">
+                        <span class="control-value" id="spring-mass-value">3.0</span>
+                    </div>
+                    <div class="control-group">
+                        <label>k (Н/м)</label>
+                        <input type="range" id="spring-k" min="10" max="100" step="5" value="50">
+                        <span class="control-value" id="spring-k-value">50</span>
+                    </div>
+                    <span class="control-label">⬤ g = 9.8 м/с²</span>
+                </div>
+
+                <div class="def-card">
+                    <p><strong>1. Сила тяжести</strong> — $F_{тяж} = mg$, направлена <span class="important">вертикально вниз</span> к центру Земли.</p>
+                    <p><strong>2. Сила упругости пружины</strong> — $F_{упр} = k \cdot \Delta x$, направлена <span class="important">вертикально вверх</span> (противоположно деформации).</p>
+                    <p><strong>3. Сила тяги</strong> — внешняя сила, растягивающая пружину вниз.</p>
+                    <p><strong>Закон Гука:</strong> $F_{упр} = -k \cdot \Delta x$, где $k$ — жёсткость пружины, $\Delta x$ — удлинение.</p>
+                    <p><span class="important">В равновесии:</span> $mg = k \cdot \Delta x$ → $\Delta x = \frac{mg}{k}$</p>
+                    <p><span class="important">Ползунок m</span> управляет массой груза — меняется сила тяжести и удлинение пружины.<br>
+                        <span class="important">Ползунок k</span> управляет жёсткостью пружины — чем больше k, тем меньше удлинение при той же силе.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ (15 ШТУК) ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением</div>
+        <div class="section-content">
+
+            <!-- Задача 1 (простая) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сила тяжести</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг находится на поверхности Земли. Определите силу тяжести, действующую на тело. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_{тяж}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation">Сила тяжести вычисляется по формуле: $F_{тяж} = mg$, где $m$ — масса тела, $g$ — ускорение свободного падения.</div>
+                        <span class="formula">$F_{тяж} = 5 \cdot 9.8 = 49 \text{ Н}$</span>
+                        <div class="explanation">Подставляем числовые значения: $5 \cdot 9.8 = 49$. Получаем силу тяжести 49 Ньютонов.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $F_{тяж} = 49$ Н</div>
+                </div>
+            </div>
+
+            <!-- Задача 2 (простая) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Масса по силе тяжести</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело действует сила тяжести $F_{тяж} = 78.4$ Н. Определите массу тела. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $F_{тяж} = 78.4$ Н, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation">Из формулы силы тяжести $F_{тяж} = mg$ выражаем массу: $m = \frac{F_{тяж}}{g}$.</div>
+                        <span class="formula">$m = \frac{78.4}{9.8} = 8 \text{ кг}$</span>
+                        <div class="explanation">Делим силу тяжести на ускорение свободного падения: $78.4 / 9.8 = 8$. Получаем массу тела 8 кг.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $m = 8$ кг</div>
+                </div>
+            </div>
+
+            <!-- Задача 3 (средняя сложность) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Ускорение тела с трением</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг тянут по горизонтальной поверхности с силой $F = 20$ Н. Коэффициент трения между телом и поверхностью $\mu = 0.15$. Найдите ускорение тела. Сопротивлением воздуха пренебречь. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н, $\mu = 0.15$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Находим силу нормальной реакции опоры. На горизонтальной поверхности $N = mg$.</div>
+                        <span class="formula">$N = 4 \cdot 9.8 = 39.2 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Находим силу трения по формуле $F_{тр} = \mu N$.</div>
+                        <span class="formula">$F_{тр} = 0.15 \cdot 39.2 = 5.88 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Находим равнодействующую силу: $F_{рез} = F - F_{тр}$.</div>
+                        <span class="formula">$F_{рез} = 20 - 5.88 = 14.12 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 4.</strong> По второму закону Ньютона $a = \frac{F_{рез}}{m}$.</div>
+                        <span class="formula">$a = \frac{14.12}{4} = 3.53 \text{ м/с}^2$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> Тело разгоняется, так как сила тяги больше силы трения. Ускорение направлено в сторону движения.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $a = 3.53$ м/с²</div>
+                </div>
+            </div>
+
+            <!-- Задача 4 (средняя сложность) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Сила упругости пружины</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружина жёсткостью $k = 150$ Н/м растягивается под действием силы $F = 30$ Н. Затем к пружине подвешивают груз массой $m = 2$ кг. Найдите удлинение пружины в обоих случаях. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 150$ Н/м, $F = 30$ Н, $m = 2$ кг, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x_1$, $\Delta x_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> По закону Гука $F_{упр} = k \cdot \Delta x$. Для первого случая $\Delta x_1 = \frac{F}{k}$.</div>
+                        <span class="formula">$\Delta x_1 = \frac{30}{150} = 0.2 \text{ м} = 20 \text{ см}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Во втором случае сила тяжести груза $F_{тяж} = mg$.</div>
+                        <span class="formula">$F_{тяж} = 2 \cdot 9.8 = 19.6 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Удлинение от груза: $\Delta x_2 = \frac{mg}{k}$.</div>
+                        <span class="formula">$\Delta x_2 = \frac{19.6}{150} \approx 0.131 \text{ м} \approx 13.1 \text{ см}$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> При одной и той же силе удлинение прямо пропорционально силе. В первом случае сила больше, поэтому удлинение больше.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $\Delta x_1 = 20$ см, $\Delta x_2 \approx 13.1$ см</div>
+                </div>
+            </div>
+
+            <!-- Задача 5 (средняя сложность) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Равнодействующая сил</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело действуют три силы: $F_1 = 8$ Н направлена вправо, $F_2 = 5$ Н направлена влево, $F_3 = 3$ Н направлена вправо. Найдите модуль и направление равнодействующей силы. Определите, как будет двигаться тело массой $m = 2$ кг под действием этих сил.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $F_1 = 8$ Н (→), $F_2 = 5$ Н (←), $F_3 = 3$ Н (→), $m = 2$ кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $R$, $a$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Силы, направленные вправо, складываются: $F_{вправо} = F_1 + F_3 = 8 + 3 = 11$ Н.</div>
+                        <div class="explanation">Сила, направленная влево: $F_{влево} = F_2 = 5$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Равнодействующая: $R = F_{вправо} - F_{влево} = 11 - 5 = 6$ Н (вправо).</div>
+                        <span class="formula">$R = 6 \text{ Н}$ (вправо)</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Ускорение: $a = \frac{R}{m} = \frac{6}{2} = 3$ м/с².</div>
+                        <span class="formula">$a = 3 \text{ м/с}^2$ (вправо)</span>
+                        <div class="explanation"><strong>Пояснение:</strong> Тело будет двигаться с ускорением вправо, так как равнодействующая направлена вправо.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $R = 6$ Н (вправо), $a = 3$ м/с² (вправо)</div>
+                </div>
+            </div>
+
+            <!-- Задача 6 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Движение по наклонной плоскости</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг находится на наклонной плоскости с углом $\alpha = 30°$ к горизонту. Коэффициент трения между телом и плоскостью $\mu = 0.2$. Найдите ускорение тела, если оно начинает скользить вниз. Определите, с какой скоростью тело достигнет основания плоскости, если длина плоскости $L = 4$ м. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $\alpha = 30°$, $\mu = 0.2$, $L = 4$ м, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$, $v$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Проекция силы тяжести вдоль плоскости: $F_{\parallel} = mg \cdot \sin\alpha$.</div>
+                        <span class="formula">$F_{\parallel} = 5 \cdot 9.8 \cdot 0.5 = 24.5 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Проекция силы тяжести перпендикулярно плоскости: $F_{\perp} = mg \cdot \cos\alpha$.</div>
+                        <span class="formula">$F_{\perp} = 5 \cdot 9.8 \cdot 0.866 \approx 42.43 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Сила нормальной реакции $N = F_{\perp} = 42.43$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 4.</strong> Сила трения: $F_{тр} = \mu N = 0.2 \cdot 42.43 = 8.49$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 5.</strong> Равнодействующая вдоль плоскости: $F_{рез} = F_{\parallel} - F_{тр} = 24.5 - 8.49 = 16.01$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 6.</strong> Ускорение: $a = \frac{F_{рез}}{m} = \frac{16.01}{5} \approx 3.20$ м/с².</div>
+                        <span class="formula">$a \approx 3.20 \text{ м/с}^2$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 7.</strong> Скорость в конце плоскости: $v = \sqrt{2aL} = \sqrt{2 \cdot 3.20 \cdot 4} = \sqrt{25.6} \approx 5.06$ м/с.</div>
+                        <span class="formula">$v \approx 5.06 \text{ м/с}$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> Тело скользит вниз с постоянным ускорением. Скорость в конце пути определяется по формуле $v^2 = 2aL$ (начальная скорость равна нулю).</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $a \approx 3.20$ м/с², $v \approx 5.06$ м/с</div>
+                </div>
+            </div>
+
+            <!-- Задача 7 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Два тела на пружине</div>
+                <div class="task-condition"><strong>Условие:</strong> Два груза массами $m_1 = 2$ кг и $m_2 = 3$ кг подвешены на пружине жёсткостью $k = 100$ Н/м так, что $m_2$ висит ниже $m_1$ (последовательно). Найдите удлинение пружины, если грузы находятся в равновесии. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $k = 100$ Н/м, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Вся пружина растягивается под действием суммарного веса обоих грузов.</div>
+                        <div class="explanation">Суммарная сила тяжести: $F = (m_1 + m_2)g = (2 + 3) \cdot 9.8 = 5 \cdot 9.8 = 49$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> По закону Гука: $F = k \cdot \Delta x \Rightarrow \Delta x = \frac{F}{k}$.</div>
+                        <span class="formula">$\Delta x = \frac{49}{100} = 0.49 \text{ м} = 49 \text{ см}$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> При последовательном соединении грузов пружина растягивается под действием суммарной силы тяжести. Удлинение пружины прямо пропорционально приложенной силе.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $\Delta x = 0.49$ м (49 см)</div>
+                </div>
+            </div>
+
+            <!-- Задача 8 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Сила трения и тяги на наклонной плоскости</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 3$ кг находится на наклонной плоскости с углом $\alpha = 25°$ к горизонту. Коэффициент трения $\mu = 0.3$. Какую силу $F$ нужно приложить параллельно плоскости, чтобы тело двигалось вверх с постоянной скоростью? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $\alpha = 25°$, $\mu = 0.3$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Проекция силы тяжести вдоль плоскости (вниз): $F_{\parallel} = mg \cdot \sin\alpha$.</div>
+                        <span class="formula">$F_{\parallel} = 3 \cdot 9.8 \cdot \sin 25° \approx 3 \cdot 9.8 \cdot 0.423 \approx 12.44 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Сила нормальной реакции: $N = mg \cdot \cos\alpha$.</div>
+                        <span class="formula">$N = 3 \cdot 9.8 \cdot \cos 25° \approx 3 \cdot 9.8 \cdot 0.906 \approx 26.64 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Сила трения (при движении вверх направлена вниз по плоскости): $F_{тр} = \mu N$.</div>
+                        <span class="formula">$F_{тр} = 0.3 \cdot 26.64 \approx 7.99 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 4.</strong> Для равномерного движения $F = F_{\parallel} + F_{тр}$.</div>
+                        <span class="formula">$F = 12.44 + 7.99 \approx 20.43 \text{ Н}$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> При равномерном движении равнодействующая сил равна нулю, поэтому сила тяги должна компенсировать как составляющую силы тяжести вдоль плоскости, так и силу трения.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $F \approx 20.43$ Н</div>
+                </div>
+            </div>
+
+            <!-- Задача 9 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Сравнение масс по силе и ускорению</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело А действует сила $F = 15$ Н, при этом оно получает ускорение $a_A = 3$ м/с². На тело Б действует та же сила, но ускорение $a_Б = 5$ м/с². Во сколько раз масса тела А больше массы тела Б? Найдите массы тел.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $F = 15$ Н, $a_A = 3$ м/с², $a_Б = 5$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\frac{m_A}{m_Б}$, $m_A$, $m_Б$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> По второму закону Ньютона $m = \frac{F}{a}$. Находим массы.</div>
+                        <span class="formula">$m_A = \frac{15}{3} = 5 \text{ кг}$</span>
+                        <span class="formula">$m_Б = \frac{15}{5} = 3 \text{ кг}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Отношение масс: $\frac{m_A}{m_Б} = \frac{5}{3}$.</div>
+                        <span class="formula">$\frac{m_A}{m_Б} = \frac{5}{3} \approx 1.67$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> При одинаковой силе тело с большей массой получает меньшее ускорение. Масса и ускорение обратно пропорциональны.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $m_A = 5$ кг, $m_Б = 3$ кг, $\frac{m_A}{m_Б} = \frac{5}{3} \approx 1.67$</div>
+                </div>
+            </div>
+
+            <!-- Задача 10 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Сила упругости и сила тяжести</div>
+                <div class="task-condition"><strong>Условие:</strong> На пружине жёсткостью $k = 80$ Н/м висит груз массой $m = 4$ кг. Пружину с грузом опускают в лифте, движущемся вниз с ускорением $a = 2$ м/с². Найдите удлинение пружины. Что изменится, если лифт будет двигаться вверх с тем же ускорением? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 80$ Н/м, $m = 4$ кг, $a = 2$ м/с², $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x_{вниз}$, $\Delta x_{вверх}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> При движении вниз с ускорением вес груза: $P = m(g - a)$.</div>
+                        <span class="formula">$P_{вниз} = 4 \cdot (9.8 - 2) = 4 \cdot 7.8 = 31.2 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Удлинение пружины при движении вниз: $\Delta x = \frac{P}{k}$.</div>
+                        <span class="formula">$\Delta x_{вниз} = \frac{31.2}{80} = 0.39 \text{ м} = 39 \text{ см}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> При движении вверх с ускорением вес груза: $P = m(g + a)$.</div>
+                        <span class="formula">$P_{вверх} = 4 \cdot (9.8 + 2) = 4 \cdot 11.8 = 47.2 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 4.</strong> Удлинение пружины при движении вверх: $\Delta x = \frac{P}{k}$.</div>
+                        <span class="formula">$\Delta x_{вверх} = \frac{47.2}{80} = 0.59 \text{ м} = 59 \text{ см}$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> При движении вниз с ускорением вес уменьшается (перегрузка отрицательная), поэтому пружина растягивается меньше. При движении вверх вес увеличивается, пружина растягивается больше.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $\Delta x_{вниз} = 39$ см, $\Delta x_{вверх} = 59$ см</div>
+                </div>
+            </div>
+
+            <!-- Задача 11 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 11. Движение связанных тел</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 2$ кг и $m_2 = 3$ кг связаны невесомой нерастяжимой нитью и лежат на гладкой горизонтальной поверхности. К телу $m_1$ приложена сила $F = 15$ Н, направленная горизонтально. Найдите ускорение системы и силу натяжения нити.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $F = 15$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$, $T$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <div id="sol11" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Для системы двух тел: $F = (m_1 + m_2) \cdot a$.</div>
+                        <span class="formula">$a = \frac{F}{m_1 + m_2} = \frac{15}{2 + 3} = \frac{15}{5} = 3 \text{ м/с}^2$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Рассмотрим второе тело: $T = m_2 \cdot a$.</div>
+                        <span class="formula">$T = 3 \cdot 3 = 9 \text{ Н}$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> Нить передаёт силу от первого тела ко второму. Сила натяжения нити равна силе, необходимой для движения второго тела с ускорением $a$.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $a = 3$ м/с², $T = 9$ Н</div>
+                </div>
+            </div>
+
+            <!-- Задача 12 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 12. Сравнение сил трения</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг движется по горизонтальной поверхности. Коэффициент трения между телом и поверхностью $\mu = 0.25$. Найдите силу трения. Во сколько раз изменится сила трения, если на тело поставить ещё один груз массой $m_2 = 3$ кг? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $m_2 = 3$ кг, $\mu = 0.25$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_{тр1}$, $F_{тр2}$, $\frac{F_{тр2}}{F_{тр1}}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <div id="sol12" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Сила трения для первого случая: $F_{тр1} = \mu mg$.</div>
+                        <span class="formula">$F_{тр1} = 0.25 \cdot 5 \cdot 9.8 = 0.25 \cdot 49 = 12.25 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Общая масса во втором случае: $m_{общ} = m + m_2 = 5 + 3 = 8$ кг.</div>
+                        <span class="formula">$F_{тр2} = \mu \cdot m_{общ} \cdot g = 0.25 \cdot 8 \cdot 9.8 = 0.25 \cdot 78.4 = 19.6 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Отношение сил трения: $\frac{F_{тр2}}{F_{тр1}} = \frac{19.6}{12.25} = 1.6$.</div>
+                        <span class="formula">$\frac{F_{тр2}}{F_{тр1}} = \frac{8}{5} = 1.6$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> Сила трения прямо пропорциональна массе тела. При увеличении массы в 1.6 раза сила трения увеличивается во столько же раз.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $F_{тр1} = 12.25$ Н, $F_{тр2} = 19.6$ Н, $\frac{F_{тр2}}{F_{тр1}} = 1.6$</div>
+                </div>
+            </div>
+
+            <!-- Задача 13 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 13. Равновесие на наклонной плоскости</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг находится на наклонной плоскости с углом $\alpha = 20°$ к горизонту. Коэффициент трения $\mu = 0.15$. Будет ли тело скользить вниз? Если да, найдите ускорение. Если нет, найдите силу трения покоя. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $\alpha = 20°$, $\mu = 0.15$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> будет ли скользить? $a$ или $F_{тр}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <div id="sol13" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Проекция силы тяжести вдоль плоскости (вниз): $F_{\parallel} = mg \cdot \sin\alpha$.</div>
+                        <span class="formula">$F_{\parallel} = 4 \cdot 9.8 \cdot \sin 20° \approx 4 \cdot 9.8 \cdot 0.342 \approx 13.41 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Сила нормальной реакции: $N = mg \cdot \cos\alpha$.</div>
+                        <span class="formula">$N = 4 \cdot 9.8 \cdot \cos 20° \approx 4 \cdot 9.8 \cdot 0.940 \approx 36.85 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Максимальная сила трения покоя: $F_{тр}^{max} = \mu N = 0.15 \cdot 36.85 \approx 5.53$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 4.</strong> Сравниваем: $F_{\parallel} = 13.41$ Н $> F_{тр}^{max} = 5.53$ Н.</div>
+                        <div class="explanation">Так как $F_{\parallel} > F_{тр}^{max}$, тело будет скользить вниз.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 5.</strong> Ускорение: $a = \frac{F_{\parallel} - F_{тр}}{m} = \frac{13.41 - 5.53}{4} = \frac{7.88}{4} \approx 1.97$ м/с².</div>
+                        <span class="formula">$a \approx 1.97 \text{ м/с}^2$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> Тело скользит, так как составляющая силы тяжести вдоль плоскости превышает максимальную силу трения покоя.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: Тело скользит с ускорением $a \approx 1.97$ м/с²</div>
+                </div>
+            </div>
+
+            <!-- Задача 14 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 14. Сила упругости и закон Гука</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружина длиной $l_0 = 20$ см под действием силы $F = 12$ Н растягивается до длины $l = 28$ см. Найдите жёсткость пружины $k$. Какую силу нужно приложить, чтобы растянуть пружину до длины $l_2 = 35$ см? Какова будет потенциальная энергия пружины при этом?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 20$ см $= 0.2$ м, $l = 28$ см $= 0.28$ м, $F = 12$ Н, $l_2 = 35$ см $= 0.35$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $k$, $F_2$, $E_{пот}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <div id="sol14" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Удлинение: $\Delta x = l - l_0 = 0.28 - 0.2 = 0.08$ м.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> По закону Гука: $k = \frac{F}{\Delta x} = \frac{12}{0.08} = 150$ Н/м.</div>
+                        <span class="formula">$k = 150 \text{ Н/м}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Удлинение для $l_2$: $\Delta x_2 = l_2 - l_0 = 0.35 - 0.2 = 0.15$ м.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 4.</strong> Необходимая сила: $F_2 = k \cdot \Delta x_2 = 150 \cdot 0.15 = 22.5$ Н.</div>
+                        <span class="formula">$F_2 = 22.5 \text{ Н}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 5.</strong> Потенциальная энергия пружины: $E_{пот} = \frac{k \cdot \Delta x_2^2}{2}$.</div>
+                        <span class="formula">$E_{пот} = \frac{150 \cdot 0.15^2}{2} = \frac{150 \cdot 0.0225}{2} = \frac{3.375}{2} = 1.6875 \text{ Дж}$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> Потенциальная энергия пружины пропорциональна квадрату деформации. Чем больше растяжение, тем больше энергия, запасённая в пружине.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $k = 150$ Н/м, $F_2 = 22.5$ Н, $E_{пот} = 1.6875$ Дж</div>
+                </div>
+            </div>
+
+            <!-- Задача 15 (сложная) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 15. Комбинированная задача</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 2$ кг лежит на горизонтальной поверхности. К телу приложена сила $F = 12$ Н под углом $\alpha = 30°$ к горизонту. Коэффициент трения $\mu = 0.2$. Найдите ускорение тела. Определите, при каком угле $\alpha$ тело начнёт двигаться, если сила $F = 10$ Н остаётся постоянной? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $F = 12$ Н, $\alpha = 30°$, $\mu = 0.2$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$, $\alpha_{крит}$ (для $F = 10$ Н)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <div id="sol15" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Проекция силы на горизонталь: $F_x = F \cdot \cos\alpha = 12 \cdot \cos 30° = 12 \cdot 0.866 \approx 10.39$ Н.</div>
+                        <div class="explanation">Проекция силы на вертикаль: $F_y = F \cdot \sin\alpha = 12 \cdot 0.5 = 6$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Сила нормальной реакции: $N = mg - F_y = 2 \cdot 9.8 - 6 = 19.6 - 6 = 13.6$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Сила трения: $F_{тр} = \mu N = 0.2 \cdot 13.6 = 2.72$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 4.</strong> Ускорение: $a = \frac{F_x - F_{тр}}{m} = \frac{10.39 - 2.72}{2} = \frac{7.67}{2} \approx 3.835$ м/с².</div>
+                        <span class="formula">$a \approx 3.84 \text{ м/с}^2$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 5.</strong> Для $F = 10$ Н условие начала движения: $F_x > F_{тр}$. $F \cdot \cos\alpha > \mu (mg - F \cdot \sin\alpha)$.</div>
+                        <span class="formula">$10 \cdot \cos\alpha > 0.2 (19.6 - 10 \cdot \sin\alpha)$</span>
+                        <span class="formula">$10 \cos\alpha > 3.92 - 2 \sin\alpha$</span>
+                        <span class="formula">$10 \cos\alpha + 2 \sin\alpha > 3.92$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 6.</strong> Проверяем $\alpha = 0°$: $10 \cdot 1 + 0 = 10 > 3.92$ — тело движется.</div>
+                        <div class="explanation">Проверяем $\alpha = 60°$: $10 \cdot 0.5 + 2 \cdot 0.866 = 5 + 1.732 = 6.732 > 3.92$.</div>
+                        <div class="explanation">Проверяем $\alpha = 80°$: $10 \cdot 0.174 + 2 \cdot 0.985 = 1.74 + 1.97 = 3.71 < 3.92$.</div>
+                        <div class="explanation">Критический угол между 60° и 80°. Решая уравнение $10 \cos\alpha + 2 \sin\alpha = 3.92$, находим $\alpha \approx 75°$.</div>
+                        <span class="formula">$\alpha_{крит} \approx 75°$</span>
+                        <div class="explanation"><strong>Пояснение:</strong> При увеличении угла горизонтальная составляющая силы уменьшается, а вертикальная составляющая увеличивается (уменьшая силу нормальной реакции). При $\alpha > 75°$ горизонтальной составляющей не хватает, чтобы преодолеть трение.</div>
+                    </div>
+                    <div class="answer">✅ Ответ: $a \approx 3.84$ м/с², $\alpha_{крит} \approx 75°$</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="mechanics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('mathTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('mathTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('mathTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-block').style.display = model === 'block' ? 'block' : 'none';
+        document.getElementById('model-spring').style.display = model === 'spring' ? 'block' : 'none';
+
+        setTimeout(() => {
+            if (typeof window.buildBlockScene === 'function') window.buildBlockScene();
+            if (typeof window.buildSpringScene === 'function') window.buildSpringScene();
+        }, 100);
+    }
+</script>
+
+<!-- 3D-модель 1: Брусок на опоре -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-block');
+        const canvas = document.getElementById('canvas-block');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(4, 3, 6);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        let showProjections = false;
+        const projectionsBtn = document.getElementById('projections-toggle-block');
+
+        function makeLabel(text, color, pos, fs = '0.75rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function createArrow(from, to, color, thickness = 2, dash = false) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            let lineMat = new THREE.LineBasicMaterial({ color, linewidth: thickness });
+            if (dash) {
+                lineMat = new THREE.LineDashedMaterial({
+                    color: color,
+                    dashSize: 0.04,
+                    gapSize: 0.04,
+                    transparent: true,
+                    opacity: 0.5
+                });
+            }
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                lineMat
+            );
+            if (dash) line.computeLineDistances();
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.055, 0.12, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.3) })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.06)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        function createAxis(from, to, color, thickness = 1.5) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            const lineMat = new THREE.LineBasicMaterial({ color, linewidth: thickness, transparent: true, opacity: 0.7 });
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                lineMat
+            );
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.04, 0.1, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.2), transparent: true, opacity: 0.7 })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.05)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        function createAngleArc(center, radius, startAngle, endAngle, color, segments = 32) {
+            const points = [];
+            const steps = segments;
+            for (let i = 0; i <= steps; i++) {
+                const t = startAngle + (endAngle - startAngle) * (i / steps);
+                const x = center.x + radius * Math.cos(t);
+                const y = center.y + radius * Math.sin(t);
+                points.push(new THREE.Vector3(x, y, 0));
+            }
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ color, linewidth: 2 });
+            const arc = new THREE.Line(geometry, material);
+            return arc;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const muSlider = document.getElementById('force-mu');
+        const angleSlider = document.getElementById('force-angle');
+        const muValue = document.getElementById('force-mu-value');
+        const angleValue = document.getElementById('force-angle-value');
+
+        let box = null;
+        let edges = null;
+        let planeGroup = null;
+        let dynamicObjects = [];
+
+        function clearDynamicObjects() {
+            dynamicObjects.forEach(obj => {
+                if (obj.parent) obj.parent.remove(obj);
+                obj.traverse((child) => {
+                    if (child.isMesh) {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    }
+                    if (child.isLine) {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) child.material.dispose();
+                    }
+                });
+            });
+            dynamicObjects = [];
+        }
+
+        window.buildBlockScene = function() {
+            clearDynamicObjects();
+
+            if (box) {
+                if (box.parent) box.parent.remove(box);
+                if (box.geometry) box.geometry.dispose();
+                if (box.material) box.material.dispose();
+                box = null;
+            }
+            if (edges) {
+                if (edges.parent) edges.parent.remove(edges);
+                if (edges.geometry) edges.geometry.dispose();
+                if (edges.material) edges.material.dispose();
+                edges = null;
+            }
+            if (planeGroup) {
+                if (planeGroup.parent) planeGroup.parent.remove(planeGroup);
+                planeGroup = null;
+            }
+
+            const alphaDeg = parseFloat(angleSlider.value);
+            const angle = alphaDeg * Math.PI / 180;
+            const mu = parseFloat(muSlider.value);
+            muValue.textContent = mu.toFixed(2);
+            angleValue.textContent = alphaDeg.toFixed(0);
+
+            planeGroup = new THREE.Group();
+            planeGroup.position.set(0.4, -0.05, 0);
+            planeGroup.rotation.z = -angle;
+            group.add(planeGroup);
+
+            const planeGeo = new THREE.BoxGeometry(2.4, 0.05, 0.6);
+            const planeMat = new THREE.MeshStandardMaterial({ color: 0x446688, transparent: true, opacity: 0.35 });
+            const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+            planeMesh.position.set(0, 0, 0);
+            planeGroup.add(planeMesh);
+
+            const boxMat = new THREE.MeshStandardMaterial({
+                color: 0x1e88e5,
+                transparent: true,
+                opacity: 0.55,
+                emissive: 0x0d47a1,
+                emissiveIntensity: 0.25,
+                roughness: 0.2,
+                metalness: 0.15
+            });
+            box = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 0.5), boxMat);
+            box.position.set(0, 0.25, 0);
+            box.castShadow = true;
+            planeGroup.add(box);
+
+            const edgesGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(0.8, 0.5, 0.5));
+            edges = new THREE.LineSegments(
+                edgesGeo,
+                new THREE.LineBasicMaterial({ color: 0x42a5f5, linewidth: 1, transparent: true, opacity: 0.8 })
+            );
+            edges.position.copy(box.position);
+            planeGroup.add(edges);
+
+            const g = 9.8;
+            const mass = 3;
+            const mg = mass * g;
+            let scale = mg * 0.035;
+            if (scale < 1.2) scale = 1.2;
+            if (scale > 2.8) scale = 2.8;
+
+            const center = new THREE.Vector3(0, 0.25, 0);
+            const worldCenter = new THREE.Vector3();
+            box.getWorldPosition(worldCenter);
+
+            const axisLen = scale * 1.6;
+            const axisXDir = new THREE.Vector3(1, 0, 0);
+            const axisXEnd = center.clone().add(axisXDir.clone().multiplyScalar(axisLen));
+            const axisX = createAxis(center, axisXEnd, 0xffffff, 1.5);
+            planeGroup.add(axisX);
+            dynamicObjects.push(axisX);
+            const axisXLabel = makeLabel('X', '#ffffff', axisXEnd.clone().add(axisXDir.clone().multiplyScalar(0.2)), '0.8rem');
+            planeGroup.add(axisXLabel);
+            dynamicObjects.push(axisXLabel);
+
+            const axisYDir = new THREE.Vector3(0, 1, 0);
+            const axisYEnd = center.clone().add(axisYDir.clone().multiplyScalar(axisLen));
+            const axisY = createAxis(center, axisYEnd, 0xffffff, 1.5);
+            planeGroup.add(axisY);
+            dynamicObjects.push(axisY);
+            const axisYLabel = makeLabel('Y', '#ffffff', axisYEnd.clone().add(axisYDir.clone().multiplyScalar(0.2)), '0.8rem');
+            planeGroup.add(axisYLabel);
+            dynamicObjects.push(axisYLabel);
+
+            // Силы
+            const gravDir = new THREE.Vector3(0, -1, 0);
+            const gravEnd = worldCenter.clone().add(gravDir.clone().multiplyScalar(scale));
+            const gravArrow = createArrow(worldCenter, gravEnd, 0xff4444, 3);
+            group.add(gravArrow);
+            dynamicObjects.push(gravArrow);
+            const gravLabel = makeLabel('mg', '#ff4444', new THREE.Vector3(worldCenter.x + 0.25, worldCenter.y - scale * 0.5, 0), '0.8rem');
+            group.add(gravLabel);
+            dynamicObjects.push(gravLabel);
+
+            const normalDirLocal = new THREE.Vector3(0, 1, 0);
+            const normalEndLocal = center.clone().add(normalDirLocal.clone().multiplyScalar(scale * 0.9));
+            const normalArrowLocal = createArrow(center, normalEndLocal, 0x44ff88, 3);
+            planeGroup.add(normalArrowLocal);
+            dynamicObjects.push(normalArrowLocal);
+            const normalLabelLocal = makeLabel('N', '#44ff88', normalEndLocal.clone().add(normalDirLocal.clone().multiplyScalar(0.25)), '0.8rem');
+            planeGroup.add(normalLabelLocal);
+            dynamicObjects.push(normalLabelLocal);
+
+            const frictionDirLocal = new THREE.Vector3(-1, 0, 0);
+            const frictionEndLocal = center.clone().add(frictionDirLocal.clone().multiplyScalar(scale * 1.4 * (mu + 0.1)));
+            const frictionArrowLocal = createArrow(center, frictionEndLocal, 0xffaa44, 3);
+            planeGroup.add(frictionArrowLocal);
+            dynamicObjects.push(frictionArrowLocal);
+            const frictionLabelLocal = makeLabel('Fтр', '#ffaa44', frictionEndLocal.clone().add(frictionDirLocal.clone().multiplyScalar(0.25)), '0.8rem');
+            planeGroup.add(frictionLabelLocal);
+            dynamicObjects.push(frictionLabelLocal);
+
+            const pullDirLocal = new THREE.Vector3(1, 0, 0);
+            const pullEndLocal = center.clone().add(pullDirLocal.clone().multiplyScalar(scale * 0.8));
+            const pullArrowLocal = createArrow(center, pullEndLocal, 0x44aaff, 3);
+            planeGroup.add(pullArrowLocal);
+            dynamicObjects.push(pullArrowLocal);
+            const pullLabelLocal = makeLabel('Fтяги', '#44aaff', pullEndLocal.clone().add(pullDirLocal.clone().multiplyScalar(0.25)), '0.8rem');
+            planeGroup.add(pullLabelLocal);
+            dynamicObjects.push(pullLabelLocal);
+
+            if (showProjections) {
+                const cosAlpha = Math.cos(Math.abs(angle));
+                const sinAlpha = Math.sin(Math.abs(angle));
+
+                if (cosAlpha > 0.01) {
+                    const cosDirLocal = new THREE.Vector3(0, -1, 0);
+                    const cosEndLocal = center.clone().add(cosDirLocal.clone().multiplyScalar(scale * 0.7 * cosAlpha));
+                    const cosArrowLocal = createArrow(center, cosEndLocal, 0xaa66ff, 3);
+                    planeGroup.add(cosArrowLocal);
+                    dynamicObjects.push(cosArrowLocal);
+                    const cosLabelLocal = makeLabel('mg·cosα', '#aa66ff', cosEndLocal.clone().add(cosDirLocal.clone().multiplyScalar(0.25)), '0.7rem');
+                    planeGroup.add(cosLabelLocal);
+                    dynamicObjects.push(cosLabelLocal);
+                }
+
+                if (sinAlpha > 0.01) {
+                    const projLength = scale * 0.6 * sinAlpha;
+                    const projDirLocal = new THREE.Vector3(1, 0, 0);
+                    const projEndLocal = center.clone().add(projDirLocal.clone().multiplyScalar(projLength));
+                    const projArrowLocal = createArrow(center, projEndLocal, 0xff6644, 1, true);
+                    planeGroup.add(projArrowLocal);
+                    dynamicObjects.push(projArrowLocal);
+                    const projLabelLocal = makeLabel('mg·sinα', '#ff6644', projEndLocal.clone().add(projDirLocal.clone().multiplyScalar(0.25)), '0.7rem');
+                    planeGroup.add(projLabelLocal);
+                    dynamicObjects.push(projLabelLocal);
+                }
+
+                if (Math.abs(angle) > 0.01) {
+                    const arcRadius = 0.4;
+                    const arcCenter = new THREE.Vector3(0, 0.25, 0);
+                    const startA = -Math.PI/2;
+                    const endA = -Math.PI/2 + angle;
+                    const arc = createAngleArc(arcCenter, arcRadius, Math.min(startA, endA), Math.max(startA, endA), 0xffff44);
+                    planeGroup.add(arc);
+                    dynamicObjects.push(arc);
+
+                    const midAngle = startA + angle / 2;
+                    const labelPos = new THREE.Vector3(
+                        arcCenter.x + (arcRadius + 0.2) * Math.cos(midAngle),
+                        arcCenter.y + (arcRadius + 0.2) * Math.sin(midAngle),
+                        0
+                    );
+                    const alphaLabel = makeLabel('α', '#ffff44', labelPos, '0.8rem');
+                    planeGroup.add(alphaLabel);
+                    dynamicObjects.push(alphaLabel);
+                }
+            }
+
+            const legendItems = document.querySelectorAll('#container-block .projection-legend');
+            legendItems.forEach(el => {
+                el.style.display = showProjections ? 'inline-flex' : 'none';
+            });
+            projectionsBtn.textContent = showProjections ? '📐 Скрыть проекции' : '📐 Показать проекции';
+            projectionsBtn.classList.toggle('active', showProjections);
+        };
+
+        projectionsBtn.addEventListener('click', () => {
+            showProjections = !showProjections;
+            window.buildBlockScene();
+        });
+
+        muSlider.addEventListener('input', window.buildBlockScene);
+        angleSlider.addEventListener('input', window.buildBlockScene);
+
+        document.getElementById('fs-block').addEventListener('click', async () => {
+            if (!document.fullscreenElement) {
+                await container.requestFullscreen();
+                if (screen.orientation && screen.orientation.lock) {
+                    try { await screen.orientation.lock('portrait'); } catch(e) {}
+                }
+            } else {
+                await document.exitFullscreen();
+                if (screen.orientation && screen.orientation.unlock) {
+                    try { screen.orientation.unlock(); } catch(e) {}
+                }
+            }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 + 0.25;
+        controls.minPolarAngle = Math.PI / 2 - 0.25;
+        controls.target.set(0.4, 0.4, 0);
+        controls.update();
+
+        window.buildBlockScene();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- 3D-модель 2: Пружина с грузом (вертикальная) -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-spring');
+        const canvas = document.getElementById('canvas-spring');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(3.5, 2.5, 5);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.75rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function createArrow(from, to, color, thickness = 2, dash = false) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            let lineMat = new THREE.LineBasicMaterial({ color, linewidth: thickness });
+            if (dash) {
+                lineMat = new THREE.LineDashedMaterial({
+                    color: color,
+                    dashSize: 0.04,
+                    gapSize: 0.04,
+                    transparent: true,
+                    opacity: 0.5
+                });
+            }
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                lineMat
+            );
+            if (dash) line.computeLineDistances();
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.055, 0.12, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.3) })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.06)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        function createAxis(from, to, color, thickness = 1.5) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            const lineMat = new THREE.LineBasicMaterial({ color, linewidth: thickness, transparent: true, opacity: 0.7 });
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                lineMat
+            );
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.04, 0.1, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.2), transparent: true, opacity: 0.7 })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.05)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        function createSpring(start, end, coils = 14, radius = 0.12, color = 0xcccccc) {
+            const group = new THREE.Group();
+            const dir = end.clone().sub(start);
+            const length = dir.length();
+            if (length < 0.01) return group;
+            dir.normalize();
+
+            const perp = new THREE.Vector3(0, 0, 1);
+            if (Math.abs(dir.dot(perp)) > 0.99) {
+                perp.set(1, 0, 0);
+            }
+            const right = new THREE.Vector3().crossVectors(dir, perp).normalize();
+            const up = new THREE.Vector3().crossVectors(right, dir).normalize();
+
+            const points = [];
+            const steps = coils * 2;
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const pos = start.clone().add(dir.clone().multiplyScalar(t * length));
+                const angle = t * coils * 2 * Math.PI;
+                const offset = right.clone().multiplyScalar(radius * Math.cos(angle))
+                    .add(up.clone().multiplyScalar(radius * Math.sin(angle)));
+                pos.add(offset);
+                points.push(pos);
+            }
+
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ color, linewidth: 1 });
+            const line = new THREE.Line(geometry, material);
+            group.add(line);
+            return group;
+        }
+
+        function createSphere(radius, color, pos) {
+            const geo = new THREE.SphereGeometry(radius, 16, 16);
+            const mat = new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.2) });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(pos);
+            return mesh;
+        }
+
+        function createCylinder(radiusTop, radiusBot, height, color, pos) {
+            const geo = new THREE.CylinderGeometry(radiusTop, radiusBot, height, 12);
+            const mat = new THREE.MeshStandardMaterial({ color, metalness: 0.3, roughness: 0.4 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(pos);
+            return mesh;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const massSlider = document.getElementById('spring-mass');
+        const kSlider = document.getElementById('spring-k');
+        const massValue = document.getElementById('spring-mass-value');
+        const kValue = document.getElementById('spring-k-value');
+        const massLabel = document.getElementById('spring-mass-label');
+        const kLabel = document.getElementById('spring-k-label');
+        const deltaLabel = document.getElementById('spring-delta-label');
+
+        let dynamicObjects = [];
+
+        function clearDynamicObjects() {
+            dynamicObjects.forEach(obj => {
+                if (obj.parent) obj.parent.remove(obj);
+                obj.traverse((child) => {
+                    if (child.isMesh) {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    }
+                    if (child.isLine) {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) child.material.dispose();
+                    }
+                });
+            });
+            dynamicObjects = [];
+        }
+
+        window.buildSpringScene = function() {
+            clearDynamicObjects();
+
+            const mass = parseFloat(massSlider.value);
+            const k = parseFloat(kSlider.value);
+            massValue.textContent = mass.toFixed(1);
+            kValue.textContent = k.toFixed(0);
+            massLabel.textContent = mass.toFixed(1) + ' кг';
+            kLabel.textContent = k.toFixed(0) + ' Н/м';
+
+            const g = 9.8;
+            const mg = mass * g;
+            const deltaX = mg / k;
+            deltaLabel.textContent = deltaX.toFixed(3) + ' м';
+
+            // Параметры пружины
+            const topY = 2.0;
+            const restLen = 1.2;
+            const totalLen = restLen + Math.min(deltaX, 2.0);
+            const bottomY = topY - totalLen;
+
+            // Кронштейн (опора)
+            const bracket = createCylinder(0.4, 0.4, 0.08, 0x666666, new THREE.Vector3(0, topY + 0.04, 0));
+            group.add(bracket);
+            dynamicObjects.push(bracket);
+
+            // Пружина
+            const springStart = new THREE.Vector3(0, topY - 0.05, 0);
+            const springEnd = new THREE.Vector3(0, bottomY + 0.05, 0);
+            const spring = createSpring(springStart, springEnd, 12, 0.12, 0xcccccc);
+            group.add(spring);
+            dynamicObjects.push(spring);
+
+            // Груз (шарик)
+            const ball = createSphere(0.2, 0x4fc3f7, new THREE.Vector3(0, bottomY, 0));
+            group.add(ball);
+            dynamicObjects.push(ball);
+
+            // Оси координат (короткие, для ориентира)
+            const axisLen = 0.8;
+            const center = new THREE.Vector3(0, bottomY, 0);
+
+            const axisX = createAxis(center, new THREE.Vector3(axisLen, bottomY, 0), 0xffffff, 1.5);
+            group.add(axisX);
+            dynamicObjects.push(axisX);
+            const axisXLabel = makeLabel('X', '#ffffff', new THREE.Vector3(axisLen + 0.15, bottomY, 0), '0.7rem');
+            group.add(axisXLabel);
+            dynamicObjects.push(axisXLabel);
+
+            const axisY = createAxis(center, new THREE.Vector3(0, bottomY + axisLen, 0), 0xffffff, 1.5);
+            group.add(axisY);
+            dynamicObjects.push(axisY);
+            const axisYLabel = makeLabel('Y', '#ffffff', new THREE.Vector3(0, bottomY + axisLen + 0.15, 0), '0.7rem');
+            group.add(axisYLabel);
+            dynamicObjects.push(axisYLabel);
+
+            // Силы
+            const scale = Math.min(mg * 0.035, 1.8);
+
+            // Сила тяжести (вниз)
+            const gravEnd = new THREE.Vector3(0, bottomY - scale, 0);
+            const gravArrow = createArrow(new THREE.Vector3(0, bottomY, 0), gravEnd, 0xff4444, 3);
+            group.add(gravArrow);
+            dynamicObjects.push(gravArrow);
+            const gravLabel = makeLabel('mg', '#ff4444', new THREE.Vector3(0.2, bottomY - scale * 0.5, 0), '0.8rem');
+            group.add(gravLabel);
+            dynamicObjects.push(gravLabel);
+
+            // Сила упругости (вверх)
+            const springForceEnd = new THREE.Vector3(0, bottomY + scale * 0.9, 0);
+            const springArrow = createArrow(new THREE.Vector3(0, bottomY, 0), springForceEnd, 0x44ff88, 3);
+            group.add(springArrow);
+            dynamicObjects.push(springArrow);
+            const springLabel = makeLabel('Fупр', '#44ff88', new THREE.Vector3(0.2, bottomY + scale * 0.45, 0), '0.8rem');
+            group.add(springLabel);
+            dynamicObjects.push(springLabel);
+
+            // Линия растяжения (пунктир, показывает Δx)
+            if (deltaX > 0.01) {
+                const dashStart = new THREE.Vector3(0.35, topY - 0.1, 0);
+                const dashEnd = new THREE.Vector3(0.35, bottomY + 0.1, 0);
+                const dashArrow = createArrow(dashStart, dashEnd, 0xffff44, 1, true);
+                group.add(dashArrow);
+                dynamicObjects.push(dashArrow);
+
+                const deltaLabel2 = makeLabel('Δx', '#ffff44', new THREE.Vector3(0.55, (topY + bottomY) / 2, 0), '0.7rem');
+                group.add(deltaLabel2);
+                dynamicObjects.push(deltaLabel2);
+            }
+        };
+
+        massSlider.addEventListener('input', window.buildSpringScene);
+        kSlider.addEventListener('input', window.buildSpringScene);
+
+        document.getElementById('fs-spring').addEventListener('click', async () => {
+            if (!document.fullscreenElement) {
+                await container.requestFullscreen();
+                if (screen.orientation && screen.orientation.lock) {
+                    try { await screen.orientation.lock('portrait'); } catch(e) {}
+                }
+            } else {
+                await document.exitFullscreen();
+                if (screen.orientation && screen.orientation.unlock) {
+                    try { screen.orientation.unlock(); } catch(e) {}
+                }
+            }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 + 0.25;
+        controls.minPolarAngle = Math.PI / 2 - 0.25;
+        controls.target.set(0, 0.5, 0);
+        controls.update();
+
+        window.buildSpringScene();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+</body>
+</html>

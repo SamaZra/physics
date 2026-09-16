@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Идеальный газ. Основное уравнение МКТ. Температура</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-container.hidden{display:none;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:110px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .favorite-btn{position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1000;color:var(--text-secondary);transition:all 0.2s;backdrop-filter:blur(4px);}
+        .favorite-btn:hover{transform:scale(1.1);}
+        .favorite-btn.active{color:#facc15;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:80px;top:8px;right:8px;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>Идеальный газ. Основное уравнение МКТ.<br>Температура и её измерение</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Идеальный газ</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Идеальный газ</strong> — это модель реального газа, в которой:</p>
+                <ul>
+                    <li>молекулы рассматриваются как <span class="important">материальные точки</span> (их собственным объёмом пренебрегают);</li>
+                    <li>между молекулами <span class="important">нет сил притяжения и отталкивания</span> (кроме момента столкновения);</li>
+                    <li>столкновения молекул между собой и со стенками сосуда <span class="important">абсолютно упругие</span>;</li>
+                    <li>молекулы движутся <span class="important">хаотически</span>, подчиняясь законам Ньютона.</li>
+                </ul>
+                <p>Реальный газ ведёт себя как идеальный при <span class="important">небольших давлениях и не слишком низких температурах</span>, когда расстояния между молекулами велики по сравнению с их размерами, а силы взаимодействия малы.</p>
+                <p><strong>Основные характеристики молекул газа:</strong></p>
+                <ul>
+                    <li>масса молекулы $m_0$;</li>
+                    <li>концентрация $n$ — число молекул в единице объёма;</li>
+                    <li>средняя квадратичная скорость $\bar{v} = \sqrt{\dfrac{v_1^2 + v_2^2 + \dots + v_N^2}{N}}$.</li>
+                </ul>
+                <p><strong>Давление газа</strong> с точки зрения МКТ — результат ударов молекул о стенки сосуда. Чем чаще удары и чем они сильнее, тем больше давление.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Основное уравнение МКТ</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Основное уравнение МКТ идеального газа</strong> связывает <span class="important">давление газа</span> с микроскопическими характеристиками его молекул:</p>
+                <div class="formula-block">
+                    <span class="f">$p = \dfrac{1}{3} m_0 n \bar{v}^2$</span>
+                    <span class="f-label">— основное уравнение МКТ</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$p$ — давление газа (Па);</li>
+                    <li>$m_0$ — масса одной молекулы (кг);</li>
+                    <li>$n$ — концентрация молекул (м$^{-3}$);</li>
+                    <li>$\bar{v}^2$ — средний квадрат скорости молекул (м²/с²).</li>
+                </ul>
+                <p><strong>Физический смысл:</strong> давление газа определяется произведением средней кинетической энергии поступательного движения молекул на их концентрацию:</p>
+                <div class="formula-block">
+                    <span class="f">$p = \dfrac{2}{3} n \bar{E}_k$</span>
+                    <span class="f-label">— давление через среднюю кинетическую энергию</span>
+                </div>
+                <p>где $\bar{E}_k = \dfrac{m_0 \bar{v}^2}{2}$ — средняя кинетическая энергия одной молекулы.</p>
+                <p><strong>Средняя кинетическая энергия</strong> молекулы идеального газа прямо пропорциональна абсолютной температуре:</p>
+                <div class="formula-block">
+                    <span class="f">$\bar{E}_k = \dfrac{3}{2} k T$</span>
+                    <span class="f-label">— средняя кинетическая энергия молекулы</span>
+                </div>
+                <p>где $k = 1{,}38 \cdot 10^{-23}$ Дж/К — <span class="important">постоянная Больцмана</span>, $T$ — абсолютная температура.</p>
+                <p><strong>Средняя квадратичная скорость</strong> молекул:</p>
+                <div class="formula-block">
+                    <span class="f">$\bar{v} = \sqrt{\dfrac{3kT}{m_0}} = \sqrt{\dfrac{3RT}{M}}$</span>
+                    <span class="f-label">— средняя квадратичная скорость</span>
+                </div>
+                <p>где $R = 8{,}31$ Дж/(моль·К) — универсальная газовая постоянная, $M$ — молярная масса.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🌡️ Температура и её измерение</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Температура</strong> — физическая величина, характеризующая <span class="important">степень нагретости</span> тела. С точки зрения МКТ температура — мера <span class="important">средней кинетической энергии</span> теплового движения молекул.</p>
+                <p><strong>Абсолютная температура</strong> (по шкале Кельвина) измеряется в кельвинах (К). Связь с температурой по Цельсию:</p>
+                <div class="formula-block">
+                    <span class="f">$T = t + 273$</span>
+                    <span class="f-label">— переход от °C к К</span>
+                </div>
+                <p>где $t$ — температура по Цельсию (°C), $T$ — абсолютная температура (К).</p>
+                <p><strong>Абсолютный нуль</strong> ($T = 0$ К $\approx -273$ °C) — температура, при которой тепловое движение молекул прекращается (теоретически). Достичь абсолютного нуля невозможно.</p>
+                <p><strong>Постоянная Больцмана:</strong></p>
+                <div class="formula-block">
+                    <span class="f">$k = \dfrac{R}{N_A} = 1{,}38 \cdot 10^{-23} \text{ Дж/К}$</span>
+                    <span class="f-label">— постоянная Больцмана</span>
+                </div>
+                <p><strong>Связь давления с температурой:</strong> подставляя $\bar{E}_k = \dfrac{3}{2}kT$ в $p = \dfrac{2}{3}n\bar{E}_k$, получаем:</p>
+                <div class="formula-block">
+                    <span class="f">$p = nkT$</span>
+                    <span class="f-label">— связь давления с температурой и концентрацией</span>
+                </div>
+                <p><strong>Важно:</strong> температура — величина, одинаковая для всех молекул газа в состоянии теплового равновесия, независимо от их массы. Более массивные молекулы движутся медленнее, но их средняя кинетическая энергия такая же, как у лёгких молекул.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛЬ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивная 3D-модель</div>
+        <div class="section-content">
+
+            <div class="model-container" id="container-ideal">
+                <canvas id="canvas-ideal" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-ideal">⛶</button>
+                <div class="info-display">
+                    <div>$T$ = <span class="val" id="ideal-temp-display">300</span> К</div>
+                    <div>$v$ = <span class="val" id="ideal-v-display">0</span> м/с</div>
+                    <div>$N$ = <span class="val" id="ideal-n-display">0</span></div>
+                </div>
+            </div>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Температура $T$ (К)</label>
+                    <input type="range" id="ideal-temp" min="100" max="1000" step="10" value="300">
+                    <span class="control-value" id="ideal-temp-value">300</span>
+                </div>
+                <div class="control-group">
+                    <label>Число молекул</label>
+                    <input type="range" id="ideal-count" min="20" max="150" step="5" value="60">
+                    <span class="control-value" id="ideal-count-value">60</span>
+                </div>
+                <button class="btn-reset" id="ideal-reset">⟳ Сброс</button>
+                <span class="control-label">⬤ Чем выше $T$ — тем быстрее молекулы · Чем больше $N$ — тем чаще удары</span>
+            </div>
+            <div class="def-card">
+                <p><strong>Модель идеального газа.</strong> Молекулы (шарики) летают в кубическом сосуде и упруго отражаются от стенок. Давление на стенки — результат ударов молекул.</p>
+                <p><span class="important">Температура</span> управляет скоростью молекул. Чем выше $T$, тем быстрее они движутся и тем сильнее ударяют о стенки.</p>
+                <p><span class="important">Число молекул</span> — чем больше, тем чаще удары и тем выше давление.</p>
+                <p>Информационное табло показывает текущую абсолютную температуру $T$, среднюю скорость $v$ и число молекул $N$.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Давление газа</div>
+                <div class="task-condition"><strong>Условие:</strong> Концентрация молекул газа $n = 3 \cdot 10^{25}$ м$^{-3}$, средняя квадратичная скорость $\bar{v} = 500$ м/с, масса молекулы $m_0 = 5 \cdot 10^{-26}$ кг. Найдите давление газа.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $n = 3 \cdot 10^{25}$ м$^{-3}$, $\bar{v} = 500$ м/с, $m_0 = 5 \cdot 10^{-26}$ кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Основное уравнение МКТ: <span class="formula">$p = \dfrac{1}{3} m_0 n \bar{v}^2$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> $\bar{v}^2 = 500^2 = 2{,}5 \cdot 10^5$ м²/с².</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$p = \dfrac{1}{3} \cdot 5 \cdot 10^{-26} \cdot 3 \cdot 10^{25} \cdot 2{,}5 \cdot 10^5 \approx 1{,}25 \cdot 10^5 \text{ Па}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Полученное давление около 125 кПа — близко к атмосферному. Это типичное значение для газа в нормальных условиях.</div>
+                    <div class="answer">✅ Ответ: $p \approx 1{,}25 \cdot 10^5$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Средняя кинетическая энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите среднюю кинетическую энергию поступательного движения молекулы идеального газа при температуре $T = 400$ К.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T = 400$ К, $k = 1{,}38 \cdot 10^{-23}$ Дж/К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\bar{E}_k$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: <span class="formula">$\bar{E}_k = \dfrac{3}{2}kT$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\bar{E}_k = \dfrac{3}{2} \cdot 1{,}38 \cdot 10^{-23} \cdot 400 \approx 8{,}28 \cdot 10^{-21} \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Средняя кинетическая энергия молекулы при 400 К — около $8 \cdot 10^{-21}$ Дж. Это очень малая величина, но её достаточно для теплового движения.</div>
+                    <div class="answer">✅ Ответ: $\bar{E}_k \approx 8{,}28 \cdot 10^{-21}$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Средняя квадратичная скорость</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите среднюю квадратичную скорость молекул кислорода $O_2$ при температуре $T = 300$ К. Молярная масса кислорода $M = 32$ г/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T = 300$ К, $M = 0{,}032$ кг/моль, $R = 8{,}31$ Дж/(моль·К)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\bar{v}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: <span class="formula">$\bar{v} = \sqrt{\dfrac{3RT}{M}}$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\bar{v} = \sqrt{\dfrac{3 \cdot 8{,}31 \cdot 300}{0{,}032}} = \sqrt{\dfrac{7479}{0{,}032}} \approx \sqrt{233719} \approx 483 \text{ м/с}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Средняя скорость молекул кислорода при комнатной температуре — около 480 м/с. Это сравнимо со скоростью звука в воздухе (340 м/с).</div>
+                    <div class="answer">✅ Ответ: $\bar{v} \approx 483$ м/с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Переход от Цельсия к Кельвину</div>
+                <div class="task-condition"><strong>Условие:</strong> Температура воздуха равна $t = 27$ °C. Найдите абсолютную температуру и среднюю кинетическую энергию молекулы.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $t = 27$ °C, $k = 1{,}38 \cdot 10^{-23}$ Дж/К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $T$, $\bar{E}_k$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $T = t + 273 = 27 + 273 = 300$ К.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\bar{E}_k = \dfrac{3}{2} \cdot 1{,}38 \cdot 10^{-23} \cdot 300 \approx 6{,}21 \cdot 10^{-21} \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При комнатной температуре (300 К) средняя кинетическая энергия молекулы — около $6 \cdot 10^{-21}$ Дж.</div>
+                    <div class="answer">✅ Ответ: $T = 300$ К, $\bar{E}_k \approx 6{,}21 \cdot 10^{-21}$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Давление через температуру</div>
+                <div class="task-condition"><strong>Условие:</strong> Концентрация молекул газа $n = 2 \cdot 10^{25}$ м$^{-3}$, температура $T = 300$ К. Найдите давление газа.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $n = 2 \cdot 10^{25}$ м$^{-3}$, $T = 300$ К, $k = 1{,}38 \cdot 10^{-23}$ Дж/К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: <span class="formula">$p = nkT$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p = 2 \cdot 10^{25} \cdot 1{,}38 \cdot 10^{-23} \cdot 300 \approx 8{,}28 \cdot 10^4 \text{ Па}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Давление около 83 кПа — чуть меньше атмосферного, что соответствует данным условиям.</div>
+                    <div class="answer">✅ Ответ: $p \approx 8{,}28 \cdot 10^4$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Масса молекулы по скорости</div>
+                <div class="task-condition"><strong>Условие:</strong> При температуре $T = 500$ К средняя квадратичная скорость молекул газа равна $\bar{v} = 600$ м/с. Найдите массу одной молекулы.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T = 500$ К, $\bar{v} = 600$ м/с, $k = 1{,}38 \cdot 10^{-23}$ Дж/К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m_0$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $\bar{v} = \sqrt{\dfrac{3kT}{m_0}}$ выражаем $m_0 = \dfrac{3kT}{\bar{v}^2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m_0 = \dfrac{3 \cdot 1{,}38 \cdot 10^{-23} \cdot 500}{600^2} = \dfrac{2{,}07 \cdot 10^{-20}}{3{,}6 \cdot 10^5} \approx 5{,}75 \cdot 10^{-26} \text{ кг}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Масса около $5{,}75 \cdot 10^{-26}$ кг — типичная для молекул газов (близка к массе молекулы кислорода или азота).</div>
+                    <div class="answer">✅ Ответ: $m_0 \approx 5{,}75 \cdot 10^{-26}$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Сравнение скоростей двух газов</div>
+                <div class="task-condition"><strong>Условие:</strong> Во сколько раз средняя квадратичная скорость молекул водорода $H_2$ ($M_1 = 2$ г/моль) больше скорости молекул кислорода $O_2$ ($M_2 = 32$ г/моль) при одной и той же температуре?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $M_1 = 0{,}002$ кг/моль, $M_2 = 0{,}032$ кг/моль, $T_1 = T_2$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{\bar{v}_1}{\bar{v}_2}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\bar{v} = \sqrt{\dfrac{3RT}{M}} \Rightarrow \dfrac{\bar{v}_1}{\bar{v}_2} = \sqrt{\dfrac{M_2}{M_1}}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{\bar{v}_1}{\bar{v}_2} = \sqrt{\dfrac{0{,}032}{0{,}002}} = \sqrt{16} = 4$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Лёгкие молекулы движутся быстрее тяжёлых в 4 раза при одинаковой температуре. Это объясняет, почему водород быстрее улетучивается из сосуда, чем кислород.</div>
+                    <div class="answer">✅ Ответ: $\dfrac{\bar{v}_1}{\bar{v}_2} = 4$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Давление через среднюю энергию</div>
+                <div class="task-condition"><strong>Условие:</strong> Концентрация молекул газа $n = 4 \cdot 10^{25}$ м$^{-3}$, средняя кинетическая энергия одной молекулы $\bar{E}_k = 9 \cdot 10^{-21}$ Дж. Найдите давление газа.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $n = 4 \cdot 10^{25}$ м$^{-3}$, $\bar{E}_k = 9 \cdot 10^{-21}$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: <span class="formula">$p = \dfrac{2}{3} n \bar{E}_k$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p = \dfrac{2}{3} \cdot 4 \cdot 10^{25} \cdot 9 \cdot 10^{-21} = 24 \cdot 10^4 \approx 2{,}4 \cdot 10^5 \text{ Па}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Давление около 240 кПа — примерно в 2,4 раза выше атмосферного.</div>
+                    <div class="answer">✅ Ответ: $p \approx 2{,}4 \cdot 10^5$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Температура по средней энергии</div>
+                <div class="task-condition"><strong>Условие:</strong> Средняя кинетическая энергия молекулы газа равна $\bar{E}_k = 1{,}2 \cdot 10^{-20}$ Дж. Найдите температуру газа.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\bar{E}_k = 1{,}2 \cdot 10^{-20}$ Дж, $k = 1{,}38 \cdot 10^{-23}$ Дж/К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $T$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $\bar{E}_k = \dfrac{3}{2}kT$ выражаем $T = \dfrac{2\bar{E}_k}{3k}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$T = \dfrac{2 \cdot 1{,}2 \cdot 10^{-20}}{3 \cdot 1{,}38 \cdot 10^{-23}} = \dfrac{2{,}4 \cdot 10^{-20}}{4{,}14 \cdot 10^{-23}} \approx 580 \text{ К}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Температура около 580 К — это примерно 307 °C. Такая температура типична для нагретого газа в технических устройствах.</div>
+                    <div class="answer">✅ Ответ: $T \approx 580$ К</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Скорость при изменении температуры</div>
+                <div class="task-condition"><strong>Условие:</strong> При температуре $T_1 = 200$ К средняя квадратичная скорость молекул газа равна $\bar{v}_1 = 400$ м/с. Какой станет скорость при $T_2 = 800$ К?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 200$ К, $\bar{v}_1 = 400$ м/с, $T_2 = 800$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\bar{v}_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\bar{v} = \sqrt{\dfrac{3RT}{M}} \Rightarrow \dfrac{\bar{v}_2}{\bar{v}_1} = \sqrt{\dfrac{T_2}{T_1}}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $\dfrac{\bar{v}_2}{\bar{v}_1} = \sqrt{\dfrac{800}{200}} = \sqrt{4} = 2$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$\bar{v}_2 = 2 \cdot 400 = 800 \text{ м/с}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При увеличении абсолютной температуры в 4 раза скорость молекул растёт в 2 раза (так как скорость пропорциональна корню из температуры).</div>
+                    <div class="answer">✅ Ответ: $\bar{v}_2 = 800$ м/с</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+</script>
+
+<!-- 3D-модель идеального газа -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-ideal');
+        const canvas = document.getElementById('canvas-ideal');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(4, 3, 8);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        const key = new THREE.DirectionalLight(0xffffff, 0.9);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Сосуд — куб со стороной 6
+        const BOX = 6;
+        const HALF = BOX / 2;
+
+        const boxGeo = new THREE.BoxGeometry(BOX, BOX, BOX);
+        const boxEdges = new THREE.EdgesGeometry(boxGeo);
+        const boxLines = new THREE.LineSegments(boxEdges, new THREE.LineBasicMaterial({ color: 0x8ba5b8, transparent: true, opacity: 0.5 }));
+        group.add(boxLines);
+
+        // Прозрачные стенки
+        const wallMat = new THREE.MeshBasicMaterial({ color: 0x4488ff, transparent: true, opacity: 0.05, side: THREE.BackSide });
+        const boxMesh = new THREE.Mesh(boxGeo, wallMat);
+        group.add(boxMesh);
+
+        const molGeo = new THREE.SphereGeometry(0.15, 12, 12);
+        const molMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x442200 });
+
+        let molecules = [];
+        let N = 60;
+        let T = 300;
+
+        function initMolecules() {
+            molecules.forEach(m => group.remove(m.mesh));
+            molecules.length = 0;
+            for (let i = 0; i < N; i++) {
+                const mesh = new THREE.Mesh(molGeo, molMat);
+                mesh.position.set(
+                    (Math.random() - 0.5) * (BOX - 0.4),
+                    (Math.random() - 0.5) * (BOX - 0.4),
+                    (Math.random() - 0.5) * (BOX - 0.4)
+                );
+                group.add(mesh);
+                const dir = new THREE.Vector3(
+                    Math.random() - 0.5,
+                    Math.random() - 0.5,
+                    Math.random() - 0.5
+                ).normalize();
+                molecules.push({
+                    mesh,
+                    vx: dir.x,
+                    vy: dir.y,
+                    vz: dir.z
+                });
+            }
+        }
+
+        const tempSlider = document.getElementById('ideal-temp');
+        const tempValue = document.getElementById('ideal-temp-value');
+        const tempDisplay = document.getElementById('ideal-temp-display');
+        const vDisplay = document.getElementById('ideal-v-display');
+        const nDisplay = document.getElementById('ideal-n-display');
+        const countSlider = document.getElementById('ideal-count');
+        const countValue = document.getElementById('ideal-count-value');
+        const resetBtn = document.getElementById('ideal-reset');
+
+        function updateVDisplay() {
+            // Средняя скорость пропорциональна sqrt(T)
+            const v = Math.round(Math.sqrt(T / 300) * 500);
+            vDisplay.textContent = v;
+        }
+
+        tempSlider.addEventListener('input', () => {
+            T = parseFloat(tempSlider.value);
+            tempValue.textContent = T;
+            tempDisplay.textContent = T;
+            updateVDisplay();
+        });
+        countSlider.addEventListener('input', () => {
+            N = parseInt(countSlider.value);
+            countValue.textContent = N;
+            nDisplay.textContent = N;
+            initMolecules();
+        });
+        resetBtn.addEventListener('click', () => {
+            T = 300; N = 60;
+            tempSlider.value = 300; tempValue.textContent = '300'; tempDisplay.textContent = '300';
+            countSlider.value = 60; countValue.textContent = '60'; nDisplay.textContent = '60';
+            updateVDisplay();
+            initMolecules();
+        });
+
+        document.getElementById('fs-ideal').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        initMolecules();
+        updateVDisplay();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Скорость пропорциональна sqrt(T)
+            const speed = Math.sqrt(T / 300) * 0.06;
+
+            molecules.forEach(m => {
+                m.mesh.position.x += m.vx * speed;
+                m.mesh.position.y += m.vy * speed;
+                m.mesh.position.z += m.vz * speed;
+
+                // Отражение от стенок
+                if (m.mesh.position.x > HALF - 0.15) { m.mesh.position.x = HALF - 0.15; m.vx *= -1; }
+                if (m.mesh.position.x < -HALF + 0.15) { m.mesh.position.x = -HALF + 0.15; m.vx *= -1; }
+                if (m.mesh.position.y > HALF - 0.15) { m.mesh.position.y = HALF - 0.15; m.vy *= -1; }
+                if (m.mesh.position.y < -HALF + 0.15) { m.mesh.position.y = -HALF + 0.15; m.vy *= -1; }
+                if (m.mesh.position.z > HALF - 0.15) { m.mesh.position.z = HALF - 0.15; m.vz *= -1; }
+                if (m.mesh.position.z < -HALF + 0.15) { m.mesh.position.z = -HALF + 0.15; m.vz *= -1; }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

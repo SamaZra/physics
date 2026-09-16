@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Основные положения МКТ и их опытное обоснование</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-container.hidden{display:none;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .favorite-btn{position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1000;color:var(--text-secondary);transition:all 0.2s;backdrop-filter:blur(4px);}
+        .favorite-btn:hover{transform:scale(1.1);}
+        .favorite-btn.active{color:#facc15;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>Основные положения МКТ и их опытное обоснование.<br>Строение газообразных, жидких и твёрдых тел</h1>
+
+    <!-- ===== ТЕОРИЯ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Основные положения МКТ</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Молекулярно-кинетическая теория (МКТ)</strong> — учение о строении и свойствах вещества, основанное на представлении о том, что все тела состоят из мельчайших частиц (молекул, атомов, ионов), находящихся в непрерывном тепловом движении и взаимодействующих друг с другом.</p>
+                <p><strong>Три основных положения МКТ:</strong></p>
+                <ul>
+                    <li><span class="important">1. Все тела состоят из частиц</span> — атомов, молекул, ионов — с промежутками между ними. Промежутки бывают больше самих частиц, что объясняет сжимаемость газов и растворимость веществ.</li>
+                    <li><span class="important">2. Частицы непрерывно и хаотически движутся</span> — это тепловое движение. Его интенсивность растёт с температурой.</li>
+                    <li><span class="important">3. Частицы взаимодействуют друг с другом</span> — одновременно притягиваются и отталкиваются. Силы притяжения преобладают на расстояниях больше размера частиц, силы отталкивания — на меньших.</li>
+                </ul>
+                <p><strong>Масса и размеры молекул.</strong> Диаметр молекулы порядка $10^{-10}$ м, масса — порядка $10^{-26}$ кг. Число молекул в 1 моле вещества называется <span class="important">постоянной Авогадро</span>:</p>
+                <p>$N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</p>
+                <p><strong>Количество вещества</strong> $\nu$ — отношение числа молекул $N$ к постоянной Авогадро:</p>
+                <p>$\nu = \dfrac{N}{N_A} = \dfrac{m}{M}$</p>
+                <p>где $m$ — масса вещества, $M$ — молярная масса.</p>
+                <p><strong>Молярная масса</strong> $M$ — масса одного моля вещества. Связана с массой одной молекулы $m_0$:</p>
+                <p>$M = m_0 \cdot N_A$</p>
+                <p><strong>Концентрация молекул</strong> $n$ — число молекул в единице объёма:</p>
+                <p>$n = \dfrac{N}{V}$</p>
+            </div>
+
+            <div class="formula-block">
+                <span class="f">$\nu = \dfrac{m}{M} = \dfrac{N}{N_A}$</span>
+                <span class="f-label">— количество вещества</span>
+                <span class="f">$N = \nu \cdot N_A = \dfrac{m}{M} \cdot N_A$</span>
+                <span class="f-label">— число молекул</span>
+                <span class="f">$m_0 = \dfrac{M}{N_A}$</span>
+                <span class="f-label">— масса одной молекулы</span>
+                <span class="f">$n = \dfrac{N}{V}$</span>
+                <span class="f-label">— концентрация молекул</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔬 Опытное обоснование МКТ</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>1. Броуновское движение.</strong> В 1827 г. английский ботаник Роберт Броун, наблюдая в микроскоп за пыльцой цветов в воде, обнаружил, что мелкие частицы непрерывно и хаотически движутся. Это движение не прекращается и не зависит от внешних причин. Объяснение: частицы пыльцы испытывают нескомпенсированные удары молекул воды — это прямое доказательство непрерывного хаотического движения молекул.</p>
+                <p><strong>2. Диффузия.</strong> Явление взаимного проникновения молекул одного вещества в промежутки между молекулами другого. Примеры: распространение запаха в воздухе, окрашивание воды при добавлении чернил, растворение сахара. Диффузия ускоряется при повышении температуры — это доказывает, что скорость молекул растёт с температурой.</p>
+                <p><strong>3. Опыт Штерна (1920).</strong> Немецкий физик Отто Штерн экспериментально измерил скорости молекул газа. Он использовал вращающиеся цилиндры с узкой щелью — молекулы серебра, вылетая из источника, оставляли следы на внешнем цилиндре, смещённые относительно щели. По смещению вычислялась средняя скорость молекул.</p>
+                <p><strong>4. Опыт Перрена (1908).</strong> Французский физик Жан Перрен изучал распределение броуновских частиц по высоте и подтвердил, что оно подчиняется тем же законам, что и распределение молекул газа. Это дало возможность определить постоянную Авогадро.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧊 Строение газообразных, жидких и твёрдых тел</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Газы.</strong> Расстояния между молекулами во много раз больше самих молекул. Силы притяжения ничтожны, молекулы движутся хаотически и почти не взаимодействуют. Газ занимает весь предоставленный объём, легко сжимается, не имеет формы и объёма.</p>
+                <p><strong>Жидкости.</strong> Расстояния между молекулами порядка размеров самих молекул. Силы притяжения значительны, но молекулы могут перемещаться — «перескоками» из одного положения в другое. Жидкость сохраняет объём, но не сохраняет форму (принимает форму сосуда), практически несжимаема.</p>
+                <p><strong>Твёрдые тела.</strong> Молекулы расположены в строгом порядке (кристаллическая решётка), расстояния порядка размеров молекул. Силы притяжения очень велики, молекулы колеблются около своих положений равновесия. Твёрдое тело сохраняет и форму, и объём.</p>
+                <p><strong>Кристаллические и аморфные тела.</strong> Кристаллические имеют строго упорядоченное расположение частиц (поваренная соль, металлы, кварц). Аморфные — не имеют строгого порядка (стекло, смола, янтарь). Аморфные тела занимают промежуточное положение между твёрдыми и жидкими: они сохраняют форму, но не имеют определённой температуры плавления.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="brownian" onclick="switchModel('brownian')">🔵 Броуновское движение</div>
+                <div class="model-tab" data-model="diffusion" onclick="switchModel('diffusion')">🔴 Диффузия</div>
+                <div class="model-tab" data-model="structure" onclick="switchModel('structure')">🧊 Строение тел</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: БРОУНОВСКОЕ ДВИЖЕНИЕ -->
+            <div id="model-brownian" class="model-content">
+                <div class="model-container" id="container-brownian">
+                    <canvas id="canvas-brownian" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-brownian">⛶</button>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Температура</label>
+                        <input type="range" id="brownian-temp" min="1" max="10" step="0.5" value="5">
+                        <span class="control-value" id="brownian-temp-value">5.0</span>
+                    </div>
+                    <button class="btn-reset" id="brownian-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Чем выше температура — тем быстрее и хаотичнее движение</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Броуновское движение</strong> — хаотичное движение множества молекул. Они сталкиваются друг с другом и разлетаются. Двигайте ползунок температуры — скорость молекул растёт.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: ДИФФУЗИЯ -->
+            <div id="model-diffusion" class="model-content" style="display:none;">
+                <div class="model-container" id="container-diffusion">
+                    <canvas id="canvas-diffusion" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-diffusion">⛶</button>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Температура</label>
+                        <input type="range" id="diffusion-temp" min="0" max="10" step="0.5" value="3">
+                        <span class="control-value" id="diffusion-temp-value">3.0</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Сближение</label>
+                        <input type="range" id="diffusion-push" min="0" max="100" step="1" value="0">
+                        <span class="control-value" id="diffusion-push-value">0%</span>
+                    </div>
+                    <button class="btn-reset" id="diffusion-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Температура — скорость молекул · Сближение — насколько бруски соприкасаются</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Диффузия</strong> — взаимное проникновение молекул. Два бруска — красный и синий. Двигайте «Сближение», чтобы прижать их друг к другу. Молекулы на границе начинают переходить из одного бруска в другой — диффузия.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 3: СТРОЕНИЕ ТЕЛ -->
+            <div id="model-structure" class="model-content" style="display:none;">
+                <div class="model-container" id="container-structure">
+                    <canvas id="canvas-structure" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-structure">⛶</button>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Состояние</label>
+                        <input type="range" id="structure-state" min="0" max="2" step="0.01" value="0">
+                        <span class="control-value" id="structure-state-value">Газ</span>
+                    </div>
+                    <button class="btn-reset" id="structure-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ 0 — газ · 1 — жидкость · 2 — твёрдое тело (кристалл)</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Строение тел.</strong> Двигайте ползунок плавно: молекулы постепенно сближаются и образуют кристаллическую решётку.</p>
+                    <p><span class="important">Газ</span> — молекулы далеко, летают свободно.</p>
+                    <p><span class="important">Жидкость</span> — молекулы почти вплотную, колеблются и перескакивают.</p>
+                    <p><span class="important">Твёрдое тело</span> — строгий порядок, кристаллическая решётка, молекулы колеблются около узлов.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Количество вещества</div>
+                <div class="task-condition"><strong>Условие:</strong> Определите количество вещества в $m = 200$ г воды. Молярная масса воды $M = 18$ г/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 200$ г $= 0{,}2$ кг, $M = 18$ г/моль $= 0{,}018$ кг/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\nu$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула количества вещества: <span class="formula">$\nu = \dfrac{m}{M}$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> Подставляем значения: <span class="formula">$\nu = \dfrac{0{,}2}{0{,}018} \approx 11{,}1 \text{ моль}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Количество вещества показывает, сколько молей содержится в данной массе. 1 моль любого вещества содержит $6{,}02 \cdot 10^{23}$ молекул.</div>
+                    <div class="answer">✅ Ответ: $\nu \approx 11{,}1$ моль</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Число молекул</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько молекул содержится в $m = 1$ кг воды? Молярная масса воды $M = 18$ г/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 1$ кг, $M = 0{,}018$ кг/моль, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Количество вещества: $\nu = \dfrac{m}{M} = \dfrac{1}{0{,}018} \approx 55{,}6$ моль.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Число молекул: <span class="formula">$N = \nu \cdot N_A = 55{,}6 \cdot 6{,}02 \cdot 10^{23} \approx 3{,}35 \cdot 10^{25}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В 1 кг воды содержится около 33,5 септиллионов молекул — это колоссальное число.</div>
+                    <div class="answer">✅ Ответ: $N \approx 3{,}35 \cdot 10^{25}$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Масса одной молекулы</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите массу одной молекулы кислорода $O_2$. Молярная масса кислорода $M = 32$ г/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $M = 0{,}032$ кг/моль, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m_0$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Масса одной молекулы: <span class="formula">$m_0 = \dfrac{M}{N_A}$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> Подставляем: <span class="formula">$m_0 = \dfrac{0{,}032}{6{,}02 \cdot 10^{23}} \approx 5{,}32 \cdot 10^{-26} \text{ кг}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Масса одной молекулы кислорода — около $5 \cdot 10^{-26}$ кг.</div>
+                    <div class="answer">✅ Ответ: $m_0 \approx 5{,}32 \cdot 10^{-26}$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Концентрация молекул</div>
+                <div class="task-condition"><strong>Условие:</strong> В сосуде объёмом $V = 2$ л находится $N = 6 \cdot 10^{22}$ молекул газа. Найдите концентрацию молекул.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V = 2$ л $= 2 \cdot 10^{-3}$ м³, $N = 6 \cdot 10^{22}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $n$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Концентрация: <span class="formula">$n = \dfrac{N}{V}$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> Подставляем: <span class="formula">$n = \dfrac{6 \cdot 10^{22}}{2 \cdot 10^{-3}} = 3 \cdot 10^{25} \text{ м}^{-3}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Концентрация показывает, сколько молекул содержится в 1 м³ газа.</div>
+                    <div class="answer">✅ Ответ: $n = 3 \cdot 10^{25}$ м$^{-3}$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Молярная масса по массе молекулы</div>
+                <div class="task-condition"><strong>Условие:</strong> Масса одной молекулы вещества равна $m_0 = 4{,}5 \cdot 10^{-26}$ кг. Найдите молярную массу этого вещества.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_0 = 4{,}5 \cdot 10^{-26}$ кг, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $M$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из формулы $m_0 = \dfrac{M}{N_A}$ выражаем $M$: <span class="formula">$M = m_0 \cdot N_A$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> Подставляем: <span class="formula">$M = 4{,}5 \cdot 10^{-26} \cdot 6{,}02 \cdot 10^{23} \approx 0{,}027 \text{ кг/моль} = 27 \text{ г/моль}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Молярная масса 27 г/моль соответствует алюминию.</div>
+                    <div class="answer">✅ Ответ: $M \approx 27$ г/моль</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Число молекул в баллоне</div>
+                <div class="task-condition"><strong>Условие:</strong> В баллоне находится $m = 2$ кг углекислого газа $CO_2$. Сколько молекул содержится в баллоне? Молярная масса $CO_2$ равна $M = 44$ г/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $M = 0{,}044$ кг/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\nu = \dfrac{m}{M} = \dfrac{2}{0{,}044} \approx 45{,}45$ моль.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $N = \nu \cdot N_A = 45{,}45 \cdot 6{,}02 \cdot 10^{23} \approx 2{,}74 \cdot 10^{25}$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В 2 кг углекислого газа около $2{,}7 \cdot 10^{25}$ молекул.</div>
+                    <div class="answer">✅ Ответ: $N \approx 2{,}74 \cdot 10^{25}$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Объём одной молекулы</div>
+                <div class="task-condition"><strong>Условие:</strong> Считая молекулу воды сферической, оцените её диаметр. Плотность воды $\rho = 1000$ кг/м³, молярная масса $M = 18$ г/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\rho = 1000$ кг/м³, $M = 0{,}018$ кг/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $d$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Объём одной молекулы: $V_0 = \dfrac{V}{\nu \cdot N_A} = \dfrac{M}{\rho \cdot N_A}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $V_0 = \dfrac{0{,}018}{1000 \cdot 6{,}02 \cdot 10^{23}} \approx 3 \cdot 10^{-29}$ м³.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Объём шара: $V_0 = \dfrac{\pi d^3}{6} \Rightarrow d = \sqrt[3]{\dfrac{6 V_0}{\pi}}$.</div>
+                    <div class="step"><strong>Шаг 4.</strong> <span class="formula">$d = \sqrt[3]{\dfrac{6 \cdot 3 \cdot 10^{-29}}{3{,}14}} \approx 3{,}9 \cdot 10^{-10} \text{ м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Диаметр молекулы воды — около 0,4 нм.</div>
+                    <div class="answer">✅ Ответ: $d \approx 3{,}9 \cdot 10^{-10}$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Число молекул в капле</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько молекул содержится в капле воды массой $m = 0{,}5$ г? Молярная масса воды $M = 18$ г/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ г $= 5 \cdot 10^{-4}$ кг, $M = 0{,}018$ кг/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\nu = \dfrac{m}{M} = \dfrac{5 \cdot 10^{-4}}{0{,}018} \approx 0{,}0278$ моль.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $N = \nu \cdot N_A = 0{,}0278 \cdot 6{,}02 \cdot 10^{23} \approx 1{,}67 \cdot 10^{22}$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Даже в крошечной капле воды содержится более $10^{22}$ молекул.</div>
+                    <div class="answer">✅ Ответ: $N \approx 1{,}67 \cdot 10^{22}$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Средняя масса молекулы воздуха</div>
+                <div class="task-condition"><strong>Условие:</strong> Считая, что воздух состоит в основном из азота $N_2$ (молярная масса $M = 28$ г/моль), найдите среднюю массу одной молекулы воздуха.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $M = 0{,}028$ кг/моль, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m_0$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $m_0 = \dfrac{M}{N_A}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m_0 = \dfrac{0{,}028}{6{,}02 \cdot 10^{23}} \approx 4{,}65 \cdot 10^{-26} \text{ кг}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Молекула азота — самая распространённая в воздухе.</div>
+                    <div class="answer">✅ Ответ: $m_0 \approx 4{,}65 \cdot 10^{-26}$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Сравнение концентраций</div>
+                <div class="task-condition"><strong>Условие:</strong> В сосуде А объёмом $V_1 = 1$ л находится $N_1 = 2 \cdot 10^{22}$ молекул, в сосуде Б объёмом $V_2 = 3$ л — $N_2 = 4 \cdot 10^{22}$ молекул. Во сколько раз концентрация в сосуде А больше, чем в сосуде Б?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V_1 = 1$ л, $N_1 = 2 \cdot 10^{22}$, $V_2 = 3$ л, $N_2 = 4 \cdot 10^{22}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{n_1}{n_2}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $n_1 = \dfrac{N_1}{V_1} = \dfrac{2 \cdot 10^{22}}{1} = 2 \cdot 10^{22}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $n_2 = \dfrac{N_2}{V_2} = \dfrac{4 \cdot 10^{22}}{3} \approx 1{,}33 \cdot 10^{22}$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $\dfrac{n_1}{n_2} = \dfrac{2}{1{,}33} = 1{,}5$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Концентрация в сосуде А в 1,5 раза больше, чем в сосуде Б.</div>
+                    <div class="answer">✅ Ответ: $\dfrac{n_1}{n_2} = 1{,}5$</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-brownian').style.display = model === 'brownian' ? 'block' : 'none';
+        document.getElementById('model-diffusion').style.display = model === 'diffusion' ? 'block' : 'none';
+        document.getElementById('model-structure').style.display = model === 'structure' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- ===== МОДЕЛЬ 1: БРОУНОВСКОЕ ДВИЖЕНИЕ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-brownian');
+        const canvas = document.getElementById('canvas-brownian');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(2, 3, 5);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const COUNT = 60;
+        const SPACE_X = 5.0, SPACE_Y = 3.2, SPACE_Z = 1.5, RADIUS = 0.22;
+
+        const molGeo = new THREE.SphereGeometry(RADIUS, 16, 16);
+        const molMats = [
+            new THREE.MeshStandardMaterial({ color: 0xff6644, emissive: 0x441100 }),
+            new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x001133 }),
+            new THREE.MeshStandardMaterial({ color: 0x44ff88, emissive: 0x003311 }),
+            new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 }),
+            new THREE.MeshStandardMaterial({ color: 0xaa66ff, emissive: 0x220044 })
+        ];
+
+        const molecules = [];
+
+        function initMolecules() {
+            molecules.forEach(m => group.remove(m.mesh));
+            molecules.length = 0;
+            for (let i = 0; i < COUNT; i++) {
+                const mesh = new THREE.Mesh(molGeo, molMats[i % molMats.length]);
+                mesh.position.set(
+                    (Math.random() - 0.5) * SPACE_X * 2 * 0.9,
+                    (Math.random() - 0.5) * SPACE_Y * 2 * 0.9,
+                    (Math.random() - 0.5) * SPACE_Z * 2 * 0.9
+                );
+                group.add(mesh);
+                molecules.push({
+                    mesh, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, vz: (Math.random() - 0.5) * 2
+                });
+            }
+        }
+
+        let temperature = 5;
+        const tempSlider = document.getElementById('brownian-temp');
+        const tempValue = document.getElementById('brownian-temp-value');
+        const resetBtn = document.getElementById('brownian-reset');
+
+        tempSlider.addEventListener('input', () => {
+            temperature = parseFloat(tempSlider.value);
+            tempValue.textContent = temperature.toFixed(1);
+        });
+        resetBtn.addEventListener('click', () => {
+            initMolecules();
+            temperature = 5;
+            tempSlider.value = 5;
+            tempValue.textContent = '5.0';
+        });
+
+        document.getElementById('fs-brownian').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        initMolecules();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const speed = temperature * 0.012;
+
+            molecules.forEach(m => {
+                m.mesh.position.x += m.vx * speed;
+                m.mesh.position.y += m.vy * speed;
+                m.mesh.position.z += m.vz * speed;
+                if (m.mesh.position.x > SPACE_X) { m.mesh.position.x = SPACE_X; m.vx *= -1; }
+                if (m.mesh.position.x < -SPACE_X) { m.mesh.position.x = -SPACE_X; m.vx *= -1; }
+                if (m.mesh.position.y > SPACE_Y) { m.mesh.position.y = SPACE_Y; m.vy *= -1; }
+                if (m.mesh.position.y < -SPACE_Y) { m.mesh.position.y = -SPACE_Y; m.vy *= -1; }
+                if (m.mesh.position.z > SPACE_Z) { m.mesh.position.z = SPACE_Z; m.vz *= -1; }
+                if (m.mesh.position.z < -SPACE_Z) { m.mesh.position.z = -SPACE_Z; m.vz *= -1; }
+            });
+
+            for (let i = 0; i < molecules.length; i++) {
+                for (let j = i + 1; j < molecules.length; j++) {
+                    const a = molecules[i], b = molecules[j];
+                    const dx = b.mesh.position.x - a.mesh.position.x;
+                    const dy = b.mesh.position.y - a.mesh.position.y;
+                    const dz = b.mesh.position.z - a.mesh.position.z;
+                    const d2 = dx*dx + dy*dy + dz*dz;
+                    const minD = RADIUS * 2;
+                    if (d2 < minD * minD && d2 > 0.0001) {
+                        const d = Math.sqrt(d2);
+                        const nx = dx / d, ny = dy / d, nz = dz / d;
+                        const overlap = (minD - d) / 2;
+                        a.mesh.position.x -= nx * overlap; a.mesh.position.y -= ny * overlap; a.mesh.position.z -= nz * overlap;
+                        b.mesh.position.x += nx * overlap; b.mesh.position.y += ny * overlap; b.mesh.position.z += nz * overlap;
+                        const va_n = a.vx*nx + a.vy*ny + a.vz*nz;
+                        const vb_n = b.vx*nx + b.vy*ny + b.vz*nz;
+                        const diff = vb_n - va_n;
+                        a.vx += nx*diff; a.vy += ny*diff; a.vz += nz*diff;
+                        b.vx -= nx*diff; b.vy -= ny*diff; b.vz -= nz*diff;
+                    }
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 2: ДИФФУЗИЯ — ДВА БРУСКА ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-diffusion');
+        const canvas = document.getElementById('canvas-diffusion');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 14);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.6);
+        key.position.set(0, 3, 5);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Параметры брусков
+        const MOL_R = 0.15;
+        const COLS = 8;
+        const ROWS = 6;
+        const DEPTH = 2;
+        const SPACING = 0.32;
+
+        // Два бруска: левый (красный) и правый (синий)
+        // Каждый — 3D-объём молекул
+        const totalMols = COLS * ROWS * DEPTH;
+        const blockWidth = (COLS - 1) * SPACING;
+        const blockHeight = (ROWS - 1) * SPACING;
+        const blockDepth = (DEPTH - 1) * SPACING;
+
+        const redMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111 });
+        const blueMat = new THREE.MeshStandardMaterial({ color: 0x4488ff, emissive: 0x001133 });
+        const molGeo = new THREE.SphereGeometry(MOL_R, 12, 12);
+
+        const molecules = [];
+
+        // Начальные позиции: два бруска рядом
+        const gapStart = 1.2; // изначальное расстояние между брусками
+
+        function initDiffusion() {
+            molecules.forEach(m => group.remove(m.mesh));
+            molecules.length = 0;
+
+            // Левый брусок (красный)
+            for (let x = 0; x < COLS; x++) {
+                for (let y = 0; y < ROWS; y++) {
+                    for (let z = 0; z < DEPTH; z++) {
+                        const mesh = new THREE.Mesh(molGeo, redMat);
+                        const homeX = -gapStart/2 - blockWidth/2 + x * SPACING;
+                        const homeY = -blockHeight/2 + y * SPACING;
+                        const homeZ = -blockDepth/2 + z * SPACING;
+                        mesh.position.set(homeX, homeY, homeZ);
+                        group.add(mesh);
+                        molecules.push({
+                            mesh,
+                            homeX, homeY, homeZ,
+                            vx: (Math.random() - 0.5) * 2,
+                            vy: (Math.random() - 0.5) * 2,
+                            vz: (Math.random() - 0.5) * 2,
+                            color: 'red'
+                        });
+                    }
+                }
+            }
+            // Правый брусок (синий)
+            for (let x = 0; x < COLS; x++) {
+                for (let y = 0; y < ROWS; y++) {
+                    for (let z = 0; z < DEPTH; z++) {
+                        const mesh = new THREE.Mesh(molGeo, blueMat);
+                        const homeX = gapStart/2 + blockWidth/2 - x * SPACING;
+                        const homeY = -blockHeight/2 + y * SPACING;
+                        const homeZ = -blockDepth/2 + z * SPACING;
+                        mesh.position.set(homeX, homeY, homeZ);
+                        group.add(mesh);
+                        molecules.push({
+                            mesh,
+                            homeX, homeY, homeZ,
+                            vx: (Math.random() - 0.5) * 2,
+                            vy: (Math.random() - 0.5) * 2,
+                            vz: (Math.random() - 0.5) * 2,
+                            color: 'blue'
+                        });
+                    }
+                }
+            }
+        }
+
+        let temperature = 3;
+        let pushFactor = 0; // 0..1 — насколько бруски сближены
+
+        const tempSlider = document.getElementById('diffusion-temp');
+        const tempValue = document.getElementById('diffusion-temp-value');
+        const pushSlider = document.getElementById('diffusion-push');
+        const pushValue = document.getElementById('diffusion-push-value');
+        const resetBtn = document.getElementById('diffusion-reset');
+
+        tempSlider.addEventListener('input', () => {
+            temperature = parseFloat(tempSlider.value);
+            tempValue.textContent = temperature.toFixed(1);
+        });
+        pushSlider.addEventListener('input', () => {
+            pushFactor = parseFloat(pushSlider.value) / 100;
+            pushValue.textContent = Math.round(pushFactor * 100) + '%';
+        });
+        resetBtn.addEventListener('click', () => {
+            initDiffusion();
+            temperature = 3;
+            pushFactor = 0;
+            tempSlider.value = 3;
+            tempValue.textContent = '3.0';
+            pushSlider.value = 0;
+            pushValue.textContent = '0%';
+        });
+
+        document.getElementById('fs-diffusion').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        initDiffusion();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Текущее сближение: gapStart уменьшается с pushFactor
+            const currentGap = gapStart * (1 - pushFactor);
+
+            // Скорость молекул: базовая + температура
+            const speed = 0.005 + temperature * 0.008;
+
+            // 1. Двигаем молекулы
+            molecules.forEach(m => {
+                // Внутренние колебания — всегда
+                m.mesh.position.x += m.vx * speed * 0.3;
+                m.mesh.position.y += m.vy * speed * 0.3;
+                m.mesh.position.z += m.vz * speed * 0.3;
+
+                // Тепловое движение — хаотичное
+                if (temperature > 0.5) {
+                    m.mesh.position.x += (Math.random() - 0.5) * speed * 0.5;
+                    m.mesh.position.y += (Math.random() - 0.5) * speed * 0.5;
+                    m.mesh.position.z += (Math.random() - 0.5) * speed * 0.5;
+                }
+            });
+
+            // 2. Столкновения — упругие
+            for (let i = 0; i < molecules.length; i++) {
+                for (let j = i + 1; j < molecules.length; j++) {
+                    const a = molecules[i], b = molecules[j];
+                    const dx = b.mesh.position.x - a.mesh.position.x;
+                    const dy = b.mesh.position.y - a.mesh.position.y;
+                    const dz = b.mesh.position.z - a.mesh.position.z;
+                    const d2 = dx*dx + dy*dy + dz*dz;
+                    const minD = MOL_R * 2;
+                    if (d2 < minD * minD && d2 > 0.0001) {
+                        const d = Math.sqrt(d2);
+                        const nx = dx / d, ny = dy / d, nz = dz / d;
+                        const overlap = (minD - d) / 2;
+                        a.mesh.position.x -= nx * overlap; a.mesh.position.y -= ny * overlap; a.mesh.position.z -= nz * overlap;
+                        b.mesh.position.x += nx * overlap; b.mesh.position.y += ny * overlap; b.mesh.position.z += nz * overlap;
+                        const va_n = a.vx*nx + a.vy*ny + a.vz*nz;
+                        const vb_n = b.vx*nx + b.vy*ny + b.vz*nz;
+                        const diff = vb_n - va_n;
+                        a.vx += nx*diff; a.vy += ny*diff; a.vz += nz*diff;
+                        b.vx -= nx*diff; b.vy -= ny*diff; b.vz -= nz*diff;
+                    }
+                }
+            }
+
+            // 3. Притягиваем молекулы к их "домашним" позициям, смещённым сближением
+            molecules.forEach(m => {
+                let targetX = m.homeX;
+                // Если pushFactor > 0, красные сдвигаются вправо, синие — влево
+                if (m.color === 'red') {
+                    targetX += currentGap / 2 - gapStart / 2;
+                } else {
+                    targetX -= currentGap / 2 - gapStart / 2;
+                }
+                // Чем меньше pushFactor, тем сильнее удержание формы бруска
+                // Чем больше pushFactor, тем слабее удержание — молекулы свободнее
+                const holdStrength = 0.15 * (1 - pushFactor * 0.7);
+                m.mesh.position.x += (targetX - m.mesh.position.x) * holdStrength;
+                m.mesh.position.y += (m.homeY - m.mesh.position.y) * holdStrength;
+                m.mesh.position.z += (m.homeZ - m.mesh.position.z) * holdStrength;
+            });
+
+            // 4. Границы сцены
+            molecules.forEach(m => {
+                if (Math.abs(m.mesh.position.x) > 7) m.mesh.position.x *= 0.99;
+                if (Math.abs(m.mesh.position.y) > 4) m.mesh.position.y *= 0.99;
+                if (Math.abs(m.mesh.position.z) > 2.5) m.mesh.position.z *= 0.99;
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 3: СТРОЕНИЕ ТЕЛ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-structure');
+        const canvas = document.getElementById('canvas-structure');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(2, 3, 5);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // 5x5x5 = 125 молекул, меньше размер
+        const GRID = 5;
+        const SPACING_SOLID = 0.45;
+        const N = GRID * GRID * GRID;
+        const RADIUS = 0.12;
+
+        const molGeo = new THREE.SphereGeometry(RADIUS, 12, 12);
+        const molMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x004466 });
+
+        const solidPositions = [];
+        const liquidPositions = [];
+        const gasPositions = [];
+
+        const offsetS = (GRID - 1) * SPACING_SOLID / 2;
+        for (let x = 0; x < GRID; x++) {
+            for (let y = 0; y < GRID; y++) {
+                for (let z = 0; z < GRID; z++) {
+                    solidPositions.push(new THREE.Vector3(
+                        x * SPACING_SOLID - offsetS,
+                        y * SPACING_SOLID - offsetS,
+                        z * SPACING_SOLID - offsetS
+                    ));
+                }
+            }
+        }
+
+        const SPACING_LIQ = 0.42;
+        const offsetL = (GRID - 1) * SPACING_LIQ / 2;
+        for (let x = 0; x < GRID; x++) {
+            for (let y = 0; y < GRID; y++) {
+                for (let z = 0; z < GRID; z++) {
+                    liquidPositions.push(new THREE.Vector3(
+                        x * SPACING_LIQ - offsetL + (Math.random() - 0.5) * 0.1,
+                        y * SPACING_LIQ - offsetL + (Math.random() - 0.5) * 0.1,
+                        z * SPACING_LIQ - offsetL + (Math.random() - 0.5) * 0.1
+                    ));
+                }
+            }
+        }
+
+        for (let i = 0; i < N; i++) {
+            gasPositions.push(new THREE.Vector3(
+                (Math.random() - 0.5) * 6,
+                (Math.random() - 0.5) * 4,
+                (Math.random() - 0.5) * 2
+            ));
+        }
+
+        const molecules = [];
+        for (let i = 0; i < N; i++) {
+            const mesh = new THREE.Mesh(molGeo, molMat);
+            mesh.position.copy(gasPositions[i]);
+            group.add(mesh);
+            molecules.push({
+                mesh,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                vz: (Math.random() - 0.5) * 2
+            });
+        }
+
+        let stateValue = 0;
+        const stateSlider = document.getElementById('structure-state');
+        const stateText = document.getElementById('structure-state-value');
+        const resetBtn = document.getElementById('structure-reset');
+
+        function updateStateText(v) {
+            if (v < 0.5) stateText.textContent = 'Газ';
+            else if (v < 1.5) stateText.textContent = 'Жидкость';
+            else stateText.textContent = 'Твёрдое тело';
+        }
+
+        stateSlider.addEventListener('input', () => {
+            stateValue = parseFloat(stateSlider.value);
+            updateStateText(stateValue);
+        });
+        resetBtn.addEventListener('click', () => {
+            stateValue = 0;
+            stateSlider.value = 0;
+            updateStateText(0);
+            for (let i = 0; i < N; i++) {
+                molecules[i].mesh.position.copy(gasPositions[i]);
+                molecules[i].vx = (Math.random() - 0.5) * 2;
+                molecules[i].vy = (Math.random() - 0.5) * 2;
+                molecules[i].vz = (Math.random() - 0.5) * 2;
+            }
+        });
+
+        document.getElementById('fs-structure').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateStateText(0);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            let targetPositions;
+            if (stateValue <= 1) {
+                const lw = stateValue, gw = 1 - stateValue;
+                targetPositions = molecules.map((m, i) => {
+                    const p = new THREE.Vector3();
+                    p.addScaledVector(gasPositions[i], gw);
+                    p.addScaledVector(liquidPositions[i], lw);
+                    return p;
+                });
+            } else {
+                const sw = stateValue - 1, lw = 1 - sw;
+                targetPositions = molecules.map((m, i) => {
+                    const p = new THREE.Vector3();
+                    p.addScaledVector(liquidPositions[i], lw);
+                    p.addScaledVector(solidPositions[i], sw);
+                    return p;
+                });
+            }
+
+            molecules.forEach((m, i) => {
+                const target = targetPositions[i];
+                const k = 0.06;
+
+                if (stateValue < 0.3) {
+                    m.mesh.position.x += m.vx * 0.02;
+                    m.mesh.position.y += m.vy * 0.02;
+                    m.mesh.position.z += m.vz * 0.02;
+                    if (Math.abs(m.mesh.position.x) > 3.5) m.vx *= -1;
+                    if (Math.abs(m.mesh.position.y) > 2.2) m.vy *= -1;
+                    if (Math.abs(m.mesh.position.z) > 1.2) m.vz *= -1;
+                    m.mesh.position.lerp(target, 0.02);
+                } else if (stateValue > 1.7) {
+                    const jx = Math.sin(Date.now() * 0.005 + i) * 0.03;
+                    const jy = Math.cos(Date.now() * 0.006 + i) * 0.03;
+                    const jz = Math.sin(Date.now() * 0.007 + i) * 0.03;
+                    m.mesh.position.lerp(target, k);
+                    m.mesh.position.x += jx * 0.08;
+                    m.mesh.position.y += jy * 0.08;
+                    m.mesh.position.z += jz * 0.08;
+                } else {
+                    m.mesh.position.lerp(target, k);
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

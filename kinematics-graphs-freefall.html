@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Кинематика. Графики. Свободное падение</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(46, 204, 113, 0.1);
+            --special-border: #3b82f6;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #3b82f6;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #3b82f6;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --label-bg: rgba(26,45,60,0.85);
+            --label-color: #ffffff;
+            --card-shadow: rgba(0,0,0,0.2);
+            --ground-color: #3a4a5a;
+            --ground-grid: rgba(255,255,255,0.08);
+            --h-color: #2e8b57;
+        }
+
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #2563eb;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #2563eb;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #2563eb;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --label-bg: rgba(255,255,255,0.92);
+            --label-color: #1a2a3f;
+            --card-shadow: rgba(0,0,0,0.08);
+            --ground-color: #b0c8d8;
+            --ground-grid: rgba(0,0,0,0.1);
+            --h-color: #1a7a3a;
+        }
+
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+
+        h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:5000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.5;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+
+        .model-container {
+            text-align: center;
+            margin: 16px 0;
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            background: var(--canvas-bg);
+            box-shadow: 0 4px 12px var(--card-shadow);
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            min-height: 500px;
+            transition: background 0.3s;
+        }
+        .model-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border-radius: 20px;
+            touch-action: none;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 20;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .fullscreen-btn:hover { background: var(--special-border); transform: scale(1.05); }
+
+        .controls-panel {
+            background: var(--info-bg);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin: 8px 0 12px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            align-items: center;
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .control-group label {
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 20px;
+            transition: color 0.3s;
+        }
+        .control-group input[type="range"] {
+            width: 120px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--slider-track);
+            border-radius: 3px;
+            outline: none;
+            transition: background 0.3s;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: 2px solid var(--special-border);
+        }
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: 2px solid var(--special-border);
+        }
+        .control-value {
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 32px;
+            text-align: center;
+            background: var(--input-bg);
+            padding: 2px 8px;
+            border-radius: 12px;
+            transition: color 0.3s,background 0.3s;
+        }
+        .control-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            transition: color 0.3s;
+        }
+
+        .btn-play {
+            background: var(--special-border);
+            color: white;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 34px;
+        }
+        .btn-play:hover { transform: scale(1.05); opacity: 0.9; }
+        .btn-play:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-reset {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 34px;
+        }
+        .btn-reset:hover { transform: scale(1.05); opacity: 0.9; }
+
+        .back-link-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0 8px;
+        }
+        .back-link{
+            display:inline-block;
+            padding:10px 20px;
+            background:var(--special-border);
+            color:white;
+            text-decoration:none;
+            font-weight:bold;
+            border-radius:20px;
+            font-size:0.95rem;
+            transition:background 0.2s;
+        }
+        .back-link:hover{background:#1c6ea4;}
+
+        .task-block {
+            background: var(--task-bg);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin: 16px 0;
+            border-left: 4px solid var(--task-border);
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+        .task-block .task-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+        .task-block .task-condition {
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.8;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: color 0.3s,background 0.3s;
+        }
+        .task-block .task-condition strong {
+            color: var(--special-border);
+        }
+        .task-block .task-condition mjx-container {
+            font-size: 1.1rem !important;
+        }
+
+        .task-given-find {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 40px;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+        .task-given-find .given { color: var(--given-color); }
+        .task-given-find .find { color: var(--find-color); }
+        .task-given-find .given strong,
+        .task-given-find .find strong {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .task-given-find mjx-container {
+            font-size: 1.1rem !important;
+        }
+
+        .show-solution-btn {
+            background: var(--special-border);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
+
+        .task-solution {
+            display: none;
+            margin-top: 12px;
+        }
+        .task-solution.open { display: block; }
+        .task-solution .step {
+            padding: 10px 16px;
+            margin: 8px 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border-left: 3px solid var(--special-border);
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.8;
+            overflow-x: auto;
+            transition: background 0.3s,color 0.3s;
+        }
+        .task-solution .step .formula {
+            display: block;
+            text-align: center;
+            font-size: 1.3rem;
+            padding: 6px 0;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            color: var(--special-border);
+        }
+        .task-solution .step .formula mjx-container {
+            font-size: 1.3rem !important;
+        }
+        .task-solution .step .explanation {
+            background: var(--info-bg);
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-left: 2px solid var(--special-border);
+            transition: background 0.3s,color 0.3s;
+        }
+        .task-solution .step .text-muted {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .task-solution .answer {
+            padding: 12px 18px;
+            background: var(--special-border);
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .task-solution .answer mjx-container {
+            font-size: 1.15rem !important;
+        }
+
+        .favorite-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .favorite-btn:hover { transform: scale(1.1); }
+        .favorite-btn.active { color: #facc15; }
+
+        .graph-legend {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--label-bg);
+            backdrop-filter: blur(8px);
+            padding: 8px 14px;
+            border-radius: 14px;
+            color: var(--label-color);
+            font-size: 0.75rem;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            border: 1px solid var(--special-border);
+            box-shadow: 0 2px 10px var(--card-shadow);
+            text-align: center;
+            transition: background 0.3s,color 0.3s,border 0.3s;
+        }
+        .graph-legend span { display: flex; align-items: center; gap: 6px; justify-content: center; }
+        .graph-legend .color-dot { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+        .graph-legend .area-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #ff2222;
+            background: rgba(255, 34, 34, 0.10);
+            padding: 2px 12px;
+            border-radius: 8px;
+            margin-top: 2px;
+            border: 1px solid rgba(255, 34, 34, 0.2);
+            font-family: 'Times New Roman', serif;
+        }
+
+        .speed-display {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            padding: 6px 14px;
+            border-radius: 12px;
+            color: #fff;
+            z-index: 15;
+            text-align: left;
+            border: 2px solid var(--special-border);
+            min-width: 160px;
+        }
+        .speed-display .v { font-size: 1.0rem; font-weight: 700; color: #ffaa00; }
+        .speed-display .v span { font-size: 1.1rem; color: #fff; }
+        .speed-display .t { font-size: 0.85rem; font-weight: 600; color: #66ffaa; }
+        .speed-display .t span { font-size: 0.95rem; color: #fff; }
+        .speed-display .m { font-size: 0.8rem; font-weight: 600; color: #ff66aa; }
+        .speed-display .m span { font-size: 0.9rem; color: #fff; }
+        .speed-display .info { font-size: 0.55rem; color: #aaa; margin-top: 2px; }
+
+        .freefall-legend {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--label-bg);
+            backdrop-filter: blur(8px);
+            padding: 4px 14px;
+            border-radius: 20px;
+            color: var(--label-color);
+            font-size: 0.6rem;
+            z-index: 10;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            border: 1px solid var(--special-border);
+            box-shadow: 0 2px 10px var(--card-shadow);
+            transition: background 0.3s,color 0.3s,border 0.3s;
+        }
+        .freefall-legend span { display: inline-flex; align-items: center; gap: 5px; }
+        .freefall-legend .color-dot { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+        .freefall-legend .h-color { color: var(--h-color); font-weight: bold; }
+        .freefall-legend .v-color { color: #ffaa00; font-weight: bold; }
+        .freefall-legend .g-color { color: #ff6644; font-weight: bold; }
+        .freefall-legend .m-color { color: #ff66aa; font-weight: bold; }
+
+        .note-box {
+            background: var(--info-bg);
+            border-left: 4px solid var(--special-border);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin: 16px 0;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text);
+            transition: background 0.3s,color 0.3s;
+        }
+        .note-box .important { color: var(--special-border); font-weight: 700; }
+
+        mjx-container { font-size: 1.2em !important; overflow-x: auto !important; max-width: 100% !important; }
+
+        .model-container:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            margin: 0;
+            border-radius: 0;
+            background: var(--canvas-bg) !important;
+            aspect-ratio: auto;
+        }
+        .model-container:fullscreen .model-canvas {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+        }
+
+        @media(max-width:700px){
+            .model-container { min-height: 380px; }
+            .fullscreen-btn { width: 38px; height: 38px; font-size: 18px; bottom: 12px; right: 12px; }
+            .controls-panel { flex-direction: column; gap: 10px; align-items: stretch; }
+            .control-group { justify-content: space-between; }
+            .control-group input[type="range"] { width: 100%; max-width: 200px; }
+            .task-solution .step .formula { font-size: 1.1rem; white-space: normal; }
+            .task-given-find { flex-direction: column; gap: 6px; }
+            .graph-legend { font-size: 0.6rem; padding: 4px 10px; }
+            .graph-legend .area-value { font-size: 0.85rem; }
+            .speed-display { min-width: 120px; padding: 4px 10px; top: 8px; right: 8px; }
+            .speed-display .v { font-size: 0.85rem; }
+            .speed-display .v span { font-size: 0.95rem; }
+            .speed-display .t { font-size: 0.75rem; }
+            .speed-display .t span { font-size: 0.85rem; }
+            .speed-display .m { font-size: 0.7rem; }
+            .speed-display .m span { font-size: 0.8rem; }
+            .freefall-legend { font-size: 0.5rem; padding: 3px 10px; gap: 10px; bottom: 8px; }
+            .formula-block { font-size: 0.95rem; padding: 10px 12px; }
+            .formula-block .f { font-size: 1.1rem; }
+            .task-block .task-condition mjx-container { font-size: 0.95rem !important; }
+            .task-solution .step .formula mjx-container { font-size: 1.1rem !important; }
+        }
+        @media(max-width:450px){
+            .model-container { min-height: 280px; }
+            .container { padding: 10px; padding-top: 44px; }
+            h1 { font-size: 1.2rem; }
+            .section-title { font-size: 0.95rem; }
+            .control-group input[type="range"] { max-width: 120px; }
+            .btn-play, .btn-reset { width: 100%; text-align: center; }
+            .speed-display { min-width: 100px; padding: 3px 8px; }
+            .speed-display .v { font-size: 0.75rem; }
+            .speed-display .v span { font-size: 0.85rem; }
+            .speed-display .t { font-size: 0.65rem; }
+            .speed-display .t span { font-size: 0.75rem; }
+            .speed-display .m { font-size: 0.6rem; }
+            .speed-display .m span { font-size: 0.7rem; }
+            .freefall-legend { font-size: 0.45rem; padding: 2px 8px; gap: 6px; }
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>📊 Кинематика. Графики. Свободное падение</h1>
+
+    <!-- ===== ТЕОРИЯ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Основы кинематики</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Кинематика</strong> — раздел механики, изучающий <span class="important">движение тел</span> без учёта причин, вызывающих это движение.</p>
+                <p><strong>Механическое движение</strong> — изменение положения тела в пространстве относительно других тел с течением времени.</p>
+                <p><span class="important">Путь ($S$)</span> — это <strong>скалярная</strong> величина, равная длине траектории, пройденной телом за время движения.</p>
+                <p><span class="important">Перемещение ($\Delta \vec{r}$)</span> — это <strong>векторная</strong> величина, соединяющая начальное и конечное положение тела.</p>
+                <p><span class="important">Скорость ($\vec{v}$)</span> — это <strong>векторная</strong> величина, характеризующая быстроту изменения положения тела.</p>
+                <p><span class="important">Ускорение ($\vec{a}$)</span> — это <strong>векторная</strong> величина, характеризующая быстроту изменения скорости.</p>
+            </div>
+
+            <div class="formula-block">
+                <span class="f"><strong>Равномерное движение ($a = 0$):</strong></span>
+                <span class="f">$v = \text{const}$</span>
+                <span class="f-label">— скорость постоянна</span>
+                <span class="f">$S = vt$</span>
+                <span class="f-label">— путь при равномерном движении</span>
+            </div>
+
+            <div class="formula-block">
+                <span class="f"><strong>Равноускоренное/равнозамедленное движение ($a = \text{const}$):</strong></span>
+                <span class="f">$v = v_0 + at$</span>
+                <span class="f-label">— скорость в момент времени $t$</span>
+                <span class="f">$S = v_0 t + \frac{at^2}{2}$</span>
+                <span class="f-label">— перемещение за время $t$</span>
+                <span class="f">$v^2 - v_0^2 = 2aS$</span>
+                <span class="f-label">— связь скорости и перемещения</span>
+            </div>
+
+            <div class="def-card">
+                <p><span class="important">Важно:</span></p>
+                <ul>
+                    <li>Если $a > 0$ — движение <strong>равноускоренное</strong> (скорость увеличивается).</li>
+                    <li>Если $a < 0$ — движение <strong>равнозамедленное</strong> (скорость уменьшается).</li>
+                    <li>Если $a = 0$ — движение <strong>равномерное</strong> (скорость постоянна).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ИНТЕРАКТИВНЫЙ ГРАФИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📈 Интерактивный график $v(t)$</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><span class="important">Главное правило:</span> <strong>площадь под графиком $v(t)$ численно равна перемещению</strong> тела.</p>
+                <ul>
+                    <li><span class="important">Наклон</span> графика $v(t)$ к оси времени равен ускорению: $\text{tg}\,\alpha = a$.</li>
+                    <li>Площадь считаем по формулам геометрии — <strong>интегралы не нужны</strong>.</li>
+                    <li>Если график $v(t)$ — <strong>прямоугольник</strong> → движение <strong>равномерное</strong> ($a = 0$).</li>
+                    <li>Если график $v(t)$ — <strong>трапеция/треугольник</strong> → движение <strong>равноускоренное/равнозамедленное</strong> ($a = \text{const}$).</li>
+                </ul>
+            </div>
+            <div class="model-container" id="container-graphs">
+                <canvas id="canvas-graphs" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-graphs">⛶</button>
+                <div class="graph-legend">
+                    <span><span class="color-dot" style="background:#ff2222;"></span> $v(t)$ — скорость</span>
+                    <span><span class="color-dot" style="background:#ff2222;opacity:0.25;height:12px;"></span> $S$ — перемещение</span>
+                    <span class="area-value" id="graph-area-value">$S = 0.0$ м</span>
+                </div>
+            </div>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>$t$ (с)</label>
+                    <input type="range" id="graph-time" min="0.5" max="6" step="0.1" value="3">
+                    <span class="control-value" id="graph-time-value">3.0</span>
+                </div>
+                <div class="control-group">
+                    <label>$a$ (м/с²)</label>
+                    <input type="range" id="graph-accel" min="-3" max="3" step="0.1" value="1.0">
+                    <span class="control-value" id="graph-accel-value">1.0</span>
+                </div>
+                <div class="control-group">
+                    <label>$v_0$ (м/с)</label>
+                    <input type="range" id="graph-v0" min="0" max="5" step="0.1" value="0.5">
+                    <span class="control-value" id="graph-v0-value">0.5</span>
+                </div>
+                <span class="control-label">⬤ Площадь под графиком = перемещение</span>
+            </div>
+            <div class="def-card">
+                <p><span class="important">Как читать график:</span> Ось X — время ($t$), ось Y — скорость ($v$). <span class="important">Закрашенная область</span> под графиком = перемещение. Двигайте ползунки.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ: СВОБОДНОЕ ПАДЕНИЕ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪂 Свободное падение</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><span class="important">Свободное падение</span> — это движение тела <strong>только под действием силы тяжести</strong>, без учёта сопротивления воздуха.</p>
+                <p><span class="important">Все тела падают с одинаковым ускорением</span> $g \approx 9.8$ м/с² (на поверхности Земли).</p>
+                <p>Это частный случай равноускоренного движения с ускорением $a = g$.</p>
+            </div>
+            <div class="formula-block">
+                <span class="f"><strong>Свободное падение ($v_0 = 0$):</strong></span>
+                <span class="f">$v = gt$</span>
+                <span class="f-label">— скорость в момент времени $t$</span>
+                <span class="f">$h = \frac{gt^2}{2}$</span>
+                <span class="f-label">— высота падения за время $t$</span>
+                <span class="f">$v^2 = 2gh$</span>
+                <span class="f-label">— связь скорости и высоты</span>
+                <span class="f">$t = \sqrt{\frac{2h}{g}}$</span>
+                <span class="f-label">— время падения с высоты $h$</span>
+            </div>
+            <div class="formula-block">
+                <span class="f"><strong>Движение вверх ($v_0 \neq 0$):</strong></span>
+                <span class="f">$v = v_0 - gt$</span>
+                <span class="f-label">— скорость при движении вверх</span>
+                <span class="f">$h = v_0 t - \frac{gt^2}{2}$</span>
+                <span class="f-label">— высота в момент времени $t$</span>
+                <span class="f">$h_{max} = \frac{v_0^2}{2g}$</span>
+                <span class="f-label">— максимальная высота подъёма</span>
+                <span class="f">$t_{под} = \frac{v_0}{g}$</span>
+                <span class="f-label">— время подъёма</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ИНТЕРАКТИВНАЯ МОДЕЛЬ СВОБОДНОГО ПАДЕНИЯ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪂 Интерактивная модель свободного падения</div>
+        <div class="section-content">
+            <div class="model-container" id="container-freefall">
+                <canvas id="canvas-freefall" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-freefall">⛶</button>
+
+                <div class="speed-display">
+                    <div class="v">⚡ $v$ = <span id="freefall-speed-display">0.0</span> м/с</div>
+                    <div class="t">⌛ $t$ = <span id="freefall-time-display">0.0</span> с</div>
+                    <div class="m">⚖️ $m$ = <span id="freefall-mass-display">1.0</span> кг</div>
+                    <div class="info">$h$ = <span id="freefall-h-display">45</span> м &nbsp;|&nbsp; $g$ = <span id="freefall-g-display">9.8</span> м/с²</div>
+                </div>
+
+                <div class="freefall-legend">
+                    <span><span class="color-dot" style="background:var(--h-color);"></span> <span class="h-color">$h$</span> — высота</span>
+                    <span><span class="color-dot" style="background:#ffaa00;"></span> <span class="v-color">$v$</span> — скорость</span>
+                    <span><span class="color-dot" style="background:#ff6644;"></span> <span class="g-color">$g$</span> — ускорение</span>
+                    <span><span class="color-dot" style="background:#ff66aa;"></span> <span class="m-color">$m$</span> — масса</span>
+                </div>
+            </div>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>$h$ (м)</label>
+                    <input type="range" id="freefall-height" min="5" max="100" value="45" step="1">
+                    <span class="control-value" id="freefall-height-value">45</span>
+                </div>
+                <div class="control-group">
+                    <label>$m$ (кг)</label>
+                    <input type="range" id="freefall-mass" min="0.5" max="10" step="0.1" value="1.0">
+                    <span class="control-value" id="freefall-mass-value">1.0</span>
+                </div>
+                <div class="control-group">
+                    <label>$g$ (м/с²)</label>
+                    <input type="range" id="freefall-g" min="1" max="30" step="0.1" value="9.8">
+                    <span class="control-value" id="freefall-g-value">9.8</span>
+                </div>
+                <button class="btn-play" id="freefall-play-btn">▶ Пуск</button>
+                <button class="btn-reset" id="freefall-reset-btn">⟳ Сброс</button>
+                <span class="control-label">⬤ $m$ не влияет на скорость падения!</span>
+            </div>
+            <div class="def-card">
+                <p><span class="important">Нажмите «Пуск»</span> — тело начнёт падать.</p>
+                <p><span class="important">Меняйте массу — размер шара меняется, но скорость падения остаётся той же!</span> Это демонстрация опыта Галилея: все тела падают с одинаковым ускорением независимо от массы.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ (15 ШТУК С ПОДРОБНЫМ РЕШЕНИЕМ) ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (15 задач)</div>
+        <div class="section-content">
+
+            <!-- Задача 1 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Определение ускорения</div>
+                <div class="task-condition"><strong>Условие:</strong> За $t = 10$ с скорость тела увеличилась с $v_0 = 2$ м/с до $v = 12$ м/с. Найдите ускорение тела.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_0 = 2$ м/с, $v = 12$ м/с, $t = 10$ с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Записываем формулу ускорения: <span class="formula">$a = \frac{v - v_0}{t}$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> Подставляем: <span class="formula">$a = \frac{12 - 2}{10} = 1 \text{ м/с}^2$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Ускорение показывает, на сколько м/с изменяется скорость за 1 секунду. Здесь скорость увеличивается на 1 м/с каждую секунду.</div>
+                    <div class="answer">✅ Ответ: $a = 1$ м/с²</div>
+                </div>
+            </div>
+
+            <!-- Задача 2 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Путь при равноускоренном движении</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело начинает движение из покоя ($v_0 = 0$) с ускорением $a = 2$ м/с². Какой путь $S$ оно пройдёт за $t = 5$ с?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_0 = 0$, $a = 2$ м/с², $t = 5$ с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $S$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $S = v_0 t + \frac{at^2}{2} = \frac{2 \cdot 5^2}{2} = 25$ м</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> За 1-ю секунду тело проходит 1 м, за 2-ю — 3 м, за 3-ю — 5 м. Пути за равные промежутки относятся как $1:3:5:7:\dots$.</div>
+                    <div class="answer">✅ Ответ: $S = 25$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 3 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Свободное падение — время</div>
+                <div class="task-condition"><strong>Условие:</strong> Камень падает с высоты $h = 45$ м. Сколько времени $t$ он падает? ($g = 9.8$ м/с², $v_0 = 0$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $h = 45$ м, $g = 9.8$ м/с², $v_0 = 0$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $h = \frac{gt^2}{2} \Rightarrow t = \sqrt{\frac{2h}{g}}$</div>
+                    <div class="step"><strong>Шаг 2.</strong> $t = \sqrt{\frac{90}{9.8}} \approx 3.03$ с</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Время падения не зависит от массы камня. Если $g = 10$ м/с², время было бы ровно 3 с.</div>
+                    <div class="answer">✅ Ответ: $t \approx 3.03$ с</div>
+                </div>
+            </div>
+
+            <!-- Задача 4 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Свободное падение — скорость</div>
+                <div class="task-condition"><strong>Условие:</strong> С какой скоростью $v$ камень упадёт на землю, если его бросили вертикально вниз с высоты $h = 20$ м со скоростью $v_0 = 5$ м/с? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $h = 20$ м, $v_0 = 5$ м/с, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $v^2 - v_0^2 = 2gh \Rightarrow v = \sqrt{v_0^2 + 2gh}$</div>
+                    <div class="step"><strong>Шаг 2.</strong> $v = \sqrt{25 + 392} = \sqrt{417} \approx 20.4$ м/с</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Если бы $v_0 = 0$, скорость была бы $\sqrt{392} \approx 19.8$ м/с. Начальная скорость увеличивает конечную.</div>
+                    <div class="answer">✅ Ответ: $v \approx 20.4$ м/с</div>
+                </div>
+            </div>
+
+            <!-- Задача 5 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. График скорости — прямоугольник</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело движется равномерно со скоростью $v = 5$ м/с в течение $t = 4$ с. Найдите перемещение $S$, используя площадь под графиком $v(t)$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v = 5$ м/с, $t = 4$ с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $S$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> График $v(t)$ — прямоугольник со сторонами $v = 5$ м/с и $t = 4$ с.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $S = v \cdot t = 5 \cdot 4 = 20$ м</div>
+                    <div class="step explanation"><strong>Важно!</strong> Площадь под графиком скорости численно равна перемещению. Это работает для любого движения.</div>
+                    <div class="answer">✅ Ответ: $S = 20$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 6 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. График скорости — трапеция</div>
+                <div class="task-condition"><strong>Условие:</strong> Скорость тела изменяется от $v_0 = 2$ м/с до $v = 10$ м/с за $t = 4$ с. Найдите перемещение $S$ как площадь под графиком $v(t)$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_0 = 2$ м/с, $v = 10$ м/с, $t = 4$ с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $S$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> График $v(t)$ — трапеция с основаниями $v_0 = 2$ м/с и $v = 10$ м/с, высотой $t = 4$ с.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $S = \frac{v_0 + v}{2} \cdot t = \frac{2 + 10}{2} \cdot 4 = 24$ м</div>
+                    <div class="step explanation"><strong>Важно!</strong> Здесь не нужны интегралы! Просто формула площади трапеции из геометрии.</div>
+                    <div class="answer">✅ Ответ: $S = 24$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 7 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Движение вертикально вверх</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело брошено вертикально вверх со скоростью $v_0 = 20$ м/с. На какую максимальную высоту $h_{max}$ оно поднимется? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_0 = 20$ м/с, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $h_{max}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> В верхней точке $v = 0$. $v^2 - v_0^2 = -2gh$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $0 - 20^2 = -2 \cdot 9.8 \cdot h \Rightarrow h = \frac{400}{19.6} \approx 20.4$ м</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Время подъёма: $t = \frac{v_0}{g} \approx 2.04$ с. Полное время полёта — около 4.08 с.</div>
+                    <div class="answer">✅ Ответ: $h_{max} \approx 20.4$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 8 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Торможение автомобиля</div>
+                <div class="task-condition"><strong>Условие:</strong> Автомобиль, движущийся со скоростью $v_0 = 72$ км/ч, начинает тормозить с ускорением $a = 2$ м/с². Какой путь $S$ он пройдёт до полной остановки?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_0 = 72$ км/ч $= 20$ м/с, $a = 2$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $S$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $72$ км/ч $= 20$ м/с.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $v^2 - v_0^2 = -2aS \Rightarrow 0 - 400 = -4S \Rightarrow S = 100$ м.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Время торможения: $t = \frac{v_0}{a} = 10$ с. При скорости 72 км/ч тормозной путь — 100 м (реальное значение для сухого асфальта).</div>
+                    <div class="answer">✅ Ответ: $S = 100$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 9 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Полное время полёта</div>
+                <div class="task-condition"><strong>Условие:</strong> Мяч бросили вертикально вверх со скоростью $v_0 = 15$ м/с. Через сколько секунд $t$ он вернётся в исходную точку? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_0 = 15$ м/с, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $t_{под} = \frac{v_0}{g} = \frac{15}{9.8} \approx 1.53$ с.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Полное время: $t = 2t_{под} \approx 3.06$ с.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Можно также решить квадратное уравнение: $h = v_0 t - \frac{gt^2}{2} = 0$.</div>
+                    <div class="answer">✅ Ответ: $t \approx 3.06$ с</div>
+                </div>
+            </div>
+
+            <!-- Задача 10 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Определение высоты по скорости</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело упало с высоты $h$. В момент удара о землю его скорость была $v = 40$ м/с. С какой высоты $h$ упало тело? ($g = 9.8$ м/с², $v_0 = 0$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v = 40$ м/с, $g = 9.8$ м/с², $v_0 = 0$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $h$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $v^2 = 2gh \Rightarrow h = \frac{v^2}{2g}$</div>
+                    <div class="step"><strong>Шаг 2.</strong> $h = \frac{1600}{19.6} \approx 81.6$ м</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Если $g = 10$ м/с², высота была бы 80 м. Разница связана с точным значением $g$.</div>
+                    <div class="answer">✅ Ответ: $h \approx 81.6$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 11 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 11. Средняя скорость</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело первую половину пути двигалось со скоростью $v_1 = 60$ км/ч, вторую половину — со скоростью $v_2 = 40$ км/ч. Найдите среднюю скорость $v_{ср}$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_1 = 60$ км/ч, $v_2 = 40$ км/ч</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v_{ср}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <div id="sol11" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $v_{ср} = \frac{S_{общ}}{t_{общ}} = \frac{2v_1v_2}{v_1 + v_2}$</div>
+                    <div class="step"><strong>Шаг 2.</strong> $v_{ср} = \frac{2 \cdot 60 \cdot 40}{100} = 48$ км/ч</div>
+                    <div class="step explanation"><strong>Важно!</strong> Средняя скорость не равна среднему арифметическому ($50$ км/ч). Она всегда ближе к меньшей скорости.</div>
+                    <div class="answer">✅ Ответ: $v_{ср} = 48$ км/ч</div>
+                </div>
+            </div>
+
+            <!-- Задача 12 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 12. Падение с начальной скоростью вниз</div>
+                <div class="task-condition"><strong>Условие:</strong> С высоты $h = 80$ м тело бросают вертикально вниз со скоростью $v_0 = 10$ м/с. Найдите время падения $t$. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $h = 80$ м, $v_0 = 10$ м/с, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <div id="sol12" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $h = v_0 t + \frac{gt^2}{2} \Rightarrow 80 = 10t + 4.9t^2$</div>
+                    <div class="step"><strong>Шаг 2.</strong> $4.9t^2 + 10t - 80 = 0$</div>
+                    <div class="step"><strong>Шаг 3.</strong> $t = \frac{-10 + \sqrt{100 + 1568}}{9.8} = \frac{-10 + 40.84}{9.8} \approx 3.15$ с</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Проверка: $v = \sqrt{10^2 + 2 \cdot 9.8 \cdot 80} \approx 40.84$ м/с.</div>
+                    <div class="answer">✅ Ответ: $t \approx 3.15$ с</div>
+                </div>
+            </div>
+
+            <!-- Задача 13 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 13. Определение ускорения по графику</div>
+                <div class="task-condition"><strong>Условие:</strong> По графику $v(t)$ (прямая через $(0, -4)$ и $(2, 2)$) определите ускорение $a$ и начальную скорость $v_0$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $(0, -4)$, $(2, 2)$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$, $v_0$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <div id="sol13" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $v_0 = -4$ м/с (значение при $t=0$).</div>
+                    <div class="step"><strong>Шаг 2.</strong> $a = \frac{\Delta v}{\Delta t} = \frac{2 - (-4)}{2 - 0} = 3$ м/с².</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Отрицательная начальная скорость — тело сначала двигалось в отрицательном направлении.</div>
+                    <div class="answer">✅ Ответ: $v_0 = -4$ м/с, $a = 3$ м/с²</div>
+                </div>
+            </div>
+
+            <!-- Задача 14 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 14. Путь через площадь треугольника</div>
+                <div class="task-condition"><strong>Условие:</strong> По графику $v(t)$ (треугольник $(0,0)$, $(2,6)$, $(4,0)$) определите перемещение $S$ за $4$ с.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> треугольник $(0,0)$, $(2,6)$, $(4,0)$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $S$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <div id="sol14" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Площадь под графиком = перемещение.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $S = \frac{1}{2} \cdot 4 \cdot 6 = 12$ м</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> За первые 2 с тело разгонялось, за следующие 2 с — тормозило. Общее перемещение — 12 м.</div>
+                    <div class="answer">✅ Ответ: $S = 12$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 15 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 15. Два момента времени</div>
+                <div class="task-condition"><strong>Условие:</strong> Мяч бросили вертикально вверх со скоростью $v_0 = 25$ м/с. Через сколько секунд $t$ он окажется на высоте $h = 20$ м? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_0 = 25$ м/с, $h = 20$ м, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <div id="sol15" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $h = v_0 t - \frac{gt^2}{2} \Rightarrow 20 = 25t - 4.9t^2$</div>
+                    <div class="step"><strong>Шаг 2.</strong> $4.9t^2 - 25t + 20 = 0$</div>
+                    <div class="step"><strong>Шаг 3.</strong> $t = \frac{25 \pm \sqrt{625 - 392}}{9.8} = \frac{25 \pm 15.26}{9.8}$</div>
+                    <div class="step"><strong>Шаг 4.</strong> $t_1 \approx 0.99$ с, $t_2 \approx 4.11$ с</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Два корня — мяч на высоте 20 м дважды: при подъёме и при падении. $h_{max} = \frac{v_0^2}{2g} \approx 31.9$ м, поэтому 20 м достигается дважды.</div>
+                    <div class="answer">✅ Ответ: $t_1 \approx 0.99$ с, $t_2 \approx 4.11$ с</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="index.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('mathTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('mathTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('mathTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='math_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+</script>
+
+<!-- 3D-модель 1: Графики -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-graphs');
+        const canvas = document.getElementById('canvas-graphs');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(0.5, 0.5, 8);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.7rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const timeSlider = document.getElementById('graph-time');
+        const accelSlider = document.getElementById('graph-accel');
+        const v0Slider = document.getElementById('graph-v0');
+        const timeValue = document.getElementById('graph-time-value');
+        const accelValue = document.getElementById('graph-accel-value');
+        const v0Value = document.getElementById('graph-v0-value');
+        const areaValue = document.getElementById('graph-area-value');
+
+        const AXIS_LEFT = -6.0;
+        const AXIS_RIGHT = 2.0;
+        const AXIS_BOTTOM = -1.5;
+        const AXIS_TOP = 3.0;
+
+        let graphElements = [];
+
+        function clearGraph() {
+            graphElements.forEach(el => group.remove(el));
+            graphElements = [];
+        }
+
+        function createAxes() {
+            const g = new THREE.Group();
+            g.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM, 0),
+                    new THREE.Vector3(AXIS_RIGHT, AXIS_BOTTOM, 0)
+                ]),
+                new THREE.LineBasicMaterial({ color: 0x888888 })
+            ));
+            g.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM, 0),
+                    new THREE.Vector3(AXIS_LEFT, AXIS_TOP, 0)
+                ]),
+                new THREE.LineBasicMaterial({ color: 0x888888 })
+            ));
+            return g;
+        }
+        const axes = createAxes();
+        group.add(axes);
+
+        const labelT = makeLabel('t (с)', '#ffffff', new THREE.Vector3(AXIS_RIGHT + 0.4, AXIS_BOTTOM - 0.2, 0), '0.6rem');
+        const labelV = makeLabel('v (м/с)', '#ffffff', new THREE.Vector3(AXIS_LEFT - 0.5, AXIS_TOP + 0.2, 0), '0.6rem');
+        const label0 = makeLabel('0', '#888888', new THREE.Vector3(AXIS_LEFT - 0.2, AXIS_BOTTOM - 0.2, 0), '0.5rem');
+        group.add(labelT);
+        group.add(labelV);
+        group.add(label0);
+
+        function buildGraph() {
+            clearGraph();
+
+            const t = parseFloat(timeSlider.value);
+            const a = parseFloat(accelSlider.value);
+            const v0 = parseFloat(v0Slider.value);
+            timeValue.textContent = t.toFixed(1);
+            accelValue.textContent = a.toFixed(1);
+            v0Value.textContent = v0.toFixed(1);
+
+            const SCALE_X = 0.8;
+            const SCALE_Y = 0.5;
+
+            const pts = [];
+            const steps = 100;
+            const maxT = 6;
+            for (let i = 0; i <= steps; i++) {
+                const ti = (i / steps) * maxT;
+                const vi = v0 + a * ti;
+                const x = AXIS_LEFT + ti * SCALE_X;
+                const y = AXIS_BOTTOM + vi * SCALE_Y;
+                pts.push(new THREE.Vector3(x, y, 0));
+            }
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const graphLine = new THREE.Line(
+                geo,
+                new THREE.LineBasicMaterial({ color: 0xff2222, linewidth: 3 })
+            );
+            graphElements.push(graphLine);
+
+            const tScaled = t * SCALE_X;
+            const vEnd = v0 + a * t;
+            const vStartScaled = v0 * SCALE_Y;
+            const vEndScaled = vEnd * SCALE_Y;
+
+            const vertices = new Float32Array([
+                AXIS_LEFT, AXIS_BOTTOM + vStartScaled, 0,
+                AXIS_LEFT + tScaled, AXIS_BOTTOM + vEndScaled, 0,
+                AXIS_LEFT + tScaled, AXIS_BOTTOM, 0,
+                AXIS_LEFT, AXIS_BOTTOM, 0
+            ]);
+            const triGeo = new THREE.BufferGeometry();
+            triGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            triGeo.setIndex([0, 1, 2, 0, 2, 3]);
+            triGeo.computeVertexNormals();
+
+            const areaMat = new THREE.MeshBasicMaterial({
+                color: 0xff2222,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.DoubleSide
+            });
+            const areaMesh = new THREE.Mesh(triGeo, areaMat);
+            graphElements.push(areaMesh);
+
+            const contourPts = [
+                new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM + vStartScaled, 0),
+                new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM + vEndScaled, 0),
+                new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM, 0),
+                new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM, 0)
+            ];
+            const contourGeo = new THREE.BufferGeometry().setFromPoints(contourPts);
+            const contourLine = new THREE.Line(contourGeo, new THREE.LineBasicMaterial({ color: 0xff2222, transparent: true, opacity: 0.3 }));
+            graphElements.push(contourLine);
+
+            const areaVal = v0 * t + (a * t * t) / 2;
+            areaValue.textContent = `S = ${areaVal.toFixed(1)} м`;
+
+            const dotMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.12 });
+            const dotGeo = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM + vEndScaled, 0)
+            ]);
+            const dot = new THREE.Points(dotGeo, dotMat);
+            graphElements.push(dot);
+
+            const dashMat = new THREE.LineDashedMaterial({ color: 0x888888, dashSize: 0.04, gapSize: 0.04 });
+            const dashLine = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM, 0),
+                    new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM + vEndScaled, 0)
+                ]),
+                dashMat
+            );
+            dashLine.computeLineDistances();
+            graphElements.push(dashLine);
+
+            const labelTval = makeLabel(`${t.toFixed(1)}с`, '#888888', new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM - 0.25, 0), '0.5rem');
+            graphElements.push(labelTval);
+            const labelVval = makeLabel(`${vEnd.toFixed(1)}м/с`, '#888888', new THREE.Vector3(AXIS_LEFT - 0.4, AXIS_BOTTOM + vEndScaled, 0), '0.5rem');
+            graphElements.push(labelVval);
+
+            graphElements.forEach(el => group.add(el));
+        }
+
+        timeSlider.addEventListener('input', buildGraph);
+        accelSlider.addEventListener('input', buildGraph);
+        v0Slider.addEventListener('input', buildGraph);
+
+        document.getElementById('fs-graphs').addEventListener('click', async () => {
+            if (!document.fullscreenElement) {
+                await container.requestFullscreen();
+                if (screen.orientation && screen.orientation.lock) {
+                    try { await screen.orientation.lock('portrait'); } catch(e) {}
+                }
+            } else {
+                await document.exitFullscreen();
+                if (screen.orientation && screen.orientation.unlock) {
+                    try { screen.orientation.unlock(); } catch(e) {}
+                }
+            }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(AXIS_LEFT + 2, 0.5, 0);
+        controls.update();
+
+        buildGraph();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- 3D-модель 2: Свободное падение с массой -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-freefall');
+        const canvas = document.getElementById('canvas-freefall');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(3.5, 1.0, 5);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        // Цвет высоты — тёмно-зелёный, читается в обеих темах
+        const H_COLOR = '#2e8b57';
+
+        function makeLabel(text, color, pos, fs = '0.55rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const heightSlider = document.getElementById('freefall-height');
+        const massSlider = document.getElementById('freefall-mass');
+        const gSlider = document.getElementById('freefall-g');
+        const heightValue = document.getElementById('freefall-height-value');
+        const massValue = document.getElementById('freefall-mass-value');
+        const gValue = document.getElementById('freefall-g-value');
+        const playBtn = document.getElementById('freefall-play-btn');
+        const resetBtn = document.getElementById('freefall-reset-btn');
+        const speedDisplay = document.getElementById('freefall-speed-display');
+        const timeDisplay = document.getElementById('freefall-time-display');
+        const hDisplay = document.getElementById('freefall-h-display');
+        const gDisplay = document.getElementById('freefall-g-display');
+        const massDisplay = document.getElementById('freefall-mass-display');
+
+        let animating = false;
+        let startTime = 0;
+        let currentTime = 0;
+        let sphereY = 0;
+        let h = 45;
+        let g = 9.8;
+        let mass = 1.0;
+        let sphereRadius = 0.3;
+        const GROUND_Y = 0.5;
+
+        let sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(sphereRadius, 24, 24),
+            new THREE.MeshStandardMaterial({ color: 0xff6644, emissive: 0x441100 })
+        );
+        sphere.position.set(0, 0, 0);
+        group.add(sphere);
+
+        const shadowGeo = new THREE.CircleGeometry(0.3, 20);
+        const shadowMat = new THREE.MeshBasicMaterial({
+            color: 0x000000,
+            transparent: true,
+            opacity: 0.25,
+            depthWrite: false
+        });
+        const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+        shadow.rotation.x = -Math.PI / 2;
+        shadow.position.set(0, GROUND_Y + 0.02, 0);
+        group.add(shadow);
+
+        function createAsphaltTexture() {
+            const isLight = document.documentElement.classList.contains('light-mode');
+            const canvas2 = document.createElement('canvas');
+            canvas2.width = 256;
+            canvas2.height = 256;
+            const ctx = canvas2.getContext('2d');
+
+            const baseColor = isLight ? '#b0c8d8' : '#3a4a5a';
+            ctx.fillStyle = baseColor;
+            ctx.fillRect(0, 0, 256, 256);
+
+            for (let i = 0; i < 8000; i++) {
+                const x = Math.random() * 256;
+                const y = Math.random() * 256;
+                const offset = isLight ? 30 : 40;
+                const b = (isLight ? 120 : 30) + Math.random() * offset;
+                const r = b + (isLight ? 10 : 0);
+                const g2 = b + (isLight ? 20 : 10);
+                const b2 = b + (isLight ? 30 : 20);
+                ctx.fillStyle = `rgba(${Math.min(255,r)},${Math.min(255,g2)},${Math.min(255,b2)},0.3)`;
+                ctx.fillRect(x, y, 2, 2);
+            }
+
+            ctx.strokeStyle = isLight ? 'rgba(100,120,140,0.3)' : 'rgba(30,50,60,0.4)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 15; i++) {
+                ctx.beginPath();
+                let x = Math.random() * 256;
+                let y = Math.random() * 256;
+                ctx.moveTo(x, y);
+                for (let j = 0; j < 4; j++) {
+                    x += (Math.random() - 0.5) * 30;
+                    y += (Math.random() - 0.5) * 30;
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            const texture = new THREE.CanvasTexture(canvas2);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(3, 3);
+            return texture;
+        }
+
+        const groundMat = new THREE.MeshStandardMaterial({
+            map: createAsphaltTexture(),
+            roughness: 0.9,
+            metalness: 0.1,
+            transparent: false,
+            side: THREE.DoubleSide
+        });
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.set(0, GROUND_Y, 0);
+        group.add(ground);
+
+        const grid = new THREE.GridHelper(4, 16, 0x5f7f9e, 0x3a5a6a);
+        grid.position.y = GROUND_Y + 0.01;
+        grid.material.transparent = true;
+        grid.material.opacity = 0.15;
+        group.add(grid);
+
+        // Ось высоты — тёмно-зелёная (не чёрная)
+        const axisMat = new THREE.LineBasicMaterial({ color: 0x2e8b57, transparent: true, opacity: 0.35 });
+        const axisGeo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, GROUND_Y - 0.2, 0),
+            new THREE.Vector3(0, GROUND_Y + 2.5, 0)
+        ]);
+        group.add(new THREE.Line(axisGeo, axisMat));
+
+        const trajPts = [];
+        for (let y = GROUND_Y - 0.2; y <= GROUND_Y + 2.5; y += 0.05) {
+            trajPts.push(new THREE.Vector3(0, y, 0));
+        }
+        const trajGeo = new THREE.BufferGeometry().setFromPoints(trajPts);
+        const trajLine = new THREE.Line(trajGeo, new THREE.LineDashedMaterial({
+            color: 0x2e8b57,
+            dashSize: 0.04,
+            gapSize: 0.04,
+            transparent: true,
+            opacity: 0.3
+        }));
+        trajLine.computeLineDistances();
+        group.add(trajLine);
+
+        // Подписи h и v — тёмно-зелёный для h, оранжевый для v
+        const labelH = makeLabel('h', H_COLOR, new THREE.Vector3(0.25, GROUND_Y + 0.5, 0), '0.5rem');
+        group.add(labelH);
+        const labelV = makeLabel('v', '#ffaa00', new THREE.Vector3(0.5, GROUND_Y - 0.3, 0), '0.5rem');
+        group.add(labelV);
+
+        function resetFall() {
+            h = parseFloat(heightSlider.value);
+            g = parseFloat(gSlider.value);
+            mass = parseFloat(massSlider.value);
+            heightValue.textContent = h;
+            gValue.textContent = g.toFixed(1);
+            massValue.textContent = mass.toFixed(1);
+            hDisplay.textContent = h;
+            gDisplay.textContent = g.toFixed(1);
+            massDisplay.textContent = mass.toFixed(1);
+
+            const size = 0.12 + mass * 0.04;
+            sphereRadius = size;
+
+            sphere.geometry.dispose();
+            sphere.geometry = new THREE.SphereGeometry(size, 24, 24);
+            const hue = 0.05 + mass * 0.04;
+            const color = new THREE.Color().setHSL(hue, 0.9, 0.5);
+            sphere.material.color.copy(color);
+            sphere.material.emissive.copy(new THREE.Color().setHSL(hue, 0.8, 0.15));
+
+            shadow.geometry.dispose();
+            shadow.geometry = new THREE.CircleGeometry(size * 1.5, 20);
+
+            const scaleH = h / 60;
+            sphereY = GROUND_Y + size + scaleH;
+            sphere.position.y = sphereY;
+            shadow.position.y = GROUND_Y + 0.02;
+
+            currentTime = 0;
+            animating = false;
+            speedDisplay.textContent = '0.0';
+            timeDisplay.textContent = '0.0';
+            playBtn.textContent = '▶ Пуск';
+            playBtn.disabled = false;
+        }
+
+        function startFall() {
+            if (animating) return;
+            h = parseFloat(heightSlider.value);
+            g = parseFloat(gSlider.value);
+            hDisplay.textContent = h;
+            gDisplay.textContent = g.toFixed(1);
+
+            const size = sphere.geometry.parameters.radius || 0.3;
+            const scaleH = h / 60;
+            sphereY = GROUND_Y + size + scaleH;
+            sphere.position.y = sphereY;
+            currentTime = 0;
+            animating = true;
+            startTime = performance.now();
+            playBtn.textContent = '⏹ Стоп';
+        }
+
+        function pauseFall() {
+            animating = false;
+            playBtn.textContent = '▶ Пуск';
+        }
+
+        function resumeFall() {
+            animating = true;
+            startTime = performance.now() - currentTime * 1000;
+            playBtn.textContent = '⏹ Стоп';
+        }
+
+        function updateFall() {
+            if (!animating) return;
+
+            const now = performance.now();
+            const dt = (now - startTime) / 1000;
+            currentTime = dt;
+
+            const size = sphere.geometry.parameters.radius || 0.3;
+            const scaleH = h / 60;
+            const accel = g / 60;
+            const speedMultiplier = 1.8;
+
+            const yPos = GROUND_Y + size + scaleH - (accel * dt * dt * speedMultiplier) / 2;
+            const v = accel * dt * speedMultiplier;
+
+            if (yPos <= GROUND_Y + size) {
+                sphere.position.y = GROUND_Y + size;
+                animating = false;
+                playBtn.textContent = '▶ Пуск';
+                const vFinal = Math.sqrt(2 * g * h);
+                speedDisplay.textContent = vFinal.toFixed(1);
+                timeDisplay.textContent = dt.toFixed(2);
+                return;
+            }
+
+            sphere.position.y = yPos;
+            shadow.position.y = GROUND_Y + 0.02;
+            const heightRatio = (sphere.position.y - GROUND_Y) / (scaleH);
+            shadow.material.opacity = 0.1 + 0.2 * (1 - Math.min(1, heightRatio));
+
+            speedDisplay.textContent = v.toFixed(1);
+            timeDisplay.textContent = dt.toFixed(2);
+        }
+
+        heightSlider.addEventListener('input', () => { if (!animating) resetFall(); });
+        massSlider.addEventListener('input', () => { if (!animating) resetFall(); });
+        gSlider.addEventListener('input', () => { if (!animating) resetFall(); });
+
+        playBtn.addEventListener('click', () => {
+            if (animating) {
+                pauseFall();
+            } else {
+                if (playBtn.textContent === '▶ Пуск') {
+                    startFall();
+                } else {
+                    resumeFall();
+                }
+            }
+        });
+
+        resetBtn.addEventListener('click', resetFall);
+
+        document.getElementById('fs-freefall').addEventListener('click', async () => {
+            if (!document.fullscreenElement) {
+                await container.requestFullscreen();
+                if (screen.orientation && screen.orientation.lock) {
+                    try { await screen.orientation.lock('portrait'); } catch(e) {}
+                }
+            } else {
+                await document.exitFullscreen();
+                if (screen.orientation && screen.orientation.unlock) {
+                    try { screen.orientation.unlock(); } catch(e) {}
+                }
+            }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, GROUND_Y + 0.5, 0);
+        controls.update();
+
+        resetFall();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (animating) {
+                updateFall();
+            }
+
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Закон всемирного тяготения. Сила тяжести. Вес тела и невесомость — Физика в кармане</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(46, 204, 113, 0.1);
+            --special-border: #f59e0b;
+            --special-bg: rgba(245, 158, 11, 0.12);
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --label-bg: rgba(26,45,60,0.85);
+            --label-color: #ffffff;
+            --card-shadow: rgba(0,0,0,0.2);
+            --important-color: #f59e0b;
+            --explanation-color: #8ba5b8;
+        }
+
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --special-bg: rgba(217, 119, 6, 0.10);
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --label-bg: rgba(255,255,255,0.92);
+            --label-color: #1a2a3f;
+            --card-shadow: rgba(0,0,0,0.08);
+            --important-color: #d97706;
+            --explanation-color: #5a7a94;
+        }
+
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s,color 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s,color 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+
+        h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
+
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:5000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s,color 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--important-color);font-weight:700;background:var(--special-bg);padding:1px 6px;border-radius:4px;}
+        .def-card .formula-inline{color:var(--special-border);font-family:'Times New Roman',serif;font-style:italic;}
+
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;border:1px solid var(--border);}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+
+        .model-container {
+            text-align: center;
+            margin: 16px 0;
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            background: var(--canvas-bg);
+            box-shadow: 0 4px 12px var(--card-shadow);
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            min-height: 450px;
+            transition: background 0.3s,color 0.3s;
+        }
+        .model-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border-radius: 20px;
+            touch-action: none;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 20;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .fullscreen-btn:hover { background: var(--special-border); transform: scale(1.05); }
+
+        .controls-panel {
+            background: var(--info-bg);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin: 8px 0 12px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            align-items: center;
+            border: 1px solid var(--border);
+            transition: background 0.3s,color 0.3s,border 0.3s;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .control-group label {
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 20px;
+            transition: color 0.3s;
+        }
+        .control-group input[type="range"] {
+            width: 120px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--slider-track);
+            border-radius: 3px;
+            outline: none;
+            transition: background 0.3s;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: 2px solid var(--special-border);
+        }
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: 2px solid var(--special-border);
+        }
+        .control-value {
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 32px;
+            text-align: center;
+            background: var(--input-bg);
+            padding: 2px 8px;
+            border-radius: 12px;
+            transition: color 0.3s,background 0.3s;
+        }
+        .control-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            transition: color 0.3s;
+        }
+
+        .back-link-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0 8px;
+        }
+        .back-link{
+            display:inline-block;
+            padding:10px 20px;
+            background:var(--special-border);
+            color:white;
+            text-decoration:none;
+            font-weight:bold;
+            border-radius:20px;
+            font-size:0.95rem;
+            transition:background 0.2s;
+        }
+        .back-link:hover{background:#b45309;}
+
+        .task-block {
+            background: var(--task-bg);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin: 16px 0;
+            border-left: 4px solid var(--task-border);
+            border: 1px solid var(--border);
+            transition: background 0.3s,color 0.3s,border 0.3s;
+        }
+        .task-block .task-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+        .task-block .task-condition {
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.8;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: color 0.3s,background 0.3s;
+        }
+        .task-block .task-condition strong { color: var(--special-border); }
+        .task-block .task-condition mjx-container { font-size: 1.1rem !important; }
+
+        .task-given-find {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 40px;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            transition: background 0.3s,color 0.3s,border 0.3s;
+        }
+        .task-given-find .given { color: var(--given-color); }
+        .task-given-find .find { color: var(--find-color); }
+        .task-given-find .given strong,
+        .task-given-find .find strong { font-weight: 700; font-size: 1rem; }
+        .task-given-find mjx-container { font-size: 1.1rem !important; }
+
+        .show-solution-btn {
+            background: var(--special-border);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
+
+        .task-solution { display: none; margin-top: 12px; }
+        .task-solution.open { display: block; }
+        .task-solution .step {
+            padding: 10px 16px;
+            margin: 8px 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border-left: 3px solid var(--special-border);
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.8;
+            overflow-x: auto;
+            transition: background 0.3s,color 0.3s;
+        }
+        .task-solution .step .formula {
+            display: block;
+            text-align: center;
+            font-size: 1.3rem;
+            padding: 6px 0;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            color: var(--special-border);
+        }
+        .task-solution .step .formula mjx-container { font-size: 1.3rem !important; }
+        .task-solution .step .explanation {
+            background: var(--special-bg);
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-style: italic;
+            color: var(--explanation-color);
+            font-size: 0.9rem;
+            border-left: 2px solid var(--special-border);
+            transition: background 0.3s,color 0.3s;
+        }
+        .task-solution .answer {
+            padding: 12px 18px;
+            background: var(--special-border);
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .favorite-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .favorite-btn:hover { transform: scale(1.1); }
+        .favorite-btn.active { color: #facc15; }
+
+        .note-box {
+            background: var(--info-bg);
+            border-left: 4px solid var(--special-border);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin: 16px 0;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text);
+            transition: background 0.3s,color 0.3s;
+        }
+        .note-box .important { color: var(--important-color); font-weight: 700; }
+
+        .force-legend {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--label-bg);
+            backdrop-filter: blur(8px);
+            padding: 4px 14px;
+            border-radius: 20px;
+            color: var(--label-color);
+            font-size: 0.6rem;
+            z-index: 10;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            border: 1px solid var(--special-border);
+            box-shadow: 0 2px 10px var(--card-shadow);
+            transition: background 0.3s,color 0.3s,border 0.3s;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .force-legend span { display: inline-flex; align-items: center; gap: 4px; }
+        .force-legend .color-dot { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+
+        .info-display {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--label-bg);
+            backdrop-filter: blur(8px);
+            padding: 6px 14px;
+            border-radius: 12px;
+            color: var(--label-color);
+            font-size: 0.7rem;
+            z-index: 15;
+            text-align: left;
+            border: 1px solid var(--special-border);
+            box-shadow: 0 2px 10px var(--card-shadow);
+            transition: background 0.3s,color 0.3s,border 0.3s;
+            min-width: 100px;
+        }
+        .info-display div { margin: 2px 0; }
+        .info-display .val { font-weight: 700; color: var(--special-border); }
+
+        mjx-container { font-size: 1.2em !important; overflow-x: auto !important; max-width: 100% !important; }
+
+        .model-container:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            margin: 0;
+            border-radius: 0;
+            background: var(--canvas-bg) !important;
+            aspect-ratio: auto;
+        }
+        .model-container:fullscreen .model-canvas {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+        }
+
+        @media(max-width:700px){
+            .model-container { min-height: 350px; }
+            .fullscreen-btn { width: 38px; height: 38px; font-size: 18px; bottom: 12px; right: 12px; }
+            .controls-panel { flex-direction: column; gap: 10px; align-items: stretch; }
+            .control-group { justify-content: space-between; }
+            .control-group input[type="range"] { width: 100%; max-width: 200px; }
+            .task-solution .step .formula { font-size: 1.1rem; white-space: normal; }
+            .task-given-find { flex-direction: column; gap: 6px; }
+            .info-display { font-size: 0.6rem; padding: 4px 10px; min-width: 80px; top: 8px; right: 8px; }
+            .force-legend { font-size: 0.5rem; padding: 3px 10px; gap: 6px; bottom: 8px; }
+            .formula-block { font-size: 0.95rem; padding: 10px 12px; }
+            .formula-block .f { font-size: 1.1rem; }
+            .task-block .task-condition mjx-container { font-size: 0.95rem !important; }
+            .task-solution .step .formula mjx-container { font-size: 1.1rem !important; }
+        }
+        @media(max-width:450px){
+            .model-container { min-height: 260px; }
+            .container { padding: 10px; padding-top: 44px; }
+            h1 { font-size: 1.2rem; }
+            .section-title { font-size: 0.95rem; }
+            .control-group input[type="range"] { max-width: 120px; }
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>🌍 Закон всемирного тяготения.<br>Сила тяжести. Вес тела и невесомость</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Закон всемирного тяготения</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Закон всемирного тяготения</strong> — один из фундаментальных законов физики, открытый <span class="important">Исааком Ньютоном</span> в 1687 году. Он описывает гравитационное взаимодействие между любыми телами во Вселенной.</p>
+
+                <p style="font-size:1.1rem;font-weight:700;margin:12px 0;color:var(--special-border);">
+                    Два тела притягиваются друг к другу с силой, прямо пропорциональной произведению их масс и обратно пропорциональной квадрату расстояния между ними.
+                </p>
+
+                <div class="formula-block" style="margin:8px 0;">
+                    <span class="f">$F = G \cdot \dfrac{m_1 m_2}{r^2}$</span>
+                    <span class="f-label">— закон всемирного тяготения</span>
+                </div>
+
+                <p><strong>Обозначения:</strong></p>
+                <ul>
+                    <li>$F$ — сила гравитационного притяжения (Н).</li>
+                    <li><span class="important">$G = 6.67 \cdot 10^{-11}$</span> Н·м²/кг² — <span class="important">гравитационная постоянная</span>.</li>
+                    <li>$m_1$, $m_2$ — массы тел (кг).</li>
+                    <li>$r$ — расстояние между <span class="important">центрами масс</span> тел (м).</li>
+                </ul>
+
+                <p><strong>Гравитационная постоянная $G$</strong> была измерена <span class="important">Генри Кавендишем</span> в 1798 году с помощью крутильных весов. Это один из самых точных экспериментов в истории физики.</p>
+
+                <p><strong>Следствия закона:</strong></p>
+                <ul>
+                    <li>Сила притяжения <span class="important">убывает с расстоянием</span> — при увеличении $r$ в 2 раза сила уменьшается в 4 раза.</li>
+                    <li>Сила притяжения <span class="important">растёт с массой</span> — чем больше массы, тем сильнее притяжение.</li>
+                    <li>Закон справедлив для <span class="important">любых тел</span> — от атомов до галактик.</li>
+                    <li>Гравитация — <span class="important">самая слабая</span> из четырёх фундаментальных взаимодействий.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Сила тяжести</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Сила тяжести</strong> — это <span class="important">частный случай</span> закона всемирного тяготения для тел, находящихся вблизи поверхности Земли (или другой планеты).</p>
+
+                <div class="formula-block" style="margin:8px 0;">
+                    <span class="f">$F_{тяж} = mg$</span>
+                    <span class="f-label">— сила тяжести</span>
+                </div>
+
+                <p><strong>Обозначения:</strong></p>
+                <ul>
+                    <li>$m$ — масса тела (кг).</li>
+                    <li><span class="important">$g$</span> — ускорение свободного падения.</li>
+                    <li>На поверхности Земли: <span class="important">$g \approx 9.8$</span> м/с².</li>
+                </ul>
+
+                <p><strong>Вывод $g$ из закона тяготения:</strong></p>
+                <p style="font-size:1.05rem;font-weight:600;color:var(--special-border);">$g = G \cdot \dfrac{M}{R^2}$</p>
+                <ul>
+                    <li>$M$ — масса планеты, $R$ — радиус планеты.</li>
+                    <li>На разных планетах $g$ разное.</li>
+                    <li>С высотой $g$ уменьшается: $g_h = g_0 \cdot \dfrac{R^2}{(R+h)^2}$.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Вес тела и невесомость</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Вес тела</strong> — это <span class="important">сила</span>, с которой тело действует на опору или подвес.</p>
+                <p style="font-size:0.95rem;color:var(--important-color);"><strong>⚠️ Важно!</strong> Вес — это НЕ масса! Масса — мера инертности, вес — сила.</p>
+
+                <p><strong>Формулы для веса:</strong></p>
+                <ul>
+                    <li><span class="important">В покое или при равномерном движении:</span> $P = mg$.</li>
+                    <li><span class="important">При ускоренном движении вверх:</span> $P = m(g + a)$ — <span class="important">перегрузка</span>.</li>
+                    <li><span class="important">При ускоренном движении вниз:</span> $P = m(g - a)$.</li>
+                    <li><span class="important">При свободном падении ($a = g$):</span> $P = 0$ — <span class="important">невесомость</span>.</li>
+                </ul>
+
+                <div class="formula-block" style="margin:8px 0;">
+                    <span class="f">$P = m(g \pm a)$</span>
+                    <span class="f-label">— общая формула веса</span>
+                </div>
+
+                <p><strong>Невесомость</strong> — состояние, при котором тело <span class="important">не давит</span> на опору и не растягивает подвес.</p>
+                <ul>
+                    <li>Невесомость возникает при <span class="important">свободном падении</span> ($a = g$).</li>
+                    <li>Космонавты на орбите находятся в состоянии невесомости.</li>
+                    <li>В невесомости $P = 0$, но <span class="important">сила тяжести $F_{тяж} = mg$ продолжает действовать</span>!</li>
+                    <li>Невесомость ≠ отсутствие силы тяжести.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 4 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Космические скорости</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Первая космическая скорость</strong> — минимальная скорость для движения по <span class="important">круговой орбите</span> вокруг планеты.</p>
+                <div class="formula-block" style="margin:8px 0;">
+                    <span class="f">$v_1 = \sqrt{gR}$</span>
+                    <span class="f-label">— первая космическая скорость</span>
+                </div>
+                <p>Для Земли: <span class="important">$v_1 \approx 7.9$</span> км/с.</p>
+
+                <p><strong>Вторая космическая скорость</strong> — скорость, необходимая для <span class="important">преодоления</span> гравитационного притяжения планеты.</p>
+                <div class="formula-block" style="margin:8px 0;">
+                    <span class="f">$v_2 = \sqrt{2gR}$</span>
+                    <span class="f-label">— вторая космическая скорость</span>
+                </div>
+                <p>Для Земли: <span class="important">$v_2 \approx 11.2$</span> км/с.</p>
+                <p style="margin-top:8px;">Вторая космическая скорость всегда в <span class="important">$\sqrt{2}$</span> раз больше первой.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ИНТЕРАКТИВНАЯ МОДЕЛЬ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивная модель</div>
+        <div class="section-content">
+            <div class="model-container" id="container-gravity">
+                <canvas id="canvas-gravity" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-gravity">⛶</button>
+                <div class="info-display">
+                    <div>$F$ = <span class="val" id="disp-force">0.00</span> Н</div>
+                    <div>$r$ = <span class="val" id="disp-distance">4.0</span> м</div>
+                    <div>$m_1$ = <span class="val" id="disp-m1">5.0</span> кг</div>
+                    <div>$m_2$ = <span class="val" id="disp-m2">5.0</span> кг</div>
+                </div>
+                <div class="force-legend">
+                    <span><span class="color-dot" style="background:#ff4444;"></span> $F_{12}$</span>
+                    <span><span class="color-dot" style="background:#44ff88;"></span> $F_{21}$</span>
+                    <span><span class="color-dot" style="background:#ff8800;"></span> Тело 1</span>
+                    <span><span class="color-dot" style="background:#44aaff;"></span> Тело 2</span>
+                </div>
+            </div>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Множитель масс</label>
+                    <input type="range" id="gravity-scale" min="1" max="20" step="0.5" value="5">
+                    <span class="control-value" id="gravity-scale-value">5.0</span>
+                </div>
+                <div class="control-group">
+                    <label>$r$ (м)</label>
+                    <input type="range" id="gravity-r" min="1" max="10" step="0.1" value="4">
+                    <span class="control-value" id="gravity-r-value">4.0</span>
+                </div>
+                <button class="btn-action" id="gravity-reset-btn">⟳ Сброс</button>
+                <span class="control-label">⬤ $G = 6.67 \cdot 10^{-11}$</span>
+            </div>
+            <div class="def-card">
+                <p><strong>🪐 Как работает модель:</strong></p>
+                <p>Два тела притягиваются с силой <span class="important">$F = G \cdot \dfrac{m_1 m_2}{r^2}$</span>.</p>
+                <p>Меняйте множитель масс и расстояние — сила меняется в реальном времени.</p>
+                <p><span class="important">Красная и зелёная стрелки показывают силы притяжения — они направлены друг к другу.</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ (15 ШТУК) ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением</div>
+        <div class="section-content">
+
+            <!-- === ЗАКОН ВСЕМИРНОГО ТЯГОТЕНИЯ (1-5) === -->
+            <div style="margin:12px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Закон всемирного тяготения</div>
+
+            <!-- Задача 1 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сила притяжения двух тел</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 50$ кг и $m_2 = 80$ кг находятся на расстоянии $r = 4$ м. Найдите силу их притяжения. ($G = 6.67 \cdot 10^{-11}$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 50$ кг, $m_2 = 80$ кг, $r = 4$ м, $G = 6.67 \cdot 10^{-11}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Записываем закон всемирного тяготения: <span class="formula">$F = G \cdot \dfrac{m_1 m_2}{r^2}$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> Подставляем числа: <span class="formula">$F = 6.67 \cdot 10^{-11} \cdot \dfrac{50 \cdot 80}{4^2}$</span></div>
+                    <div class="step"><strong>Шаг 3.</strong> $50 \cdot 80 = 4000$, $4^2 = 16$. <span class="formula">$F = 6.67 \cdot 10^{-11} \cdot 250 = 1.6675 \cdot 10^{-8}$ Н</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Сила очень мала, потому что массы тел малы по сравнению с массами планет.</div>
+                    <div class="answer">✅ Ответ: $F \approx 1.67 \cdot 10^{-8}$ Н</div>
+                </div>
+            </div>
+
+            <!-- Задача 2 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Расстояние между телами</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 100$ кг и $m_2 = 100$ кг притягиваются с силой $F = 6.67 \cdot 10^{-9}$ Н. Найдите расстояние между ними.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 100$ кг, $m_2 = 100$ кг, $F = 6.67 \cdot 10^{-9}$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $r$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из формулы $F = G \cdot \dfrac{m_1 m_2}{r^2}$ выражаем $r$: <span class="formula">$r = \sqrt{G \cdot \dfrac{m_1 m_2}{F}}$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$r = \sqrt{6.67 \cdot 10^{-11} \cdot \dfrac{10000}{6.67 \cdot 10^{-9}}} = \sqrt{10000 \cdot 10^{-2}} = \sqrt{100} = 10$</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Мы нашли расстояние, на котором сила притяжения равна заданной.</div>
+                    <div class="answer">✅ Ответ: $r = 10$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 3 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Во сколько раз изменится сила?</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела притягиваются с силой $F$. Во сколько раз изменится сила, если расстояние <strong>увеличить в 2 раза</strong>, а массы <strong>увеличить в 3 раза</strong>?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r_2 = 2r_1$, $m_1' = 3m_1$, $m_2' = 3m_2$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{F_2}{F_1}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $F_2 = G \cdot \dfrac{(3m_1)(3m_2)}{(2r_1)^2} = G \cdot \dfrac{9m_1 m_2}{4r_1^2} = \dfrac{9}{4} \cdot F_1$</div>
+                    <div class="step"><span class="formula">$\dfrac{F_2}{F_1} = \dfrac{9}{4} = 2.25$</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Увеличение масс даёт множитель 9, увеличение расстояния — множитель $1/4$. Итого $9/4 = 2.25$.</div>
+                    <div class="answer">✅ Ответ: Сила увеличится в $2.25$ раза</div>
+                </div>
+            </div>
+
+            <!-- Задача 4 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Сравнение силы притяжения и веса</div>
+                <div class="task-condition"><strong>Условие:</strong> Два шара массами $m_1 = 200$ кг и $m_2 = 300$ кг на расстоянии $r = 5$ м. Найдите силу притяжения. Сравните её с весом тела массой $1$ кг. ($G = 6.67 \cdot 10^{-11}$, $g = 9.8$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 200$ кг, $m_2 = 300$ кг, $r = 5$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$, сравнить с весом $1$ кг</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $F = 6.67 \cdot 10^{-11} \cdot \dfrac{200 \cdot 300}{25} = 6.67 \cdot 10^{-11} \cdot 2400 = 1.6 \cdot 10^{-7}$ Н</div>
+                    <div class="step"><strong>Шаг 2.</strong> Вес $1$ кг: $P = 1 \cdot 9.8 = 9.8$ Н.</div>
+                    <div class="step"><span class="formula">$\dfrac{P}{F} = \dfrac{9.8}{1.6 \cdot 10^{-7}} \approx 6.1 \cdot 10^7$</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Гравитация между обычными телами ничтожна по сравнению с весом.</div>
+                    <div class="answer">✅ Ответ: $F \approx 1.6 \cdot 10^{-7}$ Н, вес $1$ кг больше в $6.1 \cdot 10^7$ раз</div>
+                </div>
+            </div>
+
+            <!-- Задача 5 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Ускорение свободного падения на планете</div>
+                <div class="task-condition"><strong>Условие:</strong> Планета имеет массу $M = 8 \cdot 10^{23}$ кг и радиус $R = 4 \cdot 10^6$ м. Найдите $g$ на поверхности. ($G = 6.67 \cdot 10^{-11}$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $M = 8 \cdot 10^{23}$ кг, $R = 4 \cdot 10^6$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $g$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $g = G \cdot \dfrac{M}{R^2} = 6.67 \cdot 10^{-11} \cdot \dfrac{8 \cdot 10^{23}}{(4 \cdot 10^6)^2}$</div>
+                    <div class="step"><strong>Шаг 2.</strong> $(4 \cdot 10^6)^2 = 1.6 \cdot 10^{13}$. <span class="formula">$g = 6.67 \cdot 10^{-11} \cdot 5 \cdot 10^{10} = 3.34$ м/с²</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> На этой планете $g < 9.8$, значит, она легче Земли.</div>
+                    <div class="answer">✅ Ответ: $g \approx 3.34$ м/с²</div>
+                </div>
+            </div>
+
+            <!-- === СИЛА ТЯЖЕСТИ И ВЕС (6-10) === -->
+            <div style="margin:20px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Сила тяжести и вес тела</div>
+
+            <!-- Задача 6 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Сравнение силы тяжести на Земле и на Луне</div>
+                <div class="task-condition"><strong>Условие:</strong> На Земле $g_З = 9.8$ м/с², на Луне $g_Л = 1.6$ м/с². Тело массой $m = 12$ кг. Найдите силу тяжести на Земле и на Луне.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 12$ кг, $g_З = 9.8$, $g_Л = 1.6$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_З$, $F_Л$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><span class="formula">$F_З = 12 \cdot 9.8 = 117.6$ Н</span>, <span class="formula">$F_Л = 12 \cdot 1.6 = 19.2$ Н</span></div>
+                    <div class="step"><span class="formula">$\dfrac{F_З}{F_Л} = \dfrac{117.6}{19.2} = 6.125$</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> На Луне сила тяжести в 6 раз меньше. Поэтому космонавты весят в 6 раз меньше.</div>
+                    <div class="answer">✅ Ответ: $F_З = 117.6$ Н, $F_Л = 19.2$ Н</div>
+                </div>
+            </div>
+
+            <!-- Задача 7 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Вес в лифте (подъём)</div>
+                <div class="task-condition"><strong>Условие:</strong> Человек массой $m = 70$ кг в лифте, который поднимается вверх с ускорением $a = 2$ м/с². Найдите вес. ($g = 9.8$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 70$ кг, $a = 2$ м/с², $g = 9.8$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $P$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> При движении вверх: $P = m(g + a)$.</div>
+                    <div class="step"><span class="formula">$P = 70 \cdot (9.8 + 2) = 70 \cdot 11.8 = 826$ Н</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> Вес в покое: $P_0 = 70 \cdot 9.8 = 686$ Н.</div>
+                    <div class="step"><span class="formula">$\dfrac{P}{P_0} = \dfrac{826}{686} \approx 1.2$</span> (перегрузка $1.2g$)</div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> При подъёме с ускорением вес увеличивается — это перегрузка.</div>
+                    <div class="answer">✅ Ответ: $P = 826$ Н (перегрузка $\approx 1.2g$)</div>
+                </div>
+            </div>
+
+            <!-- Задача 8 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Вес в лифте (спуск)</div>
+                <div class="task-condition"><strong>Условие:</strong> Тот же человек ($m = 70$ кг) в лифте, который опускается вниз с ускорением $a = 3$ м/с². Найдите вес. ($g = 9.8$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 70$ кг, $a = 3$ м/с², $g = 9.8$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $P$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> При движении вниз: $P = m(g - a)$.</div>
+                    <div class="step"><span class="formula">$P = 70 \cdot (9.8 - 3) = 70 \cdot 6.8 = 476$ Н</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> При движении вниз вес уменьшается. Если $a = g$, наступает невесомость.</div>
+                    <div class="answer">✅ Ответ: $P = 476$ Н (человек чувствует себя легче)</div>
+                </div>
+            </div>
+
+            <!-- Задача 9 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Невесомость в лифте</div>
+                <div class="task-condition"><strong>Условие:</strong> С каким ускорением должен двигаться лифт, чтобы человек массой $m = 60$ кг оказался в состоянии невесомости?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 60$ кг, $P = 0$, $g = 9.8$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Невесомость: $P = 0$. Формула для движения вниз: $P = m(g - a)$.</div>
+                    <div class="step"><span class="formula">$0 = m(g - a) \Rightarrow a = g = 9.8$ м/с²</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Если лифт свободно падает, человек в невесомости.</div>
+                    <div class="answer">✅ Ответ: $a = 9.8$ м/с² (свободное падение)</div>
+                </div>
+            </div>
+
+            <!-- Задача 10 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Масса по весу на другой планете</div>
+                <div class="task-condition"><strong>Условие:</strong> На Марсе $g_М = 3.7$ м/с². Тело весит $P = 185$ Н. Найдите массу тела и его вес на Земле. ($g_З = 9.8$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $g_М = 3.7$ м/с², $P_М = 185$ Н, $g_З = 9.8$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$, $P_З$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $m = \dfrac{P_М}{g_М} = \dfrac{185}{3.7} = 50$ кг.</div>
+                    <div class="step"><strong>Шаг 2.</strong> На Земле: $P_З = m \cdot g_З = 50 \cdot 9.8 = 490$ Н.</div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Масса не меняется при перелёте на другие планеты, меняется только вес.</div>
+                    <div class="answer">✅ Ответ: $m = 50$ кг, $P_З = 490$ Н</div>
+                </div>
+            </div>
+
+            <!-- === КОСМИЧЕСКИЕ СКОРОСТИ (11-15) === -->
+            <div style="margin:20px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Космические скорости</div>
+
+            <!-- Задача 11 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 11. Первая космическая скорость</div>
+                <div class="task-condition"><strong>Условие:</strong> Для планеты с $g = 3.34$ м/с² и $R = 4 \cdot 10^6$ м найдите первую космическую скорость.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $g = 3.34$ м/с², $R = 4 \cdot 10^6$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v_1$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <div id="sol11" class="task-solution">
+                    <div class="step"><span class="formula">$v_1 = \sqrt{gR} = \sqrt{3.34 \cdot 4 \cdot 10^6} = \sqrt{1.336 \cdot 10^7} \approx 3.65 \cdot 10^3$ м/с</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Это меньше, чем на Земле (7.9 км/с), потому что планета легче.</div>
+                    <div class="answer">✅ Ответ: $v_1 \approx 3.65$ км/с</div>
+                </div>
+            </div>
+
+            <!-- Задача 12 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 12. Вторая космическая скорость</div>
+                <div class="task-condition"><strong>Условие:</strong> Для той же планеты ($v_1 = 3.65$ км/с) найдите вторую космическую скорость.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_1 = 3.65$ км/с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <div id="sol12" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $v_2 = \sqrt{2} \cdot v_1$ (так как $v_2 = \sqrt{2gR}$, а $v_1 = \sqrt{gR}$).</div>
+                    <div class="step"><span class="formula">$v_2 = \sqrt{2} \cdot 3.65 \approx 5.16$ км/с</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Вторая космическая скорость всегда в $\sqrt{2}$ раз больше первой.</div>
+                    <div class="answer">✅ Ответ: $v_2 \approx 5.16$ км/с</div>
+                </div>
+            </div>
+
+            <!-- Задача 13 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 13. Период обращения спутника</div>
+                <div class="task-condition"><strong>Условие:</strong> Спутник на орбите $r = 7 \cdot 10^6$ м вокруг Земли ($M = 6 \cdot 10^{24}$ кг). Найдите период. ($G = 6.67 \cdot 10^{-11}$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r = 7 \cdot 10^6$ м, $M = 6 \cdot 10^{24}$ кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $T$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <div id="sol13" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $T = 2\pi \sqrt{\dfrac{r^3}{GM}}$</div>
+                    <div class="step"><span class="formula">$T = 6.28 \sqrt{\dfrac{343 \cdot 10^{18}}{6.67 \cdot 10^{-11} \cdot 6 \cdot 10^{24}}} = 6.28 \sqrt{8.57 \cdot 10^5}$</span></div>
+                    <div class="step"><span class="formula">$T \approx 5.82 \cdot 10^3$ с $\approx 97$ минут</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Примерно полтора часа — типичное время для спутника на низкой орбите.</div>
+                    <div class="answer">✅ Ответ: $T \approx 97$ мин</div>
+                </div>
+            </div>
+
+            <!-- Задача 14 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 14. Масса планеты по скорости спутника</div>
+                <div class="task-condition"><strong>Условие:</strong> Спутник движется вокруг планеты по орбите $r = 2 \cdot 10^7$ м со скоростью $v = 4000$ м/с. Найдите массу планеты. ($G = 6.67 \cdot 10^{-11}$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r = 2 \cdot 10^7$ м, $v = 4000$ м/с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $M$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <div id="sol14" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Для круговой орбиты: $v^2 = \dfrac{GM}{r} \Rightarrow M = \dfrac{v^2 r}{G}$.</div>
+                    <div class="step"><span class="formula">$M = \dfrac{4000^2 \cdot 2 \cdot 10^7}{6.67 \cdot 10^{-11}} = \dfrac{3.2 \cdot 10^{14}}{6.67 \cdot 10^{-11}} \approx 4.8 \cdot 10^{24}$ кг</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> Так астрономы определяют массы планет и звёзд.</div>
+                    <div class="answer">✅ Ответ: $M \approx 4.8 \cdot 10^{24}$ кг</div>
+                </div>
+            </div>
+
+            <!-- Задача 15 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 15. Сравнение космических скоростей</div>
+                <div class="task-condition"><strong>Условие:</strong> На планете А $v_{1A} = 6$ км/с, на планете Б $v_{1Б} = 4$ км/с. Радиусы равны. Во сколько раз отличаются $g$?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v_{1A} = 6$ км/с, $v_{1Б} = 4$ км/с, $R_A = R_B$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{g_A}{g_B}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <div id="sol15" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $v_1 = \sqrt{gR} \Rightarrow g = \dfrac{v_1^2}{R}$.</div>
+                    <div class="step"><span class="formula">$\dfrac{g_A}{g_B} = \dfrac{v_{1A}^2}{v_{1Б}^2} = \dfrac{6^2}{4^2} = \dfrac{36}{16} = 2.25$</span></div>
+                    <div class="step explanation"><strong>💡 Пояснение:</strong> $g$ пропорционально квадрату первой космической скорости.</div>
+                    <div class="answer">✅ Ответ: $g_A$ в $2.25$ раза больше $g_B$</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="mechanics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+</script>
+
+<!-- 3D-модель -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-gravity');
+        const canvas = document.getElementById('canvas-gravity');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+        camera.position.set(0, 2.5, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.7rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function createArrow(from, to, color) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                new THREE.LineBasicMaterial({ color, linewidth: 3 })
+            );
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.08, 0.18, 8),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.3) })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.09)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        function createSphere(radius, color, pos) {
+            const geo = new THREE.SphereGeometry(radius, 32, 32);
+            const mat = new THREE.MeshStandardMaterial({
+                color, emissive: new THREE.Color(color).multiplyScalar(0.15),
+                roughness: 0.3, metalness: 0.1
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(pos);
+            return mesh;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const scaleSlider = document.getElementById('gravity-scale');
+        const rSlider = document.getElementById('gravity-r');
+        const scaleValue = document.getElementById('gravity-scale-value');
+        const rValue = document.getElementById('gravity-r-value');
+        const dispForce = document.getElementById('disp-force');
+        const dispDistance = document.getElementById('disp-distance');
+        const dispM1 = document.getElementById('disp-m1');
+        const dispM2 = document.getElementById('disp-m2');
+        const resetBtn = document.getElementById('gravity-reset-btn');
+
+        const G = 6.67e-11;
+        const BASE_MASS = 1;
+        let sphere1, sphere2;
+        let dynamicObjects = [];
+
+        function clearDynamicObjects() {
+            dynamicObjects.forEach(obj => {
+                if (obj.parent) obj.parent.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) obj.material.dispose();
+            });
+            dynamicObjects = [];
+        }
+
+        function buildGravityScene() {
+            clearDynamicObjects();
+
+            const scale = parseFloat(scaleSlider.value);
+            const m1 = scale * BASE_MASS;
+            const m2 = scale * BASE_MASS;
+            const r = parseFloat(rSlider.value);
+
+            scaleValue.textContent = scale.toFixed(1);
+            rValue.textContent = r.toFixed(1);
+            dispM1.textContent = m1.toFixed(1);
+            dispM2.textContent = m2.toFixed(1);
+            dispDistance.textContent = r.toFixed(1);
+
+            const force = G * m1 * m2 / (r * r);
+            dispForce.textContent = force.toExponential(4);
+
+            const baseRadius = 0.4;
+            const r1 = baseRadius + m1 * 0.015;
+            const r2 = baseRadius + m2 * 0.015;
+            const pos1 = new THREE.Vector3(-r/2, 0, 0);
+            const pos2 = new THREE.Vector3(r/2, 0, 0);
+
+            if (r > 0.5) {
+                const points = [new THREE.Vector3(-r/2, -1.3, 0), new THREE.Vector3(r/2, -1.3, 0)];
+                const geo = new THREE.BufferGeometry().setFromPoints(points);
+                const mat = new THREE.LineDashedMaterial({
+                    color: 0xffffff, dashSize: 0.08, gapSize: 0.06,
+                    transparent: true, opacity: 0.3
+                });
+                const line = new THREE.Line(geo, mat);
+                line.computeLineDistances();
+                group.add(line);
+                dynamicObjects.push(line);
+            }
+
+            const color1 = 0xff8800;
+            const color2 = 0x44aaff;
+            if (sphere1) { group.remove(sphere1); sphere1.geometry.dispose(); sphere1.material.dispose(); }
+            if (sphere2) { group.remove(sphere2); sphere2.geometry.dispose(); sphere2.material.dispose(); }
+            sphere1 = createSphere(r1, color1, pos1);
+            sphere2 = createSphere(r2, color2, pos2);
+            group.add(sphere1);
+            group.add(sphere2);
+
+            const m1Label = makeLabel('m₁=' + m1.toFixed(1) + 'кг', '#ff8800', new THREE.Vector3(pos1.x, pos1.y + r1 + 0.4, 0), '0.75rem');
+            group.add(m1Label);
+            dynamicObjects.push(m1Label);
+            const m2Label = makeLabel('m₂=' + m2.toFixed(1) + 'кг', '#44aaff', new THREE.Vector3(pos2.x, pos2.y + r2 + 0.4, 0), '0.75rem');
+            group.add(m2Label);
+            dynamicObjects.push(m2Label);
+
+            const forceScale = Math.min(force * 1e10, 2.5);
+            if (forceScale > 0.01) {
+                const f1End = new THREE.Vector3(pos1.x + forceScale, pos1.y, 0);
+                const f1Arrow = createArrow(pos1, f1End, 0xff4444);
+                group.add(f1Arrow);
+                dynamicObjects.push(f1Arrow);
+                const f1Label = makeLabel('F₁₂', '#ff4444', new THREE.Vector3(pos1.x + forceScale * 0.5, pos1.y + 0.4, 0), '0.7rem');
+                group.add(f1Label);
+                dynamicObjects.push(f1Label);
+
+                const f2End = new THREE.Vector3(pos2.x - forceScale, pos2.y, 0);
+                const f2Arrow = createArrow(pos2, f2End, 0x44ff88);
+                group.add(f2Arrow);
+                dynamicObjects.push(f2Arrow);
+                const f2Label = makeLabel('F₂₁', '#44ff88', new THREE.Vector3(pos2.x - forceScale * 0.5, pos2.y + 0.4, 0), '0.7rem');
+                group.add(f2Label);
+                dynamicObjects.push(f2Label);
+            }
+        }
+
+        window.buildGravityScene = buildGravityScene;
+
+        scaleSlider.addEventListener('input', buildGravityScene);
+        rSlider.addEventListener('input', buildGravityScene);
+
+        resetBtn.addEventListener('click', () => {
+            scaleSlider.value = 5;
+            rSlider.value = 4;
+            buildGravityScene();
+        });
+
+        document.getElementById('fs-gravity').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        buildGravityScene();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

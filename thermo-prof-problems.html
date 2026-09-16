@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Термодинамика — задачи с профессиональной направленностью</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+            --badge-welder: #ff6644;
+            --badge-electric: #ffcc00;
+            --badge-auto: #44aaff;
+            --badge-mech: #aa66ff;
+            --badge-it: #44ff88;
+            --self-border: #3b82f6;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+            --badge-welder: #dc2626;
+            --badge-electric: #ca8a04;
+            --badge-auto: #2563eb;
+            --badge-mech: #7c3aed;
+            --badge-it: #059669;
+            --self-border: #2563eb;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .intro-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:14px 16px;margin:12px 0;transition:background 0.3s;}
+        .intro-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .intro-card ul{color:var(--text);padding-left:20px;line-height:1.8;}
+        .intro-card .important{color:var(--special-border);font-weight:700;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:600000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .prof-header{display:flex;align-items:center;gap:10px;background:var(--info-bg);border-left:5px solid var(--special-border);border-radius:14px;padding:12px 16px;margin:18px 0 10px 0;}
+        .prof-header .prof-icon{font-size:1.8rem;}
+        .prof-header .prof-title{font-size:1.1rem;font-weight:700;color:var(--text);}
+        .prof-header .prof-sub{font-size:0.8rem;color:var(--text-secondary);margin-top:2px;}
+        .prof-header.welder{border-left-color:var(--badge-welder);}
+        .prof-header.electric{border-left-color:var(--badge-electric);}
+        .prof-header.auto{border-left-color:var(--badge-auto);}
+        .prof-header.mech{border-left-color:var(--badge-mech);}
+        .prof-header.it{border-left-color:var(--badge-it);}
+        .prof-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;margin-left:auto;}
+        .prof-badge.welder{background:var(--badge-welder);}
+        .prof-badge.electric{background:var(--badge-electric);}
+        .prof-badge.auto{background:var(--badge-auto);}
+        .prof-badge.mech{background:var(--badge-mech);}
+        .prof-badge.it{background:var(--badge-it);}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block.hard{border-left:5px solid #ff4444;background:linear-gradient(135deg, var(--task-bg) 0%, rgba(255,68,68,0.05) 100%);}
+        .task-block.self{border-left:5px solid var(--self-border);background:linear-gradient(135deg, var(--task-bg) 0%, rgba(59,130,246,0.06) 100%);}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .hard-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:#ff4444;margin-left:8px;vertical-align:middle;}
+        .self-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:var(--self-border);margin-left:8px;vertical-align:middle;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid var(--self-border);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:var(--self-border);}
+        .hint-box mjx-container{font-size:1rem !important;}
+        .favorite-btn{position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1000;color:var(--text-secondary);transition:all 0.2s;backdrop-filter:blur(4px);}
+        .favorite-btn:hover{transform:scale(1.1);}
+        .favorite-btn.active{color:#facc15;}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        @media(max-width:700px){
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>Основы термодинамики — задачи с профессиональной направленностью</h1>
+
+    <div class="intro-card">
+        <p><strong>📌 О разделе.</strong> Задачи по термодинамике, связанные с реальными профессиональными ситуациями.</p>
+        <p>По каждой специальности — <strong>5 задач</strong>:</p>
+        <ul>
+            <li>🔴 1 задача <strong>сложная</strong> — с подробным решением.</li>
+            <li>🟠 2 задачи <strong>обычные</strong> — с подробным решением.</li>
+            <li>🔵 2 задачи <strong>для самостоятельного решения</strong> — только условие и подсказка.</li>
+        </ul>
+        <p>Специальности:</p>
+        <ul>
+            <li>🔧 <strong>Сварщик</strong> — нагрев, плавление, тепловые потери при сварке.</li>
+            <li>⚡ <strong>Электрик</strong> — нагрев проводников, КПД, охлаждение оборудования.</li>
+            <li>🚗 <strong>Автомеханик</strong> — ДВС, КПД двигателя, система охлаждения.</li>
+            <li>⚙️ <strong>Машиностроение</strong> — паровые турбины, тепловые двигатели, КПД циклов.</li>
+            <li>💻 <strong>Информационные системы</strong> — тепловыделение серверов, охлаждение, КПД.</li>
+        </ul>
+    </div>
+
+    <!-- ===== СВАРЩИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔧 Задачи для сварщика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header welder">
+                <div class="prof-icon">🔧</div>
+                <div>
+                    <div class="prof-title">Сварочное производство</div>
+                    <div class="prof-sub">Нагрев, плавление, тепловые потери</div>
+                </div>
+                <span class="prof-badge welder">Сварщик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Работа газа при сварке</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При сварке в баллоне объёмом $V = 40$ л газ изобарно расширяется при давлении $p = 10^5$ Па, его объём увеличивается на $\Delta V = 0{,}5$ л. Найдите работу газа.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $p = 10^5$ Па, $\Delta V = 0{,}5$ л $= 5 \cdot 10^{-4}$ м³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('w1')">📖 Показать решение</button>
+                <div id="w1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Работа газа при изобарном процессе: $A = p \cdot \Delta V$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$A = 10^5 \cdot 5 \cdot 10^{-4} = 50 \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Небольшое расширение газа в баллоне совершает работу всего 50 Дж — этого недостаточно для существенных изменений.</div>
+                    <div class="answer">✅ Ответ: $A = 50$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. КПД нагрева при сварке</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При сварке выделилось $Q_1 = 10000$ Дж теплоты. Из них в изделие ушло только $Q_{полезн} = 6000$ Дж. Найдите КПД процесса нагрева.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q_1 = 10000$ Дж, $Q_{полезн} = 6000$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('w2')">📖 Показать решение</button>
+                <div id="w2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $\eta = \dfrac{Q_{полезн}}{Q_1}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta = \dfrac{6000}{10000} = 0{,}6 = 60\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 40% теплоты потеряно: ушло в окружающую среду, на нагрев воздуха и т.д.</div>
+                    <div class="answer">✅ Ответ: $\eta = 60\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Тепловой баланс при сварке <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> При сварке деталь массой $m = 0{,}5$ кг из стали (удельная теплоёмкость $c = 500$ Дж/(кг·К)) нагревается от $t_1 = 20$ °C. Выделилось $Q = 50$ кДж теплоты, КПД процесса $\eta = 60\%$. Найдите: а) полезную теплоту; б) конечную температуру детали; в) потери теплоты в окружающую среду.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ кг, $c = 500$ Дж/(кг·К), $t_1 = 20$ °C, $Q = 50000$ Дж, $\eta = 0{,}6$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{пол}$, $t_2$, $Q_{пот}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('w3')">📖 Показать решение</button>
+                <div id="w3" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (полезная теплота).</strong> $Q_{пол} = \eta \cdot Q = 0{,}6 \cdot 50000 = 30000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2 (нагрев детали).</strong> $Q_{пол} = cm\Delta t \Rightarrow \Delta t = \dfrac{Q_{пол}}{cm}$.</div>
+                    <div class="step"><span class="formula">$\Delta t = \dfrac{30000}{500 \cdot 0{,}5} = \dfrac{30000}{250} = 120 \text{ °C}$</span></div>
+                    <div class="step"><strong>Шаг 3.</strong> Конечная температура: $t_2 = 20 + 120 = 140$ °C.</div>
+                    <div class="step"><strong>Шаг 4 (потери).</strong> $Q_{пот} = Q - Q_{пол} = 50000 - 30000 = 20000$ Дж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Треть теплоты уходит в атмосферу. Поэтому при сварке важно защищать зону нагрева от потерь.</div>
+                    <div class="answer">✅ Ответ: $Q_{пол} = 30$ кДж; $t_2 = 140$ °C; $Q_{пот} = 20$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Изменение внутренней энергии <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> При сварке газ в замкнутом объёме получил $Q = 2000$ Дж теплоты. Работа газа не совершается ($V = \text{const}$). На сколько изменилась его внутренняя энергия?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Изохорный процесс ($V = \text{const}$), поэтому $A = 0$. Первое начало: $\Delta U = Q$. Ответ — 2000 Дж.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Работа при расширении газа <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Газ в баллоне при давлении $p = 5 \cdot 10^5$ Па изобарно расширяется от $V_1 = 2$ л до $V_2 = 5$ л. Найдите работу газа.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $A = p(V_2 - V_1)$. Не забудьте перевести литры в м³: 2 л = 0,002 м³, 5 л = 0,005 м³. Ответ — 1500 Дж.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЭЛЕКТРИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚡ Задачи для электрика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header electric">
+                <div class="prof-icon">⚡</div>
+                <div>
+                    <div class="prof-title">Электротехника</div>
+                    <div class="prof-sub">Нагрев проводников, КПД, охлаждение</div>
+                </div>
+                <span class="prof-badge electric">Электрик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Изменение внутренней энергии проводника</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При протекании тока проводник получил $Q = 500$ Дж теплоты. Работа не совершается. Найдите изменение внутренней энергии и температуры, если масса $m = 0{,}1$ кг, $c = 400$ Дж/(кг·К).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q = 500$ Дж, $m = 0{,}1$ кг, $c = 400$ Дж/(кг·К)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta U$, $\Delta T$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('e1')">📖 Показать решение</button>
+                <div id="e1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $A = 0$, поэтому $\Delta U = Q = 500$ Дж.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $\Delta T = \dfrac{Q}{cm} = \dfrac{500}{400 \cdot 0{,}1} = \dfrac{500}{40} = 12{,}5$ К.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Вся теплота пошла на нагрев проводника. Температура выросла на 12,5 °C.</div>
+                    <div class="answer">✅ Ответ: $\Delta U = 500$ Дж; $\Delta T = 12{,}5$ К</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. КПД электродвигателя</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Электродвигатель совершил полезную работу $A = 8000$ Дж, затратив $Q = 10000$ Дж электроэнергии. Найдите КПД.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $A = 8000$ Дж, $Q = 10000$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('e2')">📖 Показать решение</button>
+                <div id="e2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta = \dfrac{A}{Q}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta = \dfrac{8000}{10000} = 0{,}8 = 80\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Потери 20% — это нагрев обмоток (джоулево тепло) и трение в подшипниках.</div>
+                    <div class="answer">✅ Ответ: $\eta = 80\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Тепловой баланс в электрощите <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> В трансформаторном отсеке работают два прибора: один выделяет $Q_1 = 500$ Дж/с, второй $Q_2 = 300$ Дж/с. Отсек имеет вентиляцию, отводящую $Q_{отв} = 600$ Дж/с. Найдите: а) общее тепловыделение; б) накопление теплоты в отсеке за $t = 60$ с; в) изменение температуры воздуха массой $m = 50$ кг за это время ($c = 1005$ Дж/(кг·К)).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q_1 = 500$ Дж/с, $Q_2 = 300$ Дж/с, $Q_{отв} = 600$ Дж/с, $t = 60$ с, $m = 50$ кг, $c = 1005$ Дж/(кг·К)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$, $\Delta Q$, $\Delta T$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('e3')">📖 Показать решение</button>
+                <div id="e3" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (общее тепловыделение).</strong> $Q_{общ} = Q_1 + Q_2 = 800$ Дж/с.</div>
+                    <div class="step"><strong>Шаг 2 (накопление).</strong> Разница между выделением и отводом: $Q_{ост} = 800 - 600 = 200$ Дж/с.</div>
+                    <div class="step"><strong>Шаг 3.</strong> За $t = 60$ с накопится $\Delta Q = 200 \cdot 60 = 12000$ Дж.</div>
+                    <div class="step"><strong>Шаг 4 (нагрев воздуха).</strong> $\Delta T = \dfrac{\Delta Q}{cm} = \dfrac{12000}{1005 \cdot 50} \approx 0{,}239$ К.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Вентиляция почти справляется, но из-за превышения выделения над отводом воздух всё равно нагреется. При длительной работе температура может стать критичной.</div>
+                    <div class="answer">✅ Ответ: $Q_{общ} = 800$ Дж/с; $\Delta Q = 12$ кДж; $\Delta T \approx 0{,}24$ К</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Работа при нагреве провода <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Проводник получил $Q = 2000$ Дж теплоты и совершил работу $A = 500$ Дж (за счёт расширения). Найдите изменение внутренней энергии.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Первое начало: $\Delta U = Q - A = 2000 - 500$. Ответ — 1500 Дж.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. КПД нагревательного прибора <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Электронагреватель потребляет $Q = 12000$ Дж, полезно передаёт воде $Q_{пол} = 9600$ Дж. Найдите КПД.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $\eta = \dfrac{Q_{пол}}{Q} = \dfrac{9600}{12000}$. Ответ — 80%.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== АВТОМЕХАНИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🚗 Задачи для автомеханика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header auto">
+                <div class="prof-icon">🚗</div>
+                <div>
+                    <div class="prof-title">Автосервис</div>
+                    <div class="prof-sub">ДВС, КПД, система охлаждения</div>
+                </div>
+                <span class="prof-badge auto">Автомеханик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. КПД двигателя</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Двигатель получил от сгорания топлива $Q_1 = 40000$ Дж теплоты и совершил работу $A = 12000$ Дж. Найдите КПД.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q_1 = 40000$ Дж, $A = 12000$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('a1')">📖 Показать решение</button>
+                <div id="a1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta = \dfrac{A}{Q_1}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta = \dfrac{12000}{40000} = 0{,}3 = 30\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Это типичный КПД ДВС. Остальные 70% теплоты уходят в выхлопные газы и систему охлаждения.</div>
+                    <div class="answer">✅ Ответ: $\eta = 30\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Теплота, отданная холодильнику</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Двигатель получает $Q_1 = 50000$ Дж, КПД $\eta = 35\%$. Найдите полезную работу и теплоту, отданную в атмосферу.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q_1 = 50000$ Дж, $\eta = 0{,}35$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A$, $Q_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('a2')">📖 Показать решение</button>
+                <div id="a2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $A = \eta \cdot Q_1 = 0{,}35 \cdot 50000 = 17500$ Дж.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $Q_2 = Q_1 - A = 50000 - 17500 = 32500$ Дж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Более половины теплоты уходит в атмосферу — поэтому двигатели греются и нуждаются в радиаторе.</div>
+                    <div class="answer">✅ Ответ: $A = 17{,}5$ кДж; $Q_2 = 32{,}5$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Полный анализ работы двигателя <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Двигатель работает по циклу Карно между температурами $T_1 = 900$ К и $T_2 = 400$ К. За цикл от нагревателя получено $Q_1 = 8000$ Дж. Найдите: а) КПД; б) полезную работу; в) теплоту, отданную холодильнику; г) как изменится КПД, если $T_2$ уменьшить до 300 К.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 900$ К, $T_2 = 400$ К, $Q_1 = 8000$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta$, $A$, $Q_2$, $\eta'$ (при $T_2 = 300$ К)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('a3')">📖 Показать решение</button>
+                <div id="a3" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (КПД).</strong> <span class="formula">$\eta = \dfrac{900 - 400}{900} = \dfrac{500}{900} \approx 0{,}556 = 55{,}6\%$</span></div>
+                    <div class="step"><strong>Шаг 2 (работа).</strong> $A = 0{,}556 \cdot 8000 \approx 4444$ Дж.</div>
+                    <div class="step"><strong>Шаг 3 (теплота холодильнику).</strong> $Q_2 = 8000 - 4444 = 3556$ Дж.</div>
+                    <div class="step"><strong>Шаг 4 (при $T_2 = 300$ К).</strong> <span class="formula">$\eta' = \dfrac{900 - 300}{900} = \dfrac{600}{900} \approx 0{,}667 = 66{,}7\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Снижение температуры холодильника с 400 до 300 К повысило КПД с 55,6% до 66,7%. Это один из способов повышения эффективности двигателя.</div>
+                    <div class="answer">✅ Ответ: $\eta \approx 55{,}6\%$; $A \approx 4{,}4$ кДж; $Q_2 \approx 3{,}6$ кДж; $\eta' \approx 66{,}7\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Работа газа в цилиндре <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> В цилиндре двигателя газ изобарно расширяется при давлении $p = 8 \cdot 10^5$ Па от $V_1 = 0{,}05$ л до $V_2 = 0{,}2$ л. Найдите работу газа за такт расширения.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $A = p(V_2 - V_1)$. Перевести литры в м³: 0,05 л = 5·10⁻⁵ м³, 0,2 л = 2·10⁻⁴ м³. Ответ — 120 Дж.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Сравнение КПД двух двигателей <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Двигатель №1 получает $Q_1 = 10000$ Дж и совершает работу $A_1 = 3000$ Дж. Двигатель №2 получает $Q_2 = 15000$ Дж и совершает работу $A_2 = 6000$ Дж. Какой КПД выше?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $\eta_1 = 3000/10000 = 30\%$; $\eta_2 = 6000/15000 = 40\%$. Второй двигатель эффективнее.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ТЕХНОЛОГИЯ МАШИНОСТРОЕНИЯ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚙️ Задачи для технологии машиностроения (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header mech">
+                <div class="prof-icon">⚙️</div>
+                <div>
+                    <div class="prof-title">Машиностроение</div>
+                    <div class="prof-sub">Турбины, тепловые двигатели, циклы</div>
+                </div>
+                <span class="prof-badge mech">Машиностроение</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. КПД паровой турбины</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Паровая турбина получает пар с температурой $T_1 = 750$ К, отработанный пар имеет температуру $T_2 = 350$ К. Найдите максимально возможный КПД (цикл Карно).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 750$ К, $T_2 = 350$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta_{max}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('m1')">📖 Показать решение</button>
+                <div id="m1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta_{max} = \dfrac{T_1 - T_2}{T_1}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta_{max} = \dfrac{750 - 350}{750} = \dfrac{400}{750} \approx 0{,}533 = 53{,}3\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Реальные паровые турбины имеют КПД 35–45% — ниже идеального цикла Карно из-за трения и потерь.</div>
+                    <div class="answer">✅ Ответ: $\eta_{max} \approx 53{,}3\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Полезная работа турбины</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Турбина получает $Q_1 = 100000$ Дж теплоты от пара и отдаёт холодильнику $Q_2 = 60000$ Дж. Найдите КПД и полезную работу.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q_1 = 100000$ Дж, $Q_2 = 60000$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta$, $A$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('m2')">📖 Показать решение</button>
+                <div id="m2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $A = Q_1 - Q_2 = 40000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $\eta = \dfrac{A}{Q_1} = \dfrac{40000}{100000} = 40\%$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 40% теплоты превращается в работу — это типичный КПД турбины. Остальные 60% рассеиваются в конденсаторе.</div>
+                    <div class="answer">✅ Ответ: $\eta = 40\%$; $A = 40$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Оптимизация теплового двигателя <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Тепловой двигатель работает по циклу Карно. Инженер хочет повысить КПД с 40% до 50%. Начальные температуры: $T_1 = 500$ К, $T_2 = 300$ К. Найдите: а) на сколько нужно повысить $T_1$ при неизменном $T_2$; б) на сколько нужно понизить $T_2$ при неизменном $T_1$. Какой способ эффективнее?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 500$ К, $T_2 = 300$ К, $\eta_1 = 40\%$, $\eta_2 = 50\%$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta T_1$, $\Delta T_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('m3')">📖 Показать решение</button>
+                <div id="m3" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (повышение $T_1$).</strong> $\eta = 1 - \dfrac{T_2}{T_1} = 0{,}5 \Rightarrow \dfrac{T_2}{T_1} = 0{,}5 \Rightarrow T_1 = \dfrac{T_2}{0{,}5} = 600$ К.</div>
+                    <div class="step"><span class="formula">$\Delta T_1 = 600 - 500 = 100 \text{ К}$</span></div>
+                    <div class="step"><strong>Шаг 2 (понижение $T_2$).</strong> $\dfrac{T_2}{500} = 0{,}5 \Rightarrow T_2 = 250$ К.</div>
+                    <div class="step"><span class="formula">$\Delta T_2 = 300 - 250 = 50 \text{ К}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Понизить $T_2$ на 50 К проще, чем повысить $T_1$ на 100 К. Но на практике оба способа ограничены свойствами материалов и окружающей среды.</div>
+                    <div class="answer">✅ Ответ: $\Delta T_1 = 100$ К или $\Delta T_2 = 50$ К; второй способ энергетически выгоднее</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Идеальный КПД <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Газовая турбина работает между $T_1 = 1500$ К и $T_2 = 700$ К. Найдите максимально возможный КПД.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $\eta_{max} = \dfrac{T_1 - T_2}{T_1} = \dfrac{800}{1500}$. Ответ — около 53%.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Теплота топлива <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Двигатель мощностью $P = 50$ кВт работает в течение $t = 1$ часа с КПД $\eta = 25\%$. Сколько теплоты выделилось при сгорании топлива?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Полезная работа $A = P \cdot t = 50000 \cdot 3600 = 1{,}8 \cdot 10^8$ Дж. Тогда $Q = \dfrac{A}{\eta}$. Ответ — $7{,}2 \cdot 10^8$ Дж.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ИНФОРМАЦИОННЫЕ СИСТЕМЫ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">💻 Задачи для информационных систем (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header it">
+                <div class="prof-icon">💻</div>
+                <div>
+                    <div class="prof-title">Информационные системы</div>
+                    <div class="prof-sub">Тепловыделение, охлаждение, КПД</div>
+                </div>
+                <span class="prof-badge it">ИС</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Тепловыделение процессора</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Процессор выделяет $Q = 80$ Вт тепла. Какое количество теплоты выделится за $t = 30$ минут работы?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q = 80$ Вт, $t = 30$ мин $= 1800$ с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('i1')">📖 Показать решение</button>
+                <div id="i1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q_{общ} = Q \cdot t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q_{общ} = 80 \cdot 1800 = 144000 \text{ Дж} = 144 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> За 30 минут процессор выделяет 144 кДж тепла. Это сравнимо с нагревом 1 литра воды на 34 °C.</div>
+                    <div class="answer">✅ Ответ: $Q_{общ} = 144$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. КПД системы охлаждения</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Система охлаждения отводит $Q_{отв} = 36000$ Дж тепла из $Q_{общ} = 40000$ Дж, выделяемых сервером. Найдите КПД системы охлаждения.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q_{общ} = 40000$ Дж, $Q_{отв} = 36000$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('i2')">📖 Показать решение</button>
+                <div id="i2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\eta = \dfrac{Q_{отв}}{Q_{общ}}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta = \dfrac{36000}{40000} = 0{,}9 = 90\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Система отводит 90% теплоты — хороший показатель. Оставшиеся 10% накапливаются в корпусе, повышая температуру.</div>
+                    <div class="answer">✅ Ответ: $\eta = 90\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Тепловой баланс дата-центра <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Дата-центр содержит $N = 50$ серверов по $P = 500$ Вт каждый. Система охлаждения работает как тепловой насос: затрачивает $P_{охл} = 10$ кВт, отводит 90% всего тепла. Найдите: а) общее тепловыделение серверов; б) отведённое тепло; в) КПД системы; г) итоговое тепловыделение в помещение.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $N = 50$, $P = 500$ Вт, $P_{охл} = 10000$ Вт, $\eta_{отв} = 0{,}9$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{серв}$, $Q_{отв}$, $\eta$, $Q_{ост}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('i3')">📖 Показать решение</button>
+                <div id="i3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Общее тепловыделение серверов: $Q_{серв} = 50 \cdot 500 = 25000$ Вт = 25 кВт.</div>
+                    <div class="step"><strong>Шаг 2.</strong> С учётом системы охлаждения: общее выделение $Q_{общ} = 25000 + 10000 = 35000$ Вт.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Отведено: $Q_{отв} = 0{,}9 \cdot 35000 = 31500$ Вт = 31,5 кВт.</div>
+                    <div class="step"><strong>Шаг 4.</strong> КПД: $\eta = 0{,}9 = 90\%$.</div>
+                    <div class="step"><strong>Шаг 5.</strong> Остаётся в помещении: $Q_{ост} = 35000 - 31500 = 3500$ Вт = 3,5 кВт.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Даже при отводе 90% остаётся 3,5 кВт — это требует дополнительной вентиляции, иначе температура будет расти.</div>
+                    <div class="answer">✅ Ответ: $Q_{серв} = 25$ кВт; $Q_{отв} = 31{,}5$ кВт; $\eta = 90\%$; $Q_{ост} = 3{,}5$ кВт</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Работа при нагреве воздуха в корпусе <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Воздух в герметичном корпусе сервера получил $Q = 1000$ Дж теплоты, при этом совершил работу расширения $A = 300$ Дж. Найдите изменение внутренней энергии.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Первое начало: $\Delta U = Q - A = 1000 - 300$. Ответ — 700 Дж.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. КПД охлаждающей системы <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Кондиционер в серверной затрачивает $P_1 = 5$ кВт электроэнергии, чтобы отвести $P_2 = 20$ кВт тепла. Найдите эффективность системы (как отношение отведённого тепла к затраченной энергии).</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Это холодильный коэффициент: $\varepsilon = \dfrac{P_2}{P_1} = \dfrac{20}{5}$. Ответ — 4. Чем больше, тем эффективнее.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+</script>
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Внутренняя энергия идеального газа</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:140px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .favorite-btn{position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1000;color:var(--text-secondary);transition:all 0.2s;backdrop-filter:blur(4px);}
+        .favorite-btn:hover{transform:scale(1.1);}
+        .favorite-btn.active{color:#facc15;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>Внутренняя энергия идеального газа</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Что такое внутренняя энергия</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Внутренняя энергия</strong> $U$ — это сумма кинетической энергии теплового движения всех молекул и потенциальной энергии их взаимодействия.</p>
+                <p>Для <span class="important">идеального газа</span> силы притяжения между молекулами отсутствуют, поэтому потенциальная энергия взаимодействия равна нулю. Внутренняя энергия идеального газа — это <strong>только суммарная кинетическая энергия движения всех его молекул</strong>.</p>
+                <p>Одна молекула обладает средней кинетической энергией:</p>
+                <p>$\bar{E}_k = \dfrac{3}{2}kT$</p>
+                <p>Если в газе $N$ молекул, то внутренняя энергия:</p>
+                <div class="formula-block">
+                    <span class="f">$U = N \cdot \bar{E}_k = \dfrac{3}{2}NkT$</span>
+                    <span class="f-label">— внутренняя энергия через число молекул</span>
+                </div>
+                <p>Учитывая, что $N = \nu N_A$ и $kN_A = R$, получаем:</p>
+                <div class="formula-block">
+                    <span class="f">$U = \dfrac{3}{2}\nu RT = \dfrac{3}{2}\dfrac{m}{M}RT$</span>
+                    <span class="f-label">— внутренняя энергия идеального газа</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$\nu$ — количество вещества (моль);</li>
+                    <li>$R = 8{,}31$ Дж/(моль·К) — универсальная газовая постоянная;</li>
+                    <li>$T$ — абсолютная температура (К).</li>
+                </ul>
+                <p><strong>Важные свойства внутренней энергии:</strong></p>
+                <ul>
+                    <li>Зависит только от <strong>температуры</strong> и <strong>количества вещества</strong> (для одноатомного идеального газа).</li>
+                    <li><strong>Не зависит</strong> от объёма и давления по отдельности — только от $T$ (и $\nu$).</li>
+                    <li>Если температура не меняется — внутренняя энергия не меняется (<strong>изотермический процесс</strong>).</li>
+                    <li>При <strong>абсолютном нуле</strong> ($T = 0$ К $= -273$ °C) внутренняя энергия идеального газа равна нулю — молекулы остановились.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Одноатомный, двухатомный и многоатомный газ</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>Общая формула для внутренней энергии идеального газа с учётом <span class="important">степеней свободы</span> молекул:</p>
+                <div class="formula-block">
+                    <span class="f">$U = \dfrac{i}{2}\nu RT$</span>
+                    <span class="f-label">— общая формула внутренней энергии</span>
+                </div>
+                <p>где $i$ — число степеней свободы молекулы:</p>
+                <ul>
+                    <li><strong>Одноатомный газ</strong> (He, Ne, Ar): $i = 3$ → $U = \dfrac{3}{2}\nu RT$.</li>
+                    <li><strong>Двухатомный газ</strong> (H₂, O₂, N₂): $i = 5$ → $U = \dfrac{5}{2}\nu RT$.</li>
+                    <li><strong>Многоатомный газ</strong> (CO₂, CH₄): $i = 6$ → $U = 3\nu RT$.</li>
+                </ul>
+                <p><strong>Почему так?</strong> Молекула может двигаться поступательно (3 направления — $x$, $y$, $z$), вращаться (2 или 3 оси) и колебаться. Чем больше степеней свободы, тем больше энергии приходится на одну молекулу при данной температуре.</p>
+                <p>В 3D-модели ниже это показано: одноатомные молекулы — простые шарики, двухатомные — «гантельки», многоатомные — «треугольники». Вращающиеся молекулы имеют больше степеней свободы и, следовательно, больше внутренней энергии.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Способы изменения внутренней энергии</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>Внутреннюю энергию тела можно изменить <span class="important">двумя способами</span>:</p>
+                <p><strong>1. Совершение работы.</strong> Например, при сжатии газа поршнем мы совершаем работу — молекулы получают дополнительную энергию, температура растёт. При расширении газ сам совершает работу — его внутренняя энергия уменьшается.</p>
+                <p><strong>2. Теплопередача.</strong> Энергия передаётся от более нагретого тела к менее нагретому без совершения работы. Виды теплопередачи:</p>
+                <ul>
+                    <li><strong>Теплопроводность</strong> — передача энергии при непосредственном контакте тел.</li>
+                    <li><strong>Конвекция</strong> — перенос энергии потоками жидкости или газа.</li>
+                    <li><strong>Излучение</strong> — передача энергии электромагнитными волнами.</li>
+                </ul>
+                <p>Количество теплоты $Q$, переданное телу, идёт на изменение его внутренней энергии (или на совершение работы). Это и есть содержание <strong>первого начала термодинамики</strong>:</p>
+                <div class="formula-block">
+                    <span class="f">$\Delta U = Q + A_{внеш}$</span>
+                    <span class="f-label">— первое начало термодинамики</span>
+                </div>
+                <p>где $A_{внеш}$ — работа внешних сил над газом. Часто записывают через работу самого газа $A_{газа} = -A_{внеш}$:</p>
+                <div class="formula-block">
+                    <span class="f">$Q = \Delta U + A_{газа}$</span>
+                    <span class="f-label">— теплота идёт на изменение энергии и работу</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛЬ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивная 3D-модель</div>
+        <div class="section-content">
+
+            <div class="model-container" id="container-internal">
+                <canvas id="canvas-internal" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-internal">⛶</button>
+                <div class="info-display">
+                    <div>$t$ = <span class="val" id="internal-celsius">0</span> °C</div>
+                    <div>$T$ = <span class="val" id="internal-kelvin">273</span> К</div>
+                    <div>$\nu$ = <span class="val" id="internal-nu">1.0</span> моль</div>
+                    <div>$U$ = <span class="val" id="internal-u">3.40</span> кДж</div>
+                    <div>$i$ = <span class="val" id="internal-i">3</span></div>
+                </div>
+            </div>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="internal-temp">Температура $t$ (°C)</label>
+                    <input type="range" id="internal-temp" min="-273" max="300" step="1" value="0">
+                    <span class="control-value" id="internal-temp-value">0</span>
+                </div>
+                <div class="control-group">
+                    <label for="internal-nu-slider">$\nu$ (моль)</label>
+                    <input type="range" id="internal-nu-slider" min="0.5" max="5" step="0.1" value="1">
+                    <span class="control-value" id="internal-nu-value">1.0</span>
+                </div>
+                <div class="control-group">
+                    <label for="internal-i-slider">Газ</label>
+                    <input type="range" id="internal-i-slider" min="3" max="6" step="1" value="3">
+                    <span class="control-value" id="internal-i-value">одноатомный</span>
+                </div>
+                <button class="btn-reset" id="internal-reset">⟳ Сброс</button>
+                <span class="control-label">⬤ $U = \frac{i}{2}\nu RT$</span>
+            </div>
+            <div class="def-card">
+                <p><strong>Модель внутренней энергии.</strong> Молекулы газа в сосуде. Форма молекул зависит от типа газа:</p>
+                <ul>
+                    <li><strong>одноатомный</strong> — одиночные шарики (только поступательное движение);</li>
+                    <li><strong>двухатомный</strong> — «гантельки» из двух шариков (поступательное + вращательное);</li>
+                    <li><strong>многоатомный</strong> — «треугольники» из трёх шариков (больше вращательных степеней свободы).</li>
+                </ul>
+                <p><span class="important">Ползунок $t$</span> меняет температуру от −273 °C до +300 °C. При <strong>−273 °C</strong> (0 К) — <strong>абсолютный нуль</strong>: молекулы <strong>останавливаются</strong>, их кинетическая энергия равна нулю, и $U = 0$.</p>
+                <p><span class="important">Ползунок «Газ»</span> переключает тип газа: меняется форма молекул, число степеней свободы $i$ и внутренняя энергия $U$.</p>
+                <p>Обратите внимание: при одинаковых $t$ и $\nu$ у двухатомного и многоатомного газов $U$ больше — потому что у них есть вращательные степени свободы.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Внутренняя энергия одноатомного газа</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите внутреннюю энергию $\nu = 2$ моль одноатомного идеального газа при температуре $T = 300$ К.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\nu = 2$ моль, $T = 300$ К, $R = 8{,}31$ Дж/(моль·К)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: <span class="formula">$U = \dfrac{3}{2}\nu RT$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = \dfrac{3}{2} \cdot 2 \cdot 8{,}31 \cdot 300 = 3 \cdot 8{,}31 \cdot 300 = 7479 \text{ Дж} \approx 7{,}48 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Внутренняя энергия 2 молей одноатомного газа при комнатной температуре — около 7,5 кДж.</div>
+                    <div class="answer">✅ Ответ: $U \approx 7{,}48$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Внутренняя энергия через массу</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите внутреннюю энергию $m = 4$ г гелия при температуре $T = 320$ К. Молярная масса гелия $M = 4$ г/моль (одноатомный газ).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ г $= 0{,}004$ кг, $T = 320$ К, $M = 0{,}004$ кг/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Количество вещества: $\nu = \dfrac{m}{M} = \dfrac{0{,}004}{0{,}004} = 1$ моль.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = \dfrac{3}{2} \cdot 1 \cdot 8{,}31 \cdot 320 \approx 3989 \text{ Дж} \approx 3{,}99 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 4 г гелия — это ровно 1 моль (молярная масса 4 г/моль).</div>
+                    <div class="answer">✅ Ответ: $U \approx 3{,}99$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Изменение внутренней энергии</div>
+                <div class="task-condition"><strong>Условие:</strong> Температура $\nu = 3$ моль одноатомного газа увеличилась с $T_1 = 250$ К до $T_2 = 400$ К. Найдите изменение внутренней энергии.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\nu = 3$ моль, $T_1 = 250$ К, $T_2 = 400$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta U$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\Delta U = U_2 - U_1 = \dfrac{3}{2}\nu R(T_2 - T_1)$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\Delta U = \dfrac{3}{2} \cdot 3 \cdot 8{,}31 \cdot (400 - 250) = 4{,}5 \cdot 8{,}31 \cdot 150 \approx 5609 \text{ Дж} \approx 5{,}61 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Температура выросла — внутренняя энергия увеличилась. Знак «плюс» — газ получил энергию.</div>
+                    <div class="answer">✅ Ответ: $\Delta U \approx 5{,}61$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Двухатомный газ</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите внутреннюю энергию $\nu = 1{,}5$ моль азота $N_2$ при температуре $T = 400$ К. Азот — двухатомный газ ($i = 5$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\nu = 1{,}5$ моль, $T = 400$ К, $i = 5$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Для двухатомного газа: $U = \dfrac{5}{2}\nu RT$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = \dfrac{5}{2} \cdot 1{,}5 \cdot 8{,}31 \cdot 400 = 2{,}5 \cdot 1{,}5 \cdot 8{,}31 \cdot 400 \approx 12465 \text{ Дж} \approx 12{,}5 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Двухатомный газ при той же температуре имеет больше внутренней энергии, чем одноатомный — из-за вращательных степеней свободы.</div>
+                    <div class="answer">✅ Ответ: $U \approx 12{,}5$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Внутренняя энергия и давление</div>
+                <div class="task-condition"><strong>Условие:</strong> В баллоне объёмом $V = 20$ л находится одноатомный газ при давлении $p = 2 \cdot 10^5$ Па. Найдите внутреннюю энергию газа.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V = 0{,}02$ м³, $p = 2 \cdot 10^5$ Па, $i = 3$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $pV = \nu RT$ следует $\nu RT = pV$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Подставляем в $U = \dfrac{3}{2}\nu RT = \dfrac{3}{2}pV$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$U = \dfrac{3}{2} \cdot 2 \cdot 10^5 \cdot 0{,}02 = 3 \cdot 10^5 \cdot 0{,}02 = 6000 \text{ Дж} = 6 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Полезная формула: для одноатомного газа $U = \dfrac{3}{2}pV$. Это быстрый способ, если даны давление и объём, а не температура.</div>
+                    <div class="answer">✅ Ответ: $U = 6$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Изменение температуры по $\Delta U$</div>
+                <div class="task-condition"><strong>Условие:</strong> Внутренняя энергия $\nu = 4$ моль одноатомного газа увеличилась на $\Delta U = 2493$ Дж. На сколько градусов нагрелся газ?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\nu = 4$ моль, $\Delta U = 2493$ Дж, $i = 3$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta T$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $\Delta U = \dfrac{3}{2}\nu R \Delta T$ выражаем $\Delta T = \dfrac{2\Delta U}{3\nu R}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\Delta T = \dfrac{2 \cdot 2493}{3 \cdot 4 \cdot 8{,}31} = \dfrac{4986}{99{,}72} = 50 \text{ К}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Газ нагрелся на 50 К (или °C — разница температур в К и °C одинакова).</div>
+                    <div class="answer">✅ Ответ: $\Delta T = 50$ К</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Сравнение внутренних энергий</div>
+                <div class="task-condition"><strong>Условие:</strong> Сравните внутренние энергии двух газов при одинаковой температуре: 1 моль гелия (одноатомный, $i = 3$) и 1 моль кислорода $O_2$ (двухатомный, $i = 5$).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\nu_1 = \nu_2 = 1$ моль, $T = \text{const}$, $i_1 = 3$, $i_2 = 5$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{U_2}{U_1}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $U_1 = \dfrac{3}{2}\nu RT$ (гелий), $U_2 = \dfrac{5}{2}\nu RT$ (кислород).</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{U_2}{U_1} = \dfrac{5}{3} \approx 1{,}67$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При одинаковых $\nu$ и $T$ двухатомный газ имеет в 1,67 раза больше внутренней энергии, чем одноатомный. Причина — дополнительные вращательные степени свободы.</div>
+                    <div class="answer">✅ Ответ: $\dfrac{U_2}{U_1} = \dfrac{5}{3} \approx 1{,}67$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Средняя энергия одной молекулы</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите среднюю кинетическую энергию одной молекулы одноатомного газа при $T = 500$ К. Сколько молекул содержится в $\nu = 1$ моль газа?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T = 500$ К, $\nu = 1$ моль, $k = 1{,}38 \cdot 10^{-23}$ Дж/К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\bar{E}_k$, $N$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\bar{E}_k = \dfrac{3}{2}kT = \dfrac{3}{2} \cdot 1{,}38 \cdot 10^{-23} \cdot 500 \approx 1{,}04 \cdot 10^{-20} \text{ Дж}$</div>
+                    <div class="step"><strong>Шаг 2.</strong> $N = \nu N_A = 1 \cdot 6{,}02 \cdot 10^{23} = 6{,}02 \cdot 10^{23}$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Проверка: $U = N \bar{E}_k = 6{,}02 \cdot 10^{23} \cdot 1{,}04 \cdot 10^{-20} \approx 6260$ Дж. Совпадает с формулой $\dfrac{3}{2}\nu RT = \dfrac{3}{2} \cdot 8{,}31 \cdot 500 \approx 6233$ Дж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Оба пути дают один и тот же результат — это хорошая проверка.</div>
+                    <div class="answer">✅ Ответ: $\bar{E}_k \approx 1{,}04 \cdot 10^{-20}$ Дж; $N = 6{,}02 \cdot 10^{23}$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Внутренняя энергия смеси газов</div>
+                <div class="task-condition"><strong>Условие:</strong> Смесь состоит из $\nu_1 = 2$ моль гелия (одноатомный) и $\nu_2 = 1$ моль азота (двухатомный) при $T = 350$ К. Найдите внутреннюю энергию смеси.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\nu_1 = 2$ моль, $i_1 = 3$; $\nu_2 = 1$ моль, $i_2 = 5$; $T = 350$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $U_{см}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Внутренняя энергия — аддитивная величина: $U_{см} = U_1 + U_2$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U_1 = \dfrac{3}{2}\nu_1 RT = 1{,}5 \cdot 2 \cdot 8{,}31 \cdot 350 \approx 8726 \text{ Дж}$</span></div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$U_2 = \dfrac{5}{2}\nu_2 RT = 2{,}5 \cdot 1 \cdot 8{,}31 \cdot 350 \approx 7271 \text{ Дж}$</span></div>
+                    <div class="step"><strong>Шаг 4.</strong> $U_{см} = 8726 + 7271 = 15997$ Дж $\approx 16$ кДж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Внутренняя энергия смеси — сумма энергий компонентов. Каждый газ вносит свой вклад в зависимости от количества вещества и числа степеней свободы.</div>
+                    <div class="answer">✅ Ответ: $U_{см} \approx 16$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Работа и внутренняя энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Над газом совершили работу $A_{внеш} = 500$ Дж, при этом газ отдал количество теплоты $Q = 300$ Дж. Как изменилась внутренняя энергия газа?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $A_{внеш} = 500$ Дж, $Q = -300$ Дж (газ отдал)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta U$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Первое начало термодинамики: $\Delta U = Q + A_{внеш}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Газ отдал теплоту — значит $Q < 0$: $Q = -300$ Дж.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$\Delta U = -300 + 500 = 200 \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Внешняя работа (500 Дж) больше, чем отданная теплота (300 Дж), поэтому внутренняя энергия выросла на 200 Дж.</div>
+                    <div class="answer">✅ Ответ: $\Delta U = +200$ Дж (энергия увеличилась)</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+</script>
+
+<!-- 3D-модель внутренней энергии -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-internal');
+        const canvas = document.getElementById('canvas-internal');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(5, 4, 9);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        const key = new THREE.DirectionalLight(0xffffff, 0.9);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const BOX = 6;
+        const HALF = BOX / 2;
+
+        const boxGeo = new THREE.BoxGeometry(BOX, BOX, BOX);
+        const boxEdges = new THREE.EdgesGeometry(boxGeo);
+        const boxLines = new THREE.LineSegments(boxEdges, new THREE.LineBasicMaterial({ color: 0x8ba5b8, transparent: true, opacity: 0.5 }));
+        group.add(boxLines);
+
+        const wallMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.05, side: THREE.BackSide });
+        const boxMesh = new THREE.Mesh(boxGeo, wallMat);
+        group.add(boxMesh);
+
+        const atomMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x442200 });
+        const atomMat2 = new THREE.MeshStandardMaterial({ color: 0xff6644, emissive: 0x441100 });
+        const bondMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, emissive: 0x333333 });
+
+        const atomGeo = new THREE.SphereGeometry(0.12, 12, 12);
+        const bondGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.18, 6);
+
+        function createMolecule(type) {
+            const molGroup = new THREE.Group();
+
+            if (type === 3) {
+                const a = new THREE.Mesh(atomGeo, atomMat);
+                molGroup.add(a);
+            } else if (type === 5) {
+                const a1 = new THREE.Mesh(atomGeo, atomMat);
+                a1.position.set(-0.12, 0, 0);
+                molGroup.add(a1);
+                const a2 = new THREE.Mesh(atomGeo, atomMat2);
+                a2.position.set(0.12, 0, 0);
+                molGroup.add(a2);
+                const bond = new THREE.Mesh(bondGeo, bondMat);
+                bond.rotation.z = Math.PI / 2;
+                molGroup.add(bond);
+            } else {
+                const a1 = new THREE.Mesh(atomGeo, atomMat);
+                a1.position.set(0, 0.14, 0);
+                molGroup.add(a1);
+                const a2 = new THREE.Mesh(atomGeo, atomMat2);
+                a2.position.set(-0.13, -0.08, 0);
+                molGroup.add(a2);
+                const a3 = new THREE.Mesh(atomGeo, atomMat);
+                a3.position.set(0.13, -0.08, 0);
+                molGroup.add(a3);
+                const b1 = new THREE.Mesh(bondGeo, bondMat);
+                b1.position.set(-0.065, 0.03, 0);
+                b1.rotation.z = Math.PI / 3;
+                b1.scale.set(1, 1.6, 1);
+                molGroup.add(b1);
+                const b2 = new THREE.Mesh(bondGeo, bondMat);
+                b2.position.set(0.065, 0.03, 0);
+                b2.rotation.z = -Math.PI / 3;
+                b2.scale.set(1, 1.6, 1);
+                molGroup.add(b2);
+                const b3 = new THREE.Mesh(bondGeo, bondMat);
+                b3.position.set(0, -0.08, 0);
+                b3.rotation.z = Math.PI / 2;
+                b3.scale.set(1, 1.4, 1);
+                molGroup.add(b3);
+            }
+            return molGroup;
+        }
+
+        let molecules = [];
+        let tCelsius = 0;
+        let T = 273;
+        let nu = 1.0;
+        let i = 3;
+
+        const N_base = 60;
+
+        function initMolecules() {
+            molecules.forEach(m => group.remove(m.mesh));
+            molecules.length = 0;
+            const N = Math.round(N_base * nu / 2);
+            for (let k = 0; k < N; k++) {
+                const mesh = createMolecule(i);
+                mesh.position.set(
+                    (Math.random() - 0.5) * (BOX - 0.6),
+                    (Math.random() - 0.5) * (BOX - 0.6),
+                    (Math.random() - 0.5) * (BOX - 0.6)
+                );
+                mesh.rotation.set(
+                    Math.random() * Math.PI * 2,
+                    Math.random() * Math.PI * 2,
+                    Math.random() * Math.PI * 2
+                );
+                group.add(mesh);
+                const dir = new THREE.Vector3(
+                    Math.random() - 0.5,
+                    Math.random() - 0.5,
+                    Math.random() - 0.5
+                ).normalize();
+                molecules.push({
+                    mesh,
+                    vx: dir.x, vy: dir.y, vz: dir.z,
+                    rotX: (Math.random() - 0.5) * 0.1,
+                    rotY: (Math.random() - 0.5) * 0.1,
+                    rotZ: (Math.random() - 0.5) * 0.1
+                });
+            }
+        }
+
+        const tempSlider = document.getElementById('internal-temp');
+        const tempValue = document.getElementById('internal-temp-value');
+        const celsiusDisplay = document.getElementById('internal-celsius');
+        const kelvinDisplay = document.getElementById('internal-kelvin');
+        const nuSlider = document.getElementById('internal-nu-slider');
+        const nuValue = document.getElementById('internal-nu-value');
+        const nuDisplay = document.getElementById('internal-nu');
+        const iSlider = document.getElementById('internal-i-slider');
+        const iValue = document.getElementById('internal-i-value');
+        const iDisplay = document.getElementById('internal-i');
+        const uDisplay = document.getElementById('internal-u');
+        const resetBtn = document.getElementById('internal-reset');
+
+        const R = 8.31;
+
+        function updateU() {
+            const U = (i / 2) * nu * R * T / 1000;
+            uDisplay.textContent = U.toFixed(2);
+        }
+
+        function updateTemperature() {
+            tCelsius = parseFloat(tempSlider.value);
+            T = tCelsius + 273;
+            if (T < 0) T = 0;
+            tempValue.textContent = tCelsius;
+            celsiusDisplay.textContent = tCelsius;
+            kelvinDisplay.textContent = T;
+            updateU();
+        }
+
+        function iName(v) {
+            if (v == 3) return 'одноатомный';
+            if (v == 5) return 'двухатомный';
+            return 'многоатомный';
+        }
+
+        tempSlider.addEventListener('input', updateTemperature);
+        nuSlider.addEventListener('input', () => {
+            nu = parseFloat(nuSlider.value);
+            nuValue.textContent = nu.toFixed(1);
+            nuDisplay.textContent = nu.toFixed(1);
+            updateU();
+            initMolecules();
+        });
+        iSlider.addEventListener('input', () => {
+            i = parseFloat(iSlider.value);
+            iValue.textContent = iName(i);
+            iDisplay.textContent = i;
+            updateU();
+            initMolecules();
+        });
+        resetBtn.addEventListener('click', () => {
+            tempSlider.value = 0;
+            nuSlider.value = 1;
+            iSlider.value = 3;
+            nuValue.textContent = '1.0';
+            nuDisplay.textContent = '1.0';
+            iValue.textContent = 'одноатомный';
+            iDisplay.textContent = '3';
+            updateTemperature();
+            initMolecules();
+        });
+
+        document.getElementById('fs-internal').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        initMolecules();
+        updateTemperature();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const speed = T > 0 ? Math.sqrt(T / 273) * 0.07 : 0;
+
+            molecules.forEach(m => {
+                m.mesh.position.x += m.vx * speed;
+                m.mesh.position.y += m.vy * speed;
+                m.mesh.position.z += m.vz * speed;
+
+                if (i > 3 && speed > 0) {
+                    m.mesh.rotation.x += m.rotX * speed * 3;
+                    m.mesh.rotation.y += m.rotY * speed * 3;
+                    m.mesh.rotation.z += m.rotZ * speed * 3;
+                }
+
+                if (m.mesh.position.x > HALF - 0.3) { m.mesh.position.x = HALF - 0.3; m.vx *= -1; }
+                if (m.mesh.position.x < -HALF + 0.3) { m.mesh.position.x = -HALF + 0.3; m.vx *= -1; }
+                if (m.mesh.position.y > HALF - 0.3) { m.mesh.position.y = HALF - 0.3; m.vy *= -1; }
+                if (m.mesh.position.y < -HALF + 0.3) { m.mesh.position.y = -HALF + 0.3; m.vy *= -1; }
+                if (m.mesh.position.z > HALF - 0.3) { m.mesh.position.z = HALF - 0.3; m.vz *= -1; }
+                if (m.mesh.position.z < -HALF + 0.3) { m.mesh.position.z = -HALF + 0.3; m.vz *= -1; }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Введение. Физика и методы научного познания. ТБ</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(46, 204, 113, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --label-bg: rgba(26,45,60,0.85);
+            --label-color: #ffffff;
+            --card-shadow: rgba(0,0,0,0.2);
+            --ground-color: #3a4a5a;
+        }
+
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --label-bg: rgba(255,255,255,0.92);
+            --label-color: #1a2a3f;
+            --card-shadow: rgba(0,0,0,0.08);
+            --ground-color: #b0c8d8;
+        }
+
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+
+        h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:5000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.5;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+
+        .model-container {
+            text-align: center;
+            margin: 16px 0;
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            background: var(--canvas-bg);
+            box-shadow: 0 4px 12px var(--card-shadow);
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            min-height: 500px;
+            transition: background 0.3s;
+        }
+        .model-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border-radius: 20px;
+            touch-action: none;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 20;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .fullscreen-btn:hover { background: var(--special-border); transform: scale(1.05); }
+
+        /* Кнопка "Назад" по центру */
+        .back-link-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0 8px;
+        }
+        .back-link{
+            display:inline-block;
+            padding:10px 20px;
+            background:var(--special-border);
+            color:white;
+            text-decoration:none;
+            font-weight:bold;
+            border-radius:20px;
+            font-size:0.95rem;
+            transition:background 0.2s;
+        }
+        .back-link:hover{background:#b45309;}
+
+        .task-block {
+            background: var(--task-bg);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin: 16px 0;
+            border-left: 4px solid var(--task-border);
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+        .task-block .task-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+        .task-block .task-condition {
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.8;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: color 0.3s,background 0.3s;
+        }
+        .task-block .task-condition strong {
+            color: var(--special-border);
+        }
+        .task-block .task-condition mjx-container {
+            font-size: 1.1rem !important;
+        }
+
+        .task-given-find {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 40px;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s;
+        }
+        .task-given-find .given { color: var(--given-color); }
+        .task-given-find .find { color: var(--find-color); }
+        .task-given-find .given strong,
+        .task-given-find .find strong {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .task-given-find mjx-container {
+            font-size: 1.1rem !important;
+        }
+
+        .show-solution-btn {
+            background: var(--special-border);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
+
+        .task-solution {
+            display: none;
+            margin-top: 12px;
+        }
+        .task-solution.open { display: block; }
+        .task-solution .step {
+            padding: 10px 16px;
+            margin: 8px 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border-left: 3px solid var(--special-border);
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.8;
+            overflow-x: auto;
+            transition: background 0.3s,color 0.3s;
+        }
+        .task-solution .step .formula {
+            display: block;
+            text-align: center;
+            font-size: 1.3rem;
+            padding: 6px 0;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            color: var(--special-border);
+        }
+        .task-solution .step .formula mjx-container {
+            font-size: 1.3rem !important;
+        }
+        .task-solution .step .explanation {
+            background: var(--info-bg);
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-left: 2px solid var(--special-border);
+            transition: background 0.3s,color 0.3s;
+        }
+        .task-solution .answer {
+            padding: 12px 18px;
+            background: var(--special-border);
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .favorite-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .favorite-btn:hover { transform: scale(1.1); }
+        .favorite-btn.active { color: #facc15; }
+
+        .note-box {
+            background: var(--info-bg);
+            border-left: 4px solid var(--special-border);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin: 16px 0;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text);
+            transition: background 0.3s,color 0.3s;
+        }
+        .note-box .important { color: var(--special-border); font-weight: 700; }
+
+        mjx-container { font-size: 1.2em !important; overflow-x: auto !important; max-width: 100% !important; }
+
+        .model-container:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            margin: 0;
+            border-radius: 0;
+            background: var(--canvas-bg) !important;
+            aspect-ratio: auto;
+        }
+        .model-container:fullscreen .model-canvas {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+        }
+
+        @media(max-width:700px){
+            .model-container { min-height: 380px; }
+            .fullscreen-btn { width: 38px; height: 38px; font-size: 18px; bottom: 12px; right: 12px; }
+            .task-solution .step .formula { font-size: 1.1rem; white-space: normal; }
+            .task-given-find { flex-direction: column; gap: 6px; }
+            .formula-block { font-size: 0.95rem; padding: 10px 12px; }
+            .formula-block .f { font-size: 1.1rem; }
+            .task-block .task-condition mjx-container { font-size: 0.95rem !important; }
+            .task-solution .step .formula mjx-container { font-size: 1.1rem !important; }
+        }
+        @media(max-width:450px){
+            .model-container { min-height: 280px; }
+            .container { padding: 10px; padding-top: 44px; }
+            h1 { font-size: 1.2rem; }
+            .section-title { font-size: 0.95rem; }
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>Введение. Физика и методы научного познания. ТБ</h1>
+
+    <!-- ===== ТЕОРИЯ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Что такое физика</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Физика</strong> — это фундаментальная наука о природе, которая изучает наиболее общие свойства материи и формы её движения (механическое, тепловое, электромагнитное, атомное, ядерное и др.).</p>
+                <p><strong>Основная цель физики</strong> — открывать законы, описывающие явления природы, и использовать их для объяснения и предсказания новых явлений.</p>
+                <p><strong>Физика лежит в основе</strong> всего естествознания и техники. Без физики невозможны современные технологии: компьютеры, мобильная связь, медицина, энергетика.</p>
+                <p><strong>Разделы физики:</strong> механика, термодинамика, электродинамика, оптика, атомная и ядерная физика, физика элементарных частиц, астрофизика.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">Методы научного познания</div>
+        <div class="section-content">
+            <div class="model-container" id="container-method">
+                <canvas id="canvas-method" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-method">⛶</button>
+            </div>
+            <div class="def-card">
+                <p><strong>Научный метод</strong> — это система приёмов, операций и правил, используемых для получения достоверных и обоснованных знаний о природе. Научный метод включает несколько последовательных этапов.</p>
+
+                <p><strong>Основные этапы научного познания:</strong></p>
+                <ul>
+                    <li>
+                        <strong>1. Наблюдение</strong> — это целенаправленное восприятие явлений природы без активного вмешательства в их ход. Наблюдение может быть <em>непосредственным</em> (с помощью органов чувств) или <em>опосредованным</em> (с использованием приборов: телескопов, микроскопов, датчиков). Наблюдение даёт <span class="important">первичные факты</span>, которые затем нужно объяснить.
+                        <br><span class="important">Важно:</span> наблюдение само по себе не объясняет причины явлений, оно только фиксирует их.
+                    </li>
+                    <li>
+                        <strong>2. Гипотеза</strong> — это научное предположение, выдвигаемое для объяснения наблюдаемых фактов. Гипотеза должна быть <span class="important">проверяемой</span> и <span class="important">фальсифицируемой</span> (то есть опровергаемой). Гипотеза — это мост между фактами и теорией.
+                        <br><span class="important">Важно:</span> гипотеза не является доказанным фактом. Она нуждается в проверке.
+                    </li>
+                    <li>
+                        <strong>3. Эксперимент</strong> — это воспроизведение явления в контролируемых и управляемых условиях. В эксперименте исследователь <span class="important">активно вмешивается</span> в ход явления, изменяет условия и наблюдает результат. Эксперимент позволяет выявить причинно-следственные связи и проверить гипотезу.
+                        <br><span class="important">Важно:</span> эксперимент должен быть <em>воспроизводимым</em> — любой другой учёный должен получить те же результаты в тех же условиях.
+                    </li>
+                    <li>
+                        <strong>4. Теория</strong> — это система обобщённых знаний, которая объясняет совокупность наблюдаемых явлений и предсказывает новые. Теория является <span class="important">высшей формой научного знания</span>. Теория должна удовлетворять следующим требованиям: <em>непротиворечивость, объяснительная сила, предсказательная сила, простота</em> (принцип Оккама).
+                        <br><span class="important">Важно:</span> теория — это не просто набор фактов, а <em>система</em>, в которой факты связаны логическими и математическими соотношениями.
+                    </li>
+                    <li>
+                        <strong>5. Закон</strong> — это устойчивая, повторяющаяся связь между явлениями, выраженная в виде математической формулы или краткой словесной формулировки. Закон — это <span class="important">проверенный и подтверждённый</span> факт, который не имеет исключений.
+                        <br><span class="important">Важно:</span> закон отличается от теории тем, что он описывает <em>что</em> происходит, а теория объясняет <em>почему</em> это происходит.
+                    </li>
+                </ul>
+
+                <p><strong>Схема научного метода:</strong></p>
+                <p style="text-align:center;font-size:1.1rem;background:var(--card-bg);padding:8px;border-radius:8px;color:var(--text);">
+                    <span style="background:var(--special-border);color:white;padding:2px 8px;border-radius:4px;">Наблюдение</span> →
+                    <span style="background:var(--special-border);color:white;padding:2px 8px;border-radius:4px;">Гипотеза</span> →
+                    <span style="background:var(--special-border);color:white;padding:2px 8px;border-radius:4px;">Эксперимент</span> →
+                    <span style="background:var(--special-border);color:white;padding:2px 8px;border-radius:4px;">Теория</span> →
+                    <span style="background:var(--special-border);color:white;padding:2px 8px;border-radius:4px;">Закон</span>
+                </p>
+
+                <p><strong>Важно понимать:</strong> наука не стоит на месте. Старые теории могут уточняться или даже заменяться новыми, если появляются новые экспериментальные факты, которые не укладываются в старую теорию. Это называется <em>развитием науки</em>.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚠️ Техника безопасности в кабинете физики</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Техника безопасности</strong> — это система правил и мероприятий, направленных на предотвращение травматизма и повреждения оборудования. Соблюдение техники безопасности — <span class="important">обязательное условие</span> работы в физическом кабинете.</p>
+
+                <p><strong>Основные правила техники безопасности:</strong></p>
+                <ul>
+                    <li><strong>Общие правила:</strong>
+                        <ul>
+                            <li>Входить в кабинет только с разрешения учителя.</li>
+                            <li>Не трогать приборы и оборудование без разрешения учителя.</li>
+                            <li>Не включать электроприборы в сеть без разрешения учителя.</li>
+                            <li>При обнаружении неисправности оборудования — немедленно сообщить учителю.</li>
+                        </ul>
+                    </li>
+                    <li><strong>При работе с электрическими цепями:</strong>
+                        <ul>
+                            <li>Собирать электрические цепи только при выключенном источнике тока.</li>
+                            <li>Перед включением проверить правильность сборки цепи.</li>
+                            <li>Не прикасаться к оголённым проводам и клеммам.</li>
+                            <li>Руки должны быть сухими (вода — хороший проводник тока).</li>
+                            <li>После окончания работы отключить источник тока.</li>
+                        </ul>
+                    </li>
+                    <li><strong>При работе с нагревательными приборами:</strong>
+                        <ul>
+                            <li>Не трогать горячие предметы незащищёнными руками.</li>
+                            <li>При нагревании жидкостей в пробирках не направлять отверстие пробирки на себя и на соседей.</li>
+                            <li>Использовать защитные очки при работе с нагревательными приборами.</li>
+                        </ul>
+                    </li>
+                    <li><strong>При работе с химическими веществами:</strong>
+                        <ul>
+                            <li>Не пробовать вещества на вкус и не нюхать их, поднося близко к лицу.</li>
+                            <li>Использовать защитные перчатки при работе с агрессивными веществами.</li>
+                            <li>При попадании вещества на кожу — немедленно промыть большим количеством воды и сообщить учителю.</li>
+                        </ul>
+                    </li>
+                    <li><strong>При травме:</strong>
+                        <ul>
+                            <li>Немедленно прекратить работу.</li>
+                            <li>Сообщить учителю о случившемся.</li>
+                            <li>Не заниматься самолечением — обратиться к учителю или медсестре.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p><span class="important">Помните:</span> Ваша безопасность — в ваших руках! Небрежное отношение к правилам ТБ может привести к серьёзным травмам.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">Задачи с подробным разбором</div>
+        <div class="section-content">
+
+            <!-- Задача 1 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1</div>
+                <div class="task-condition"><strong>Условие:</strong> Автомобиль движется со скоростью $v = 108$ км/ч. Выразите эту скорость в метрах в секунду.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v = 108$ км/ч</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$ (м/с)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> 1 км = 1000 м, 1 ч = 3600 с.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Подставляем в формулу перевода:<br><span class="formula">$v = 108 \cdot \frac{1000}{3600} \text{ м/с}$</span></div>
+                    <div class="step"><strong>Шаг 3.</strong> Сокращаем: $\frac{1000}{3600} = \frac{5}{18}$.<br><span class="formula">$v = 108 \cdot \frac{5}{18} = 30 \text{ м/с}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Чтобы перевести км/ч в м/с, нужно число умножить на $\frac{5}{18}$.</div>
+                    <div class="answer">✅ Ответ: $30$ м/с</div>
+                </div>
+            </div>
+
+            <!-- Задача 2 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2</div>
+                <div class="task-condition"><strong>Условие:</strong> Скорость звука в воздухе составляет приблизительно $340$ м/с. Представьте эту скорость в километрах в час.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v = 340$ м/с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$ (км/ч)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><span class="formula">$v = 340 \cdot \frac{3600}{1000} = 340 \cdot 3,6 = 1224 \text{ км/ч}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Чтобы перевести м/с в км/ч, нужно число умножить на 3,6.</div>
+                    <div class="answer">✅ Ответ: $1224$ км/ч</div>
+                </div>
+            </div>
+
+            <!-- Задача 3 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3</div>
+                <div class="task-condition"><strong>Условие:</strong> Масса железного бруска составляет $m = 780$ г, а его объём $V = 100$ см³. Определите плотность железа в килограммах на кубический метр.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 780$ г $= 0,78$ кг, $V = 100$ см³ $= 0,0001$ м³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\rho$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Формула плотности:</strong> $\rho = \frac{m}{V}$ (эту формулу ученики знают из курса 7 класса).</div>
+                    <div class="step"><span class="formula">$\rho = \frac{0,78}{0,0001} = 7800 \text{ кг/м}^3$</span></div>
+                    <div class="answer">✅ Ответ: $7800$ кг/м³</div>
+                </div>
+            </div>
+
+            <!-- Задача 4 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4</div>
+                <div class="task-condition"><strong>Условие:</strong> Один ученик заметил, что маятник на длинной нити качается медленнее, чем на короткой, и предположил, что период колебаний зависит от длины нити. К какому этапу научного познания относится выдвинутое им предположение?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• <strong>Наблюдение</strong> — это просто фиксация факта (например: «я заметил, что маятник качается»).</div>
+                    <div class="step explanation">• <strong>Гипотеза</strong> — это предположение, которое объясняет наблюдаемое явление и требует проверки. Ученик не просто заметил, а выдвинул конкретное предположение о <strong>зависимости</strong> периода от длины.</div>
+                    <div class="step explanation">• <strong>Эксперимент</strong> — это проверка гипотезы на практике.</div>
+                    <div class="step explanation">• <strong>Теория</strong> — это уже проверенная и подтверждённая система знаний.</div>
+                    <div class="step">Поскольку ученик выдвинул предположение, которое нужно проверить — это <strong>гипотеза</strong>.</div>
+                    <div class="answer">✅ Ответ: гипотеза</div>
+                </div>
+            </div>
+
+            <!-- Задача 5 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5</div>
+                <div class="task-condition"><strong>Условие:</strong> Чтобы проверить, зависит ли сила трения от массы тела, ученик провёл серию опытов: он брал бруски разной массы и измерял силу трения при их движении по одной и той же поверхности. Как называется эта деятельность ученика с точки зрения научного метода?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• Ученик <strong>проводит опыты</strong> — это активное вмешательство в ход явления.</div>
+                    <div class="step explanation">• Он меняет массу брусков (контролируемый параметр) и измеряет силу трения.</div>
+                    <div class="step explanation">• Это и есть <strong>эксперимент</strong> — воспроизведение явления в управляемых условиях.</div>
+                    <div class="answer">✅ Ответ: эксперимент</div>
+                </div>
+            </div>
+
+            <!-- Задача 6 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6</div>
+                <div class="task-condition"><strong>Условие:</strong> Какая форма научного знания считается высшей и представляет собой систему обобщённых знаний, объясняющих совокупность явлений и предсказывающих новые?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• <strong>Наблюдение</strong> — первичный этап, даёт факты.</div>
+                    <div class="step explanation">• <strong>Гипотеза</strong> — предположение, требующее проверки.</div>
+                    <div class="step explanation">• <strong>Эксперимент</strong> — проверка гипотезы.</div>
+                    <div class="step explanation">• <strong>Теория</strong> — это система проверенных знаний, которая объясняет множество явлений и предсказывает новые. Это высшая форма.</div>
+                    <div class="answer">✅ Ответ: теория</div>
+                </div>
+            </div>
+
+            <!-- Задача 7 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7</div>
+                <div class="task-condition"><strong>Условие:</strong> Площадь комнаты равна $S = 18$ м². Переведите это значение в квадратные сантиметры.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $S = 18$ м²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $S$ (см²)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> 1 м = 100 см, значит 1 м² = 100² = 10000 см².</div>
+                    <div class="step"><span class="formula">$S = 18 \cdot 10000 = 180000 \text{ см}^2$</span></div>
+                    <div class="answer">✅ Ответ: $180 000$ см²</div>
+                </div>
+            </div>
+
+            <!-- Задача 8 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8</div>
+                <div class="task-condition"><strong>Условие:</strong> Скорость света в вакууме составляет примерно $300 000$ км/с. Запишите эту скорость в метрах в секунду.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $v = 300 000$ км/с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$ (м/с)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><span class="formula">$v = 300000 \cdot 1000 = 300000000 \text{ м/с} = 3 \cdot 10^8 \text{ м/с}$</span></div>
+                    <div class="answer">✅ Ответ: $3 \cdot 10^8$ м/с</div>
+                </div>
+            </div>
+
+            <!-- Задача 9 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9</div>
+                <div class="task-condition"><strong>Условие:</strong> Продолжительность некоторого процесса составляет $t = 2,5$ часа. Выразите это время в секундах.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $t = 2,5$ ч</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t$ (с)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><span class="formula">$t = 2,5 \cdot 3600 = 9000 \text{ с}$</span></div>
+                    <div class="answer">✅ Ответ: $9000$ с</div>
+                </div>
+            </div>
+
+            <!-- Задача 10 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10</div>
+                <div class="task-condition"><strong>Условие:</strong> Астроном, используя телескоп, фиксирует положения планет на небесной сфере, не вмешиваясь в их движение. Как называется этот этап познания?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• Астроном <strong>не вмешивается</strong> в движение планет, он только фиксирует то, что видит.</div>
+                    <div class="step explanation">• Это пассивное восприятие — <strong>наблюдение</strong>.</div>
+                    <div class="answer">✅ Ответ: наблюдение</div>
+                </div>
+            </div>
+
+            <!-- Задача 11 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 11</div>
+                <div class="task-condition"><strong>Условие:</strong> Масса тела $m = 250$ г. Переведите эту массу в килограммы.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 250$ г</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$ (кг)</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <div id="sol11" class="task-solution">
+                    <div class="step"><span class="formula">$m = 250 \cdot 0,001 = 0,25 \text{ кг}$</span></div>
+                    <div class="answer">✅ Ответ: $0,25$ кг</div>
+                </div>
+            </div>
+
+            <!-- Задача 12 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 12</div>
+                <div class="task-condition"><strong>Условие:</strong> Известно, что $F = ma$. Эта формула описывает связь между силой, массой и ускорением. Какой элемент научного познания представляет собой данная формула?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <div id="sol12" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• Формула, выраженная математически и подтверждённая множеством экспериментов — это <strong>закон</strong>.</div>
+                    <div class="step explanation">• Второй закон Ньютона — один из фундаментальных законов физики.</div>
+                    <div class="answer">✅ Ответ: закон</div>
+                </div>
+            </div>
+
+            <!-- НОВЫЕ ЗАДАЧИ 13-17 на определение этапов научного метода -->
+
+            <!-- Задача 13 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 13</div>
+                <div class="task-condition"><strong>Условие:</strong> Исследователь выдвинул предположение о том, что электрический ток в металлах обусловлен движением свободных электронов. Это предположение ещё не подтверждено экспериментально. К какому этапу научного познания оно относится?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <div id="sol13" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• Это предположение выдвинуто для объяснения явления, но ещё не проверено.</div>
+                    <div class="step explanation">• Такое предположение называется <strong>гипотезой</strong>.</div>
+                    <div class="answer">✅ Ответ: гипотеза</div>
+                </div>
+            </div>
+
+            <!-- Задача 14 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 14</div>
+                <div class="task-condition"><strong>Условие:</strong> Учёный многократно проводит один и тот же опыт с нагреванием жидкости, меняя только начальную температуру, и каждый раз записывает результаты. Как называется этот процесс?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <div id="sol14" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• Учёный активно вмешивается в процесс, меняет условия и наблюдает результат.</div>
+                    <div class="step explanation">• Это <strong>эксперимент</strong>.</div>
+                    <div class="answer">✅ Ответ: эксперимент</div>
+                </div>
+            </div>
+
+            <!-- Задача 15 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 15</div>
+                <div class="task-condition"><strong>Условие:</strong> Ученик просто смотрит на пламя свечи и описывает его цвет, форму и яркость, ничего не изменяя. Какой метод он использует?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <div id="sol15" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• Ученик не вмешивается в процесс, только фиксирует наблюдаемые характеристики.</div>
+                    <div class="step explanation">• Это <strong>наблюдение</strong>.</div>
+                    <div class="answer">✅ Ответ: наблюдение</div>
+                </div>
+            </div>
+
+            <!-- Задача 16 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 16</div>
+                <div class="task-condition"><strong>Условие:</strong> После множества экспериментов и наблюдений физики сформулировали утверждение: «Давление газа на стенки сосуда прямо пропорционально его абсолютной температуре». Это утверждение имеет вид математической формулы и многократно подтверждено. К какому элементу научного познания оно относится?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol16')">📖 Показать решение</button>
+                <div id="sol16" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• Утверждение имеет математическую форму и подтверждено экспериментально.</div>
+                    <div class="step explanation">• Это <strong>закон</strong> (закон Шарля).</div>
+                    <div class="answer">✅ Ответ: закон</div>
+                </div>
+            </div>
+
+            <!-- Задача 17 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 17</div>
+                <div class="task-condition"><strong>Условие:</strong> На основе законов Ньютона и закона всемирного тяготения учёные создали стройную систему знаний, которая объясняет движение планет, спутников и падение тел на Земле. Как называется эта система знаний?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol17')">📖 Показать решение</button>
+                <div id="sol17" class="task-solution">
+                    <div class="step"><strong>Разбор:</strong></div>
+                    <div class="step explanation">• Это система обобщённых знаний, которая объединяет множество фактов и законов.</div>
+                    <div class="step explanation">• Она объясняет явления и предсказывает новые — это <strong>теория</strong> (небесная механика).</div>
+                    <div class="answer">✅ Ответ: теория</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="note-box">
+        <strong>📌 Запомните:</strong><br>
+        1 км/ч = $\frac{1000}{3600}$ м/с = $\frac{5}{18}$ м/с ≈ 0,278 м/с<br>
+        1 м/с = 3,6 км/ч<br>
+        1 г = 0,001 кг<br>
+        1 м² = 10 000 см²<br>
+        <br>
+        <strong>Научный метод:</strong> <span style="color:var(--special-border);">Наблюдение</span> → <span style="color:var(--special-border);">Гипотеза</span> → <span style="color:var(--special-border);">Эксперимент</span> → <span style="color:var(--special-border);">Теория</span> → <span style="color:var(--special-border);">Закон</span>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="index.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('mathTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('mathTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('mathTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='math_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+</script>
+
+<!-- 3D-модель: Научный метод (5 этапов: Наблюдение → Гипотеза → Эксперимент → Теория → Закон) -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    const container = document.getElementById('container-method');
+    const canvas = document.getElementById('canvas-method');
+    if (container && canvas) {
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(5, 4, 8);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function getLabelBg() {
+            const isLight = document.documentElement.classList.contains('light-mode');
+            return isLight ? 'rgba(255,255,255,0.92)' : 'rgba(10,15,26,0.88)';
+        }
+
+        function getLabelColor() {
+            const isLight = document.documentElement.classList.contains('light-mode');
+            return isLight ? '#1a2a3f' : '#ffffff';
+        }
+
+        function makeLabel(text, color, pos, fs = '0.85rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = getLabelColor();
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = getLabelBg();
+            div.style.padding = '4px 12px';
+            div.style.borderRadius = '20px';
+            div.style.border = '2px solid ' + color;
+            div.style.backdropFilter = 'blur(4px)';
+            div.style.transition = 'background 0.3s ease, color 0.3s ease';
+            div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+        const grid = new THREE.GridHelper(6, 16, 0x5f7f9e, 0x2c4258);
+        grid.position.y = -0.01;
+        grid.material.transparent = true;
+        grid.material.opacity = 0.2;
+        scene.add(grid);
+
+        const group = new THREE.Group();
+
+        // ===== 5 точек: Наблюдение, Гипотеза, Эксперимент, Теория, Закон =====
+        const o    = new THREE.Vector3(0, 0, 0);
+        const obs  = new THREE.Vector3(0, 0, 2.0);
+        const hyp  = new THREE.Vector3(2.0, 0, 0.8);
+        const exp  = new THREE.Vector3(0.8, 2.0, 0);
+        const theo = new THREE.Vector3(0, 2.0, 2.0);
+        const law  = new THREE.Vector3(2.0, 2.0, 2.0);
+
+        function createLine(a, b, col) {
+            return new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([a, b]),
+                new THREE.LineBasicMaterial({ color: col, linewidth: 2 })
+            );
+        }
+        group.add(createLine(o, obs, 0xffaa00));
+        group.add(createLine(o, hyp, 0xff66aa));
+        group.add(createLine(o, exp, 0x66aaff));
+        group.add(createLine(o, theo, 0x44dd88));
+        group.add(createLine(o, law, 0xaa66ff));
+
+        const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x224466 });
+        const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        s1.position.copy(obs);
+        group.add(s1);
+        const s2 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        s2.position.copy(hyp);
+        group.add(s2);
+        const s3 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        s3.position.copy(exp);
+        group.add(s3);
+        const s4 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        s4.position.copy(theo);
+        group.add(s4);
+        const s5 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        s5.position.copy(law);
+        group.add(s5);
+
+        const labelObs  = makeLabel('🔍 Наблюдение', '#ffaa00', obs.clone().add(new THREE.Vector3(0, 0.25, 0)), '0.85rem');
+        const labelHyp  = makeLabel('💡 Гипотеза', '#ff66aa', hyp.clone().add(new THREE.Vector3(0.25, 0.15, 0)), '0.85rem');
+        const labelExp  = makeLabel('🔬 Эксперимент', '#66aaff', exp.clone().add(new THREE.Vector3(0.15, 0.25, 0)), '0.85rem');
+        const labelTheo = makeLabel('📚 Теория', '#44dd88', theo.clone().add(new THREE.Vector3(0, 0.25, 0.25)), '0.85rem');
+        const labelLaw  = makeLabel('⚖️ Закон', '#aa66ff', law.clone().add(new THREE.Vector3(0.25, 0.25, 0.25)), '0.85rem');
+
+        group.add(labelObs);
+        group.add(labelHyp);
+        group.add(labelExp);
+        group.add(labelTheo);
+        group.add(labelLaw);
+
+        function createArrow(from, to, col) {
+            const g = new THREE.Group();
+            const dir = to.clone().sub(from);
+            const len = dir.length();
+            if (len < 0.01) return g;
+            dir.normalize();
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.05, 0.12, 8),
+                new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: 0.5 })
+            );
+            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.06)));
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(cone);
+            return g;
+        }
+
+        // Стрелки: цепочка этапов + связь Закона с Наблюдением (обратная связь)
+        group.add(createArrow(obs, hyp, 0xffaa00));
+        group.add(createArrow(hyp, exp, 0xff66aa));
+        group.add(createArrow(exp, theo, 0x66aaff));
+        group.add(createArrow(theo, law, 0xaa66ff));
+        group.add(createArrow(law, obs, 0xaa66ff));
+
+        scene.add(group);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0.8, 1.0, 0.8);
+        controls.update();
+
+        document.getElementById('fs-method').addEventListener('click', async () => {
+            if (!document.fullscreenElement) {
+                await container.requestFullscreen();
+                if (screen.orientation && screen.orientation.lock) {
+                    try { await screen.orientation.lock('portrait'); } catch(e) {}
+                }
+            } else {
+                await document.exitFullscreen();
+                if (screen.orientation && screen.orientation.unlock) {
+                    try { screen.orientation.unlock(); } catch(e) {}
+                }
+            }
+            updateSize();
+        });
+
+        const themeObserver = new MutationObserver(() => {
+            const bg = getLabelBg();
+            const color = getLabelColor();
+            document.querySelectorAll('#container-method .css2d-object div').forEach(el => {
+                el.style.background = bg;
+                el.style.color = color;
+            });
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    }
+</script>
+</body>
+</html>

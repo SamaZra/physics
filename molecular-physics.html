@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Молекулярная физика и термодинамика — Физический справочник</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PhysicsHelper">
+    <meta name="theme-color" content="#3b82f6">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --border: rgba(59, 130, 246, 0.15);
+            --icon-color: #8ba5b8;
+            --header-bg: linear-gradient(135deg, #1e3545, #162a38);
+            --menu-card-bg: #1e3545;
+            --menu-item-bg: #1e3545;
+            --menu-item-hover: #233e50;
+            --group-header-bg: #1a3a5a;
+            --search-bg: #1a2d3c;
+            --label-bg: rgba(26,45,60,0.85);
+            --label-color: #ffffff;
+            --card-shadow: rgba(0,0,0,0.2);
+            --submenu-level: #1a2d3c;
+            --special-border: #3b82f6;
+            --info-bg: #1e3545;
+        }
+
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --accent: #2563eb;
+            --accent-hover: #3b82f6;
+            --border: #d0d8e0;
+            --icon-color: #1a2d3c;
+            --header-bg: linear-gradient(135deg, #ffffff, #f8fafc);
+            --menu-card-bg: white;
+            --menu-item-bg: white;
+            --menu-item-hover: #f0f4fa;
+            --group-header-bg: #e8edf5;
+            --search-bg: #f1f5f9;
+            --label-bg: rgba(255,255,255,0.92);
+            --label-color: #1a2a3f;
+            --card-shadow: rgba(0,0,0,0.08);
+            --submenu-level: #f5f8fc;
+            --special-border: #2563eb;
+            --info-bg: #e8f0fe;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            transition: background 0.3s;
+            padding: 8px;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 50px 16px 48px;
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 4px 20px var(--card-shadow);
+            transition: background 0.3s;
+        }
+
+        /* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: color 0.3s;
+        }
+        .page-title .icon { font-size: 1.8rem; }
+
+        .theme-toggle {
+            position: absolute;
+            top: -34px;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px var(--card-shadow);
+            transition: all 0.2s ease;
+            color: var(--text);
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+
+        /* ===== МЕНЮ ===== */
+        .menu-card {
+            background: var(--menu-card-bg);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px -12px var(--card-shadow);
+            border: 1px solid var(--border);
+            transition: background 0.3s,border 0.3s,box-shadow 0.3s;
+        }
+
+        /* ===== ГРУППЫ ===== */
+        .group-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--group-header-bg);
+        }
+        .group-header:hover { background: var(--menu-item-hover); }
+        .group-icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-right: 14px; font-size: 24px; font-weight: 400; color: var(--icon-color); flex-shrink: 0; }
+        .group-content { flex: 1; }
+        .group-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 2px; transition: color 0.3s; }
+        .group-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3; transition: color 0.3s; }
+        .group-arrow { font-size: 22px; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
+        .group-header.open .group-arrow { transform: rotate(90deg); }
+
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: var(--submenu-level);
+        }
+        .submenu.open { max-height: 1400px; }
+
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px 14px 48px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            background: var(--menu-item-bg);
+            color: var(--text);
+        }
+        .submenu-item:hover { background: var(--menu-item-hover); transform: translateX(4px); }
+        .submenu-item.prof { background: var(--group-header-bg); }
+        .submenu-item.prof:hover { background: var(--menu-item-hover); }
+        .submenu-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 20px; color: var(--icon-color); flex-shrink: 0; }
+        .submenu-content { flex: 1; }
+        .submenu-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 2px; transition: color 0.3s; }
+        .submenu-desc { font-size: 0.7rem; color: var(--text-secondary); line-height: 1.3; transition: color 0.3s; }
+        .submenu-arrow { font-size: 20px; color: var(--text-secondary); flex-shrink: 0; }
+
+        /* ===== КНОПКА НАЗАД ===== */
+        .back-link-bottom {
+            display: inline-block;
+            margin: 16px 0 8px;
+            padding: 10px 20px;
+            background: var(--special-border);
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        .back-link-bottom:hover { opacity: 0.9; }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px 0;
+        }
+        .footer p {
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            font-weight: 400;
+            transition: color 0.3s;
+        }
+
+        /* ===== ИЗБРАННОЕ ===== */
+        .favorite-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 10px var(--card-shadow);
+        }
+        .favorite-btn:hover { transform: scale(1.1); }
+        .favorite-btn.active { color: #facc15; }
+
+        @media (max-width: 550px) {
+            body { padding: 4px; }
+            .container { padding: 44px 12px 36px; border-radius: 16px; }
+            .page-title { font-size: 1.2rem; }
+            .page-title .icon { font-size: 1.5rem; }
+            .theme-toggle { top: -30px; width: 32px; height: 32px; font-size: 16px; }
+            .group-header { padding: 14px 16px; }
+            .submenu-item { padding: 12px 14px 12px 36px; }
+            .group-icon { width: 40px; height: 40px; font-size: 20px; margin-right: 12px; }
+            .submenu-icon { width: 32px; height: 32px; font-size: 18px; margin-right: 10px; }
+            .group-title { font-size: 0.95rem; }
+            .submenu-title { font-size: 0.88rem; }
+            .back-link-bottom { font-size: 0.8rem; padding: 8px 16px; }
+            .favorite-btn { width: 38px; height: 38px; font-size: 20px; bottom: 12px; left: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ===== ВЕРХНЯЯ ПАНЕЛЬ ===== -->
+    <div class="top-bar">
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+        <div class="page-title">
+            <span>🌡️ Молекулярная физика и термодинамика</span>
+        </div>
+    </div>
+
+    <div class="menu-card">
+
+        <!-- ===== ТЕМА 1: ОСНОВЫ МКТ ===== -->
+        <div class="group-header" data-group="mkt" onclick="toggleGroup(this)">
+            <div class="group-content">
+                <div class="group-title">Тема 1. Основы МКТ</div>
+                <div class="group-desc">Молекулярно-кинетическая теория, идеальный газ, изопроцессы</div>
+            </div>
+            <div class="group-arrow">›</div>
+        </div>
+        <div class="submenu">
+            <a href="mkt-basics.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">1. Основные положения МКТ и их опытное обоснование</div>
+                    <div class="submenu-desc">Строение газообразных, жидких и твёрдых тел · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="ideal-gas.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">2. Идеальный газ. Основное уравнение МКТ</div>
+                    <div class="submenu-desc">Температура и её измерение · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="gas-laws.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">3. Уравнение состояния идеального газа. Изопроцессы</div>
+                    <div class="submenu-desc">Газовые законы · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="mkt-prof-problems.html" class="submenu-item prof">
+                <div class="submenu-content">
+                    <div class="submenu-title">4. Решение задач с профессиональной направленностью</div>
+                    <div class="submenu-desc">Сварщик · Электрик · Автомеханик · Машиностроение · ИС</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+        </div>
+
+        <!-- ===== ТЕМА 2: ОСНОВЫ ТЕРМОДИНАМИКИ ===== -->
+        <div class="group-header" data-group="thermo" onclick="toggleGroup(this)">
+            <div class="group-content">
+                <div class="group-title">Тема 2. Основы термодинамики</div>
+                <div class="group-desc">Внутренняя энергия, первое начало, тепловые двигатели</div>
+            </div>
+            <div class="group-arrow">›</div>
+        </div>
+        <div class="submenu">
+            <a href="internal-energy.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">1. Внутренняя энергия идеального газа</div>
+                    <div class="submenu-desc">Способы изменения внутренней энергии · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="first-law-thermo.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">2. Изменение внутренней энергии. I начало термодинамики</div>
+                    <div class="submenu-desc">Адиабатный процесс · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="heat-engines.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">3. КПД и принцип действия тепловых двигателей</div>
+                    <div class="submenu-desc">Второе начало термодинамики · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="thermo-prof-problems.html" class="submenu-item prof">
+                <div class="submenu-content">
+                    <div class="submenu-title">4. Решение задач с профессиональной направленностью</div>
+                    <div class="submenu-desc">Сварщик · Электрик · Автомеханик · Машиностроение · ИС</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+        </div>
+
+        <!-- ===== ТЕМА 3: АГРЕГАТНЫЕ СОСТОЯНИЯ ===== -->
+        <div class="group-header" data-group="states" onclick="toggleGroup(this)">
+            <div class="group-content">
+                <div class="group-title">Тема 3. Агрегатные состояния вещества и фазовые переходы</div>
+                <div class="group-desc">Пары, жидкости, твёрдые тела, плавление, кристаллизация</div>
+            </div>
+            <div class="group-arrow">›</div>
+        </div>
+        <div class="submenu">
+            <a href="vapors.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">1. Свойства паров. Испарение и конденсация. Кипение</div>
+                    <div class="submenu-desc">Абсолютная и относительная влажность воздуха · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="liquids.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">2. Свойства жидкостей. Поверхностное натяжение. Смачивание</div>
+                    <div class="submenu-desc">Капиллярные явления в природе, быту и технике · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="solids.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">3. Свойства твёрдых тел. Упругие свойства. Закон Гука</div>
+                    <div class="submenu-desc">Механические свойства материалов · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="melting.html" class="submenu-item">
+                <div class="submenu-content">
+                    <div class="submenu-title">4. Плавление и кристаллизация</div>
+                    <div class="submenu-desc">Удельная теплота плавления · 10 задач</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+            <a href="states-prof-problems.html" class="submenu-item prof">
+                <div class="submenu-content">
+                    <div class="submenu-title">5. Решение задач с профессиональной направленностью</div>
+                    <div class="submenu-desc">Сварщик · Электрик · Автомеханик · Машиностроение · ИС</div>
+                </div>
+                <div class="submenu-arrow">›</div>
+            </a>
+        </div>
+
+    </div>
+
+    <div style="text-align:center;">
+        <a href="index.html" class="back-link-bottom">← Назад</a>
+    </div>
+
+    <div class="footer">
+        <p>Физический справочник · Молекулярная физика и термодинамика</p>
+    </div>
+</div>
+
+<button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+
+<script>
+    (function() {
+        var savedTheme = localStorage.getItem('physicsTheme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.add('light-mode');
+            var btn = document.getElementById('themeBtn');
+            if (btn) btn.textContent = '☀️';
+        }
+    })();
+    function toggleTheme() {
+        var html = document.documentElement;
+        var btn = document.getElementById('themeBtn');
+        if (html.classList.contains('light-mode')) {
+            html.classList.remove('light-mode');
+            localStorage.setItem('physicsTheme', 'dark');
+            if (btn) btn.textContent = '🌙';
+        } else {
+            html.classList.add('light-mode');
+            localStorage.setItem('physicsTheme', 'light');
+            if (btn) btn.textContent = '☀️';
+        }
+    }
+    function toggleGroup(header) {
+        header.classList.toggle('open');
+        var submenu = header.nextElementSibling;
+        if (submenu && submenu.classList.contains('submenu')) submenu.classList.toggle('open');
+        saveOpenGroups();
+    }
+    function saveOpenGroups() {
+        var openGroups = [];
+        document.querySelectorAll('.group-header').forEach(function(g) {
+            if (g.classList.contains('open')) {
+                var id = g.getAttribute('data-group');
+                if (id) openGroups.push(id);
+            }
+        });
+        localStorage.setItem('physicsMolecularGroups', JSON.stringify(openGroups));
+    }
+    (function() {
+        var savedGroups = localStorage.getItem('physicsMolecularGroups');
+        if (!savedGroups) return;
+        var openIds;
+        try { openIds = JSON.parse(savedGroups); } catch (e) { return; }
+        if (!Array.isArray(openIds)) return;
+        document.querySelectorAll('.group-header').forEach(function(group) {
+            var id = group.getAttribute('data-group');
+            if (id && openIds.includes(id)) {
+                group.classList.add('open');
+                var submenu = group.nextElementSibling;
+                if (submenu && submenu.classList.contains('submenu')) submenu.classList.add('open');
+            }
+        });
+    })();
+    const FAV_KEY = 'physics_favorites';
+    function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}
+    function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}
+    function currentPage(){return window.location.pathname.split('/').pop() || 'index.html';}
+    function isFavorite(){const u=currentPage();return getFavorites().includes(u);}
+    function toggleFavorite(){
+        const u=currentPage();
+        let f=getFavorites();
+        const btn=document.getElementById('favoriteBtn');
+        if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}
+        else{f.push(u);btn.textContent='★';btn.classList.add('active');}
+        saveFavorites(f);
+    }
+    function updateFavoriteBtn(){
+        const btn=document.getElementById('favoriteBtn');
+        if(btn){if(isFavorite()){btn.textContent='★';btn.classList.add('active');}else{btn.textContent='☆';btn.classList.remove('active');}}
+    }
+    updateFavoriteBtn();
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then(function() { console.log('✅ Service Worker зарегистрирован'); })
+            .catch(function() { console.log('❌ Ошибка регистрации Service Worker'); });
+    }
+</script>
+</body>
+</html>

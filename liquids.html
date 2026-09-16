@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Свойства жидкостей. Поверхностное натяжение. Смачивание</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle{background:#3b82f6;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-toggle:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle.off{background:#666;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .favorite-btn{position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1000;color:var(--text-secondary);transition:all 0.2s;backdrop-filter:blur(4px);}
+        .favorite-btn:hover{transform:scale(1.1);}
+        .favorite-btn.active{color:#facc15;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>Свойства жидкостей. Поверхностное натяжение.<br>Смачивание. Капиллярные явления</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Свойства жидкостей</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Жидкость</strong> — агрегатное состояние вещества, промежуточное между газом и твёрдым телом.</p>
+                <p><strong>Основные свойства жидкостей:</strong></p>
+                <ul>
+                    <li><span class="important">Сохраняет объём</span>, но не сохраняет форму (принимает форму сосуда).</li>
+                    <li><span class="important">Практически несжимаема</span>.</li>
+                    <li><span class="important">Текучесть</span> — способность легко менять форму под действием силы.</li>
+                    <li>Молекулы расположены близко, но могут перескакивать с места на место.</li>
+                    <li>Обладает <span class="important">поверхностным натяжением</span> и <span class="important">вязкостью</span>.</li>
+                </ul>
+                <p><strong>Ближний порядок</strong> — в расположении молекул жидкости есть упорядоченность только на расстояниях порядка нескольких молекул. В твёрдых телах существует дальний порядок (кристаллическая решётка).</p>
+                <p><strong>Текучесть и вязкость:</strong> разные жидкости текут по-разному. Мёд, масло, глицерин — вязкие, текут медленно. Вода, спирт, эфир — маловязкие, текут быстро.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Поверхностное натяжение</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>Молекулы на поверхности жидкости испытывают притяжение только со стороны молекул внутри жидкости. Поэтому поверхность жидкости ведёт себя как <span class="important">натянутая упругая плёнка</span> — стремится сократиться до минимума (форма шара — минимальная площадь при данном объёме).</p>
+                <p><strong>Сила поверхностного натяжения</strong> $F$ действует вдоль поверхности, перпендикулярно границе:</p>
+                <div class="formula-block">
+                    <span class="f">$F = \sigma \cdot l$</span>
+                    <span class="f-label">— сила поверхностного натяжения</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$\sigma$ — коэффициент поверхностного натяжения (Н/м);</li>
+                    <li>$l$ — длина границы поверхности (м).</li>
+                </ul>
+
+                <p><strong>Коэффициент поверхностного натяжения</strong> $\sigma$ показывает, какая сила действует на единицу длины границы. Для воды при 20 °C: $\sigma \approx 0{,}073$ Н/м. Для мыльного раствора: $\sigma \approx 0{,}04$ Н/м.</p>
+
+                <p><strong>Энергия поверхностного слоя:</strong></p>
+                <div class="formula-block">
+                    <span class="f">$E = \sigma \cdot S$</span>
+                    <span class="f-label">— поверхностная энергия</span>
+                </div>
+                <p>где $S$ — площадь поверхности.</p>
+
+                <p><strong>Примеры поверхностного натяжения:</strong></p>
+                <ul>
+                    <li>Капли воды имеют форму, близкую к сферической.</li>
+                    <li>Водомерка скользит по поверхности воды.</li>
+                    <li>Мыльные пузыри имеют форму шара.</li>
+                    <li>Металлическая иголка может держаться на поверхности воды.</li>
+                    <li>Мыло уменьшает $\sigma$ — поэтому оно помогает стирать.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Смачивание и капиллярные явления</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Смачивание</strong> — явление взаимодействия жидкости с твёрдой поверхностью на границе их соприкосновения. Проще говоря, смачивание показывает, «прилипает» ли жидкость к поверхности или собирается в каплю.</p>
+                <ul>
+                    <li><span class="important">Смачивание</span> (вода — стекло, вода — металл): жидкость растекается по поверхности, краевой угол $\theta < 90°$. Молекулы жидкости притягиваются к стенке <strong>сильнее</strong>, чем друг к другу.</li>
+                    <li><span class="important">Несмачивание</span> (вода — парафин, ртуть — стекло): жидкость собирается в капли, краевой угол $\theta > 90°$. Молекулы жидкости притягиваются друг к другу <strong>сильнее</strong>, чем к стенке.</li>
+                    <li><span class="important">Полное смачивание</span>: $\theta \approx 0°$.</li>
+                    <li><span class="important">Полное несмачивание</span>: $\theta \approx 180°$.</li>
+                </ul>
+                <p><strong>Мениск</strong> — искривлённая поверхность жидкости у стенок сосуда:</p>
+                <ul>
+                    <li>При смачивании — вогнутый мениск (вода в стеклянном сосуде).</li>
+                    <li>При несмачивании — выпуклый мениск (ртуть в стеклянном сосуде).</li>
+                </ul>
+
+                <p><strong>Капиллярные явления</strong> — подъём или опускание жидкости в узких трубках (капиллярах).</p>
+                <p><strong>Высота подъёма жидкости в капилляре:</strong></p>
+                <div class="formula-block">
+                    <span class="f">$h = \dfrac{2\sigma}{\rho g r}$</span>
+                    <span class="f-label">— высота подъёма в капилляре</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$\sigma$ — коэффициент поверхностного натяжения (Н/м);</li>
+                    <li>$\rho$ — плотность жидкости (кг/м³);</li>
+                    <li>$g$ — ускорение свободного падения (м/с²);</li>
+                    <li>$r$ — радиус капилляра (м).</li>
+                </ul>
+                <p><strong>Чем меньше радиус капилляра, тем выше поднимается жидкость.</strong></p>
+                <p>При несмачивании жидкость в капилляре опускается ниже уровня в сосуде.</p>
+
+                <p><strong>Капиллярные явления в природе, быту и технике:</strong></p>
+                <ul>
+                    <li><strong>В природе:</strong> подъём воды по сосудам растений от корней к листьям; питание почвы влагой; кровеносная система.</li>
+                    <li><strong>В быту:</strong> промокание ткани и бумаги; работа фитиля свечи; впитывание влаги полотенцем.</li>
+                    <li><strong>В технике:</strong> пропитка материалов; флотация руд; капиллярная дефектоскопия (поиск трещин); капиллярные трубки в термометрах.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="surface" onclick="switchModel('surface')">💧 Поверхностное натяжение</div>
+                <div class="model-tab" data-model="capillary" onclick="switchModel('capillary')">🌊 Капилляр</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: ПОВЕРХНОСТНОЕ НАТЯЖЕНИЕ -->
+            <div id="model-surface" class="model-content">
+                <div class="model-container" id="container-surface">
+                    <canvas id="canvas-surface" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-surface">⛶</button>
+                    <div class="info-display">
+                        <div>$\sigma$ = <span class="val" id="surf-sigma">0.073</span> Н/м</div>
+                        <div>Тип: <span class="val" id="surf-type">вода</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>$\sigma$ (Н/м)</label>
+                        <input type="range" id="surf-sigma-slider" min="0.02" max="0.1" step="0.005" value="0.073">
+                        <span class="control-value" id="surf-sigma-value">0.073</span>
+                    </div>
+                    <button class="btn-reset" id="surf-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Больше σ — толще поверхностный слой, сильнее натяжение</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель поверхностного натяжения.</strong> Вид сбоку на жидкость в сосуде.</p>
+                    <p><span class="important">Синие молекулы внутри</span> — их тянут со всех сторон (4 стрелки).</p>
+                    <p><span class="important">Оранжевые молекулы на поверхности</span> — их тянет только внутрь (3 стрелки вниз), потому что сверху молекул нет.</p>
+                    <p><span class="important">Жёлтая линия</span> — «поверхностная плёнка», которая стремится сократиться.</p>
+                    <p>Ползунок $\sigma$ меняет толщину и высоту поверхностного слоя.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: КАПИЛЛЯР -->
+            <div id="model-capillary" class="model-content" style="display:none;">
+                <div class="model-container" id="container-capillary">
+                    <canvas id="canvas-capillary" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-capillary">⛶</button>
+                    <div class="info-display">
+                        <div>$r$ = <span class="val" id="cap-r">2</span> мм</div>
+                        <div>$h$ = <span class="val" id="cap-h">0</span> см</div>
+                        <div>Смачивание: <span class="val" id="cap-mode">есть</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Радиус $r$ (мм)</label>
+                        <input type="range" id="cap-radius" min="0.5" max="5" step="0.1" value="2">
+                        <span class="control-value" id="cap-radius-value">2.0</span>
+                    </div>
+                    <button class="btn-toggle" id="cap-wetting-btn">💧 Смачивание: есть</button>
+                    <button class="btn-reset" id="cap-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Нажмите кнопку, чтобы переключить смачивание</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель капилляра.</strong> Капилляр опущен в сосуд с водой. Столб воды в трубке зависит от смачивания.</p>
+                    <p><span class="important">Что такое смачивание:</span> это явление на границе жидкости и твёрдого тела. Если молекулы жидкости притягиваются к стенке <strong>сильнее</strong>, чем друг к другу — жидкость <strong>смачивает</strong> стенку, растекается и <strong>поднимается</strong> в капилляре. Если слабее — <strong>не смачивает</strong>, собирается в каплю и <strong>опускается</strong> в капилляре.</p>
+                    <ul>
+                        <li><strong>Смачивание</strong> (вода + стекло): вода в капилляре <strong style="color:#60a5fa;">поднимается выше</strong> уровня в сосуде, мениск <strong>вогнутый</strong>.</li>
+                        <li><strong>Несмачивание</strong> (вода + парафин, ртуть + стекло): вода в капилляре <strong style="color:#f97316;">опускается ниже</strong> уровня, мениск <strong>выпуклый</strong>.</li>
+                    </ul>
+                    <p>Формула $h = \dfrac{2\sigma}{\rho g r}$: чем тоньше трубка — тем выше столб (при смачивании).</p>
+                    <p><strong>Нажмите кнопку «Смачивание»</strong>, чтобы переключить режим и увидеть разницу.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сила поверхностного натяжения</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите силу поверхностного натяжения, действующую на рамку длиной $l = 0{,}05$ м, если $\sigma = 0{,}073$ Н/м.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $l = 0{,}05$ м, $\sigma = 0{,}073$ Н/м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $F = \sigma l$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = 0{,}073 \cdot 0{,}05 = 3{,}65 \cdot 10^{-3} \text{ Н} \approx 3{,}65 \text{ мН}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сила маленькая, но достаточная, чтобы удержать на воде иголку или водомерку.</div>
+                    <div class="answer">✅ Ответ: $F \approx 3{,}65$ мН</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Поверхностная энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите энергию поверхностного слоя воды, если площадь поверхности $S = 0{,}02$ м², а $\sigma = 0{,}073$ Н/м.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $S = 0{,}02$ м², $\sigma = 0{,}073$ Н/м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $E = \sigma S$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = 0{,}073 \cdot 0{,}02 = 1{,}46 \cdot 10^{-3} \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Энергия поверхностного слоя — небольшая, но это она заставляет капли принимать сферическую форму.</div>
+                    <div class="answer">✅ Ответ: $E = 1{,}46 \cdot 10^{-3}$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Высота подъёма в капилляре</div>
+                <div class="task-condition"><strong>Условие:</strong> В капилляре радиусом $r = 0{,}5$ мм вода поднимается. Найдите высоту подъёма. $\sigma = 0{,}073$ Н/м, $\rho = 1000$ кг/м³, $g = 9{,}8$ м/с².</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r = 0{,}5$ мм $= 5 \cdot 10^{-4}$ м, $\sigma = 0{,}073$ Н/м, $\rho = 1000$ кг/м³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $h$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $h = \dfrac{2\sigma}{\rho g r}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$h = \dfrac{2 \cdot 0{,}073}{1000 \cdot 9{,}8 \cdot 5 \cdot 10^{-4}} = \dfrac{0{,}146}{4{,}9} \approx 0{,}0298 \text{ м} \approx 3 \text{ см}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В капилляре радиусом 0,5 мм вода поднимается почти на 3 см. В более тонких капиллярах — выше.</div>
+                    <div class="answer">✅ Ответ: $h \approx 3$ см</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Радиус капилляра</div>
+                <div class="task-condition"><strong>Условие:</strong> Вода поднялась в капилляре на высоту $h = 10$ см. Найдите радиус капилляра. $\sigma = 0{,}073$ Н/м, $\rho = 1000$ кг/м³.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $h = 0{,}1$ м, $\sigma = 0{,}073$ Н/м, $\rho = 1000$ кг/м³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $r$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $h = \dfrac{2\sigma}{\rho g r}$ выражаем $r = \dfrac{2\sigma}{\rho g h}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$r = \dfrac{2 \cdot 0{,}073}{1000 \cdot 9{,}8 \cdot 0{,}1} = \dfrac{0{,}146}{980} \approx 1{,}49 \cdot 10^{-4} \text{ м} \approx 0{,}15 \text{ мм}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Капилляр с радиусом 0,15 мм — тонкий, как поры промокательной бумаги. Именно поэтому бумага хорошо впитывает воду.</div>
+                    <div class="answer">✅ Ответ: $r \approx 0{,}15$ мм</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Давление под изогнутой поверхностью</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите добавочное давление под сферической поверхностью капли воды радиусом $r = 1$ мм. $\sigma = 0{,}073$ Н/м.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r = 1$ мм $= 10^{-3}$ м, $\sigma = 0{,}073$ Н/м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta p$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула Лапласа: $\Delta p = \dfrac{2\sigma}{r}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\Delta p = \dfrac{2 \cdot 0{,}073}{10^{-3}} = 146 \text{ Па}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Внутри капли давление выше, чем снаружи, на 146 Па. Для мелких капель это добавочное давление больше.</div>
+                    <div class="answer">✅ Ответ: $\Delta p = 146$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Работа по раздуванию плёнки</div>
+                <div class="task-condition"><strong>Условие:</strong> Мыльную плёнку площадью $S = 0{,}05$ м² растянули на $\Delta S = 0{,}02$ м². $\sigma = 0{,}04$ Н/м. Найдите совершённую работу.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $S = 0{,}05$ м², $\Delta S = 0{,}02$ м², $\sigma = 0{,}04$ Н/м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Плёнка имеет две поверхности: $A = 2\sigma \cdot \Delta S$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$A = 2 \cdot 0{,}04 \cdot 0{,}02 = 1{,}6 \cdot 10^{-3} \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Мыльная плёнка имеет две поверхности — отсюда множитель 2. Работа пошла на увеличение поверхностной энергии.</div>
+                    <div class="answer">✅ Ответ: $A = 1{,}6 \cdot 10^{-3}$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Сравнение высоты в двух капиллярах</div>
+                <div class="task-condition"><strong>Условие:</strong> Вода поднимается в капилляре радиусом $r_1 = 0{,}2$ мм на высоту $h_1$. Во сколько раз выше она поднимется в капилляре радиусом $r_2 = 0{,}05$ мм?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r_1 = 0{,}2$ мм, $r_2 = 0{,}05$ мм</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{h_2}{h_1}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $h = \dfrac{2\sigma}{\rho g r}$ — высота обратно пропорциональна радиусу.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{h_2}{h_1} = \dfrac{r_1}{r_2} = \dfrac{0{,}2}{0{,}05} = 4$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Чем тоньше капилляр, тем выше подъём. Уменьшение радиуса в 4 раза увеличивает высоту в 4 раза.</div>
+                    <div class="answer">✅ Ответ: $h_2$ больше в 4 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Подъём в капилляре в лифте</div>
+                <div class="task-condition"><strong>Условие:</strong> В капилляре радиусом $r = 0{,}3$ мм вода поднимается на высоту $h_1$ при $g = 9{,}8$ м/с². Как изменится высота, если капилляр поместить в лифт, движущийся вверх с ускорением $a = 2$ м/с²?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r = 0{,}3$ мм, $g = 9{,}8$ м/с², $a = 2$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{h_2}{h_1}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> В лифте эффективное ускорение: $g_{эф} = g + a = 11{,}8$ м/с².</div>
+                    <div class="step"><strong>Шаг 2.</strong> $h \propto \dfrac{1}{g}$, значит $\dfrac{h_2}{h_1} = \dfrac{g}{g + a} = \dfrac{9{,}8}{11{,}8} \approx 0{,}83$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Высота подъёма уменьшится примерно на 17% — при перегрузке жидкость поднимается ниже.</div>
+                    <div class="answer">✅ Ответ: $\dfrac{h_2}{h_1} \approx 0{,}83$ (уменьшится)</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Смачивание и мениск</div>
+                <div class="task-condition"><strong>Условие:</strong> В стеклянном сосуде налита ртуть. Какой мениск образуется? Что произойдёт, если сосуд перевернуть?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> ртуть + стекло</div>
+                    <div class="find"><strong>🔍 Найти:</strong> тип мениска</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Ртуть не смачивает стекло — это несмачивающая жидкость.</div>
+                    <div class="step"><strong>Шаг 2.</strong> При несмачивании поверхность ртути в стеклянном сосуде имеет <strong>выпуклый</strong> мениск.</div>
+                    <div class="step"><strong>Шаг 3.</strong> В капилляре ртуть будет <strong>опускаться</strong> ниже уровня в сосуде, а не подниматься.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Молекулы ртути притягиваются друг к другу сильнее, чем к стеклу — поэтому жидкость стремится собраться в каплю, а не растечься по поверхности.</div>
+                    <div class="answer">✅ Ответ: выпуклый мениск; в капилляре ртуть опускается</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Полная энергия капли</div>
+                <div class="task-condition"><strong>Условие:</strong> Капля воды имеет объём $V = 0{,}1$ см³. Найдите её радиус и энергию поверхностного слоя. $\sigma = 0{,}073$ Н/м.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V = 0{,}1$ см³ $= 10^{-7}$ м³, $\sigma = 0{,}073$ Н/м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $r$, $E$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (радиус).</strong> $V = \dfrac{4}{3}\pi r^3 \Rightarrow r = \sqrt[3]{\dfrac{3V}{4\pi}}$.</div>
+                    <div class="step"><span class="formula">$r = \sqrt[3]{\dfrac{3 \cdot 10^{-7}}{4 \cdot 3{,}14}} \approx \sqrt[3]{2{,}39 \cdot 10^{-8}} \approx 2{,}88 \cdot 10^{-3} \text{ м} \approx 2{,}9 \text{ мм}$</span></div>
+                    <div class="step"><strong>Шаг 2 (площадь).</strong> $S = 4\pi r^2 = 4 \cdot 3{,}14 \cdot (2{,}88 \cdot 10^{-3})^2 \approx 1{,}04 \cdot 10^{-4}$ м².</div>
+                    <div class="step"><strong>Шаг 3 (энергия).</strong> $E = \sigma S = 0{,}073 \cdot 1{,}04 \cdot 10^{-4} \approx 7{,}6 \cdot 10^{-6}$ Дж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Энергия поверхностного слоя очень мала, но достаточна, чтобы придать капле сферическую форму.</div>
+                    <div class="answer">✅ Ответ: $r \approx 2{,}9$ мм; $E \approx 7{,}6 \cdot 10^{-6}$ Дж</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-surface').style.display = model === 'surface' ? 'block' : 'none';
+        document.getElementById('model-capillary').style.display = model === 'capillary' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- ===== МОДЕЛЬ 1: ПОВЕРХНОСТНОЕ НАТЯЖЕНИЕ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-surface');
+        const canvas = document.getElementById('canvas-surface');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 1, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.65rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(2, 5, 5);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // ===== СОСУД =====
+        const BEAKER_W = 9;
+        const BEAKER_H = 5;
+        const BEAKER_D = 2;
+        const BEAKER_BOTTOM = -2.5;
+        const BEAKER_TOP = 2.5;
+
+        const beakerGeo = new THREE.BoxGeometry(BEAKER_W, BEAKER_H, BEAKER_D);
+        const beakerEdges = new THREE.EdgesGeometry(beakerGeo);
+        const beakerLines = new THREE.LineSegments(beakerEdges, new THREE.LineBasicMaterial({
+            color: 0x8ba5b8, transparent: true, opacity: 0.45
+        }));
+        group.add(beakerLines);
+
+        // ===== ЖИДКОСТЬ =====
+        const LIQ_W = 8.6;
+        const LIQ_D = 1.8;
+        const LIQ_BOTTOM = BEAKER_BOTTOM + 0.1; // -2.4
+
+        const liquidGeo = new THREE.BoxGeometry(LIQ_W, 1, LIQ_D);
+        const liquidMat = new THREE.MeshStandardMaterial({
+            color: 0x3388ff, transparent: true, opacity: 0.22,
+            emissive: 0x001133,
+            depthWrite: false
+        });
+        const liquid = new THREE.Mesh(liquidGeo, liquidMat);
+        group.add(liquid);
+
+        // Молекулы внутри жидкости
+        const molGeo = new THREE.SphereGeometry(0.16, 14, 14);
+        const molInsideMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x002244 });
+        const molSurfaceMat = new THREE.MeshStandardMaterial({ color: 0xffcc44, emissive: 0x664400 });
+
+        const insideMols = [];
+        for (let i = 0; i < 12; i++) {
+            const m = new THREE.Mesh(molGeo, molInsideMat);
+            m.position.set(-3.3 + i * 0.6, 0, 0);
+            group.add(m);
+            insideMols.push(m);
+        }
+        // Молекулы на поверхности — только они (без плоскости)
+        const surfaceMols = [];
+        for (let i = 0; i < 12; i++) {
+            const m = new THREE.Mesh(molGeo, molSurfaceMat);
+            m.position.set(-3.3 + i * 0.6, 0, 0);
+            group.add(m);
+            surfaceMols.push(m);
+        }
+
+        // ===== Стрелки =====
+        function createArrow(from, dir, len, color, thickness = 2) {
+            const g = new THREE.Group();
+            const to = from.clone().add(dir.clone().normalize().multiplyScalar(len));
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([from, to]),
+                new THREE.LineBasicMaterial({ color, linewidth: thickness })
+            );
+            g.add(line);
+            const cone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.055, 0.14, 6),
+                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.4) })
+            );
+            cone.position.copy(to);
+            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(
+                new THREE.Vector3(0, 1, 0), dir.clone().normalize()
+            ));
+            g.add(cone);
+            return g;
+        }
+
+        // Стрелки для молекулы ВНУТРИ (4 во все стороны)
+        const insideArrows = [];
+        function buildInsideArrows() {
+            insideArrows.forEach(a => group.remove(a));
+            insideArrows.length = 0;
+            const molPos = insideMols[6].position.clone();
+            const dirs = [
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(-1, 0, 0),
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(0, -1, 0),
+            ];
+            dirs.forEach(d => {
+                const a = createArrow(molPos, d, 0.45, 0x66ccff, 2);
+                group.add(a);
+                insideArrows.push(a);
+            });
+        }
+
+        // Стрелки для молекулы НА ПОВЕРХНОСТИ (3 вниз)
+        const surfArrows = [];
+        function buildSurfArrows() {
+            surfArrows.forEach(a => group.remove(a));
+            surfArrows.length = 0;
+            const molPos = surfaceMols[6].position.clone();
+            const dirs = [
+                new THREE.Vector3(-0.7, -0.7, 0),
+                new THREE.Vector3(0.7, -0.7, 0),
+                new THREE.Vector3(0, -1, 0),
+            ];
+            dirs.forEach(d => {
+                const a = createArrow(molPos, d, 0.45, 0xffcc44, 2);
+                group.add(a);
+                surfArrows.push(a);
+            });
+        }
+
+        // Стрелки вдоль поверхности — по краям, направлены к центру
+        const surfaceForceArrows = [];
+        function buildSurfaceForceArrows(surfaceY) {
+            surfaceForceArrows.forEach(a => group.remove(a));
+            surfaceForceArrows.length = 0;
+
+            const leftPos = new THREE.Vector3(-4.3, surfaceY, 0);
+            const rightPos = new THREE.Vector3(4.3, surfaceY, 0);
+            const leftArrow = createArrow(leftPos, new THREE.Vector3(1, 0, 0), 0.8, 0xffcc00, 3);
+            const rightArrow = createArrow(rightPos, new THREE.Vector3(-1, 0, 0), 0.8, 0xffcc00, 3);
+            group.add(leftArrow); group.add(rightArrow);
+            surfaceForceArrows.push(leftArrow, rightArrow);
+        }
+
+        let sigma = 0.073;
+        const sigmaSlider = document.getElementById('surf-sigma-slider');
+        const sigmaValue = document.getElementById('surf-sigma-value');
+        const sigmaDisplay = document.getElementById('surf-sigma');
+        const typeDisplay = document.getElementById('surf-type');
+
+        function updateLiquid() {
+            sigma = parseFloat(sigmaSlider.value);
+            sigmaValue.textContent = sigma.toFixed(3);
+            sigmaDisplay.textContent = sigma.toFixed(3);
+
+            // Чем больше σ — тем выше столб жидкости (условно)
+            const ratio = (sigma - 0.02) / 0.08;
+            const liquidH = 2.5 + ratio * 0.8;
+            const liquidTop = LIQ_BOTTOM + liquidH;
+            const liquidCenterY = (LIQ_BOTTOM + liquidTop) / 2;
+
+            // Обновить геометрию жидкости
+            liquid.geometry.dispose();
+            liquid.geometry = new THREE.BoxGeometry(LIQ_W, liquidH, LIQ_D);
+            liquid.position.set(0, liquidCenterY, 0);
+
+            const surfaceY = liquidTop;
+
+            // Молекулы внутри
+            const insideY = LIQ_BOTTOM + liquidH * 0.4;
+            insideMols.forEach(m => m.position.y = insideY);
+
+            // Поверхностные молекулы — на поверхности
+            surfaceMols.forEach(m => m.position.y = surfaceY);
+
+            // Пересобрать стрелки
+            buildInsideArrows();
+            buildSurfArrows();
+            buildSurfaceForceArrows(surfaceY);
+
+            if (sigma < 0.04) typeDisplay.textContent = 'растекается';
+            else if (sigma < 0.07) typeDisplay.textContent = 'спирт';
+            else typeDisplay.textContent = 'вода';
+        }
+
+        sigmaSlider.addEventListener('input', updateLiquid);
+        document.getElementById('surf-reset').addEventListener('click', () => {
+            sigmaSlider.value = 0.073;
+            updateLiquid();
+        });
+
+        document.getElementById('fs-surface').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.enableRotate = true;
+        controls.enableZoom = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateLiquid();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 2: КАПИЛЛЯР ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-capillary');
+        const canvas = document.getElementById('canvas-capillary');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 1, 14);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(2, 5, 5);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // ===== РАЗМЕРЫ =====
+        const BEAKER_W = 8;
+        const BEAKER_H = 6;
+        const BEAKER_D = 3;
+        const BEAKER_BOTTOM = -3;
+        const WATER_LEVEL_Y = 0;
+
+        // ===== СОСУД (только контур) =====
+        const beakerGeo = new THREE.BoxGeometry(BEAKER_W, BEAKER_H, BEAKER_D);
+        const beakerEdges = new THREE.EdgesGeometry(beakerGeo);
+        const beakerLines = new THREE.LineSegments(beakerEdges, new THREE.LineBasicMaterial({
+            color: 0x8ba5b8, transparent: true, opacity: 0.55
+        }));
+        group.add(beakerLines);
+
+                // ===== ВОДА В СОСУДЕ =====
+        // 1) Заливка — очень прозрачная
+        const bigWaterH = WATER_LEVEL_Y - BEAKER_BOTTOM;
+        const bigWaterGeo = new THREE.BoxGeometry(BEAKER_W - 0.15, bigWaterH, BEAKER_D - 0.15);
+        const bigWaterMat = new THREE.MeshStandardMaterial({
+            color: 0x3388ff, transparent: true, opacity: 0.10,
+            depthWrite: false
+        });
+        const bigWater = new THREE.Mesh(bigWaterGeo, bigWaterMat);
+        bigWater.position.set(0, BEAKER_BOTTOM + bigWaterH / 2, 0);
+        group.add(bigWater);
+
+        // 2) Контурные рёбра воды — делает её заметной, но не перекрывает капилляр
+        const bigWaterEdges = new THREE.EdgesGeometry(bigWaterGeo);
+        const bigWaterLines = new THREE.LineSegments(bigWaterEdges, new THREE.LineBasicMaterial({
+            color: 0x66ccff, transparent: true, opacity: 0.55
+        }));
+        bigWaterLines.position.copy(bigWater.position);
+        group.add(bigWaterLines);
+
+        // 3) Яркая линия уровня воды (верхняя грань) — чтобы уровень был виден сразу
+        const levelLineGeo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-(BEAKER_W - 0.15) / 2, WATER_LEVEL_Y, (BEAKER_D - 0.15) / 2),
+            new THREE.Vector3( (BEAKER_W - 0.15) / 2, WATER_LEVEL_Y, (BEAKER_D - 0.15) / 2),
+            new THREE.Vector3( (BEAKER_W - 0.15) / 2, WATER_LEVEL_Y, -(BEAKER_D - 0.15) / 2),
+            new THREE.Vector3(-(BEAKER_W - 0.15) / 2, WATER_LEVEL_Y, -(BEAKER_D - 0.15) / 2),
+            new THREE.Vector3(-(BEAKER_W - 0.15) / 2, WATER_LEVEL_Y, (BEAKER_D - 0.15) / 2)
+        ]);
+        const levelLine = new THREE.Line(levelLineGeo, new THREE.LineBasicMaterial({
+            color: 0x88ddff, transparent: true, opacity: 0.9, linewidth: 2
+        }));
+        group.add(levelLine);
+
+        // ===== КАПИЛЛЯР =====
+        const CAP_X = -2.5;
+        const TUBE_BOTTOM = -2.5;
+        const TUBE_TOP = 2.5;
+        const TUBE_H = TUBE_TOP - TUBE_BOTTOM;
+
+        let capTube = null;
+        let capTubeEdges = null;
+        let capWater = null;
+        let meniscus = null;
+
+                function rebuildTube(r) {
+            if (capTube) { group.remove(capTube); capTube.geometry.dispose(); capTube.material.dispose(); }
+
+            // Стеклянная трубка — только верхняя и нижняя кромки, без боковых образующих
+            const tubeGeo = new THREE.CylinderGeometry(r, r, TUBE_H, 24, 1, true);
+            const tubeMat = new THREE.MeshStandardMaterial({
+                color: 0xaaccee, transparent: true, opacity: 0.25,
+                side: THREE.DoubleSide, emissive: 0x335577,
+                depthWrite: false
+            });
+            capTube = new THREE.Mesh(tubeGeo, tubeMat);
+            capTube.position.set(CAP_X, (TUBE_TOP + TUBE_BOTTOM) / 2, 0);
+            capTube.renderOrder = 10;
+            group.add(capTube);
+        }
+
+        function rebuildWaterColumn(r, isWetting, hVisual) {
+            if (capWater) { group.remove(capWater); capWater.geometry.dispose(); capWater.material.dispose(); capWater = null; }
+            if (meniscus) { group.remove(meniscus); meniscus.geometry.dispose(); meniscus.material.dispose(); meniscus = null; }
+
+            let topY = isWetting
+                ? WATER_LEVEL_Y + hVisual
+                : WATER_LEVEL_Y - hVisual;
+
+            if (topY > TUBE_TOP - 0.15) topY = TUBE_TOP - 0.15;
+            if (topY < TUBE_BOTTOM + 0.15) topY = TUBE_BOTTOM + 0.15;
+
+            const bottomY = TUBE_BOTTOM + 0.05;
+            const colH = topY - bottomY;
+
+            if (colH > 0.02) {
+                const colGeo = new THREE.CylinderGeometry(r * 0.85, r * 0.85, colH, 24);
+                const colMat = new THREE.MeshStandardMaterial({
+                    color: isWetting ? 0x3388ff : 0xff6633,
+                    transparent: true, opacity: 0.95,
+                    emissive: isWetting ? 0x002255 : 0x552200
+                });
+                capWater = new THREE.Mesh(colGeo, colMat);
+                capWater.position.set(CAP_X, (topY + bottomY) / 2, 0);
+                capWater.renderOrder = 12;
+                group.add(capWater);
+
+                const meniscusR = r * 0.85;
+                const meniscusGeo = new THREE.SphereGeometry(
+                    meniscusR, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2
+                );
+                const meniscusMat = new THREE.MeshStandardMaterial({
+                    color: isWetting ? 0x66aaff : 0xff8844,
+                    emissive: isWetting ? 0x335577 : 0x553311,
+                    transparent: true, opacity: 1.0,
+                    side: THREE.DoubleSide
+                });
+                meniscus = new THREE.Mesh(meniscusGeo, meniscusMat);
+                if (isWetting) {
+                    meniscus.rotation.x = 0;
+                    meniscus.position.set(CAP_X, topY, 0);
+                } else {
+                    meniscus.rotation.x = Math.PI;
+                    meniscus.position.set(CAP_X, topY, 0);
+                }
+                meniscus.renderOrder = 13;
+                group.add(meniscus);
+            }
+        }
+
+        const radiusSlider = document.getElementById('cap-radius');
+        const wettingBtn = document.getElementById('cap-wetting-btn');
+        const radiusValue = document.getElementById('cap-radius-value');
+        const rDisplay = document.getElementById('cap-r');
+        const hDisplay = document.getElementById('cap-h');
+        const modeDisplay = document.getElementById('cap-mode');
+
+        const sigma = 0.073;
+        const rho = 1000;
+        const g = 9.8;
+
+        let isWetting = true;
+
+        function update() {
+            const rMm = parseFloat(radiusSlider.value);
+            const rM = rMm / 1000;
+            radiusValue.textContent = rMm.toFixed(1);
+            rDisplay.textContent = rMm.toFixed(1);
+
+            modeDisplay.textContent = isWetting ? 'есть' : 'нет';
+
+            const hReal = 2 * sigma / (rho * g * rM);
+            hDisplay.textContent = (hReal * 100).toFixed(1);
+
+            const hVisual = Math.min(hReal * 50, 2.0);
+
+            const visualR = 0.15 + (rMm - 0.5) / 4.5 * 0.30;
+
+            rebuildTube(visualR);
+            rebuildWaterColumn(visualR, isWetting, hVisual);
+
+            // Обновить кнопку
+            if (isWetting) {
+                wettingBtn.textContent = '💧 Смачивание: есть';
+                wettingBtn.classList.remove('off');
+            } else {
+                wettingBtn.textContent = '🚫 Смачивание: нет';
+                wettingBtn.classList.add('off');
+            }
+        }
+
+        radiusSlider.addEventListener('input', update);
+        wettingBtn.addEventListener('click', () => {
+            isWetting = !isWetting;
+            update();
+        });
+        document.getElementById('cap-reset').addEventListener('click', () => {
+            radiusSlider.value = 2;
+            isWetting = true;
+            update();
+        });
+
+        document.getElementById('fs-capillary').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

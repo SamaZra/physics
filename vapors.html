@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Свойства паров. Испарение и конденсация. Кипение. Влажность</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .favorite-btn{position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1000;color:var(--text-secondary);transition:all 0.2s;backdrop-filter:blur(4px);}
+        .favorite-btn:hover{transform:scale(1.1);}
+        .favorite-btn.active{color:#facc15;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>Свойства паров. Испарение и конденсация.<br>Кипение. Влажность воздуха</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Испарение и конденсация</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Парообразование</strong> — переход жидкости в газообразное состояние. Существует два вида:</p>
+                <ul>
+                    <li><span class="important">Испарение</span> — парообразование с поверхности жидкости, происходящее при любой температуре.</li>
+                    <li><span class="important">Кипение</span> — парообразование по всему объёму жидкости при определённой температуре (температуре кипения).</li>
+                </ul>
+                <p><strong>Конденсация</strong> — обратный процесс: переход пара в жидкость.</p>
+
+                <p><strong>Скорость испарения зависит от:</strong></p>
+                <ul>
+                    <li><strong>температуры</strong> — чем выше, тем быстрее;</li>
+                    <li><strong>площади поверхности</strong> — чем больше, тем быстрее;</li>
+                    <li><strong>рода жидкости</strong> — летучие (эфир, спирт) испаряются быстрее;</li>
+                    <li><strong>ветра</strong> — наличие ветра ускоряет испарение, унося пары;</li>
+                    <li><strong>давления</strong> — при низком давлении испарение идёт быстрее.</li>
+                </ul>
+
+                <p><strong>При испарении</strong> жидкость охлаждается, потому что покидают её самые быстрые молекулы. Поэтому в жару нам прохладно, когда мы вспотели.</p>
+
+                <p><strong>Удельная теплота парообразования</strong> $L$ — количество теплоты, необходимое для превращения 1 кг жидкости в пар при температуре кипения:</p>
+                <div class="formula-block">
+                    <span class="f">$Q = Lm$</span>
+                    <span class="f-label">— теплота парообразования / конденсации</span>
+                </div>
+                <p>Для воды: $L = 2{,}3 \cdot 10^6$ Дж/кг. Это очень много — поэтому ожоги паром опаснее ожогов кипятком.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Насыщенный и ненасыщенный пар</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Насыщенный пар</strong> — пар, находящийся в динамическом равновесии с жидкостью. Число молекул, покидающих жидкость, равно числу возвращающихся.</p>
+                <p><strong>Свойства насыщенного пара:</strong></p>
+                <ul>
+                    <li><span class="important">Давление и плотность</span> зависят только от температуры, но не от объёма.</li>
+                    <li>При изотермическом сжатии насыщенный пар частично конденсируется, его давление не растёт.</li>
+                    <li>При нагревании давление насыщенного пара растёт быстрее, чем у идеального газа.</li>
+                </ul>
+                <p><strong>Ненасыщенный пар</strong> — пар, не достигший состояния динамического равновесия с жидкостью. Подчиняется законам идеального газа.</p>
+                <p><strong>Зависимость давления насыщенного пара от температуры:</strong> с ростом температуры давление растёт, и при некоторой температуре становится равным внешнему давлению — начинается кипение.</p>
+                <div class="formula-block">
+                    <span class="f">$p_{нас} = p_{внеш}$</span>
+                    <span class="f-label">— условие кипения</span>
+                </div>
+                <p><strong>Температура кипения зависит от внешнего давления:</strong></p>
+                <ul>
+                    <li>При нормальном атмосферном давлении (760 мм рт. ст. = 101,3 кПа) вода кипит при 100 °C.</li>
+                    <li>В горах, где давление ниже, вода кипит при более низкой температуре (на высоте 3000 м — около 90 °C).</li>
+                    <li>В скороварке давление выше атмосферного, вода кипит при 120 °C — еда готовится быстрее.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Влажность воздуха</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Абсолютная влажность</strong> $\rho$ — масса водяного пара, содержащегося в 1 м³ воздуха (или его парциальное давление $p$).</p>
+                <p><strong>Относительная влажность</strong> $\varphi$ — отношение абсолютной влажности к максимально возможной (плотности насыщенного пара при данной температуре):</p>
+                <div class="formula-block">
+                    <span class="f">$\varphi = \dfrac{\rho}{\rho_{нас}} \cdot 100\% = \dfrac{p}{p_{нас}} \cdot 100\%$</span>
+                    <span class="f-label">— относительная влажность</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$\rho$ — абсолютная влажность (кг/м³);</li>
+                    <li>$\rho_{нас}$ — плотность насыщенного пара при данной температуре (кг/м³);</li>
+                    <li>$p$ — парциальное давление водяного пара (Па);</li>
+                    <li>$p_{нас}$ — давление насыщенного пара при данной температуре (Па).</li>
+                </ul>
+
+                <p><strong>Точка росы</strong> — температура, при которой пар становится насыщенным (при охлаждении начинается конденсация — выпадает роса).</p>
+
+                <p><strong>Значение влажности:</strong></p>
+                <ul>
+                    <li>Комфортная влажность для человека — 40–60%.</li>
+                    <li>При низкой влажности пересыхают слизистые, плохо себя чувствуют растения.</li>
+                    <li>При высокой влажности затруднён теплообмен, в помещениях появляется плесень.</li>
+                    <li>Влажность важна в промышленности: текстиль, бумага, деревообработка.</li>
+                </ul>
+
+                <p><strong>Приборы для измерения влажности:</strong> гигрометр, психрометр.</p>
+                <p><strong>Психрометр</strong> состоит из двух термометров: сухого и влажного. По разности их показаний определяют влажность с помощью психрометрической таблицы.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="evaporation" onclick="switchModel('evaporation')">💧 Испарение</div>
+                <div class="model-tab" data-model="boiling" onclick="switchModel('boiling')">🔥 Кипение</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: ИСПАРЕНИЕ -->
+            <div id="model-evaporation" class="model-content">
+                <div class="model-container" id="container-evaporation">
+                    <canvas id="canvas-evaporation" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-evaporation">⛶</button>
+                    <div class="info-display">
+                        <div>$T$ = <span class="val" id="evap-T">300</span> К</div>
+                        <div>молекул в паре: <span class="val" id="evap-count">0</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Температура $T$ (К)</label>
+                        <input type="range" id="evap-temp" min="280" max="400" step="5" value="300">
+                        <span class="control-value" id="evap-temp-value">300</span>
+                    </div>
+                    <button class="btn-reset" id="evap-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Чем выше температура — тем больше молекул покидает жидкость</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель испарения.</strong> Внизу — жидкость (молекулы плотно), сверху — пар (молекулы свободно).</p>
+                    <p><span class="important">Ползунок температуры</span> управляет скоростью. Чем выше $T$ — тем больше молекул отрывается от поверхности и уходит в пар.</p>
+                    <p>Обратите внимание: часть молекул возвращается обратно (конденсация). Когда число уходящих и возвращающихся сравняется — наступит <strong>динамическое равновесие</strong>, пар станет насыщенным.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: КИПЕНИЕ -->
+            <div id="model-boiling" class="model-content" style="display:none;">
+                <div class="model-container" id="container-boiling">
+                    <canvas id="canvas-boiling" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-boiling">⛶</button>
+                    <div class="info-display">
+                        <div>$T$ = <span class="val" id="boil-T">350</span> К</div>
+                        <div>$p_{внеш}$ = <span class="val" id="boil-p">101</span> кПа</div>
+                        <div>Кипит: <span class="val" id="boil-status">нет</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Температура $T$ (К)</label>
+                        <input type="range" id="boil-temp" min="280" max="450" step="5" value="350">
+                        <span class="control-value" id="boil-temp-value">350</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$p_{внеш}$ (кПа)</label>
+                        <input type="range" id="boil-pressure" min="50" max="200" step="5" value="101">
+                        <span class="control-value" id="boil-pressure-value">101</span>
+                    </div>
+                    <button class="btn-reset" id="boil-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Кипение начинается, когда $p_{нас} = p_{внеш}$</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель кипения.</strong> Кипение начинается, когда давление насыщенного пара становится равным внешнему давлению.</p>
+                    <p><span class="important">Меняйте температуру</span> — при достижении температуры кипения появляются пузырьки по всему объёму.</p>
+                    <p><span class="important">Меняйте внешнее давление</span> — при высоком давлении вода кипит при более высокой температуре (эффект скороварки), при низком — при более низкой (горы).</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Теплота парообразования</div>
+                <div class="task-condition"><strong>Условие:</strong> Какое количество теплоты необходимо, чтобы превратить в пар $m = 0{,}5$ кг воды при 100 °C? Удельная теплота парообразования $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ кг, $L = 2{,}3 \cdot 10^6$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $Q = Lm$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 2{,}3 \cdot 10^6 \cdot 0{,}5 = 1{,}15 \cdot 10^6 \text{ Дж} = 1{,}15 \text{ МДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Чтобы испарить всего 0,5 кг воды, нужно 1,15 МДж энергии — столько же, сколько для нагрева 5 кг воды от 0 до 55 °C.</div>
+                    <div class="answer">✅ Ответ: $Q = 1{,}15$ МДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Теплота конденсации</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько теплоты выделится при конденсации $m = 2$ кг водяного пара при 100 °C?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $L = 2{,}3 \cdot 10^6$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q = Lm$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 2{,}3 \cdot 10^6 \cdot 2 = 4{,}6 \cdot 10^6 \text{ Дж} = 4{,}6 \text{ МДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При конденсации теплота выделяется — именно поэтому пар используется для отопления и в промышленности.</div>
+                    <div class="answer">✅ Ответ: $Q = 4{,}6$ МДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Относительная влажность</div>
+                <div class="task-condition"><strong>Условие:</strong> Абсолютная влажность воздуха $\rho = 8{,}6$ г/м³ при температуре 20 °C. Плотность насыщенного пара при 20 °C равна $\rho_{нас} = 17{,}3$ г/м³. Найдите относительную влажность.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\rho = 8{,}6$ г/м³, $\rho_{нас} = 17{,}3$ г/м³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\varphi$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $\varphi = \dfrac{\rho}{\rho_{нас}} \cdot 100\%$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\varphi = \dfrac{8{,}6}{17{,}3} \cdot 100\% \approx 49{,}7\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Влажность около 50% — комфортная для человека.</div>
+                    <div class="answer">✅ Ответ: $\varphi \approx 49{,}7\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Нагрев и испарение воды</div>
+                <div class="task-condition"><strong>Условие:</strong> Какое количество теплоты нужно, чтобы нагреть $m = 2$ кг воды от 20 °C до 100 °C и полностью её испарить? $c = 4200$ Дж/(кг·К), $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $t_1 = 20$ °C, $t_2 = 100$ °C, $c = 4200$ Дж/(кг·К), $L = 2{,}3 \cdot 10^6$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (нагрев).</strong> $Q_1 = cm\Delta t = 4200 \cdot 2 \cdot 80 = 672000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2 (испарение).</strong> $Q_2 = Lm = 2{,}3 \cdot 10^6 \cdot 2 = 4{,}6 \cdot 10^6$ Дж.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $Q_{общ} = 672000 + 4600000 = 5272000 \approx 5{,}27$ МДж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> На испарение уходит почти в 7 раз больше теплоты, чем на нагрев до кипения!</div>
+                    <div class="answer">✅ Ответ: $Q_{общ} \approx 5{,}27$ МДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Точка росы</div>
+                <div class="task-condition"><strong>Условие:</strong> Вечером температура воздуха $t_1 = 16$ °C, относительная влажность $\varphi = 60\%$. Ночью воздух охладился до $t_2 = 8$ °C. Выпадет ли роса? Давление насыщенного пара при 16 °C — 1,81 кПа, при 8 °C — 1,07 кПа.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $t_1 = 16$ °C, $\varphi = 0{,}6$, $t_2 = 8$ °C, $p_{н1} = 1810$ Па, $p_{н2} = 1070$ Па</div>
+                    <div class="find"><strong>🔍 Найти:</strong> выпадет ли роса?</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (парциальное давление).</strong> $p = \varphi \cdot p_{н1} = 0{,}6 \cdot 1810 = 1086$ Па.</div>
+                    <div class="step"><strong>Шаг 2 (сравнение).</strong> При 8 °C давление насыщенного пара 1070 Па. Полученное $p = 1086$ Па > 1070 Па.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Пар перенасыщен — выпадет роса.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Если парциальное давление превышает давление насыщенного пара при данной температуре, то избыток водяного пара конденсируется — выпадает роса.</div>
+                    <div class="answer">✅ Ответ: да, роса выпадет</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Испарение при кипении</div>
+                <div class="task-condition"><strong>Условие:</strong> Через чайник прошло $m = 0{,}3$ кг воды, которая полностью испарилась за 10 минут. Найдите среднюю мощность нагревателя. $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}3$ кг, $t = 600$ с, $L = 2{,}3 \cdot 10^6$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $P$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q = Lm = 2{,}3 \cdot 10^6 \cdot 0{,}3 = 690000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $P = \dfrac{Q}{t} = \dfrac{690000}{600} = 1150$ Вт.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Мощность ~1,15 кВт — типичная для бытового чайника.</div>
+                    <div class="answer">✅ Ответ: $P = 1150$ Вт</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Влажность через давление</div>
+                <div class="task-condition"><strong>Условие:</strong> Парциальное давление водяного пара в воздухе $p = 1{,}2$ кПа при 20 °C. Давление насыщенного пара при 20 °C $p_{нас} = 2{,}33$ кПа. Найдите относительную влажность.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $p = 1{,}2$ кПа, $p_{нас} = 2{,}33$ кПа</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\varphi$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\varphi = \dfrac{p}{p_{нас}} \cdot 100\%$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\varphi = \dfrac{1{,}2}{2{,}33} \cdot 100\% \approx 51{,}5\%$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Влажность чуть выше 50% — комфортная для человека.</div>
+                    <div class="answer">✅ Ответ: $\varphi \approx 51{,}5\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Смешивание с паром</div>
+                <div class="task-condition"><strong>Условие:</strong> В воду массой $m_1 = 5$ кг при 20 °C впустили $m_2 = 0{,}2$ кг пара при 100 °C. Найдите конечную температуру. $c = 4200$ Дж/(кг·К), $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 5$ кг, $t_1 = 20$ °C, $m_2 = 0{,}2$ кг, $t_2 = 100$ °C</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t_{кон}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Теплота от конденсации пара: $Q_1 = Lm_2 = 2{,}3 \cdot 10^6 \cdot 0{,}2 = 460000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Теплота от остывания сконденсированной воды (от 100 °C до $t_{кон}$): $Q_2 = cm_2(100 - t_{кон}) = 4200 \cdot 0{,}2 \cdot (100 - t_{кон}) = 840(100 - t_{кон})$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Теплота на нагрев воды: $Q_3 = cm_1(t_{кон} - 20) = 4200 \cdot 5 \cdot (t_{кон} - 20) = 21000(t_{кон} - 20)$.</div>
+                    <div class="step"><strong>Шаг 4.</strong> Уравнение теплового баланса: $Q_1 + Q_2 = Q_3$.</div>
+                    <div class="step">$460000 + 84000 - 840t_{кон} = 21000t_{кон} - 420000$.</div>
+                    <div class="step">$544000 + 420000 = 21840t_{кон}$ → $t_{кон} = \dfrac{964000}{21840} \approx 44$ °C.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Всего 0,2 кг пара нагрели 5 кг воды с 20 °C до 44 °C. Пар — очень эффективный теплоноситель.</div>
+                    <div class="answer">✅ Ответ: $t_{кон} \approx 44$ °C</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Зависимость кипения от давления</div>
+                <div class="task-condition"><strong>Условие:</strong> В горах на высоте 3000 м атмосферное давление $p = 70$ кПа. При какой температуре закипит вода? (При 90 °C давление насыщенного пара 70,1 кПа.)</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $p = 70$ кПа, $p_{нас}(90°C) = 70{,}1$ кПа</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t_{кип}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Условие кипения: $p_{нас} = p_{внеш}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $p_{внеш} = 70$ кПа. Из таблицы: $p_{нас} = 70{,}1$ кПа при 90 °C.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Значит вода закипит примерно при 90 °C.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В горах вода кипит при более низкой температуре — поэтому еда варится дольше, и в горах используют скороварки.</div>
+                    <div class="answer">✅ Ответ: $t_{кип} \approx 90$ °C</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Влажность и точка росы</div>
+                <div class="task-condition"><strong>Условие:</strong> При температуре $t = 24$ °C относительная влажность $\varphi = 70\%$. Найдите точку росы. (Давление насыщенного пара при 24 °C — 2,99 кПа, при 20 °C — 2,33 кПа.)</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $t = 24$ °C, $\varphi = 0{,}7$, $p_{н}(24°C) = 2{,}99$ кПа, $p_{н}(20°C) = 2{,}33$ кПа</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t_{росы}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (парциальное давление).</strong> $p = \varphi \cdot p_{н}(24°C) = 0{,}7 \cdot 2{,}99 = 2{,}093$ кПа.</div>
+                    <div class="step"><strong>Шаг 2 (точка росы).</strong> Точка росы — это температура, при которой $p = p_{нас}$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Сравнивая с таблицей: 2,093 кПа — между 18 и 20 °C. Ближе к 18,5 °C.</div>
+                    <div class="step"><strong>Шаг 4.</strong> Точка росы ≈ 18,5 °C.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Если ночью температура опустится ниже 18,5 °C, выпадет роса. Влажность при этом станет 100%.</div>
+                    <div class="answer">✅ Ответ: $t_{росы} \approx 18{,}5$ °C</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-evaporation').style.display = model === 'evaporation' ? 'block' : 'none';
+        document.getElementById('model-boiling').style.display = model === 'boiling' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- ===== МОДЕЛЬ 1: ИСПАРЕНИЕ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-evaporation');
+        const canvas = document.getElementById('canvas-evaporation');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 3, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Жидкость внизу — полупрозрачный блок
+        const liquidGeo = new THREE.BoxGeometry(10, 0.4, 4);
+        const liquidMat = new THREE.MeshStandardMaterial({
+            color: 0x3388ff, transparent: true, opacity: 0.35,
+            emissive: 0x002244
+        });
+        const liquid = new THREE.Mesh(liquidGeo, liquidMat);
+        liquid.position.y = -2;
+        group.add(liquid);
+
+        const molGeo = new THREE.SphereGeometry(0.12, 10, 10);
+        const liquidMolMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x002244 });
+        const vaporMolMat = new THREE.MeshStandardMaterial({ color: 0xaaddff, emissive: 0x335577, transparent: true, opacity: 0.85 });
+
+        // Молекулы в жидкости (много, плотно)
+        const liquidMols = [];
+        const N_LIQ = 80;
+        for (let i = 0; i < N_LIQ; i++) {
+            const m = new THREE.Mesh(molGeo, liquidMolMat);
+            m.position.set(
+                (Math.random() - 0.5) * 9,
+                -2 + (Math.random() - 0.5) * 0.3,
+                (Math.random() - 0.5) * 3
+            );
+            group.add(m);
+            liquidMols.push({ mesh: m });
+        }
+
+        // Молекулы пара (свободно летают)
+        const vaporMols = [];
+        const N_VAPOR = 40;
+        for (let i = 0; i < N_VAPOR; i++) {
+            const m = new THREE.Mesh(molGeo, vaporMolMat);
+            m.position.set(
+                (Math.random() - 0.5) * 10,
+                -1.5 + Math.random() * 4,
+                (Math.random() - 0.5) * 4
+            );
+            m.visible = false; // изначально скрыты
+            group.add(m);
+            vaporMols.push({
+                mesh: m,
+                vx: (Math.random() - 0.5) * 2,
+                vy: Math.random() * 1.5 + 0.5,
+                vz: (Math.random() - 0.5) * 2,
+                active: false
+            });
+        }
+
+        let T = 300;
+        let vaporCount = 0;
+        const tempSlider = document.getElementById('evap-temp');
+        const tempValue = document.getElementById('evap-temp-value');
+        const TDisplay = document.getElementById('evap-T');
+        const countDisplay = document.getElementById('evap-count');
+
+        function updateFromTemp() {
+            T = parseFloat(tempSlider.value);
+            tempValue.textContent = T;
+            TDisplay.textContent = T;
+
+            // Чем выше T — тем больше активных молекул пара
+            const ratio = Math.max(0, Math.min(1, (T - 280) / 120));
+            vaporCount = Math.round(N_VAPOR * ratio);
+            countDisplay.textContent = vaporCount;
+
+            vaporMols.forEach((v, i) => {
+                if (i < vaporCount) {
+                    v.active = true;
+                    v.mesh.visible = true;
+                    if (v.mesh.position.y < -1.8) {
+                        v.mesh.position.y = -1.5;
+                        v.mesh.position.x = (Math.random() - 0.5) * 8;
+                        v.mesh.position.z = (Math.random() - 0.5) * 3;
+                    }
+                } else {
+                    v.active = false;
+                    v.mesh.visible = false;
+                }
+            });
+        }
+
+        tempSlider.addEventListener('input', updateFromTemp);
+        document.getElementById('evap-reset').addEventListener('click', () => {
+            tempSlider.value = 300;
+            // Сбросить пар вниз
+            vaporMols.forEach(v => {
+                v.mesh.position.set(
+                    (Math.random() - 0.5) * 10,
+                    -1.5 + Math.random() * 4,
+                    (Math.random() - 0.5) * 4
+                );
+            });
+            updateFromTemp();
+        });
+
+        document.getElementById('fs-evaporation').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateFromTemp();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const speed = 0.03 + (T - 280) / 4000;
+
+            vaporMols.forEach(v => {
+                if (!v.active) return;
+                v.mesh.position.x += v.vx * speed;
+                v.mesh.position.y += v.vy * speed * 0.5;
+                v.mesh.position.z += v.vz * speed;
+
+                // Отскок от границ
+                if (Math.abs(v.mesh.position.x) > 5) v.vx *= -1;
+                if (v.mesh.position.y > 3) v.vy = -Math.abs(v.vy) * 0.5;
+                if (v.mesh.position.y < -1.8) { v.mesh.position.y = -1.5; v.vy = Math.abs(v.vy); }
+                if (Math.abs(v.mesh.position.z) > 2) v.vz *= -1;
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 2: КИПЕНИЕ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-boiling');
+        const canvas = document.getElementById('canvas-boiling');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 3, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Сосуд-стакан с водой
+        const cupGeo = new THREE.CylinderGeometry(3, 3, 5, 32, 1, true);
+        const cupMat = new THREE.MeshStandardMaterial({
+            color: 0x8ba5b8, transparent: true, opacity: 0.1,
+            side: THREE.DoubleSide
+        });
+        const cup = new THREE.Mesh(cupGeo, cupMat);
+        cup.position.y = -0.5;
+        group.add(cup);
+
+        // Вода в сосуде
+        const waterGeo = new THREE.CylinderGeometry(2.9, 2.9, 3, 32);
+        const waterMat = new THREE.MeshStandardMaterial({
+            color: 0x3388ff, transparent: true, opacity: 0.35,
+            emissive: 0x002244
+        });
+        const water = new THREE.Mesh(waterGeo, waterMat);
+        water.position.y = -2;
+        group.add(water);
+
+        // Молекулы воды в жидкости
+        const molGeo = new THREE.SphereGeometry(0.1, 8, 8);
+        const molMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x002244 });
+        const molecules = [];
+        const N = 100;
+        for (let i = 0; i < N; i++) {
+            const m = new THREE.Mesh(molGeo, molMat);
+            const r = Math.random() * 2.7;
+            const angle = Math.random() * Math.PI * 2;
+            m.position.set(
+                Math.cos(angle) * r,
+                -3.3 + Math.random() * 3,
+                Math.sin(angle) * r
+            );
+            group.add(m);
+            molecules.push({
+                mesh: m,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                vz: (Math.random() - 0.5) * 2
+            });
+        }
+
+        // Пузырьки (появляются при кипении)
+        const bubbles = [];
+        const bubbleGeo = new THREE.SphereGeometry(0.15, 10, 10);
+        const bubbleMat = new THREE.MeshStandardMaterial({
+            color: 0xffffff, emissive: 0x6688aa,
+            transparent: true, opacity: 0.6
+        });
+        for (let i = 0; i < 30; i++) {
+            const b = new THREE.Mesh(bubbleGeo, bubbleMat);
+            b.position.set(
+                (Math.random() - 0.5) * 5,
+                -3 + Math.random() * 3,
+                (Math.random() - 0.5) * 5
+            );
+            b.visible = false;
+            group.add(b);
+            bubbles.push({
+                mesh: b,
+                vy: 0.05 + Math.random() * 0.05,
+                active: false
+            });
+        }
+
+        let T = 350;
+        let P = 101;
+        const tempSlider = document.getElementById('boil-temp');
+        const pressureSlider = document.getElementById('boil-pressure');
+        const tempValue = document.getElementById('boil-temp-value');
+        const pressureValue = document.getElementById('boil-pressure-value');
+        const TDisplay = document.getElementById('boil-T');
+        const PDisplay = document.getElementById('boil-p');
+        const statusDisplay = document.getElementById('boil-status');
+
+        // Упрощённая зависимость: T_кип ≈ 373 К при P = 101 кПа
+        // Эмпирически: T_кип ≈ 373 + (P - 101) * 0.3 (в К)
+        function getBoilingTemp(P) {
+            return 373 + (P - 101) * 0.3;
+        }
+
+        function updateBoiling() {
+            T = parseFloat(tempSlider.value);
+            P = parseFloat(pressureSlider.value);
+            tempValue.textContent = T;
+            pressureValue.textContent = P;
+            TDisplay.textContent = T;
+            PDisplay.textContent = P;
+
+            const Tboil = getBoilingTemp(P);
+            const isBoiling = T >= Tboil;
+            statusDisplay.textContent = isBoiling ? 'ДА' : 'нет';
+
+            // Активировать/деактивировать пузырьки
+            bubbles.forEach((b, i) => {
+                if (isBoiling && i < 20) {
+                    b.active = true;
+                    b.mesh.visible = true;
+                    if (b.mesh.position.y > 0) {
+                        b.mesh.position.y = -3;
+                        b.mesh.position.x = (Math.random() - 0.5) * 5;
+                        b.mesh.position.z = (Math.random() - 0.5) * 5;
+                    }
+                } else {
+                    b.active = false;
+                    b.mesh.visible = false;
+                }
+            });
+
+            // Цвет воды: холодная — синяя, горячая — фиолетовая/красная
+            const tempRatio = Math.max(0, Math.min(1, (T - 280) / 170));
+            waterMat.color.setRGB(0.2 + tempRatio * 0.6, 0.4 - tempRatio * 0.2, 0.9 - tempRatio * 0.5);
+        }
+
+        tempSlider.addEventListener('input', updateBoiling);
+        pressureSlider.addEventListener('input', updateBoiling);
+        document.getElementById('boil-reset').addEventListener('click', () => {
+            tempSlider.value = 350;
+            pressureSlider.value = 101;
+            updateBoiling();
+        });
+
+        document.getElementById('fs-boiling').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateBoiling();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const speed = 0.02 + (T - 280) / 6000;
+
+            // Движение молекул в воде
+            molecules.forEach(m => {
+                m.mesh.position.x += m.vx * speed;
+                m.mesh.position.y += m.vy * speed;
+                m.mesh.position.z += m.vz * speed;
+
+                const r2 = m.mesh.position.x * m.mesh.position.x + m.mesh.position.z * m.mesh.position.z;
+                if (r2 > 7.3) {
+                    const r = Math.sqrt(r2);
+                    m.mesh.position.x = m.mesh.position.x / r * 2.7;
+                    m.mesh.position.z = m.mesh.position.z / r * 2.7;
+                    m.vx *= -1; m.vz *= -1;
+                }
+                if (m.mesh.position.y > -0.5) { m.mesh.position.y = -0.5; m.vy *= -1; }
+                if (m.mesh.position.y < -3.3) { m.mesh.position.y = -3.3; m.vy *= -1; }
+            });
+
+            // Пузырьки всплывают
+            bubbles.forEach(b => {
+                if (!b.active) return;
+                b.mesh.position.y += b.vy;
+                if (b.mesh.position.y > 0) {
+                    b.mesh.position.y = -3;
+                    b.mesh.position.x = (Math.random() - 0.5) * 5;
+                    b.mesh.position.z = (Math.random() - 0.5) * 5;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>МКТ — задачи с профессиональной направленностью</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+            --badge-welder: #ff6644;
+            --badge-electric: #ffcc00;
+            --badge-auto: #44aaff;
+            --badge-mech: #aa66ff;
+            --badge-it: #44ff88;
+            --self-border: #3b82f6;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+            --badge-welder: #dc2626;
+            --badge-electric: #ca8a04;
+            --badge-auto: #2563eb;
+            --badge-mech: #7c3aed;
+            --badge-it: #059669;
+            --self-border: #2563eb;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .intro-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:14px 16px;margin:12px 0;transition:background 0.3s;}
+        .intro-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .intro-card ul{color:var(--text);padding-left:20px;line-height:1.8;}
+        .intro-card .important{color:var(--special-border);font-weight:700;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:600000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .prof-header{display:flex;align-items:center;gap:10px;background:var(--info-bg);border-left:5px solid var(--special-border);border-radius:14px;padding:12px 16px;margin:18px 0 10px 0;}
+        .prof-header .prof-icon{font-size:1.8rem;}
+        .prof-header .prof-title{font-size:1.1rem;font-weight:700;color:var(--text);}
+        .prof-header .prof-sub{font-size:0.8rem;color:var(--text-secondary);margin-top:2px;}
+        .prof-header.welder{border-left-color:var(--badge-welder);}
+        .prof-header.electric{border-left-color:var(--badge-electric);}
+        .prof-header.auto{border-left-color:var(--badge-auto);}
+        .prof-header.mech{border-left-color:var(--badge-mech);}
+        .prof-header.it{border-left-color:var(--badge-it);}
+        .prof-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;margin-left:auto;}
+        .prof-badge.welder{background:var(--badge-welder);}
+        .prof-badge.electric{background:var(--badge-electric);}
+        .prof-badge.auto{background:var(--badge-auto);}
+        .prof-badge.mech{background:var(--badge-mech);}
+        .prof-badge.it{background:var(--badge-it);}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block.hard{border-left:5px solid #ff4444;background:linear-gradient(135deg, var(--task-bg) 0%, rgba(255,68,68,0.05) 100%);}
+        .task-block.self{border-left:5px solid var(--self-border);background:linear-gradient(135deg, var(--task-bg) 0%, rgba(59,130,246,0.06) 100%);}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .hard-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:#ff4444;margin-left:8px;vertical-align:middle;}
+        .self-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:var(--self-border);margin-left:8px;vertical-align:middle;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid var(--self-border);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:var(--self-border);}
+        .hint-box mjx-container{font-size:1rem !important;}
+        .favorite-btn{position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1000;color:var(--text-secondary);transition:all 0.2s;backdrop-filter:blur(4px);}
+        .favorite-btn:hover{transform:scale(1.1);}
+        .favorite-btn.active{color:#facc15;}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        @media(max-width:700px){
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>Основы МКТ — задачи с профессиональной направленностью</h1>
+
+    <div class="intro-card">
+        <p><strong>📌 О разделе.</strong> Задачи по теме «Основы МКТ», связанные с реальными профессиональными ситуациями.</p>
+        <p>По каждой специальности — <strong>5 задач</strong>:</p>
+        <ul>
+            <li>🔴 1 задача <strong>сложная</strong> — с подробным решением.</li>
+            <li>🟠 2 задачи <strong>обычные</strong> — с подробным решением.</li>
+            <li>🔵 2 задачи <strong>для самостоятельного решения</strong> — только условие и подсказка.</li>
+        </ul>
+        <p>Специальности:</p>
+        <ul>
+            <li>🔧 <strong>Сварщик</strong> — газы в баллонах, защитные среды.</li>
+            <li>⚡ <strong>Электрик</strong> — нагрев, охлаждение, изоляционные газы.</li>
+            <li>🚗 <strong>Автомеханик</strong> — шины, двигатель, тормоза.</li>
+            <li>⚙️ <strong>Машиностроение</strong> — пневматика, сжатый воздух.</li>
+            <li>💻 <strong>Информационные системы</strong> — охлаждение, датчики.</li>
+        </ul>
+    </div>
+
+    <!-- ===== СВАРЩИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔧 Задачи для сварщика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header welder">
+                <div class="prof-icon">🔧</div>
+                <div>
+                    <div class="prof-title">Сварочное производство</div>
+                    <div class="prof-sub">Газы в баллонах, защитные среды, давление</div>
+                </div>
+                <span class="prof-badge welder">Сварщик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Кислород в сварочном баллоне</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Сварщик использует кислородный баллон объёмом $V = 40$ л. Давление $p = 15 \cdot 10^6$ Па, температура $T = 300$ К. Найдите массу кислорода. $M = 32$ г/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V = 0{,}04$ м³, $p = 15 \cdot 10^6$ Па, $T = 300$ К, $M = 0{,}032$ кг/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('w1')">📖 Показать решение</button>
+                <div id="w1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Уравнение Менделеева–Клапейрона: $pV = \dfrac{m}{M}RT$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Выражаем массу: $m = \dfrac{pVM}{RT}$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$m = \dfrac{15 \cdot 10^6 \cdot 0{,}04 \cdot 0{,}032}{8{,}31 \cdot 300} \approx 7{,}7 \text{ кг}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В стандартном 40-литровом баллоне при давлении 150 атм содержится около 7,7 кг кислорода.</div>
+                    <div class="answer">✅ Ответ: $m \approx 7{,}7$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Нагрев баллона на солнце</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Баллон со сжатым аргоном. Утром $T_1 = 280$ К, $p_1 = 12 \cdot 10^6$ Па. К обеду $T_2 = 320$ К. Каким стало давление? $V = \text{const}$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 280$ К, $p_1 = 12 \cdot 10^6$ Па, $T_2 = 320$ К, $V = \text{const}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('w2')">📖 Показать решение</button>
+                <div id="w2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Закон Шарля: $\dfrac{p_1}{T_1} = \dfrac{p_2}{T_2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p_2 = \dfrac{12 \cdot 10^6 \cdot 320}{280} \approx 13{,}7 \cdot 10^6 \text{ Па}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Давление выросло на 14%. Баллоны нельзя оставлять на солнце — опасно!</div>
+                    <div class="answer">✅ Ответ: $p_2 \approx 13{,}7 \cdot 10^6$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Расход защитного газа <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Сварка в среде CO₂: расход $q = 15$ л/мин при н.у. ($p_0 = 10^5$ Па, $T_0 = 273$ К). Баллон $V = 40$ л, $p = 10^7$ Па, $T = 290$ К. Найдите: а) объём газа при н.у.; б) время работы баллона; в) сколько баллонов нужно на 8-часовую смену.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 15$ л/мин, $V = 40$ л, $p = 10^7$ Па, $T = 290$ К, $p_0 = 10^5$ Па, $T_0 = 273$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $V_0$, $t$, $N$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('w3')">📖 Показать решение</button>
+                <div id="w3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\dfrac{pV}{T} = \dfrac{p_0 V_0}{T_0}$ → <span class="formula">$V_0 = \dfrac{pVT_0}{Tp_0} = \dfrac{10^7 \cdot 40 \cdot 273}{290 \cdot 10^5} \approx 3765 \text{ л}$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> $t = \dfrac{V_0}{q} = \dfrac{3765}{15} \approx 251$ мин ≈ 4,2 ч.</div>
+                    <div class="step"><strong>Шаг 3.</strong> 8 ч = 480 мин. $N = \dfrac{480}{251} \approx 1{,}91$ → нужно <strong>2 баллона</strong>.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Один баллон не покроет смену, поэтому берут запасной.</div>
+                    <div class="answer">✅ Ответ: $V_0 \approx 3765$ л; $t \approx 251$ мин; нужно 2 баллона</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Давление в баллоне после заправки <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> После заправки кислородный баллон объёмом $V = 40$ л содержит $m = 8$ кг кислорода при $T = 295$ К. Какое давление показывает манометр? Молярная масса $M = 32$ г/моль.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Используйте уравнение Менделеева–Клапейрона в форме $pV = \dfrac{m}{M}RT$. Выразите $p$ и подставьте данные. Ответ должен получиться порядка $1{,}5 \cdot 10^7$ Па.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Пересчёт объёма газа к нормальным условиям <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Аргон в баллоне занимает $V = 40$ л при $p = 14 \cdot 10^6$ Па и $T = 300$ К. Какой объём займёт этот газ при нормальных условиях ($p_0 = 10^5$ Па, $T_0 = 273$ К)?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Примените объединённый газовый закон: $\dfrac{p_1 V_1}{T_1} = \dfrac{p_0 V_0}{T_0}$. Выразите $V_0$. Ответ — порядка $5000$ л.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЭЛЕКТРИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚡ Задачи для электрика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header electric">
+                <div class="prof-icon">⚡</div>
+                <div>
+                    <div class="prof-title">Электротехника</div>
+                    <div class="prof-sub">Нагрев, охлаждение, изоляционные газы</div>
+                </div>
+                <span class="prof-badge electric">Электрик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Нагрев воздуха в отсеке</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Закрытый трансформаторный отсек $V = 2$ м³. Воздух: $T_1 = 290$ К, $p_1 = 10^5$ Па. При работе нагрелся до $T_2 = 320$ К. Найдите давление.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V = 2$ м³, $T_1 = 290$ К, $p_1 = 10^5$ Па, $T_2 = 320$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('e1')">📖 Показать решение</button>
+                <div id="e1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Изохорный процесс: $\dfrac{p_1}{T_1} = \dfrac{p_2}{T_2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p_2 = \dfrac{10^5 \cdot 320}{290} \approx 1{,}1 \cdot 10^5 \text{ Па}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Давление выросло на 10%. Отсеки имеют вентиляцию.</div>
+                    <div class="answer">✅ Ответ: $p_2 \approx 1{,}1 \cdot 10^5$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Средняя скорость молекул воздуха</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Температура воздуха в шкафу $T = 310$ К. Найдите среднюю квадратичную скорость молекул воздуха ($M = 29$ г/моль).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T = 310$ К, $M = 0{,}029$ кг/моль, $R = 8{,}31$ Дж/(моль·К)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\bar{v}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('e2')">📖 Показать решение</button>
+                <div id="e2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\bar{v} = \sqrt{\dfrac{3RT}{M}}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\bar{v} = \sqrt{\dfrac{3 \cdot 8{,}31 \cdot 310}{0{,}029}} \approx 516 \text{ м/с}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Молекулы воздуха движутся со скоростью ~516 м/с — быстрее скорости звука.</div>
+                    <div class="answer">✅ Ответ: $\bar{v} \approx 516$ м/с</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Элегаз в высоковольтном выключателе <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Элегаз SF₆ ($M = 146$ г/моль) в камере $V = 5$ л, $p = 5 \cdot 10^5$ Па, $T = 300$ К. Найдите: а) массу; б) количество молекул; в) среднюю квадратичную скорость; г) сравните со скоростью молекул воздуха ($M_{возд} = 29$ г/моль).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $M = 0{,}146$, $V = 0{,}005$ м³, $p = 5 \cdot 10^5$ Па, $T = 300$ К, $M_{возд} = 0{,}029$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$, $N$, $\bar{v}_{SF_6}$, отношение</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('e3')">📖 Показать решение</button>
+                <div id="e3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> <span class="formula">$m = \dfrac{pVM}{RT} = \dfrac{5 \cdot 10^5 \cdot 0{,}005 \cdot 0{,}146}{8{,}31 \cdot 300} \approx 0{,}146 \text{ кг}$</span></div>
+                    <div class="step"><strong>Шаг 2.</strong> $\nu = \dfrac{m}{M} = 1$ моль. $N = 6{,}02 \cdot 10^{23}$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $\bar{v}_{SF_6} = \sqrt{\dfrac{3 \cdot 8{,}31 \cdot 300}{0{,}146}} \approx 226$ м/с.</div>
+                    <div class="step"><strong>Шаг 4.</strong> $\dfrac{\bar{v}_{возд}}{\bar{v}_{SF_6}} = \sqrt{\dfrac{146}{29}} \approx 2{,}24$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Тяжёлый элегаз движется медленнее, что определяет его свойства как дугогасящей среды.</div>
+                    <div class="answer">✅ Ответ: $m = 146$ г; $N = 6{,}02 \cdot 10^{23}$; $\bar{v}_{SF_6} \approx 226$ м/с; воздух быстрее в 2,24 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Концентрация молекул в кабельном канале <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> В кабельном канале воздух имеет давление $p = 10^5$ Па и температуру $T = 305$ К. Найдите концентрацию молекул воздуха.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Воспользуйтесь формулой $p = nkT$, где $k = 1{,}38 \cdot 10^{-23}$ Дж/К. Выразите $n = \dfrac{p}{kT}$. Ответ — порядка $2{,}4 \cdot 10^{25}$ м$^{-3}$.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Давление в герметичном корпусе при нагреве <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Герметичный корпус электрощита заполнен воздухом при $T_1 = 293$ К и $p_1 = 10^5$ Па. При нагреве до $T_2 = 350$ К каким стало давление?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Объём не меняется — это изохорный процесс, закон Шарля: $\dfrac{p_1}{T_1} = \dfrac{p_2}{T_2}$. Ответ должен получиться около $1{,}19 \cdot 10^5$ Па.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== АВТОМЕХАНИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🚗 Задачи для автомеханика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header auto">
+                <div class="prof-icon">🚗</div>
+                <div>
+                    <div class="prof-title">Автосервис</div>
+                    <div class="prof-sub">Шины, двигатель, тормозная система</div>
+                </div>
+                <span class="prof-badge auto">Автомеханик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Давление в шине после поездки</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Утром $T_1 = 280$ К, давление $p_1 = 220$ кПа. После поездки $T_2 = 320$ К. Найдите давление. $V = \text{const}$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 280$ К, $p_1 = 220$ кПа, $T_2 = 320$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('a1')">📖 Показать решение</button>
+                <div id="a1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Изохорный процесс: $\dfrac{p_1}{T_1} = \dfrac{p_2}{T_2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p_2 = \dfrac{220 \cdot 320}{280} \approx 251 \text{ кПа}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Давление выросло на 14%. Поэтому шины проверяют «на холодную».</div>
+                    <div class="answer">✅ Ответ: $p_2 \approx 251$ кПа</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Масса воздуха в цилиндре двигателя</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Цилиндр: $V = 0{,}5$ л, $p = 10^5$ Па, $T = 320$ К. Найдите массу воздуха ($M = 29$ г/моль).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V = 5 \cdot 10^{-4}$ м³, $p = 10^5$ Па, $T = 320$ К, $M = 0{,}029$ кг/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('a2')">📖 Показать решение</button>
+                <div id="a2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $m = \dfrac{pVM}{RT}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = \dfrac{10^5 \cdot 5 \cdot 10^{-4} \cdot 0{,}029}{8{,}31 \cdot 320} \approx 0{,}545 \text{ г}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Важно для расчёта топливной смеси: воздух : бензин ≈ 14,7 : 1.</div>
+                    <div class="answer">✅ Ответ: $m \approx 0{,}545$ г</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Полный цикл в двигателе <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Воздух сжимается от $V_1 = 0{,}5$ л до $V_2 = 0{,}05$ л. $p_1 = 10^5$ Па, $T_1 = 320$ К, $\gamma = 1{,}4$. Найдите: а) $p_{2,изот}$; б) $T_2$ и $p_{2,адиаб}$; в) отношение $p_{2,адиаб}/p_{2,изот}$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V_1 = 5 \cdot 10^{-4}$, $V_2 = 5 \cdot 10^{-5}$, $p_1 = 10^5$, $T_1 = 320$, $\gamma = 1{,}4$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p_{2,изот}$, $T_2$, $p_{2,адиаб}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('a3')">📖 Показать решение</button>
+                <div id="a3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Изотерма: $p_{2,изот} = \dfrac{10^5 \cdot 0{,}5}{0{,}05} = 10^6$ Па.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Адиабата: <span class="formula">$p_{2,адиаб} = 10^5 \cdot 10^{1{,}4} \approx 2{,}51 \cdot 10^6 \text{ Па}$</span></div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$T_2 = 320 \cdot 10^{0{,}4} \approx 803 \text{ К}$</span></div>
+                    <div class="step"><strong>Шаг 4.</strong> $\dfrac{p_{2,адиаб}}{p_{2,изот}} \approx 2{,}51$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При адиабатном сжатии воздух нагревается до ~530 °C — воспламеняется топливо в дизеле.</div>
+                    <div class="answer">✅ Ответ: $p_{2,изот} = 10^6$ Па; $p_{2,адиаб} \approx 2{,}51 \cdot 10^6$ Па; $T_2 \approx 803$ К</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Давление в тормозной системе <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> В пневматической тормозной системе воздух изотермически расширяется от $V_1 = 0{,}1$ л до $V_2 = 0{,}4$ л. Начальное давление $p_1 = 8 \cdot 10^5$ Па. Каким стало давление?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Изотермический процесс — закон Бойля–Мариотта: $p_1 V_1 = p_2 V_2$. Объём увеличился в 4 раза → давление уменьшилось в 4 раза. Ответ — $2 \cdot 10^5$ Па.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Расчёт воздуха для сгорания топлива <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Для сгорания 1 кг бензина нужно примерно 14,7 кг воздуха. Какой объём займёт эта масса воздуха при $p = 10^5$ Па и $T = 300$ К? Молярная масса воздуха $M = 29$ г/моль.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Сначала из уравнения Менделеева–Клапейрона: $V = \dfrac{mRT}{pM}$. Здесь $m = 14{,}7$ кг. Ответ — около $12{,}5$ м³.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ТЕХНОЛОГИЯ МАШИНОСТРОЕНИЯ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚙️ Задачи для технологии машиностроения (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header mech">
+                <div class="prof-icon">⚙️</div>
+                <div>
+                    <div class="prof-title">Машиностроение</div>
+                    <div class="prof-sub">Пневматика, сжатый воздух, технологические газы</div>
+                </div>
+                <span class="prof-badge mech">Машиностроение</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сжатый воздух в ресивере</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Ресивер $V = 100$ л содержит воздух при $p = 8 \cdot 10^5$ Па и $T = 300$ К. Найдите массу воздуха ($M = 29$ г/моль).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V = 0{,}1$ м³, $p = 8 \cdot 10^5$ Па, $T = 300$ К, $M = 0{,}029$ кг/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('m1')">📖 Показать решение</button>
+                <div id="m1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $m = \dfrac{pVM}{RT}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = \dfrac{8 \cdot 10^5 \cdot 0{,}1 \cdot 0{,}029}{8{,}31 \cdot 300} \approx 0{,}93 \text{ кг}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В 100-литровом ресивере при 8 атм — около 1 кг воздуха.</div>
+                    <div class="answer">✅ Ответ: $m \approx 0{,}93$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Расширение в пневмоцилиндре</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Воздух изотермически расширяется от $V_1 = 0{,}2$ л до $V_2 = 1{,}2$ л. $p_1 = 6 \cdot 10^5$ Па. Найдите конечное давление.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V_1 = 0{,}2$ л, $V_2 = 1{,}2$ л, $p_1 = 6 \cdot 10^5$ Па</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('m2')">📖 Показать решение</button>
+                <div id="m2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Закон Бойля–Мариотта: $p_1 V_1 = p_2 V_2$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p_2 = \dfrac{6 \cdot 10^5 \cdot 0{,}2}{1{,}2} = 10^5 \text{ Па}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Расширение в 6 раз → давление в 6 раз меньше.</div>
+                    <div class="answer">✅ Ответ: $p_2 = 10^5$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Пневмоцилиндр в техпроцессе <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Пневмоцилиндр $d = 50$ мм, усилие $F = 500$ Н, $T = 300$ К, ход поршня $L = 100$ мм. Найдите: а) давление; б) массу воздуха; в) количество молекул; г) во сколько раз увеличить давление для удвоения усилия.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $d = 0{,}05$ м, $F = 500$ Н, $T = 300$ К, $L = 0{,}1$ м, $M = 0{,}029$ кг/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p$, $m$, $N$, отношение</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('m3')">📖 Показать решение</button>
+                <div id="m3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $S = \dfrac{\pi d^2}{4} \approx 1{,}96 \cdot 10^{-3}$ м².</div>
+                    <div class="step"><strong>Шаг 2.</strong> $p = \dfrac{F}{S} \approx 2{,}55 \cdot 10^5$ Па.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $V = S \cdot L \approx 1{,}96 \cdot 10^{-4}$ м³.</div>
+                    <div class="step"><strong>Шаг 4.</strong> <span class="formula">$m = \dfrac{pVM}{RT} \approx 0{,}58 \text{ г}$</span></div>
+                    <div class="step"><strong>Шаг 5.</strong> $\nu = \dfrac{m}{M} \approx 0{,}02$ моль. $N \approx 1{,}2 \cdot 10^{22}$.</div>
+                    <div class="step"><strong>Шаг 6.</strong> $F = pS$ → $p_2/p_1 = 2$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Усилие пневмоцилиндра пропорционально давлению.</div>
+                    <div class="answer">✅ Ответ: $p \approx 2{,}55 \cdot 10^5$ Па; $m \approx 0{,}58$ г; $N \approx 1{,}2 \cdot 10^{22}$; в 2 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Объём воздуха для пневмоинструмента <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Пневмогайковёрт расходует 200 л/мин сжатого воздуха при давлении $6 \cdot 10^5$ Па. Какой объём займёт этот воздух при нормальных условиях ($p_0 = 10^5$ Па, $T_0 = 273$ К) за 1 час работы при $T = 290$ К?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Сначала найдите объём за час в рабочих условиях: $V = 200 \cdot 60 = 12000$ л. Затем примените объединённый газовый закон $\dfrac{pV}{T} = \dfrac{p_0 V_0}{T_0}$. Ответ — около $67$ м³.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Изменение давления при нагреве ресивера <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Ресивер пневмосистемы заполнен воздухом при $T_1 = 290$ К и $p_1 = 8 \cdot 10^5$ Па. Летом воздух нагрелся до $T_2 = 340$ К. Каким стало давление?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Объём ресивера постоянен — изохорный процесс (закон Шарля): $\dfrac{p_1}{T_1} = \dfrac{p_2}{T_2}$. Ответ — примерно $9{,}4 \cdot 10^5$ Па.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ИНФОРМАЦИОННЫЕ СИСТЕМЫ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">💻 Задачи для информационных систем (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header it">
+                <div class="prof-icon">💻</div>
+                <div>
+                    <div class="prof-title">Информационные системы</div>
+                    <div class="prof-sub">Охлаждение серверов, газовые датчики, вентиляция</div>
+                </div>
+                <span class="prof-badge it">ИС</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Охлаждение серверной</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Серверная $V = 60$ м³, воздух при $T_1 = 295$ К и $p_1 = 10^5$ Па. При отказе кондиционера воздух нагрелся до $T_2 = 315$ К. Найдите давление.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V = 60$ м³, $T_1 = 295$ К, $p_1 = 10^5$ Па, $T_2 = 315$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('i1')">📖 Показать решение</button>
+                <div id="i1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Изохорный процесс: $\dfrac{p_1}{T_1} = \dfrac{p_2}{T_2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p_2 = \dfrac{10^5 \cdot 315}{295} \approx 1{,}068 \cdot 10^5 \text{ Па}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Давление выросло на 6,8%. Но критична именно температура: при 42 °C оборудование может выйти из строя.</div>
+                    <div class="answer">✅ Ответ: $p_2 \approx 1{,}068 \cdot 10^5$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Газовый датчик утечки</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Датчик аммиака срабатывает при $n = 5 \cdot 10^{21}$ м$^{-3}$ при $T = 300$ К. Найдите давление срабатывания.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $n = 5 \cdot 10^{21}$ м$^{-3}$, $T = 300$ К, $k = 1{,}38 \cdot 10^{-23}$ Дж/К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('i2')">📖 Показать решение</button>
+                <div id="i2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $p = nkT$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p = 5 \cdot 10^{21} \cdot 1{,}38 \cdot 10^{-23} \cdot 300 = 20{,}7 \text{ Па}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Датчик сработает при очень малой концентрации — аммиак опасен даже в малых дозах.</div>
+                    <div class="answer">✅ Ответ: $p \approx 20{,}7$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Система охлаждения дата-центра <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Дата-центр выделяет $P = 100$ кВт. Допустимый нагрев воздуха $\Delta T = 10$ К. $c = 1005$ Дж/(кг·К). Найдите: а) массу воздуха в час; б) объём при н.у.; в) объём при $T = 300$ К. $p_0 = 10^5$ Па, $T_0 = 273$ К, $M = 29$ г/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $P = 10^5$ Вт, $\Delta T = 10$ К, $c = 1005$ Дж/(кг·К), $p_0 = 10^5$ Па, $T_0 = 273$ К, $T = 300$ К, $M = 0{,}029$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$, $V_0$, $V$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('i3')">📖 Показать решение</button>
+                <div id="i3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q = Pt = 10^5 \cdot 3600 = 3{,}6 \cdot 10^8$ Дж.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = \dfrac{Q}{c\Delta T} \approx 35821 \text{ кг} \approx 35{,}8 \text{ т}$</span></div>
+                    <div class="step"><strong>Шаг 3.</strong> $\nu = \dfrac{m}{M} \approx 1{,}24 \cdot 10^6$ моль. $V_0 = \nu \cdot 22{,}4 \approx 27800$ м³.</div>
+                    <div class="step"><strong>Шаг 4.</strong> <span class="formula">$V = \dfrac{V_0 T}{T_0} = \dfrac{27800 \cdot 300}{273} \approx 30550 \text{ м}^3$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Для отвода 100 кВт нужно прогонять ~30 500 м³ воздуха в час — это основа проектирования вентиляции дата-центров.</div>
+                    <div class="answer">✅ Ответ: $m \approx 35{,}8$ т/ч; $V_0 \approx 27800$ м³; $V \approx 30550$ м³</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Расчёт вентиляции серверной <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Серверная выделяет 20 кВт тепла. Нагрев воздуха допустим на $\Delta T = 8$ К. Удельная теплоёмкость воздуха $c = 1005$ Дж/(кг·К). Какую массу воздуха нужно прогонять через серверную за 1 час?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $Q = Pt = 20000 \cdot 3600 = 7{,}2 \cdot 10^7$ Дж. Далее $m = \dfrac{Q}{c \Delta T}$. Ответ — около $8{,}96$ т/ч.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Давление в герметичном корпусе сервера <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Герметичный корпус сервера заполнен сухим воздухом при $T_1 = 300$ К и $p_1 = 10^5$ Па. После работы сервер нагрелся до $T_2 = 330$ К. Каким стало давление внутри корпуса?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Объём герметичного корпуса постоянен — изохорный процесс (закон Шарля): $\dfrac{p_1}{T_1} = \dfrac{p_2}{T_2}$. Ответ — $1{,}1 \cdot 10^5$ Па.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+</script>
+</body>
+</html>
