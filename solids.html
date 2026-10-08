@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Свойства твёрдых тел. Упругие свойства. Закон Гука</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
+        .theme-toggle:hover{transform:scale(1.1);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .favorite-btn{position:fixed;bottom:20px;left:20px;width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1000;color:var(--text-secondary);transition:all 0.2s;backdrop-filter:blur(4px);}
+        .favorite-btn:hover{transform:scale(1.1);}
+        .favorite-btn.active{color:#facc15;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <h1>Свойства твёрдых тел. Упругие свойства.<br>Закон Гука</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Строение и свойства твёрдых тел</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Твёрдое тело</strong> — агрегатное состояние вещества, которое сохраняет и форму, и объём. Молекулы (атомы, ионы) расположены в строгом порядке и колеблются около своих положений равновесия.</p>
+                <p><strong>Кристаллические тела</strong> — имеют строго упорядоченное расположение частиц (кристаллическую решётку). Примеры: металлы, поваренная соль NaCl, кварц, алмаз, лёд.</p>
+                <p><strong>Свойства кристаллов:</strong></p>
+                <ul>
+                    <li><span class="important">Дальний порядок</span> — упорядоченность сохраняется на больших расстояниях.</li>
+                    <li><span class="important">Анизотропия</span> — физические свойства зависят от направления (например, прочность, теплопроводность, оптические свойства).</li>
+                    <li>Имеют определённую <span class="important">температуру плавления</span>.</li>
+                </ul>
+                <p><strong>Аморфные тела</strong> — не имеют строгого порядка в расположении частиц. Примеры: стекло, смола, янтарь, пластик.</p>
+                <p><strong>Свойства аморфных тел:</strong></p>
+                <ul>
+                    <li>Изотропны (свойства одинаковы по всем направлениям).</li>
+                    <li>Не имеют определённой температуры плавления — при нагреве постепенно размягчаются.</li>
+                    <li>Занимают промежуточное положение между твёрдыми телами и жидкостями.</li>
+                </ul>
+                <p><strong>Поликристаллы</strong> — тела, состоящие из множества мелких кристаллов (зёрен), ориентированных случайно. Примеры: чугун, сталь, керамика. В целом изотропны, потому что анизотропия отдельных зёрен усредняется.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Деформация и её виды</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Деформация</strong> — изменение формы или объёма тела под действием внешних сил.</p>
+                <p><strong>Виды деформации:</strong></p>
+                <ul>
+                    <li><span class="important">Растяжение / сжатие</span> — тело удлиняется или укорачивается вдоль одной оси.</li>
+                    <li><span class="important">Сдвиг</span> — параллельные слои тела смещаются друг относительно друга.</li>
+                    <li><span class="important">Кручение</span> — один конец тела поворачивается относительно другого.</li>
+                    <li><span class="important">Изгиб</span> — тело изгибается под действием сил.</li>
+                </ul>
+                <p><strong>Упругая деформация</strong> — после снятия нагрузки тело полностью восстанавливает форму и объём.</p>
+                <p><strong>Пластическая деформация</strong> — после снятия нагрузки тело не восстанавливает форму (остаётся деформированным).</p>
+                <p><strong>Механическое напряжение</strong> $\sigma$ — отношение силы упругости к площади поперечного сечения:</p>
+                <div class="formula-block">
+                    <span class="f">$\sigma = \dfrac{F}{S}$</span>
+                    <span class="f-label">— механическое напряжение (Па)</span>
+                </div>
+                <p>где $F$ — сила упругости (Н), $S$ — площадь сечения (м²).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Закон Гука</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Закон Гука:</strong> при малых упругих деформациях сила упругости прямо пропорциональна удлинению (деформации) тела и направлена противоположно смещению частиц.</p>
+                <div class="formula-block">
+                    <span class="f">$F_{упр} = -k \cdot \Delta x$</span>
+                    <span class="f-label">— закон Гука</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$F_{упр}$ — сила упругости (Н);</li>
+                    <li>$k$ — жёсткость тела (Н/м);</li>
+                    <li>$\Delta x$ — удлинение (деформация), м;</li>
+                    <li>знак «минус» означает, что сила упругости направлена против деформации.</li>
+                </ul>
+
+                <p>Для механического напряжения закон Гука записывается так:</p>
+                <div class="formula-block">
+                    <span class="f">$\sigma = E \cdot \varepsilon$</span>
+                    <span class="f-label">— закон Гука через напряжение</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$\sigma$ — напряжение (Па);</li>
+                    <li>$E$ — модуль Юнга (Па) — характеризует упругие свойства материала;</li>
+                    <li>$\varepsilon = \dfrac{\Delta x}{l_0}$ — относительное удлинение.</li>
+                </ul>
+
+                <p><strong>Жёсткость</strong> зависит от материала и размеров тела:</p>
+                <div class="formula-block">
+                    <span class="f">$k = \dfrac{ES}{l_0}$</span>
+                    <span class="f-label">— жёсткость стержня</span>
+                </div>
+                <p>где $E$ — модуль Юнга, $S$ — площадь сечения, $l_0$ — начальная длина.</p>
+
+                <p><strong>Диаграмма растяжения:</strong> при малых деформациях выполняется закон Гука (линейный участок). Затем материал переходит в область пластической деформации, затем — в область разрушения.</p>
+
+                <p><strong>Границы применимости закона Гука:</strong> только при малых упругих деформациях (для металлов — примерно до 0,1% удлинения).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="lattice" onclick="switchModel('lattice')">💎 Кристаллическая решётка</div>
+                <div class="model-tab" data-model="hooke" onclick="switchModel('hooke')">📏 Закон Гука</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: КРИСТАЛЛИЧЕСКАЯ РЕШЁТКА -->
+            <div id="model-lattice" class="model-content">
+                <div class="model-container" id="container-lattice">
+                    <canvas id="canvas-lattice" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-lattice">⛶</button>
+                    <div class="info-display">
+                        <div>Тип: <span class="val" id="lat-type">кристалл</span></div>
+                        <div>Порядок: <span class="val" id="lat-order">дальний</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <button class="btn-reset" id="lat-toggle">🔄 Переключить: кристалл / аморфное</button>
+                    <span class="control-label">⬤ Кристалл — строгий порядок, аморфное — частицы расположены беспорядочно</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель кристаллической решётки.</strong> Атомы (шарики) колеблются около своих положений равновесия.</p>
+                    <p><span class="important">Кристаллическое тело:</span> атомы расположены в узлах кубической решётки — <strong>дальний порядок</strong>.</p>
+                    <p><span class="important">Аморфное тело:</span> атомы расположены беспорядочно — <strong>нет дальнего порядка</strong>.</p>
+                    <p>Переключите кнопку — увидите разницу между кристаллом и аморфным телом.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: ЗАКОН ГУКА -->
+            <div id="model-hooke" class="model-content" style="display:none;">
+                <div class="model-container" id="container-hooke">
+                    <canvas id="canvas-hooke" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-hooke">⛶</button>
+                    <div class="info-display">
+                        <div>$F$ = <span class="val" id="hooke-force">0.0</span> Н</div>
+                        <div>$\Delta x$ = <span class="val" id="hooke-stretch">0.00</span> м</div>
+                        <div>$k$ = <span class="val" id="hooke-k">100</span> Н/м</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Сила $F$ (Н)</label>
+                        <input type="range" id="hooke-force-slider" min="0" max="50" step="1" value="10">
+                        <span class="control-value" id="hooke-force-value">10</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$k$ (Н/м)</label>
+                        <input type="range" id="hooke-k-slider" min="20" max="200" step="5" value="100">
+                        <span class="control-value" id="hooke-k-value">100</span>
+                    </div>
+                    <button class="btn-reset" id="hooke-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ $\Delta x = F / k$ — чем жёстче пружина, тем меньше растяжение</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель закона Гука.</strong> Пружина растягивается под действием силы $F$.</p>
+                    <p><span class="important">Закон Гука:</span> $F_{упр} = k \cdot \Delta x$. Сила упругости пропорциональна удлинению.</p>
+                    <p>Меняйте <strong>силу</strong> — пружина растягивается сильнее. Меняйте <strong>жёсткость $k$</strong> — при той же силе растяжение будет другим: чем больше $k$, тем короче растяжение.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сила упругости по закону Гука</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружина жёсткостью $k = 200$ Н/м растянута на $\Delta x = 0{,}05$ м. Найдите силу упругости.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 200$ Н/м, $\Delta x = 0{,}05$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_{упр}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $F_{упр} = k \cdot \Delta x$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F_{упр} = 200 \cdot 0{,}05 = 10 \text{ Н}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сила упругости направлена против растяжения, её модуль равен 10 Н.</div>
+                    <div class="answer">✅ Ответ: $F_{упр} = 10$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Жёсткость пружины</div>
+                <div class="task-condition"><strong>Условие:</strong> Под действием силы $F = 30$ Н пружина растянулась на $\Delta x = 0{,}15$ м. Найдите жёсткость.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $F = 30$ Н, $\Delta x = 0{,}15$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $k$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $F = k\Delta x$ выражаем $k = \dfrac{F}{\Delta x}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$k = \dfrac{30}{0{,}15} = 200 \text{ Н/м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Жёсткость 200 Н/м — типичная для лабораторной пружины.</div>
+                    <div class="answer">✅ Ответ: $k = 200$ Н/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Удлинение пружины</div>
+                <div class="task-condition"><strong>Условие:</strong> К пружине жёсткостью $k = 150$ Н/м подвесили груз массой $m = 3$ кг. Найдите удлинение. $g = 9{,}8$ м/с².</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 150$ Н/м, $m = 3$ кг, $g = 9{,}8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Сила тяжести: $F = mg = 3 \cdot 9{,}8 = 29{,}4$ Н.</div>
+                    <div class="step"><strong>Шаг 2.</strong> В равновесии сила упругости равна силе тяжести: $k\Delta x = mg$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$\Delta x = \dfrac{mg}{k} = \dfrac{29{,}4}{150} = 0{,}196 \text{ м} \approx 19{,}6 \text{ см}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Чем больше масса груза и меньше жёсткость — тем сильнее растянется пружина.</div>
+                    <div class="answer">✅ Ответ: $\Delta x \approx 19{,}6$ см</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Механическое напряжение</div>
+                <div class="task-condition"><strong>Условие:</strong> К стержню с площадью поперечного сечения $S = 2 \cdot 10^{-4}$ м² приложена сила $F = 500$ Н. Найдите напряжение.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $S = 2 \cdot 10^{-4}$ м², $F = 500$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\sigma$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $\sigma = \dfrac{F}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\sigma = \dfrac{500}{2 \cdot 10^{-4}} = 2{,}5 \cdot 10^6 \text{ Па} = 2{,}5 \text{ МПа}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Напряжение 2,5 МПа — умеренное для стали (предел прочности стали ~400 МПа).</div>
+                    <div class="answer">✅ Ответ: $\sigma = 2{,}5$ МПа</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Модуль Юнга</div>
+                <div class="task-condition"><strong>Условие:</strong> Стержень длиной $l_0 = 2$ м и площадью $S = 10^{-4}$ м² растянули на $\Delta x = 1$ мм силой $F = 2000$ Н. Найдите модуль Юнга материала.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 2$ м, $S = 10^{-4}$ м², $\Delta x = 10^{-3}$ м, $F = 2000$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из закона Гука: $E = \dfrac{F \cdot l_0}{S \cdot \Delta x}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = \dfrac{2000 \cdot 2}{10^{-4} \cdot 10^{-3}} = \dfrac{4000}{10^{-7}} = 4 \cdot 10^{10} \text{ Па} = 40 \text{ ГПа}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Модуль Юнга ~40 ГПа. Это близко к алюминию (~70 ГПа) — материал достаточно жёсткий.</div>
+                    <div class="answer">✅ Ответ: $E = 40$ ГПа</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Абсолютное удлинение</div>
+                <div class="task-condition"><strong>Условие:</strong> Проволока длиной $l_0 = 5$ м растянулась на 0,2%. Найдите абсолютное удлинение.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 5$ м, $\varepsilon = 0{,}2\% = 0{,}002$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\varepsilon = \dfrac{\Delta x}{l_0}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\Delta x = \varepsilon \cdot l_0 = 0{,}002 \cdot 5 = 0{,}01 \text{ м} = 1 \text{ см}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Относительное удлинение 0,2% — в пределах применимости закона Гука для стали.</div>
+                    <div class="answer">✅ Ответ: $\Delta x = 1$ см</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Жёсткость через модуль Юнга</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите жёсткость стержня длиной $l_0 = 1{,}5$ м, площадью $S = 4 \cdot 10^{-4}$ м², если модуль Юнга $E = 2 \cdot 10^{11}$ Па.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 1{,}5$ м, $S = 4 \cdot 10^{-4}$ м², $E = 2 \cdot 10^{11}$ Па</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $k$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $k = \dfrac{ES}{l_0}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$k = \dfrac{2 \cdot 10^{11} \cdot 4 \cdot 10^{-4}}{1{,}5} = \dfrac{8 \cdot 10^7}{1{,}5} \approx 5{,}3 \cdot 10^7 \text{ Н/м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Жёсткость стержня огромна — миллионы Н/м. Именно поэтому стальные конструкции почти не деформируются под обычными нагрузками.</div>
+                    <div class="answer">✅ Ответ: $k \approx 5{,}3 \cdot 10^7$ Н/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Две пружины последовательно</div>
+                <div class="task-condition"><strong>Условие:</strong> Две пружины с жёсткостью $k_1 = 100$ Н/м и $k_2 = 150$ Н/м соединены последовательно. Найдите общую жёсткость.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k_1 = 100$ Н/м, $k_2 = 150$ Н/м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $k_{общ}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> При последовательном соединении: $\dfrac{1}{k_{общ}} = \dfrac{1}{k_1} + \dfrac{1}{k_2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $\dfrac{1}{k_{общ}} = \dfrac{1}{100} + \dfrac{1}{150} = \dfrac{3 + 2}{300} = \dfrac{5}{300}$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$k_{общ} = \dfrac{300}{5} = 60 \text{ Н/м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При последовательном соединении общая жёсткость меньше каждой из пружин — система становится мягче.</div>
+                    <div class="answer">✅ Ответ: $k_{общ} = 60$ Н/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Две пружины параллельно</div>
+                <div class="task-condition"><strong>Условие:</strong> Две пружины с жёсткостью $k_1 = 100$ Н/м и $k_2 = 150$ Н/м соединены параллельно. Найдите общую жёсткость.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k_1 = 100$ Н/м, $k_2 = 150$ Н/м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $k_{общ}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> При параллельном соединении: $k_{общ} = k_1 + k_2$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$k_{общ} = 100 + 150 = 250 \text{ Н/м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При параллельном соединении общая жёсткость больше каждой — система становится жёстче.</div>
+                    <div class="answer">✅ Ответ: $k_{общ} = 250$ Н/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Предел применимости закона Гука</div>
+                <div class="task-condition"><strong>Условие:</strong> Проволока длиной $l_0 = 1$ м и площадью $S = 5 \cdot 10^{-5}$ м² имеет модуль Юнга $E = 2 \cdot 10^{11}$ Па. Предел пропорциональности $\sigma_{пр} = 200$ МПа. Какую максимальную силу можно приложить, чтобы закон Гука ещё выполнялся?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 1$ м, $S = 5 \cdot 10^{-5}$ м², $E = 2 \cdot 10^{11}$ Па, $\sigma_{пр} = 2 \cdot 10^8$ Па</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_{max}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Условие применимости: $\sigma \leq \sigma_{пр}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Из $\sigma = \dfrac{F}{S}$: $F \leq \sigma_{пр} \cdot S$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$F_{max} = 2 \cdot 10^8 \cdot 5 \cdot 10^{-5} = 10^4 \text{ Н} = 10 \text{ кН}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Если приложить большую силу, начнётся пластическая деформация, и закон Гука перестанет работать.</div>
+                    <div class="answer">✅ Ответ: $F_{max} = 10$ кН</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-lattice').style.display = model === 'lattice' ? 'block' : 'none';
+        document.getElementById('model-hooke').style.display = model === 'hooke' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- ===== МОДЕЛЬ 1: КРИСТАЛЛИЧЕСКАЯ РЕШЁТКА ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-lattice');
+        const canvas = document.getElementById('canvas-lattice');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(5, 4, 7);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Параметры решётки
+        const GRID = 4;
+        const SPACING = 0.85;
+        const ATOM_R = 0.2;
+        const TOTAL = GRID * GRID * GRID;
+
+        const atomGeo = new THREE.SphereGeometry(ATOM_R, 14, 14);
+        const atomMat = new THREE.MeshStandardMaterial({
+            color: 0x66ccff, emissive: 0x224466, roughness: 0.35, metalness: 0.2
+        });
+
+        // Позиции атомов: кристалл (кубическая решётка)
+        const crystalPositions = [];
+        // Позиции атомов: аморфное (случайные)
+        const amorphousPositions = [];
+
+        const offset = (GRID - 1) * SPACING / 2;
+        for (let x = 0; x < GRID; x++) {
+            for (let y = 0; y < GRID; y++) {
+                for (let z = 0; z < GRID; z++) {
+                    crystalPositions.push(new THREE.Vector3(
+                        x * SPACING - offset,
+                        y * SPACING - offset,
+                        z * SPACING - offset
+                    ));
+                    // Аморфное — случайное смещение
+                    amorphousPositions.push(new THREE.Vector3(
+                        (Math.random() - 0.5) * (GRID * SPACING * 0.9),
+                        (Math.random() - 0.5) * (GRID * SPACING * 0.9),
+                        (Math.random() - 0.5) * (GRID * SPACING * 0.9)
+                    ));
+                }
+            }
+        }
+
+        // Создаём атомы
+        const atoms = [];
+        for (let i = 0; i < TOTAL; i++) {
+            const m = new THREE.Mesh(atomGeo, atomMat);
+            m.position.copy(crystalPositions[i]);
+            group.add(m);
+            atoms.push({
+                mesh: m,
+                homePos: crystalPositions[i].clone(),
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+
+        // Рёбра решётки — показывают кристаллическую структуру
+        const edgesGroup = new THREE.Group();
+        group.add(edgesGroup);
+
+        function buildEdges() {
+            while (edgesGroup.children.length) {
+                const c = edgesGroup.children[0];
+                edgesGroup.remove(c);
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) c.material.dispose();
+            }
+            const lineMat = new THREE.LineBasicMaterial({
+                color: 0x88ddff, transparent: true, opacity: 0.2
+            });
+            for (let x = 0; x < GRID; x++) {
+                for (let y = 0; y < GRID; y++) {
+                    for (let z = 0; z < GRID; z++) {
+                        const p = crystalPositions[x * GRID * GRID + y * GRID + z];
+                        if (x < GRID - 1) {
+                            const q = crystalPositions[(x + 1) * GRID * GRID + y * GRID + z];
+                            const geo = new THREE.BufferGeometry().setFromPoints([p, q]);
+                            edgesGroup.add(new THREE.Line(geo, lineMat));
+                        }
+                        if (y < GRID - 1) {
+                            const q = crystalPositions[x * GRID * GRID + (y + 1) * GRID + z];
+                            const geo = new THREE.BufferGeometry().setFromPoints([p, q]);
+                            edgesGroup.add(new THREE.Line(geo, lineMat));
+                        }
+                        if (z < GRID - 1) {
+                            const q = crystalPositions[x * GRID * GRID + y * GRID + (z + 1)];
+                            const geo = new THREE.BufferGeometry().setFromPoints([p, q]);
+                            edgesGroup.add(new THREE.Line(geo, lineMat));
+                        }
+                    }
+                }
+            }
+        }
+
+        let isCrystal = true;
+        const toggleBtn = document.getElementById('lat-toggle');
+        const typeDisplay = document.getElementById('lat-type');
+        const orderDisplay = document.getElementById('lat-order');
+
+        function setMode(crystal) {
+            isCrystal = crystal;
+            atoms.forEach((a, i) => {
+                a.homePos.copy(crystal ? crystalPositions[i] : amorphousPositions[i]);
+            });
+            edgesGroup.visible = crystal;
+
+            if (crystal) {
+                typeDisplay.textContent = 'кристалл';
+                orderDisplay.textContent = 'дальний';
+                toggleBtn.textContent = '🔄 Переключить: кристалл / аморфное';
+            } else {
+                typeDisplay.textContent = 'аморфное';
+                orderDisplay.textContent = 'нет';
+                toggleBtn.textContent = '🔄 Переключить: аморфное / кристалл';
+            }
+        }
+
+        toggleBtn.addEventListener('click', () => setMode(!isCrystal));
+
+        document.getElementById('fs-lattice').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        buildEdges();
+        setMode(true);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Колебания атомов около положений равновесия
+            const t = Date.now() * 0.003;
+            atoms.forEach(a => {
+                const jitter = 0.05;
+                a.mesh.position.x = a.homePos.x + Math.sin(t + a.phase) * jitter;
+                a.mesh.position.y = a.homePos.y + Math.cos(t * 1.3 + a.phase) * jitter;
+                a.mesh.position.z = a.homePos.z + Math.sin(t * 0.8 + a.phase) * jitter;
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 2: ЗАКОН ГУКА ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-hooke');
+        const canvas = document.getElementById('canvas-hooke');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 2, 10);
+        camera.lookAt(0, 1, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Потолок (точка подвеса)
+        const ceiling = new THREE.Mesh(
+            new THREE.BoxGeometry(4, 0.15, 2),
+            new THREE.MeshStandardMaterial({ color: 0x8ba5b8, transparent: true, opacity: 0.5 })
+        );
+        ceiling.position.set(0, 3.5, 0);
+        group.add(ceiling);
+
+        // Пружина
+        const SPRING_TOP = 3.4;
+        const SPRING_REST = 2.0;
+        const SPRING_R = 0.35;
+
+        let springGroup = new THREE.Group();
+        group.add(springGroup);
+
+        function buildSpring(stretch) {
+            while (springGroup.children.length) {
+                const c = springGroup.children[0];
+                springGroup.remove(c);
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) c.material.dispose();
+            }
+
+            const length = SPRING_REST + stretch;
+            const coils = 12;
+            const pts = [];
+            const steps = coils * 20;
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const y = SPRING_TOP - t * length;
+                const angle = t * coils * 2 * Math.PI;
+                pts.push(new THREE.Vector3(
+                    Math.cos(angle) * SPRING_R,
+                    y,
+                    Math.sin(angle) * SPRING_R
+                ));
+            }
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const mat = new THREE.LineBasicMaterial({ color: 0xffaa00, linewidth: 2 });
+            const spring = new THREE.Line(geo, mat);
+            springGroup.add(spring);
+        }
+
+        // Груз
+        const loadMat = new THREE.MeshStandardMaterial({
+            color: 0xff6644, emissive: 0x441100, roughness: 0.4, metalness: 0.3
+        });
+        const load = new THREE.Mesh(
+            new THREE.BoxGeometry(1.2, 1.2, 1.2),
+            loadMat
+        );
+        group.add(load);
+
+        // Стрелка силы (вниз)
+        const forceArrowMat = new THREE.LineBasicMaterial({ color: 0xff4444 });
+        const forceArrow = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(1.5, 0, 0),
+                new THREE.Vector3(1.5, 0, 0)
+            ]),
+            forceArrowMat
+        );
+        group.add(forceArrow);
+
+        let forceVal = 10;
+        let kVal = 100;
+
+        const forceSlider = document.getElementById('hooke-force-slider');
+        const kSlider = document.getElementById('hooke-k-slider');
+        const forceValue = document.getElementById('hooke-force-value');
+        const kValue = document.getElementById('hooke-k-value');
+        const forceDisplay = document.getElementById('hooke-force');
+        const stretchDisplay = document.getElementById('hooke-stretch');
+        const kDisplay = document.getElementById('hooke-k');
+
+        function update() {
+            forceVal = parseFloat(forceSlider.value);
+            kVal = parseFloat(kSlider.value);
+            forceValue.textContent = forceVal;
+            kValue.textContent = kVal;
+            forceDisplay.textContent = forceVal.toFixed(1);
+            kDisplay.textContent = kVal;
+
+            // Δx = F / k, масштабируем для визуализации (÷10)
+            const stretchReal = forceVal / kVal;
+            const stretchVisual = Math.min(stretchReal * 5, 2.5); // визуально
+
+            stretchDisplay.textContent = stretchReal.toFixed(3);
+
+            buildSpring(stretchVisual);
+
+            // Груз внизу пружины
+            const loadY = SPRING_TOP - SPRING_REST - stretchVisual - 0.6;
+            load.position.set(0, loadY, 0);
+
+            // Обновить стрелку силы
+            forceArrow.geometry.dispose();
+            const arrowLen = Math.min(forceVal * 0.04, 1.5);
+            forceArrow.geometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(1.5, loadY + 0.6, 0),
+                new THREE.Vector3(1.5, loadY + 0.6 - arrowLen, 0)
+            ]);
+
+            // Подпись F
+            if (window.forceLabel) group.remove(window.forceLabel);
+        }
+
+        forceSlider.addEventListener('input', update);
+        kSlider.addEventListener('input', update);
+        document.getElementById('hooke-reset').addEventListener('click', () => {
+            forceSlider.value = 10;
+            kSlider.value = 100;
+            update();
+        });
+
+        document.getElementById('fs-hooke').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 1, 0);
+        controls.update();
+
+        update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</body>
+</html>

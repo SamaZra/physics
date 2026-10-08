@@ -325,6 +325,20 @@
         }
         .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
 
+        .hint-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+        .hint-btn:hover { transform: scale(1.03); opacity: 0.9; }
+
         .task-solution {
             display: none;
             margin-top: 12px;
@@ -673,8 +687,10 @@
 
     <!-- ===== ЗАДАЧИ (15 ШТУК) ===== -->
     <div class="section collapsed">
-        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением</div>
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи (15 задач)</div>
         <div class="section-content">
+
+            <div style="margin:12px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Простые задачи</div>
 
             <!-- Задача 1 (простая) -->
             <div class="task-block">
@@ -685,11 +701,17 @@
                     <div class="find"><strong>🔍 Найти:</strong> $F_{тяж}$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint1')">💡 Подсказка</button>
+                <div id="hint1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Используй формулу силы тяжести $F_{тяж} = mg$. Умножь массу на ускорение свободного падения.</div>
+                        <div class="answer">✅ Ответ: $F_{тяж} = 49$ Н</div>
+                    </div>
+                </div>
                 <div id="sol1" class="task-solution">
                     <div class="step">
-                        <div class="explanation">Сила тяжести вычисляется по формуле: $F_{тяж} = mg$, где $m$ — масса тела, $g$ — ускорение свободного падения.</div>
+                        <div class="explanation">Сила тяжести вычисляется по формуле: $F_{тяж} = mg$.</div>
                         <span class="formula">$F_{тяж} = 5 \cdot 9.8 = 49 \text{ Н}$</span>
-                        <div class="explanation">Подставляем числовые значения: $5 \cdot 9.8 = 49$. Получаем силу тяжести 49 Ньютонов.</div>
                     </div>
                     <div class="answer">✅ Ответ: $F_{тяж} = 49$ Н</div>
                 </div>
@@ -704,406 +726,418 @@
                     <div class="find"><strong>🔍 Найти:</strong> $m$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint2')">💡 Подсказка</button>
+                <div id="hint2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Из формулы $F_{тяж} = mg$ вырази массу: $m = \frac{F_{тяж}}{g}$. Раздели силу тяжести на $g$.</div>
+                        <div class="answer">✅ Ответ: $m = 8$ кг</div>
+                    </div>
+                </div>
                 <div id="sol2" class="task-solution">
                     <div class="step">
                         <div class="explanation">Из формулы силы тяжести $F_{тяж} = mg$ выражаем массу: $m = \frac{F_{тяж}}{g}$.</div>
                         <span class="formula">$m = \frac{78.4}{9.8} = 8 \text{ кг}$</span>
-                        <div class="explanation">Делим силу тяжести на ускорение свободного падения: $78.4 / 9.8 = 8$. Получаем массу тела 8 кг.</div>
                     </div>
                     <div class="answer">✅ Ответ: $m = 8$ кг</div>
                 </div>
             </div>
 
-            <!-- Задача 3 (средняя сложность) -->
+            <!-- Задача 3 (простая) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 3. Ускорение тела с трением</div>
-                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг тянут по горизонтальной поверхности с силой $F = 20$ Н. Коэффициент трения между телом и поверхностью $\mu = 0.15$. Найдите ускорение тела. Сопротивлением воздуха пренебречь. ($g = 9.8$ м/с²).</div>
+                <div class="task-title">📘 Задача 3. Второй закон Ньютона</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело массой $m = 4$ кг действует сила $F = 20$ Н. Найдите ускорение тела.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint3')">💡 Подсказка</button>
+                <div id="hint3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Второй закон Ньютона: $F = ma$, откуда $a = \frac{F}{m}$. Раздели силу на массу.</div>
+                        <div class="answer">✅ Ответ: $a = 5$ м/с²</div>
+                    </div>
+                </div>
+                <div id="sol3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation">По второму закону Ньютона $\vec{F} = m\vec{a}$, значит $a = \frac{F}{m}$.</div>
+                        <span class="formula">$a = \frac{20}{4} = 5 \text{ м/с}^2$</span>
+                    </div>
+                    <div class="answer">✅ Ответ: $a = 5$ м/с²</div>
+                </div>
+            </div>
+
+            <div style="margin:20px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Задачи чуть сложнее</div>
+
+            <!-- Задача 4 (средняя) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Ускорение тела с трением</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг тянут по горизонтальной поверхности с силой $F = 20$ Н. Коэффициент трения $\mu = 0.15$. Найдите ускорение тела. ($g = 9.8$ м/с²).</div>
                 <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н, $\mu = 0.15$, $g = 9.8$ м/с²</div>
                     <div class="find"><strong>🔍 Найти:</strong> $a$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
-                <div id="sol3" class="task-solution">
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint4')">💡 Подсказка</button>
+                <div id="hint4" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Находим силу нормальной реакции опоры. На горизонтальной поверхности $N = mg$.</div>
+                        <div class="explanation"><strong>Как решать:</strong> Сначала найди силу трения $F_{тр} = \mu N = \mu mg$. Потом равнодействующую $F_{рез} = F - F_{тр}$. Ускорение $a = \frac{F_{рез}}{m}$.</div>
+                        <div class="answer">✅ Ответ: $a = 3.53$ м/с²</div>
+                    </div>
+                </div>
+                <div id="sol4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> На горизонтальной поверхности $N = mg$.</div>
                         <span class="formula">$N = 4 \cdot 9.8 = 39.2 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Находим силу трения по формуле $F_{тр} = \mu N$.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> Сила трения: $F_{тр} = \mu N$.</div>
                         <span class="formula">$F_{тр} = 0.15 \cdot 39.2 = 5.88 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> Находим равнодействующую силу: $F_{рез} = F - F_{тр}$.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> Равнодействующая: $F_{рез} = F - F_{тр}$.</div>
                         <span class="formula">$F_{рез} = 20 - 5.88 = 14.12 \text{ Н}$</span>
                     </div>
                     <div class="step">
                         <div class="explanation"><strong>Шаг 4.</strong> По второму закону Ньютона $a = \frac{F_{рез}}{m}$.</div>
                         <span class="formula">$a = \frac{14.12}{4} = 3.53 \text{ м/с}^2$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> Тело разгоняется, так как сила тяги больше силы трения. Ускорение направлено в сторону движения.</div>
                     </div>
                     <div class="answer">✅ Ответ: $a = 3.53$ м/с²</div>
                 </div>
             </div>
 
-            <!-- Задача 4 (средняя сложность) -->
+            <!-- Задача 5 (средняя) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 4. Сила упругости пружины</div>
-                <div class="task-condition"><strong>Условие:</strong> Пружина жёсткостью $k = 150$ Н/м растягивается под действием силы $F = 30$ Н. Затем к пружине подвешивают груз массой $m = 2$ кг. Найдите удлинение пружины в обоих случаях. ($g = 9.8$ м/с²).</div>
+                <div class="task-title">📘 Задача 5. Сила упругости пружины</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружина жёсткостью $k = 150$ Н/м растягивается под действием силы $F = 30$ Н. Найдите удлинение пружины.</div>
                 <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $k = 150$ Н/м, $F = 30$ Н, $m = 2$ кг, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x_1$, $\Delta x_2$</div>
-                </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
-                <div id="sol4" class="task-solution">
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> По закону Гука $F_{упр} = k \cdot \Delta x$. Для первого случая $\Delta x_1 = \frac{F}{k}$.</div>
-                        <span class="formula">$\Delta x_1 = \frac{30}{150} = 0.2 \text{ м} = 20 \text{ см}$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Во втором случае сила тяжести груза $F_{тяж} = mg$.</div>
-                        <span class="formula">$F_{тяж} = 2 \cdot 9.8 = 19.6 \text{ Н}$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> Удлинение от груза: $\Delta x_2 = \frac{mg}{k}$.</div>
-                        <span class="formula">$\Delta x_2 = \frac{19.6}{150} \approx 0.131 \text{ м} \approx 13.1 \text{ см}$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> При одной и той же силе удлинение прямо пропорционально силе. В первом случае сила больше, поэтому удлинение больше.</div>
-                    </div>
-                    <div class="answer">✅ Ответ: $\Delta x_1 = 20$ см, $\Delta x_2 \approx 13.1$ см</div>
-                </div>
-            </div>
-
-            <!-- Задача 5 (средняя сложность) -->
-            <div class="task-block">
-                <div class="task-title">📘 Задача 5. Равнодействующая сил</div>
-                <div class="task-condition"><strong>Условие:</strong> На тело действуют три силы: $F_1 = 8$ Н направлена вправо, $F_2 = 5$ Н направлена влево, $F_3 = 3$ Н направлена вправо. Найдите модуль и направление равнодействующей силы. Определите, как будет двигаться тело массой $m = 2$ кг под действием этих сил.</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $F_1 = 8$ Н (→), $F_2 = 5$ Н (←), $F_3 = 3$ Н (→), $m = 2$ кг</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $R$, $a$</div>
+                    <div class="given"><strong>📌 Дано:</strong> $k = 150$ Н/м, $F = 30$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint5')">💡 Подсказка</button>
+                <div id="hint5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> По закону Гука $F_{упр} = k \cdot \Delta x$, значит $\Delta x = \frac{F}{k}$. Раздели силу на жёсткость.</div>
+                        <div class="answer">✅ Ответ: $\Delta x = 0.2$ м = 20 см</div>
+                    </div>
+                </div>
                 <div id="sol5" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Силы, направленные вправо, складываются: $F_{вправо} = F_1 + F_3 = 8 + 3 = 11$ Н.</div>
-                        <div class="explanation">Сила, направленная влево: $F_{влево} = F_2 = 5$ Н.</div>
+                        <div class="explanation">По закону Гука $F_{упр} = k \cdot \Delta x$. Выражаем удлинение: $\Delta x = \frac{F}{k}$.</div>
+                        <span class="formula">$\Delta x = \frac{30}{150} = 0.2 \text{ м} = 20 \text{ см}$</span>
                     </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Равнодействующая: $R = F_{вправо} - F_{влево} = 11 - 5 = 6$ Н (вправо).</div>
-                        <span class="formula">$R = 6 \text{ Н}$ (вправо)</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> Ускорение: $a = \frac{R}{m} = \frac{6}{2} = 3$ м/с².</div>
-                        <span class="formula">$a = 3 \text{ м/с}^2$ (вправо)</span>
-                        <div class="explanation"><strong>Пояснение:</strong> Тело будет двигаться с ускорением вправо, так как равнодействующая направлена вправо.</div>
-                    </div>
-                    <div class="answer">✅ Ответ: $R = 6$ Н (вправо), $a = 3$ м/с² (вправо)</div>
+                    <div class="answer">✅ Ответ: $\Delta x = 0.2$ м = 20 см</div>
                 </div>
             </div>
 
-            <!-- Задача 6 (сложная) -->
+            <!-- Задача 6 (средняя) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 6. Движение по наклонной плоскости</div>
-                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг находится на наклонной плоскости с углом $\alpha = 30°$ к горизонту. Коэффициент трения между телом и плоскостью $\mu = 0.2$. Найдите ускорение тела, если оно начинает скользить вниз. Определите, с какой скоростью тело достигнет основания плоскости, если длина плоскости $L = 4$ м. ($g = 9.8$ м/с²).</div>
+                <div class="task-title">📘 Задача 6. Равнодействующая сил</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело действуют три силы: $F_1 = 8$ Н направлена вправо, $F_2 = 5$ Н направлена влево, $F_3 = 3$ Н направлена вправо. Найдите модуль и направление равнодействующей силы.</div>
                 <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $\alpha = 30°$, $\mu = 0.2$, $L = 4$ м, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$, $v$</div>
+                    <div class="given"><strong>📌 Дано:</strong> $F_1 = 8$ Н (→), $F_2 = 5$ Н (←), $F_3 = 3$ Н (→)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $R$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint6')">💡 Подсказка</button>
+                <div id="hint6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Сложи силы, направленные в одну сторону, и вычти силу, направленную в противоположную. Равнодействующая — геометрическая сумма всех сил.</div>
+                        <div class="answer">✅ Ответ: $R = 6$ Н (вправо)</div>
+                    </div>
+                </div>
                 <div id="sol6" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Проекция силы тяжести вдоль плоскости: $F_{\parallel} = mg \cdot \sin\alpha$.</div>
+                        <div class="explanation"><strong>Шаг 1.</strong> Силы вправо: $F_1 + F_3 = 8 + 3 = 11$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> Равнодействующая: $R = 11 - 5 = 6$ Н (вправо).</div>
+                        <span class="formula">$R = 6 \text{ Н}$ (вправо)</span>
+                    </div>
+                    <div class="answer">✅ Ответ: $R = 6$ Н (вправо)</div>
+                </div>
+            </div>
+
+            <!-- Задача 7 (средняя) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Сила тяжести и масса</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела имеют массы $m_1 = 2$ кг и $m_2 = 5$ кг. Во сколько раз сила тяжести второго тела больше силы тяжести первого? ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 5$ кг, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\frac{F_{тяж2}}{F_{тяж1}}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint7')">💡 Подсказка</button>
+                <div id="hint7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Сила тяжести $F_{тяж} = mg$. Отношение сил тяжести равно отношению масс: $\frac{F_{тяж2}}{F_{тяж1}} = \frac{m_2}{m_1}$.</div>
+                        <div class="answer">✅ Ответ: в 2.5 раза</div>
+                    </div>
+                </div>
+                <div id="sol7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $F_{тяж1} = m_1 g = 2 \cdot 9.8 = 19.6$ Н.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> $F_{тяж2} = m_2 g = 5 \cdot 9.8 = 49$ Н.</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 3.</strong> Отношение: $\frac{F_{тяж2}}{F_{тяж1}} = \frac{49}{19.6} = 2.5$.</div>
+                        <span class="formula">$\frac{F_{тяж2}}{F_{тяж1}} = \frac{m_2}{m_1} = \frac{5}{2} = 2.5$</span>
+                    </div>
+                    <div class="answer">✅ Ответ: в 2.5 раза</div>
+                </div>
+            </div>
+
+            <!-- Задача 8 (средняя) -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Движение по наклонной плоскости</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг находится на наклонной плоскости с углом $\alpha = 30°$ к горизонту. Коэффициент трения $\mu = 0.2$. Найдите ускорение тела, если оно скользит вниз. ($g = 9.8$ м/с²).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $\alpha = 30°$, $\mu = 0.2$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint8')">💡 Подсказка</button>
+                <div id="hint8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Проекция силы тяжести вдоль плоскости: $F_{\parallel} = mg \sin\alpha$. Сила трения: $F_{тр} = \mu mg \cos\alpha$. Ускорение: $a = \frac{F_{\parallel} - F_{тр}}{m}$.</div>
+                        <div class="answer">✅ Ответ: $a \approx 3.20$ м/с²</div>
+                    </div>
+                </div>
+                <div id="sol8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $F_{\parallel} = mg \sin\alpha$.</div>
                         <span class="formula">$F_{\parallel} = 5 \cdot 9.8 \cdot 0.5 = 24.5 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Проекция силы тяжести перпендикулярно плоскости: $F_{\perp} = mg \cdot \cos\alpha$.</div>
-                        <span class="formula">$F_{\perp} = 5 \cdot 9.8 \cdot 0.866 \approx 42.43 \text{ Н}$</span>
+                        <div class="explanation"><strong>Шаг 2.</strong> $N = mg \cos\alpha$.</div>
+                        <span class="formula">$N = 5 \cdot 9.8 \cdot 0.866 \approx 42.43 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> Сила нормальной реакции $N = F_{\perp} = 42.43$ Н.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> $F_{тр} = \mu N$.</div>
+                        <span class="formula">$F_{тр} = 0.2 \cdot 42.43 = 8.49 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 4.</strong> Сила трения: $F_{тр} = \mu N = 0.2 \cdot 42.43 = 8.49$ Н.</div>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 5.</strong> Равнодействующая вдоль плоскости: $F_{рез} = F_{\parallel} - F_{тр} = 24.5 - 8.49 = 16.01$ Н.</div>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 6.</strong> Ускорение: $a = \frac{F_{рез}}{m} = \frac{16.01}{5} \approx 3.20$ м/с².</div>
+                        <div class="explanation"><strong>Шаг 4.</strong> $F_{рез} = F_{\parallel} - F_{тр} = 24.5 - 8.49 = 16.01$ Н.</div>
+                        <div class="explanation"><strong>Шаг 5.</strong> $a = \frac{F_{рез}}{m} = \frac{16.01}{5} \approx 3.20$ м/с².</div>
                         <span class="formula">$a \approx 3.20 \text{ м/с}^2$</span>
                     </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 7.</strong> Скорость в конце плоскости: $v = \sqrt{2aL} = \sqrt{2 \cdot 3.20 \cdot 4} = \sqrt{25.6} \approx 5.06$ м/с.</div>
-                        <span class="formula">$v \approx 5.06 \text{ м/с}$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> Тело скользит вниз с постоянным ускорением. Скорость в конце пути определяется по формуле $v^2 = 2aL$ (начальная скорость равна нулю).</div>
-                    </div>
-                    <div class="answer">✅ Ответ: $a \approx 3.20$ м/с², $v \approx 5.06$ м/с</div>
+                    <div class="answer">✅ Ответ: $a \approx 3.20$ м/с²</div>
                 </div>
             </div>
 
-            <!-- Задача 7 (сложная) -->
+            <!-- Задача 9 (средняя) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 7. Два тела на пружине</div>
-                <div class="task-condition"><strong>Условие:</strong> Два груза массами $m_1 = 2$ кг и $m_2 = 3$ кг подвешены на пружине жёсткостью $k = 100$ Н/м так, что $m_2$ висит ниже $m_1$ (последовательно). Найдите удлинение пружины, если грузы находятся в равновесии. ($g = 9.8$ м/с²).</div>
+                <div class="task-title">📘 Задача 9. Два тела на пружине</div>
+                <div class="task-condition"><strong>Условие:</strong> Два груза массами $m_1 = 2$ кг и $m_2 = 3$ кг подвешены на пружине жёсткостью $k = 100$ Н/м последовательно. Найдите удлинение пружины. ($g = 9.8$ м/с²).</div>
                 <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $k = 100$ Н/м, $g = 9.8$ м/с²</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
-                <div id="sol7" class="task-solution">
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint9')">💡 Подсказка</button>
+                <div id="hint9" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Вся пружина растягивается под действием суммарного веса обоих грузов.</div>
-                        <div class="explanation">Суммарная сила тяжести: $F = (m_1 + m_2)g = (2 + 3) \cdot 9.8 = 5 \cdot 9.8 = 49$ Н.</div>
+                        <div class="explanation"><strong>Как решать:</strong> Пружина растягивается под действием суммарного веса обоих грузов: $F = (m_1 + m_2)g$. Затем по закону Гука $\Delta x = \frac{F}{k}$.</div>
+                        <div class="answer">✅ Ответ: $\Delta x = 0.49$ м = 49 см</div>
+                    </div>
+                </div>
+                <div id="sol9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Суммарная сила тяжести: $F = (m_1 + m_2)g$.</div>
+                        <span class="formula">$F = (2 + 3) \cdot 9.8 = 49 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> По закону Гука: $F = k \cdot \Delta x \Rightarrow \Delta x = \frac{F}{k}$.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> По закону Гука $\Delta x = \frac{F}{k}$.</div>
                         <span class="formula">$\Delta x = \frac{49}{100} = 0.49 \text{ м} = 49 \text{ см}$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> При последовательном соединении грузов пружина растягивается под действием суммарной силы тяжести. Удлинение пружины прямо пропорционально приложенной силе.</div>
                     </div>
-                    <div class="answer">✅ Ответ: $\Delta x = 0.49$ м (49 см)</div>
+                    <div class="answer">✅ Ответ: $\Delta x = 0.49$ м = 49 см</div>
                 </div>
             </div>
 
-            <!-- Задача 8 (сложная) -->
+            <!-- Задача 10 (средняя) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 8. Сила трения и тяги на наклонной плоскости</div>
-                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 3$ кг находится на наклонной плоскости с углом $\alpha = 25°$ к горизонту. Коэффициент трения $\mu = 0.3$. Какую силу $F$ нужно приложить параллельно плоскости, чтобы тело двигалось вверх с постоянной скоростью? ($g = 9.8$ м/с²).</div>
+                <div class="task-title">📘 Задача 10. Равномерное движение по наклонной плоскости</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 3$ кг находится на наклонной плоскости с углом $\alpha = 25°$. Коэффициент трения $\mu = 0.3$. Какую силу $F$ нужно приложить параллельно плоскости, чтобы тело двигалось вверх с постоянной скоростью? ($g = 9.8$ м/с²).</div>
                 <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $\alpha = 25°$, $\mu = 0.3$, $g = 9.8$ м/с²</div>
                     <div class="find"><strong>🔍 Найти:</strong> $F$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
-                <div id="sol8" class="task-solution">
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint10')">💡 Подсказка</button>
+                <div id="hint10" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Проекция силы тяжести вдоль плоскости (вниз): $F_{\parallel} = mg \cdot \sin\alpha$.</div>
-                        <span class="formula">$F_{\parallel} = 3 \cdot 9.8 \cdot \sin 25° \approx 3 \cdot 9.8 \cdot 0.423 \approx 12.44 \text{ Н}$</span>
+                        <div class="explanation"><strong>Как решать:</strong> При равномерном движении сила тяги компенсирует и составляющую тяжести, и трение: $F = mg \sin\alpha + \mu mg \cos\alpha$.</div>
+                        <div class="answer">✅ Ответ: $F \approx 20.43$ Н</div>
+                    </div>
+                </div>
+                <div id="sol10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $F_{\parallel} = mg \sin\alpha$.</div>
+                        <span class="formula">$F_{\parallel} = 3 \cdot 9.8 \cdot \sin 25° \approx 12.44 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Сила нормальной реакции: $N = mg \cdot \cos\alpha$.</div>
-                        <span class="formula">$N = 3 \cdot 9.8 \cdot \cos 25° \approx 3 \cdot 9.8 \cdot 0.906 \approx 26.64 \text{ Н}$</span>
+                        <div class="explanation"><strong>Шаг 2.</strong> $N = mg \cos\alpha$.</div>
+                        <span class="formula">$N = 3 \cdot 9.8 \cdot \cos 25° \approx 26.64 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> Сила трения (при движении вверх направлена вниз по плоскости): $F_{тр} = \mu N$.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> $F_{тр} = \mu N$.</div>
                         <span class="formula">$F_{тр} = 0.3 \cdot 26.64 \approx 7.99 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 4.</strong> Для равномерного движения $F = F_{\parallel} + F_{тр}$.</div>
+                        <div class="explanation"><strong>Шаг 4.</strong> $F = F_{\parallel} + F_{тр}$.</div>
                         <span class="formula">$F = 12.44 + 7.99 \approx 20.43 \text{ Н}$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> При равномерном движении равнодействующая сил равна нулю, поэтому сила тяги должна компенсировать как составляющую силы тяжести вдоль плоскости, так и силу трения.</div>
                     </div>
                     <div class="answer">✅ Ответ: $F \approx 20.43$ Н</div>
                 </div>
             </div>
 
-            <!-- Задача 9 (сложная) -->
+            <!-- Задача 11 (средняя) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 9. Сравнение масс по силе и ускорению</div>
-                <div class="task-condition"><strong>Условие:</strong> На тело А действует сила $F = 15$ Н, при этом оно получает ускорение $a_A = 3$ м/с². На тело Б действует та же сила, но ускорение $a_Б = 5$ м/с². Во сколько раз масса тела А больше массы тела Б? Найдите массы тел.</div>
+                <div class="task-title">📘 Задача 11. Сравнение масс по силе и ускорению</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело А действует сила $F = 15$ Н, при этом оно получает ускорение $a_A = 3$ м/с². На тело Б действует та же сила, но ускорение $a_Б = 5$ м/с². Найдите массы тел.</div>
                 <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $F = 15$ Н, $a_A = 3$ м/с², $a_Б = 5$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\frac{m_A}{m_Б}$, $m_A$, $m_Б$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m_A$, $m_Б$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
-                <div id="sol9" class="task-solution">
+                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint11')">💡 Подсказка</button>
+                <div id="hint11" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> По второму закону Ньютона $m = \frac{F}{a}$. Находим массы.</div>
+                        <div class="explanation"><strong>Как решать:</strong> По второму закону Ньютона $m = \frac{F}{a}$. Найди массу каждого тела отдельно.</div>
+                        <div class="answer">✅ Ответ: $m_A = 5$ кг, $m_Б = 3$ кг</div>
+                    </div>
+                </div>
+                <div id="sol11" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $m_A = \frac{F}{a_A}$.</div>
                         <span class="formula">$m_A = \frac{15}{3} = 5 \text{ кг}$</span>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 2.</strong> $m_Б = \frac{F}{a_Б}$.</div>
                         <span class="formula">$m_Б = \frac{15}{5} = 3 \text{ кг}$</span>
                     </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Отношение масс: $\frac{m_A}{m_Б} = \frac{5}{3}$.</div>
-                        <span class="formula">$\frac{m_A}{m_Б} = \frac{5}{3} \approx 1.67$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> При одинаковой силе тело с большей массой получает меньшее ускорение. Масса и ускорение обратно пропорциональны.</div>
-                    </div>
-                    <div class="answer">✅ Ответ: $m_A = 5$ кг, $m_Б = 3$ кг, $\frac{m_A}{m_Б} = \frac{5}{3} \approx 1.67$</div>
+                    <div class="answer">✅ Ответ: $m_A = 5$ кг, $m_Б = 3$ кг</div>
                 </div>
             </div>
 
-            <!-- Задача 10 (сложная) -->
+            <!-- Задача 12 (средняя) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 10. Сила упругости и сила тяжести</div>
-                <div class="task-condition"><strong>Условие:</strong> На пружине жёсткостью $k = 80$ Н/м висит груз массой $m = 4$ кг. Пружину с грузом опускают в лифте, движущемся вниз с ускорением $a = 2$ м/с². Найдите удлинение пружины. Что изменится, если лифт будет двигаться вверх с тем же ускорением? ($g = 9.8$ м/с²).</div>
+                <div class="task-title">📘 Задача 12. Вес тела в лифте</div>
+                <div class="task-condition"><strong>Условие:</strong> На пружине жёсткостью $k = 80$ Н/м висит груз массой $m = 4$ кг. Пружину с грузом опускают в лифте, движущемся вниз с ускорением $a = 2$ м/с². Найдите удлинение пружины. ($g = 9.8$ м/с²).</div>
                 <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $k = 80$ Н/м, $m = 4$ кг, $a = 2$ м/с², $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x_{вниз}$, $\Delta x_{вверх}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
-                <div id="sol10" class="task-solution">
+                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint12')">💡 Подсказка</button>
+                <div id="hint12" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> При движении вниз с ускорением вес груза: $P = m(g - a)$.</div>
-                        <span class="formula">$P_{вниз} = 4 \cdot (9.8 - 2) = 4 \cdot 7.8 = 31.2 \text{ Н}$</span>
+                        <div class="explanation"><strong>Как решать:</strong> При движении вниз с ускорением вес груза уменьшается: $P = m(g - a)$. Затем по закону Гука $\Delta x = \frac{P}{k}$.</div>
+                        <div class="answer">✅ Ответ: $\Delta x = 0.39$ м = 39 см</div>
+                    </div>
+                </div>
+                <div id="sol12" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> Вес груза при движении вниз: $P = m(g - a)$.</div>
+                        <span class="formula">$P = 4 \cdot (9.8 - 2) = 31.2 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Удлинение пружины при движении вниз: $\Delta x = \frac{P}{k}$.</div>
-                        <span class="formula">$\Delta x_{вниз} = \frac{31.2}{80} = 0.39 \text{ м} = 39 \text{ см}$</span>
+                        <div class="explanation"><strong>Шаг 2.</strong> Удлинение: $\Delta x = \frac{P}{k}$.</div>
+                        <span class="formula">$\Delta x = \frac{31.2}{80} = 0.39 \text{ м} = 39 \text{ см}$</span>
                     </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> При движении вверх с ускорением вес груза: $P = m(g + a)$.</div>
-                        <span class="formula">$P_{вверх} = 4 \cdot (9.8 + 2) = 4 \cdot 11.8 = 47.2 \text{ Н}$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 4.</strong> Удлинение пружины при движении вверх: $\Delta x = \frac{P}{k}$.</div>
-                        <span class="formula">$\Delta x_{вверх} = \frac{47.2}{80} = 0.59 \text{ м} = 59 \text{ см}$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> При движении вниз с ускорением вес уменьшается (перегрузка отрицательная), поэтому пружина растягивается меньше. При движении вверх вес увеличивается, пружина растягивается больше.</div>
-                    </div>
-                    <div class="answer">✅ Ответ: $\Delta x_{вниз} = 39$ см, $\Delta x_{вверх} = 59$ см</div>
+                    <div class="answer">✅ Ответ: $\Delta x = 0.39$ м = 39 см</div>
                 </div>
             </div>
 
-            <!-- Задача 11 (сложная) -->
+            <!-- Задача 13 (средняя) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 11. Движение связанных тел</div>
-                <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 2$ кг и $m_2 = 3$ кг связаны невесомой нерастяжимой нитью и лежат на гладкой горизонтальной поверхности. К телу $m_1$ приложена сила $F = 15$ Н, направленная горизонтально. Найдите ускорение системы и силу натяжения нити.</div>
+                <div class="task-title">📘 Задача 13. Движение связанных тел</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 2$ кг и $m_2 = 3$ кг связаны невесомой нерастяжимой нитью и лежат на гладкой горизонтальной поверхности. К телу $m_1$ приложена сила $F = 15$ Н. Найдите ускорение системы и силу натяжения нити.</div>
                 <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $F = 15$ Н</div>
                     <div class="find"><strong>🔍 Найти:</strong> $a$, $T$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
-                <div id="sol11" class="task-solution">
+                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint13')">💡 Подсказка</button>
+                <div id="hint13" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Для системы двух тел: $F = (m_1 + m_2) \cdot a$.</div>
-                        <span class="formula">$a = \frac{F}{m_1 + m_2} = \frac{15}{2 + 3} = \frac{15}{5} = 3 \text{ м/с}^2$</span>
+                        <div class="explanation"><strong>Как решать:</strong> Ускорение системы: $a = \frac{F}{m_1 + m_2}$. Сила натяжения нити: $T = m_2 \cdot a$.</div>
+                        <div class="answer">✅ Ответ: $a = 3$ м/с², $T = 9$ Н</div>
+                    </div>
+                </div>
+                <div id="sol13" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Шаг 1.</strong> $a = \frac{F}{m_1 + m_2}$.</div>
+                        <span class="formula">$a = \frac{15}{2 + 3} = \frac{15}{5} = 3 \text{ м/с}^2$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Рассмотрим второе тело: $T = m_2 \cdot a$.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> $T = m_2 \cdot a$.</div>
                         <span class="formula">$T = 3 \cdot 3 = 9 \text{ Н}$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> Нить передаёт силу от первого тела ко второму. Сила натяжения нити равна силе, необходимой для движения второго тела с ускорением $a$.</div>
                     </div>
                     <div class="answer">✅ Ответ: $a = 3$ м/с², $T = 9$ Н</div>
                 </div>
             </div>
 
-            <!-- Задача 12 (сложная) -->
+            <!-- Задача 14 (средняя) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 12. Сравнение сил трения</div>
-                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг движется по горизонтальной поверхности. Коэффициент трения между телом и поверхностью $\mu = 0.25$. Найдите силу трения. Во сколько раз изменится сила трения, если на тело поставить ещё один груз массой $m_2 = 3$ кг? ($g = 9.8$ м/с²).</div>
+                <div class="task-title">📘 Задача 14. Сравнение сил трения</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг движется по горизонтальной поверхности. Коэффициент трения $\mu = 0.25$. Найдите силу трения. Во сколько раз изменится сила трения, если на тело поставить ещё один груз массой $m_2 = 3$ кг? ($g = 9.8$ м/с²).</div>
                 <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $m_2 = 3$ кг, $\mu = 0.25$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $F_{тр1}$, $F_{тр2}$, $\frac{F_{тр2}}{F_{тр1}}$</div>
-                </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
-                <div id="sol12" class="task-solution">
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Сила трения для первого случая: $F_{тр1} = \mu mg$.</div>
-                        <span class="formula">$F_{тр1} = 0.25 \cdot 5 \cdot 9.8 = 0.25 \cdot 49 = 12.25 \text{ Н}$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Общая масса во втором случае: $m_{общ} = m + m_2 = 5 + 3 = 8$ кг.</div>
-                        <span class="formula">$F_{тр2} = \mu \cdot m_{общ} \cdot g = 0.25 \cdot 8 \cdot 9.8 = 0.25 \cdot 78.4 = 19.6 \text{ Н}$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> Отношение сил трения: $\frac{F_{тр2}}{F_{тр1}} = \frac{19.6}{12.25} = 1.6$.</div>
-                        <span class="formula">$\frac{F_{тр2}}{F_{тр1}} = \frac{8}{5} = 1.6$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> Сила трения прямо пропорциональна массе тела. При увеличении массы в 1.6 раза сила трения увеличивается во столько же раз.</div>
-                    </div>
-                    <div class="answer">✅ Ответ: $F_{тр1} = 12.25$ Н, $F_{тр2} = 19.6$ Н, $\frac{F_{тр2}}{F_{тр1}} = 1.6$</div>
-                </div>
-            </div>
-
-            <!-- Задача 13 (сложная) -->
-            <div class="task-block">
-                <div class="task-title">📘 Задача 13. Равновесие на наклонной плоскости</div>
-                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг находится на наклонной плоскости с углом $\alpha = 20°$ к горизонту. Коэффициент трения $\mu = 0.15$. Будет ли тело скользить вниз? Если да, найдите ускорение. Если нет, найдите силу трения покоя. ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $\alpha = 20°$, $\mu = 0.15$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> будет ли скользить? $a$ или $F_{тр}$</div>
-                </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
-                <div id="sol13" class="task-solution">
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Проекция силы тяжести вдоль плоскости (вниз): $F_{\parallel} = mg \cdot \sin\alpha$.</div>
-                        <span class="formula">$F_{\parallel} = 4 \cdot 9.8 \cdot \sin 20° \approx 4 \cdot 9.8 \cdot 0.342 \approx 13.41 \text{ Н}$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Сила нормальной реакции: $N = mg \cdot \cos\alpha$.</div>
-                        <span class="formula">$N = 4 \cdot 9.8 \cdot \cos 20° \approx 4 \cdot 9.8 \cdot 0.940 \approx 36.85 \text{ Н}$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> Максимальная сила трения покоя: $F_{тр}^{max} = \mu N = 0.15 \cdot 36.85 \approx 5.53$ Н.</div>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 4.</strong> Сравниваем: $F_{\parallel} = 13.41$ Н $> F_{тр}^{max} = 5.53$ Н.</div>
-                        <div class="explanation">Так как $F_{\parallel} > F_{тр}^{max}$, тело будет скользить вниз.</div>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 5.</strong> Ускорение: $a = \frac{F_{\parallel} - F_{тр}}{m} = \frac{13.41 - 5.53}{4} = \frac{7.88}{4} \approx 1.97$ м/с².</div>
-                        <span class="formula">$a \approx 1.97 \text{ м/с}^2$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> Тело скользит, так как составляющая силы тяжести вдоль плоскости превышает максимальную силу трения покоя.</div>
-                    </div>
-                    <div class="answer">✅ Ответ: Тело скользит с ускорением $a \approx 1.97$ м/с²</div>
-                </div>
-            </div>
-
-            <!-- Задача 14 (сложная) -->
-            <div class="task-block">
-                <div class="task-title">📘 Задача 14. Сила упругости и закон Гука</div>
-                <div class="task-condition"><strong>Условие:</strong> Пружина длиной $l_0 = 20$ см под действием силы $F = 12$ Н растягивается до длины $l = 28$ см. Найдите жёсткость пружины $k$. Какую силу нужно приложить, чтобы растянуть пружину до длины $l_2 = 35$ см? Какова будет потенциальная энергия пружины при этом?</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 20$ см $= 0.2$ м, $l = 28$ см $= 0.28$ м, $F = 12$ Н, $l_2 = 35$ см $= 0.35$ м</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $k$, $F_2$, $E_{пот}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_{тр1}$, $F_{тр2}$, отношение</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint14')">💡 Подсказка</button>
+                <div id="hint14" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> $F_{тр} = \mu mg$. Во втором случае общая масса $m_{общ} = m + m_2$. Отношение сил равно отношению масс.</div>
+                        <div class="answer">✅ Ответ: $F_{тр1} = 12.25$ Н, $F_{тр2} = 19.6$ Н, отношение $= 1.6$</div>
+                    </div>
+                </div>
                 <div id="sol14" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Удлинение: $\Delta x = l - l_0 = 0.28 - 0.2 = 0.08$ м.</div>
+                        <div class="explanation"><strong>Шаг 1.</strong> $F_{тр1} = \mu mg$.</div>
+                        <span class="formula">$F_{тр1} = 0.25 \cdot 5 \cdot 9.8 = 12.25 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> По закону Гука: $k = \frac{F}{\Delta x} = \frac{12}{0.08} = 150$ Н/м.</div>
-                        <span class="formula">$k = 150 \text{ Н/м}$</span>
+                        <div class="explanation"><strong>Шаг 2.</strong> $m_{общ} = 5 + 3 = 8$ кг. $F_{тр2} = \mu m_{общ} g$.</div>
+                        <span class="formula">$F_{тр2} = 0.25 \cdot 8 \cdot 9.8 = 19.6 \text{ Н}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> Удлинение для $l_2$: $\Delta x_2 = l_2 - l_0 = 0.35 - 0.2 = 0.15$ м.</div>
+                        <div class="explanation"><strong>Шаг 3.</strong> Отношение: $\frac{F_{тр2}}{F_{тр1}} = \frac{19.6}{12.25} = 1.6$.</div>
+                        <span class="formula">$\frac{F_{тр2}}{F_{тр1}} = \frac{8}{5} = 1.6$</span>
                     </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 4.</strong> Необходимая сила: $F_2 = k \cdot \Delta x_2 = 150 \cdot 0.15 = 22.5$ Н.</div>
-                        <span class="formula">$F_2 = 22.5 \text{ Н}$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 5.</strong> Потенциальная энергия пружины: $E_{пот} = \frac{k \cdot \Delta x_2^2}{2}$.</div>
-                        <span class="formula">$E_{пот} = \frac{150 \cdot 0.15^2}{2} = \frac{150 \cdot 0.0225}{2} = \frac{3.375}{2} = 1.6875 \text{ Дж}$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> Потенциальная энергия пружины пропорциональна квадрату деформации. Чем больше растяжение, тем больше энергия, запасённая в пружине.</div>
-                    </div>
-                    <div class="answer">✅ Ответ: $k = 150$ Н/м, $F_2 = 22.5$ Н, $E_{пот} = 1.6875$ Дж</div>
+                    <div class="answer">✅ Ответ: $F_{тр1} = 12.25$ Н, $F_{тр2} = 19.6$ Н, отношение $= 1.6$</div>
                 </div>
             </div>
 
-            <!-- Задача 15 (сложная) -->
+            <!-- Задача 15 (средняя) -->
             <div class="task-block">
-                <div class="task-title">📘 Задача 15. Комбинированная задача</div>
-                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 2$ кг лежит на горизонтальной поверхности. К телу приложена сила $F = 12$ Н под углом $\alpha = 30°$ к горизонту. Коэффициент трения $\mu = 0.2$. Найдите ускорение тела. Определите, при каком угле $\alpha$ тело начнёт двигаться, если сила $F = 10$ Н остаётся постоянной? ($g = 9.8$ м/с²).</div>
+                <div class="task-title">📘 Задача 15. Сила упругости и закон Гука</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружина длиной $l_0 = 20$ см под действием силы $F = 12$ Н растягивается до длины $l = 28$ см. Найдите жёсткость пружины $k$.</div>
                 <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $F = 12$ Н, $\alpha = 30°$, $\mu = 0.2$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$, $\alpha_{крит}$ (для $F = 10$ Н)</div>
+                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 20$ см $= 0.2$ м, $l = 28$ см $= 0.28$ м, $F = 12$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $k$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint15')">💡 Подсказка</button>
+                <div id="hint15" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Сначала найди удлинение $\Delta x = l - l_0$. Затем по закону Гука $k = \frac{F}{\Delta x}$.</div>
+                        <div class="answer">✅ Ответ: $k = 150$ Н/м</div>
+                    </div>
+                </div>
                 <div id="sol15" class="task-solution">
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 1.</strong> Проекция силы на горизонталь: $F_x = F \cdot \cos\alpha = 12 \cdot \cos 30° = 12 \cdot 0.866 \approx 10.39$ Н.</div>
-                        <div class="explanation">Проекция силы на вертикаль: $F_y = F \cdot \sin\alpha = 12 \cdot 0.5 = 6$ Н.</div>
+                        <div class="explanation"><strong>Шаг 1.</strong> Удлинение: $\Delta x = l - l_0$.</div>
+                        <span class="formula">$\Delta x = 0.28 - 0.2 = 0.08 \text{ м}$</span>
                     </div>
                     <div class="step">
-                        <div class="explanation"><strong>Шаг 2.</strong> Сила нормальной реакции: $N = mg - F_y = 2 \cdot 9.8 - 6 = 19.6 - 6 = 13.6$ Н.</div>
+                        <div class="explanation"><strong>Шаг 2.</strong> По закону Гука $F = k \cdot \Delta x$, значит $k = \frac{F}{\Delta x}$.</div>
+                        <span class="formula">$k = \frac{12}{0.08} = 150 \text{ Н/м}$</span>
                     </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 3.</strong> Сила трения: $F_{тр} = \mu N = 0.2 \cdot 13.6 = 2.72$ Н.</div>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 4.</strong> Ускорение: $a = \frac{F_x - F_{тр}}{m} = \frac{10.39 - 2.72}{2} = \frac{7.67}{2} \approx 3.835$ м/с².</div>
-                        <span class="formula">$a \approx 3.84 \text{ м/с}^2$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 5.</strong> Для $F = 10$ Н условие начала движения: $F_x > F_{тр}$. $F \cdot \cos\alpha > \mu (mg - F \cdot \sin\alpha)$.</div>
-                        <span class="formula">$10 \cdot \cos\alpha > 0.2 (19.6 - 10 \cdot \sin\alpha)$</span>
-                        <span class="formula">$10 \cos\alpha > 3.92 - 2 \sin\alpha$</span>
-                        <span class="formula">$10 \cos\alpha + 2 \sin\alpha > 3.92$</span>
-                    </div>
-                    <div class="step">
-                        <div class="explanation"><strong>Шаг 6.</strong> Проверяем $\alpha = 0°$: $10 \cdot 1 + 0 = 10 > 3.92$ — тело движется.</div>
-                        <div class="explanation">Проверяем $\alpha = 60°$: $10 \cdot 0.5 + 2 \cdot 0.866 = 5 + 1.732 = 6.732 > 3.92$.</div>
-                        <div class="explanation">Проверяем $\alpha = 80°$: $10 \cdot 0.174 + 2 \cdot 0.985 = 1.74 + 1.97 = 3.71 < 3.92$.</div>
-                        <div class="explanation">Критический угол между 60° и 80°. Решая уравнение $10 \cos\alpha + 2 \sin\alpha = 3.92$, находим $\alpha \approx 75°$.</div>
-                        <span class="formula">$\alpha_{крит} \approx 75°$</span>
-                        <div class="explanation"><strong>Пояснение:</strong> При увеличении угла горизонтальная составляющая силы уменьшается, а вертикальная составляющая увеличивается (уменьшая силу нормальной реакции). При $\alpha > 75°$ горизонтальной составляющей не хватает, чтобы преодолеть трение.</div>
-                    </div>
-                    <div class="answer">✅ Ответ: $a \approx 3.84$ м/с², $\alpha_{крит} \approx 75°$</div>
+                    <div class="answer">✅ Ответ: $k = 150$ Н/м</div>
                 </div>
             </div>
 
@@ -1117,9 +1151,10 @@
 
 <script>
     function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleHint(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='💡 Подсказка';}else{el.classList.add('open');btn.textContent='📕 Скрыть подсказку';}}
     function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('mathTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('mathTheme','light');btn.textContent='☀️';}}
     (function(){if(localStorage.getItem('mathTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}function updateFavoriteBtn(){const btn=document.getElementById('favoriteBtn');if(btn){if(isFavorite()){btn.textContent='★';btn.classList.add('active');}else{btn.textContent='☆';btn.classList.remove('active');}}}updateFavoriteBtn();
 
     function switchModel(model) {
         document.querySelectorAll('.model-tab').forEach(tab => {
@@ -1745,30 +1780,25 @@
             const deltaX = mg / k;
             deltaLabel.textContent = deltaX.toFixed(3) + ' м';
 
-            // Параметры пружины
             const topY = 2.0;
             const restLen = 1.2;
             const totalLen = restLen + Math.min(deltaX, 2.0);
             const bottomY = topY - totalLen;
 
-            // Кронштейн (опора)
             const bracket = createCylinder(0.4, 0.4, 0.08, 0x666666, new THREE.Vector3(0, topY + 0.04, 0));
             group.add(bracket);
             dynamicObjects.push(bracket);
 
-            // Пружина
             const springStart = new THREE.Vector3(0, topY - 0.05, 0);
             const springEnd = new THREE.Vector3(0, bottomY + 0.05, 0);
             const spring = createSpring(springStart, springEnd, 12, 0.12, 0xcccccc);
             group.add(spring);
             dynamicObjects.push(spring);
 
-            // Груз (шарик)
             const ball = createSphere(0.2, 0x4fc3f7, new THREE.Vector3(0, bottomY, 0));
             group.add(ball);
             dynamicObjects.push(ball);
 
-            // Оси координат (короткие, для ориентира)
             const axisLen = 0.8;
             const center = new THREE.Vector3(0, bottomY, 0);
 
@@ -1786,10 +1816,8 @@
             group.add(axisYLabel);
             dynamicObjects.push(axisYLabel);
 
-            // Силы
             const scale = Math.min(mg * 0.035, 1.8);
 
-            // Сила тяжести (вниз)
             const gravEnd = new THREE.Vector3(0, bottomY - scale, 0);
             const gravArrow = createArrow(new THREE.Vector3(0, bottomY, 0), gravEnd, 0xff4444, 3);
             group.add(gravArrow);
@@ -1798,7 +1826,6 @@
             group.add(gravLabel);
             dynamicObjects.push(gravLabel);
 
-            // Сила упругости (вверх)
             const springForceEnd = new THREE.Vector3(0, bottomY + scale * 0.9, 0);
             const springArrow = createArrow(new THREE.Vector3(0, bottomY, 0), springForceEnd, 0x44ff88, 3);
             group.add(springArrow);
@@ -1807,7 +1834,6 @@
             group.add(springLabel);
             dynamicObjects.push(springLabel);
 
-            // Линия растяжения (пунктир, показывает Δx)
             if (deltaX > 0.01) {
                 const dashStart = new THREE.Vector3(0.35, topY - 0.1, 0);
                 const dashEnd = new THREE.Vector3(0.35, bottomY + 0.1, 0);
