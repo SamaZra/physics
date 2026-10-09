@@ -262,6 +262,8 @@
         .task-given-find .find strong { font-weight: 700; font-size: 1rem; }
         .task-given-find mjx-container { font-size: 1.1rem !important; }
 
+        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+
         .show-solution-btn {
             background: var(--special-border);
             color: white;
@@ -274,6 +276,19 @@
             transition: all 0.2s;
         }
         .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
+
+        .hint-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .hint-btn:hover { transform: scale(1.03); opacity: 0.9; }
 
         .task-solution { display: none; margin-top: 12px; }
         .task-solution.open { display: block; }
@@ -642,7 +657,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 50$ кг, $m_2 = 80$ кг, $r = 4$ м, $G = 6.67 \cdot 10^{-11}$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $F$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint1')">💡 Подсказка</button>
+                </div>
+                <div id="hint1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Используй закон всемирного тяготения: $F = G \cdot \dfrac{m_1 m_2}{r^2}$. Подставь массы и расстояние, не забудь возвести $r$ в квадрат.</div>
+                        <div class="answer">✅ Ответ: $F \approx 1.67 \cdot 10^{-8}$ Н</div>
+                    </div>
+                </div>
                 <div id="sol1" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Записываем закон всемирного тяготения: <span class="formula">$F = G \cdot \dfrac{m_1 m_2}{r^2}$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> Подставляем числа: <span class="formula">$F = 6.67 \cdot 10^{-11} \cdot \dfrac{50 \cdot 80}{4^2}$</span></div>
@@ -660,7 +684,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 100$ кг, $m_2 = 100$ кг, $F = 6.67 \cdot 10^{-9}$ Н</div>
                     <div class="find"><strong>🔍 Найти:</strong> $r$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint2')">💡 Подсказка</button>
+                </div>
+                <div id="hint2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Из закона тяготения вырази расстояние: $r = \sqrt{G \cdot \dfrac{m_1 m_2}{F}}$. Подставь значения и извлеки корень.</div>
+                        <div class="answer">✅ Ответ: $r = 10$ м</div>
+                    </div>
+                </div>
                 <div id="sol2" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Из формулы $F = G \cdot \dfrac{m_1 m_2}{r^2}$ выражаем $r$: <span class="formula">$r = \sqrt{G \cdot \dfrac{m_1 m_2}{F}}$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$r = \sqrt{6.67 \cdot 10^{-11} \cdot \dfrac{10000}{6.67 \cdot 10^{-9}}} = \sqrt{10000 \cdot 10^{-2}} = \sqrt{100} = 10$</span></div>
@@ -677,7 +710,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $r_2 = 2r_1$, $m_1' = 3m_1$, $m_2' = 3m_2$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\dfrac{F_2}{F_1}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint3')">💡 Подсказка</button>
+                </div>
+                <div id="hint3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Запиши новую силу $F_2 = G \cdot \dfrac{(3m_1)(3m_2)}{(2r_1)^2}$ и раздели её на $F_1$. Увеличение масс даёт множитель 9, увеличение расстояния — множитель $1/4$.</div>
+                        <div class="answer">✅ Ответ: Сила увеличится в $2.25$ раза</div>
+                    </div>
+                </div>
                 <div id="sol3" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $F_2 = G \cdot \dfrac{(3m_1)(3m_2)}{(2r_1)^2} = G \cdot \dfrac{9m_1 m_2}{4r_1^2} = \dfrac{9}{4} \cdot F_1$</div>
                     <div class="step"><span class="formula">$\dfrac{F_2}{F_1} = \dfrac{9}{4} = 2.25$</span></div>
@@ -694,7 +736,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 200$ кг, $m_2 = 300$ кг, $r = 5$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $F$, сравнить с весом $1$ кг</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint4')">💡 Подсказка</button>
+                </div>
+                <div id="hint4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Найди силу притяжения по формуле $F = G \cdot \dfrac{m_1 m_2}{r^2}$. Затем найди вес тела массой 1 кг: $P = mg$. Найди их отношение $\dfrac{P}{F}$.</div>
+                        <div class="answer">✅ Ответ: $F \approx 1.6 \cdot 10^{-7}$ Н, вес $1$ кг больше в $6.1 \cdot 10^7$ раз</div>
+                    </div>
+                </div>
                 <div id="sol4" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $F = 6.67 \cdot 10^{-11} \cdot \dfrac{200 \cdot 300}{25} = 6.67 \cdot 10^{-11} \cdot 2400 = 1.6 \cdot 10^{-7}$ Н</div>
                     <div class="step"><strong>Шаг 2.</strong> Вес $1$ кг: $P = 1 \cdot 9.8 = 9.8$ Н.</div>
@@ -712,7 +763,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $M = 8 \cdot 10^{23}$ кг, $R = 4 \cdot 10^6$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $g$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint5')">💡 Подсказка</button>
+                </div>
+                <div id="hint5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Используй формулу $g = G \cdot \dfrac{M}{R^2}$. Подставь массу планеты и радиус, не забудь возвести радиус в квадрат.</div>
+                        <div class="answer">✅ Ответ: $g \approx 3.34$ м/с²</div>
+                    </div>
+                </div>
                 <div id="sol5" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $g = G \cdot \dfrac{M}{R^2} = 6.67 \cdot 10^{-11} \cdot \dfrac{8 \cdot 10^{23}}{(4 \cdot 10^6)^2}$</div>
                     <div class="step"><strong>Шаг 2.</strong> $(4 \cdot 10^6)^2 = 1.6 \cdot 10^{13}$. <span class="formula">$g = 6.67 \cdot 10^{-11} \cdot 5 \cdot 10^{10} = 3.34$ м/с²</span></div>
@@ -732,7 +792,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 12$ кг, $g_З = 9.8$, $g_Л = 1.6$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $F_З$, $F_Л$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint6')">💡 Подсказка</button>
+                </div>
+                <div id="hint6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Сила тяжести на каждой планете: $F = mg$. Подставь массу и соответствующее $g$ для Земли и Луны. Затем найди отношение.</div>
+                        <div class="answer">✅ Ответ: $F_З = 117.6$ Н, $F_Л = 19.2$ Н</div>
+                    </div>
+                </div>
                 <div id="sol6" class="task-solution">
                     <div class="step"><span class="formula">$F_З = 12 \cdot 9.8 = 117.6$ Н</span>, <span class="formula">$F_Л = 12 \cdot 1.6 = 19.2$ Н</span></div>
                     <div class="step"><span class="formula">$\dfrac{F_З}{F_Л} = \dfrac{117.6}{19.2} = 6.125$</span></div>
@@ -749,7 +818,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 70$ кг, $a = 2$ м/с², $g = 9.8$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $P$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint7')">💡 Подсказка</button>
+                </div>
+                <div id="hint7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> При движении вверх вес увеличивается: $P = m(g + a)$. Подставь массу, $g$ и ускорение. Сравни с весом в покое $P_0 = mg$.</div>
+                        <div class="answer">✅ Ответ: $P = 826$ Н (перегрузка $\approx 1.2g$)</div>
+                    </div>
+                </div>
                 <div id="sol7" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> При движении вверх: $P = m(g + a)$.</div>
                     <div class="step"><span class="formula">$P = 70 \cdot (9.8 + 2) = 70 \cdot 11.8 = 826$ Н</span></div>
@@ -768,7 +846,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 70$ кг, $a = 3$ м/с², $g = 9.8$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $P$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint8')">💡 Подсказка</button>
+                </div>
+                <div id="hint8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> При движении вниз вес уменьшается: $P = m(g - a)$. Подставь значения.</div>
+                        <div class="answer">✅ Ответ: $P = 476$ Н (человек чувствует себя легче)</div>
+                    </div>
+                </div>
                 <div id="sol8" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> При движении вниз: $P = m(g - a)$.</div>
                     <div class="step"><span class="formula">$P = 70 \cdot (9.8 - 3) = 70 \cdot 6.8 = 476$ Н</span></div>
@@ -785,7 +872,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 60$ кг, $P = 0$, $g = 9.8$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $a$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint9')">💡 Подсказка</button>
+                </div>
+                <div id="hint9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Невесомость означает $P = 0$. Используй формулу для движения вниз: $P = m(g - a)$. Приравняй к нулю и найди $a$.</div>
+                        <div class="answer">✅ Ответ: $a = 9.8$ м/с² (свободное падение)</div>
+                    </div>
+                </div>
                 <div id="sol9" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Невесомость: $P = 0$. Формула для движения вниз: $P = m(g - a)$.</div>
                     <div class="step"><span class="formula">$0 = m(g - a) \Rightarrow a = g = 9.8$ м/с²</span></div>
@@ -802,7 +898,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $g_М = 3.7$ м/с², $P_М = 185$ Н, $g_З = 9.8$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $m$, $P_З$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint10')">💡 Подсказка</button>
+                </div>
+                <div id="hint10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Масса находится из веса на Марсе: $m = \dfrac{P_М}{g_М}$. Затем вес на Земле: $P_З = m \cdot g_З$.</div>
+                        <div class="answer">✅ Ответ: $m = 50$ кг, $P_З = 490$ Н</div>
+                    </div>
+                </div>
                 <div id="sol10" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $m = \dfrac{P_М}{g_М} = \dfrac{185}{3.7} = 50$ кг.</div>
                     <div class="step"><strong>Шаг 2.</strong> На Земле: $P_З = m \cdot g_З = 50 \cdot 9.8 = 490$ Н.</div>
@@ -822,7 +927,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $g = 3.34$ м/с², $R = 4 \cdot 10^6$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $v_1$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint11')">💡 Подсказка</button>
+                </div>
+                <div id="hint11" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Первая космическая скорость: $v_1 = \sqrt{gR}$. Подставь $g$ и радиус планеты, извлеки корень.</div>
+                        <div class="answer">✅ Ответ: $v_1 \approx 3.65$ км/с</div>
+                    </div>
+                </div>
                 <div id="sol11" class="task-solution">
                     <div class="step"><span class="formula">$v_1 = \sqrt{gR} = \sqrt{3.34 \cdot 4 \cdot 10^6} = \sqrt{1.336 \cdot 10^7} \approx 3.65 \cdot 10^3$ м/с</span></div>
                     <div class="step explanation"><strong>💡 Пояснение:</strong> Это меньше, чем на Земле (7.9 км/с), потому что планета легче.</div>
@@ -838,7 +952,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $v_1 = 3.65$ км/с</div>
                     <div class="find"><strong>🔍 Найти:</strong> $v_2$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint12')">💡 Подсказка</button>
+                </div>
+                <div id="hint12" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Вторая космическая скорость всегда в $\sqrt{2}$ раз больше первой: $v_2 = \sqrt{2} \cdot v_1$.</div>
+                        <div class="answer">✅ Ответ: $v_2 \approx 5.16$ км/с</div>
+                    </div>
+                </div>
                 <div id="sol12" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $v_2 = \sqrt{2} \cdot v_1$ (так как $v_2 = \sqrt{2gR}$, а $v_1 = \sqrt{gR}$).</div>
                     <div class="step"><span class="formula">$v_2 = \sqrt{2} \cdot 3.65 \approx 5.16$ км/с</span></div>
@@ -855,7 +978,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $r = 7 \cdot 10^6$ м, $M = 6 \cdot 10^{24}$ кг</div>
                     <div class="find"><strong>🔍 Найти:</strong> $T$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint13')">💡 Подсказка</button>
+                </div>
+                <div id="hint13" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Используй формулу периода обращения: $T = 2\pi \sqrt{\dfrac{r^3}{GM}}$. Подставь значения и вычисли.</div>
+                        <div class="answer">✅ Ответ: $T \approx 97$ мин</div>
+                    </div>
+                </div>
                 <div id="sol13" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $T = 2\pi \sqrt{\dfrac{r^3}{GM}}$</div>
                     <div class="step"><span class="formula">$T = 6.28 \sqrt{\dfrac{343 \cdot 10^{18}}{6.67 \cdot 10^{-11} \cdot 6 \cdot 10^{24}}} = 6.28 \sqrt{8.57 \cdot 10^5}$</span></div>
@@ -873,7 +1005,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $r = 2 \cdot 10^7$ м, $v = 4000$ м/с</div>
                     <div class="find"><strong>🔍 Найти:</strong> $M$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint14')">💡 Подсказка</button>
+                </div>
+                <div id="hint14" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Для круговой орбиты $v^2 = \dfrac{GM}{r}$, откуда $M = \dfrac{v^2 r}{G}$. Подставь скорость, радиус и гравитационную постоянную.</div>
+                        <div class="answer">✅ Ответ: $M \approx 4.8 \cdot 10^{24}$ кг</div>
+                    </div>
+                </div>
                 <div id="sol14" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Для круговой орбиты: $v^2 = \dfrac{GM}{r} \Rightarrow M = \dfrac{v^2 r}{G}$.</div>
                     <div class="step"><span class="formula">$M = \dfrac{4000^2 \cdot 2 \cdot 10^7}{6.67 \cdot 10^{-11}} = \dfrac{3.2 \cdot 10^{14}}{6.67 \cdot 10^{-11}} \approx 4.8 \cdot 10^{24}$ кг</span></div>
@@ -890,7 +1031,16 @@
                     <div class="given"><strong>📌 Дано:</strong> $v_{1A} = 6$ км/с, $v_{1Б} = 4$ км/с, $R_A = R_B$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\dfrac{g_A}{g_B}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint15')">💡 Подсказка</button>
+                </div>
+                <div id="hint15" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Как решать:</strong> Из $v_1 = \sqrt{gR}$ вырази $g = \dfrac{v_1^2}{R}$. Тогда отношение $\dfrac{g_A}{g_B} = \dfrac{v_{1A}^2}{v_{1Б}^2}$.</div>
+                        <div class="answer">✅ Ответ: $g_A$ в $2.25$ раза больше $g_B$</div>
+                    </div>
+                </div>
                 <div id="sol15" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $v_1 = \sqrt{gR} \Rightarrow g = \dfrac{v_1^2}{R}$.</div>
                     <div class="step"><span class="formula">$\dfrac{g_A}{g_B} = \dfrac{v_{1A}^2}{v_{1Б}^2} = \dfrac{6^2}{4^2} = \dfrac{36}{16} = 2.25$</span></div>
@@ -908,7 +1058,28 @@
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleSolution(id){
+        const el = document.getElementById(id);
+        const btn = el.previousElementSibling.querySelector('.show-solution-btn');
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent = '📖 Показать решение';
+        } else {
+            el.classList.add('open');
+            btn.textContent = '📕 Скрыть решение';
+        }
+    }
+    function toggleHint(id){
+        const el = document.getElementById(id);
+        const btn = el.previousElementSibling.querySelector('.hint-btn');
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent = '💡 Подсказка';
+        } else {
+            el.classList.add('open');
+            btn.textContent = '📕 Скрыть подсказку';
+        }
+    }
     function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
     (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
     const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
