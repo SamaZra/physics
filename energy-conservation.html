@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -62,8 +62,6 @@
         }
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
-        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
-        .theme-toggle:hover{transform:scale(1.1);}
         h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
         .section{margin-bottom:14px;}
         .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
@@ -161,9 +159,6 @@
         .task-solution .step .explanation { background: var(--info-bg); padding: 8px 12px; border-radius: 6px; margin: 8px 0; font-style: italic; color: var(--text-secondary); font-size: 0.9rem; border-left: 2px solid var(--special-border); transition: background 0.3s,color 0.3s; }
         .task-solution .step strong { color: var(--special-border); }
         .task-solution .answer { padding: 12px 18px; background: var(--special-border); color: white; border-radius: 12px; font-weight: 700; font-size: 1.15rem; text-align: center; margin-top: 10px; }
-        .favorite-btn { position: fixed; bottom: 20px; left: 20px; width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border); cursor: pointer; font-size: 26px; display: flex; align-items: center; justify-content: center; z-index: 1000; color: var(--text-secondary); transition: all 0.2s; backdrop-filter: blur(4px); }
-        .favorite-btn:hover { transform: scale(1.1); }
-        .favorite-btn.active { color: #facc15; }
         .info-display { position: absolute; top: 12px; right: 12px; background: var(--label-bg); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 12px; color: var(--label-color); font-size: 0.7rem; z-index: 15; text-align: left; border: 1px solid var(--special-border); box-shadow: 0 2px 10px var(--card-shadow); transition: background 0.3s,color 0.3s,border 0.3s; min-width: 100px; }
         .info-display div { margin: 2px 0; }
         .info-display .val { font-weight: 700; color: var(--special-border); }
@@ -237,14 +232,11 @@
             chtml: { scale: 1.2 }
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script src="es5/tex-chtml.js" async></script>
     <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
 </head>
 <body>
 <div class="container">
-    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
-    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-
     <h1>⚡ Механическая энергия. Закон сохранения энергии</h1>
 
     <!-- ТЕОРИЯ 1 -->
@@ -755,16 +747,194 @@
         </div>
     </div>
 
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения</div>
+        <div class="section-content">
+
+            <!-- Сам. задача 1 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Кинетическая энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг движется со скоростью $v = 8$ м/с. Найдите кинетическую энергию тела.</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self1')">💡 Подсказка</button>
+                </div>
+                <div id="self1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Кинетическая энергия вычисляется по формуле $E_k = \dfrac{mv^2}{2}$.</div>
+                        <div class="answer">✅ Ответ: $E_k = 160$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 2 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Потенциальная энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг поднято на высоту $h = 6$ м над поверхностью Земли. Найдите потенциальную энергию тела. ($g = 9.8$ м/с²).</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self2')">💡 Подсказка</button>
+                </div>
+                <div id="self2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Потенциальная энергия в поле тяжести: $E_p = mgh$.</div>
+                        <div class="answer">✅ Ответ: $E_p \approx 235{,}2$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 3 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. Полная механическая энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 2$ кг находится на высоте $h = 8$ м и движется со скоростью $v = 3$ м/с. Найдите полную механическую энергию тела. ($g = 9.8$ м/с²).</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self3')">💡 Подсказка</button>
+                </div>
+                <div id="self3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Полная энергия — это сумма $E = E_k + E_p$, где $E_k = \dfrac{mv^2}{2}$, $E_p = mgh$.</div>
+                        <div class="answer">✅ Ответ: $E = 165{,}8$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 4 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. Свободное падение (ЗСЭ)</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело падает с высоты $H = 30$ м без начальной скорости. Найдите скорость тела на высоте $h = 10$ м над землёй. ($g = 9.8$ м/с²).</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self4')">💡 Подсказка</button>
+                </div>
+                <div id="self4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> ЗСЭ: $mgH = mgh + \dfrac{mv^2}{2}$, откуда $v = \sqrt{2g(H - h)}$. Масса сокращается.</div>
+                        <div class="answer">✅ Ответ: $v \approx 19{,}8$ м/с</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 5 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Маятник</div>
+                <div class="task-condition"><strong>Условие:</strong> Математический маятник длиной $L = 1{,}5$ м отклонён на угол $\alpha = 60°$ и отпущен. Найдите скорость груза в нижней точке. ($g = 9.8$ м/с²).</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self5')">💡 Подсказка</button>
+                </div>
+                <div id="self5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Высота подъёма $H = L(1 - \cos\alpha)$, скорость $v = \sqrt{2gH}$.</div>
+                        <div class="answer">✅ Ответ: $v \approx 3{,}83$ м/с</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 6 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Горка с трением</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 3$ кг соскальзывает с горки высотой $h = 5$ м без начальной скорости. У основания скорость $v = 7$ м/с. Найдите количество выделившейся теплоты. ($g = 9.8$ м/с²).</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self6')">💡 Подсказка</button>
+                </div>
+                <div id="self6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $Q = E_1 - E_2 = mgh - \dfrac{mv^2}{2}$.</div>
+                        <div class="answer">✅ Ответ: $Q = 73{,}5$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 7 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Пружина</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружина жёсткостью $k = 500$ Н/м сжата на $\Delta x = 0{,}08$ м. Какую скорость приобретёт шарик массой $m = 0{,}02$ кг после освобождения пружины? Трением пренебречь.</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self7')">💡 Подсказка</button>
+                </div>
+                <div id="self7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> ЗСЭ: $\dfrac{k\Delta x^2}{2} = \dfrac{mv^2}{2}$, откуда $v = \Delta x\sqrt{\dfrac{k}{m}}$.</div>
+                        <div class="answer">✅ Ответ: $v \approx 12{,}65$ м/с</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 8 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Бросок вверх</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело брошено вертикально вверх со скоростью $v_0 = 12$ м/с. На какой высоте его кинетическая энергия уменьшится в 4 раза? ($g = 9.8$ м/с²).</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self8')">💡 Подсказка</button>
+                </div>
+                <div id="self8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Если $E_k = \dfrac{E_{k0}}{4}$, то $mgh = \dfrac{3}{4}E_{k0} = \dfrac{3}{4}\cdot\dfrac{mv_0^2}{2}$, значит $h = \dfrac{3v_0^2}{8g}$.</div>
+                        <div class="answer">✅ Ответ: $h \approx 5{,}5$ м</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 9 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. Баллистический маятник</div>
+                <div class="task-condition"><strong>Условие:</strong> Пуля массой $m = 0{,}02$ кг летит со скоростью $v = 300$ м/с и застревает в бруске массой $M = 2{,}98$ кг, подвешенном на нити. На какую высоту поднимется брусок с пулей? ($g = 9.8$ м/с²).</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self9')">💡 Подсказка</button>
+                </div>
+                <div id="self9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Сначала ЗСИ: $u = \dfrac{mv}{m+M}$. Затем ЗСЭ: $h = \dfrac{u^2}{2g}$.</div>
+                        <div class="answer">✅ Ответ: $h = 0{,}2$ м = 20 см</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 10 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. Комбинированная (ЗСИ + ЗСЭ)</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m_1 = 2$ кг, движущееся со скоростью $v_1 = 8$ м/с, сталкивается с покоящимся телом массой $m_2 = 3$ кг. Удар неупругий. Найдите скорость тел после удара, энергии до и после удара, количество выделившейся теплоты.</div>
+                <div class="btn-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                    <button class="show-solution-btn" onclick="toggleHint('self10')">💡 Подсказка</button>
+                </div>
+                <div id="self10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $u = \dfrac{m_1 v_1}{m_1+m_2}$; $E_{k1} = \dfrac{m_1 v_1^2}{2}$; $E_{k2} = \dfrac{(m_1+m_2)u^2}{2}$; $Q = E_{k1} - E_{k2}$.</div>
+                        <div class="answer">✅ Ответ: $u = 3{,}2$ м/с; $E_{k1} = 64$ Дж; $E_{k2} = 25{,}6$ Дж; $Q = 38{,}4$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div class="back-link-wrapper">
         <a href="mechanics.html" class="back-link">← Назад</a>
     </div>
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
-    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
-    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть решение';
+        }
+    }
+    function toggleHint(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling.querySelector
+            ? el.previousElementSibling.querySelector('.show-solution-btn')
+            : el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            if(btn) btn.textContent='💡 Подсказка';
+        }else{
+            el.classList.add('open');
+            if(btn) btn.textContent='📕 Скрыть подсказку';
+        }
+    }
 
     function switchModel(model) {
         document.querySelectorAll('.model-tab').forEach(tab => {
@@ -805,30 +975,22 @@
         container.style.position = 'relative';
         container.appendChild(labelRenderer.domElement);
 
-        function getLabelBg() {
-            const isLight = document.documentElement.classList.contains('light-mode');
-            return isLight ? 'rgba(255,255,255,0.92)' : 'rgba(10,15,26,0.88)';
-        }
-        function getLabelColor() {
-            const isLight = document.documentElement.classList.contains('light-mode');
-            return isLight ? '#1a2a3f' : '#ffffff';
-        }
         function makeLabel(text, color, pos, fs = '0.65rem') {
-    const div = document.createElement('div');
-    div.textContent = text;
-    div.style.color = color;;
-    div.style.fontSize = fs;
-    div.style.fontWeight = 'bold';
-    div.style.fontFamily = "'Segoe UI', sans-serif";
-    div.style.background = 'transparent';
-    div.style.padding = '0';
-    div.style.border = 'none';
-    div.style.borderRadius = '0';
-    div.style.textShadow = '0 0 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.7), 0 1px 2px rgba(0,0,0,0.6)';
-    div.style.transition = 'color 0.3s ease';
-    const lbl = new CSS2DObject(div);
-    lbl.position.copy(pos);
-    return lbl;
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            div.style.textShadow = '0 0 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.7), 0 1px 2px rgba(0,0,0,0.6)';
+            div.style.transition = 'color 0.3s ease';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
         }
         function updateSize3D() {
             const rect = container.getBoundingClientRect();
@@ -1037,7 +1199,7 @@
     })();
 </script>
 
-<!-- 3D-модель 2: Горка с трением. Дорожка на месте, горка и тело — с левого края дорожки, столбцы ещё левее -->
+<!-- 3D-модель 2: Горка с трением -->
 <script type="module">
     import * as THREE from 'three';
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -1063,31 +1225,23 @@
         container.style.position = 'relative';
         container.appendChild(labelRenderer.domElement);
 
-        function getLabelBg() {
-            const isLight = document.documentElement.classList.contains('light-mode');
-            return isLight ? 'rgba(255,255,255,0.92)' : 'rgba(10,15,26,0.88)';
-        }
-        function getLabelColor() {
-            const isLight = document.documentElement.classList.contains('light-mode');
-            return isLight ? '#1a2a3f' : '#ffffff';
-        }
         function makeLabel(text, color, pos, fs = '0.6rem') {
-    const div = document.createElement('div');
-    div.textContent = text;
-    div.style.color = color;;
-    div.style.fontSize = fs;
-    div.style.fontWeight = 'bold';
-    div.style.fontFamily = "'Segoe UI', sans-serif";
-    div.style.background = 'transparent';
-    div.style.padding = '0';
-    div.style.border = 'none';
-    div.style.borderRadius = '0';
-    div.style.textShadow = '0 0 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.7), 0 1px 2px rgba(0,0,0,0.6)';
-    div.style.transition = 'color 0.3s ease';
-    const lbl = new CSS2DObject(div);
-    lbl.position.copy(pos);
-    return lbl;
-}
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.style.border = 'none';
+            div.style.borderRadius = '0';
+            div.style.textShadow = '0 0 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.7), 0 1px 2px rgba(0,0,0,0.6)';
+            div.style.transition = 'color 0.3s ease';
+            const lbl = new CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
         function updateSize3D() {
             const rect = container.getBoundingClientRect();
             let w = rect.width, h = rect.height;
@@ -1129,7 +1283,6 @@
         const g = 9.8;
         const TIME_SCALE = 0.55;
 
-        // ===== ДОРОЖКА (земля) — ОСТАВЛЕНА НА МЕСТЕ =====
         const groundLeftX = -3.5;
         const groundRightX = 2.5;
         const groundCenterX = (groundLeftX + groundRightX) / 2;
@@ -1158,7 +1311,6 @@
         bodyShadow.rotation.x = -Math.PI / 2;
         group.add(bodyShadow);
 
-        // Вершина горки — на ЛЕВОМ КРАЮ ДОРОЖКИ
         const slopeTopX = groundLeftX;
         let slopeTopY = h0;
         let slopeLength = 0;
@@ -1190,7 +1342,6 @@
             slopeGroup.add(slopeMesh);
         }
 
-        // ===== СТОЛБЦЫ ЭНЕРГИИ — ЛЕВЕЕ ГОРКИ, ЗА ЛЕВЫМ КРАЕМ ДОРОЖКИ =====
         const barGroup = new THREE.Group();
         barGroup.position.set(groundLeftX - 2.5, -1.0, 0);
         group.add(barGroup);
@@ -1340,5 +1491,7 @@
         animate();
     })();
 </script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
 </body>
 </html>

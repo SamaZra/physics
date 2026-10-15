@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -123,7 +123,6 @@
             border: 1px solid rgba(59,130,246,0.2);
             display: inline-block;
         }
-        /* Содержимое заставки — опущено ниже через margin-top */
         .splash-content {
             text-align: center;
             z-index: 10;
@@ -162,7 +161,6 @@
             margin-top: 18px;
         }
 
-        /* ===== ПРОГРЕСС-БАР — как в математике (с жёлтой вставкой) ===== */
         .progress-wrapper {
             width: 260px;
             margin: 40px auto 0 auto;
@@ -251,28 +249,6 @@
         .main-content { padding: 80px 20px 48px; min-height: 100vh; background: var(--bg); transition: background 0.3s; }
         .container { max-width: 720px; margin: 0 auto; position: relative; padding-top: 30px; }
 
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px var(--card-shadow);
-            transition: all 0.2s ease;
-            z-index: 100;
-            color: var(--text);
-        }
-        .theme-toggle:hover { transform: scale(1.1); }
-
-        /* .header опущен ниже через margin-top */
         .header {
             text-align: center;
             margin-bottom: 24px;
@@ -465,28 +441,6 @@
             font-weight: 400;
         }
 
-        .favorite-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 26px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-            backdrop-filter: blur(4px);
-        }
-        .favorite-btn:hover { transform: scale(1.1); }
-        .favorite-btn.active { color: #facc15; }
-
         @media (max-width: 550px) {
             .main-content { padding: 60px 14px 36px; }
             .container { padding-top: 20px; }
@@ -536,8 +490,6 @@
 
 <div class="main-content">
     <div class="container" style="position: relative;">
-        <button class="theme-toggle" onclick="toggleTheme()" title="Сменить тему" id="themeBtn">🌙</button>
-
         <div class="header">
             <h1>ФИЗИКА В КАРМАНЕ</h1>
             <div class="subtitle">доступно · просто · понятно</div>
@@ -753,20 +705,40 @@
     // 1. АНИМАЦИЯ ПРОГРЕСС-БАРА (3.5 СЕКУНДЫ)
     // ============================================================
     (function() {
-        const progressBar = document.getElementById('splashProgress');
-        const percentDisplay = document.getElementById('progressPercent');
-        const splash = document.getElementById('splash');
+        var progressBar = document.getElementById('splashProgress');
+        var percentDisplay = document.getElementById('progressPercent');
+        var splash = document.getElementById('splash');
 
-        let progress = 0;
-        const duration = 3500;
-        const startTime = Date.now();
+        function hideSplash() {
+            if (splash && !splash.classList.contains('fade-out')) {
+                if (progressBar) progressBar.style.width = '100%';
+                if (percentDisplay) percentDisplay.textContent = '100%';
+                splash.classList.add('fade-out');
+                setTimeout(function() {
+                    if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+                    try { sessionStorage.setItem('splashShown', 'true'); } catch (e) {}
+                }, 600);
+            }
+        }
+
+        // Если заставка уже показывалась в этой сессии — убираем сразу
+        var alreadyShown = false;
+        try { alreadyShown = sessionStorage.getItem('splashShown') === 'true'; } catch (e) {}
+
+        if (alreadyShown) {
+            if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+            return;
+        }
+
+        var duration = 3500;
+        var startTime = Date.now();
 
         function updateProgress() {
-            const elapsed = Date.now() - startTime;
-            const rawProgress = Math.min((elapsed / duration) * 100, 100);
-            const t = rawProgress / 100;
-            const eased = 1 - Math.pow(1 - t, 2.5);
-            const currentProgress = Math.round(eased * 100);
+            var elapsed = Date.now() - startTime;
+            var rawProgress = Math.min((elapsed / duration) * 100, 100);
+            var t = rawProgress / 100;
+            var eased = 1 - Math.pow(1 - t, 2.5);
+            var currentProgress = Math.round(eased * 100);
 
             if (progressBar) progressBar.style.width = currentProgress + '%';
             if (percentDisplay) percentDisplay.textContent = currentProgress + '%';
@@ -774,44 +746,20 @@
             if (elapsed < duration) {
                 requestAnimationFrame(updateProgress);
             } else {
-                if (progressBar) progressBar.style.width = '100%';
-                if (percentDisplay) percentDisplay.textContent = '100%';
-                setTimeout(function() {
-                    if (splash) {
-                        splash.classList.add('fade-out');
-                        setTimeout(function() {
-                            if (splash) splash.remove();
-                            sessionStorage.setItem('splashShown', 'true');
-                        }, 600);
-                    }
-                }, 200);
+                hideSplash();
             }
-        }
-
-        if (sessionStorage.getItem('splashShown')) {
-            if (splash) splash.remove();
-            return;
         }
 
         requestAnimationFrame(updateProgress);
 
-        setTimeout(function() {
-            if (splash && !splash.classList.contains('fade-out')) {
-                if (progressBar) progressBar.style.width = '100%';
-                if (percentDisplay) percentDisplay.textContent = '100%';
-                splash.classList.add('fade-out');
-                setTimeout(function() {
-                    if (splash) splash.remove();
-                    sessionStorage.setItem('splashShown', 'true');
-                }, 600);
-            }
-        }, 4000);
+        // Резервный таймер — на случай, если requestAnimationFrame не сработает
+        setTimeout(hideSplash, 4200);
     })();
 
     // ============================================================
     // 2. ДАННЫЕ ДЛЯ ПОИСКА
     // ============================================================
-    const PHYSICS_DATA = [
+    var PHYSICS_DATA = [
         { "title": "Введение. Физика и методы научного познания", "url": "physics-intro-safety.html", "category": "Введение", "icon": "🔬", "desc": "Физика как наука, методы познания, техника безопасности", "keywords": ["введение", "физика", "наука", "метод", "познание", "безопасность"] },
         { "title": "Основы кинематики", "url": "kinematics-graphs-freefall.html", "category": "Механика → Кинематика", "icon": "📐", "desc": "Путь, перемещение, скорость, ускорение, графики", "keywords": ["кинематика", "путь", "перемещение", "скорость", "ускорение", "график"] },
         { "title": "Свободное падение тел", "url": "kinematics-graphs-freefall.html", "category": "Механика → Кинематика", "icon": "🪂", "desc": "Ускорение свободного падения, формулы, графики", "keywords": ["свободное падение", "g", "высота", "время", "падение"] },
@@ -839,8 +787,8 @@
         { "title": "Задачи по агрегатным состояниям с профессиональной направленностью", "url": "states-prof-problems.html", "category": "Молекулярная физика → Агрегатные состояния", "icon": "🔧", "desc": "Сварщик, электрик, автомеханик, машиностроение, ИС", "keywords": ["задачи", "профессиональные", "агрегатные состояния", "сварщик", "электрик", "автомеханик"] },
     ];
 
-    let pagesData = [];
-    let searchTimeout;
+    var pagesData = [];
+    var searchTimeout = null;
 
     function loadPagesData() {
         pagesData = PHYSICS_DATA;
@@ -851,9 +799,12 @@
     // 3. ПОИСК
     // ============================================================
     function performSearch() {
-        var query = document.getElementById('searchInput').value.toLowerCase().trim();
+        var input = document.getElementById('searchInput');
         var resultsContainer = document.getElementById('searchResults');
         var menuCard = document.getElementById('menuCard');
+        if (!input || !resultsContainer || !menuCard) return;
+
+        var query = input.value.toLowerCase().trim();
 
         if (query === '') {
             resultsContainer.classList.remove('show');
@@ -862,10 +813,10 @@
         }
 
         var results = pagesData.filter(function(page) {
-            return page.title.toLowerCase().includes(query) ||
-                   (page.keywords && page.keywords.some(function(kw) { return kw.toLowerCase().includes(query); })) ||
-                   page.category.toLowerCase().includes(query) ||
-                   (page.desc && page.desc.toLowerCase().includes(query));
+            return page.title.toLowerCase().indexOf(query) !== -1 ||
+                   (page.keywords && page.keywords.some(function(kw) { return kw.toLowerCase().indexOf(query) !== -1; })) ||
+                   page.category.toLowerCase().indexOf(query) !== -1 ||
+                   (page.desc && page.desc.toLowerCase().indexOf(query) !== -1);
         });
 
         if (results.length === 0) {
@@ -898,39 +849,16 @@
     }
 
     function clearSearch() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('searchResults').classList.remove('show');
-        document.getElementById('menuCard').style.display = 'block';
+        var input = document.getElementById('searchInput');
+        var resultsContainer = document.getElementById('searchResults');
+        var menuCard = document.getElementById('menuCard');
+        if (input) input.value = '';
+        if (resultsContainer) resultsContainer.classList.remove('show');
+        if (menuCard) menuCard.style.display = 'block';
     }
 
     // ============================================================
-    // 4. ТЕМА
-    // ============================================================
-    (function() {
-        var savedTheme = localStorage.getItem('physicsTheme');
-        if (savedTheme === 'light') {
-            document.documentElement.classList.add('light-mode');
-            var btn = document.getElementById('themeBtn');
-            if (btn) btn.textContent = '☀️';
-        }
-    })();
-
-    function toggleTheme() {
-        var html = document.documentElement;
-        var btn = document.getElementById('themeBtn');
-        if (html.classList.contains('light-mode')) {
-            html.classList.remove('light-mode');
-            localStorage.setItem('physicsTheme', 'dark');
-            if (btn) btn.textContent = '🌙';
-        } else {
-            html.classList.add('light-mode');
-            localStorage.setItem('physicsTheme', 'light');
-            if (btn) btn.textContent = '☀️';
-        }
-    }
-
-    // ============================================================
-    // 5. ГРУППЫ МЕНЮ
+    // 4. ГРУППЫ МЕНЮ
     // ============================================================
     function toggleGroup(header) {
         header.classList.toggle('open');
@@ -939,63 +867,64 @@
     }
 
     (function() {
-        var savedGroups = localStorage.getItem('physicsOpenGroups');
-        if (savedGroups) {
+        try {
+            var savedGroups = localStorage.getItem('physicsOpenGroups');
+            if (!savedGroups) return;
             var openIndices = JSON.parse(savedGroups);
             var groups = document.querySelectorAll('.group-header');
             groups.forEach(function(group, idx) {
-                if (openIndices.includes(idx)) {
+                if (openIndices.indexOf(idx) !== -1) {
                     group.classList.add('open');
                     var submenu = group.nextElementSibling;
                     if (submenu && submenu.classList.contains('submenu')) submenu.classList.add('open');
                 }
             });
-        }
+        } catch (e) {}
     })();
 
-    var allGroups = document.querySelectorAll('.group-header');
-    allGroups.forEach(function(group, idx) {
-        group.addEventListener('click', function() {
-            setTimeout(function() {
-                var openGroups = [];
-                document.querySelectorAll('.group-header').forEach(function(g, i) {
-                    if (g.classList.contains('open')) openGroups.push(i);
-                });
-                localStorage.setItem('physicsOpenGroups', JSON.stringify(openGroups));
-            }, 50);
+    // ============================================================
+    // 5. СОХРАНЕНИЕ ОТКРЫТЫХ ГРУПП
+    // ============================================================
+    (function() {
+        var allGroups = document.querySelectorAll('.group-header');
+        allGroups.forEach(function(group) {
+            group.addEventListener('click', function() {
+                setTimeout(function() {
+                    var openGroups = [];
+                    document.querySelectorAll('.group-header').forEach(function(g, i) {
+                        if (g.classList.contains('open')) openGroups.push(i);
+                    });
+                    try { localStorage.setItem('physicsOpenGroups', JSON.stringify(openGroups)); } catch (e) {}
+                }, 50);
+            });
         });
-    });
+    })();
 
     // ============================================================
     // 6. ОБРАБОТЧИКИ ПОИСКА
     // ============================================================
-    document.getElementById('searchInput').addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(performSearch, 300);
-    });
-
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+    (function() {
+        var input = document.getElementById('searchInput');
+        if (!input) return;
+        input.addEventListener('input', function() {
             clearTimeout(searchTimeout);
-            performSearch();
-        }
-    });
+            searchTimeout = setTimeout(performSearch, 300);
+        });
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimeout);
+                performSearch();
+            }
+        });
+    })();
 
     // ============================================================
-    // 7. ИЗБРАННОЕ
-    // ============================================================
-    const FAV_KEY = 'physics_favorites';
-    function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}
-    function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}
-    function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}
-    function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}
-    function updateFavoriteBtn(){const btn=document.getElementById('favoriteBtn');if(btn){if(isFavorite()){btn.textContent='★';btn.classList.add('active');}else{btn.textContent='☆';btn.classList.remove('active');}}}
-    updateFavoriteBtn();
-
-    // ============================================================
-    // 8. ИНИЦИАЛИЗАЦИЯ
+    // 7. ИНИЦИАЛИЗАЦИЯ
     // ============================================================
     loadPagesData();
 </script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
 </body>
 </html>

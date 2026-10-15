@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -62,8 +62,9 @@
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s,color 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s,color 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
 
-        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
-        .theme-toggle:hover{transform:scale(1.1);}
+        
+
+        
 
         h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
 
@@ -336,27 +337,9 @@
             margin-top: 10px;
         }
 
-        .favorite-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 26px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-            backdrop-filter: blur(4px);
-        }
-        .favorite-btn:hover { transform: scale(1.1); }
-        .favorite-btn.active { color: #facc15; }
+        
+        
+        
 
         .note-box {
             background: var(--info-bg);
@@ -466,14 +449,11 @@
             chtml: { scale: 1.2 }
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script src="es5/tex-chtml.js" async></script>
     <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
 </head>
 <body>
 <div class="container">
-    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
-    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-
     <h1>🌍 Закон всемирного тяготения.<br>Сила тяжести. Вес тела и невесомость</h1>
 
     <!-- ===== ТЕОРИЯ 1 ===== -->
@@ -1051,6 +1031,163 @@
 
         </div>
     </div>
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения</div>
+        <div class="section-content">
+
+            <!-- Самостоятельная задача 1 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Сила притяжения двух тел</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 20$ кг и $m_2 = 45$ кг находятся на расстоянии $r = 3$ м. Найдите силу их притяжения. ($G = 6.67 \cdot 10^{-11}$).</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint1')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Используйте закон всемирного тяготения $F = G \cdot \dfrac{m_1 m_2}{r^2}$.</div>
+                        <div class="answer">✅ Ответ: $F \approx 6.67 \cdot 10^{-9}$ Н</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 2 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Расстояние между телами</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 200$ кг и $m_2 = 200$ кг притягиваются с силой $F = 2.668 \cdot 10^{-8}$ Н. Найдите расстояние между ними. ($G = 6.67 \cdot 10^{-11}$).</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint2')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Выразите расстояние из закона тяготения: $r = \sqrt{G \cdot \dfrac{m_1 m_2}{F}}$.</div>
+                        <div class="answer">✅ Ответ: $r = 10$ м</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 3 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. Во сколько раз изменится сила?</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела притягиваются с силой $F$. Во сколько раз изменится сила, если расстояние <strong>уменьшить в 3 раза</strong>, а массы <strong>увеличить в 2 раза</strong>?</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint3')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Запишите новую силу $F_2 = G \cdot \dfrac{(2m_1)(2m_2)}{(r/3)^2}$ и разделите её на $F_1$.</div>
+                        <div class="answer">✅ Ответ: Сила увеличится в $36$ раз</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 4 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. Сравнение силы притяжения и веса</div>
+                <div class="task-condition"><strong>Условие:</strong> Два шара массами $m_1 = 150$ кг и $m_2 = 250$ кг на расстоянии $r = 4$ м. Найдите силу притяжения. Сравните её с весом тела массой $2$ кг. ($G = 6.67 \cdot 10^{-11}$, $g = 9.8$).</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint4')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Найдите $F$ по закону тяготения и вес $P = mg$ для 2 кг. Затем найдите отношение $P/F$.</div>
+                        <div class="answer">✅ Ответ: $F \approx 1.56 \cdot 10^{-7}$ Н; вес 2 кг больше примерно в $1.26 \cdot 10^8$ раз</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 5 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Ускорение свободного падения на планете</div>
+                <div class="task-condition"><strong>Условие:</strong> Планета имеет массу $M = 5 \cdot 10^{23}$ кг и радиус $R = 3 \cdot 10^6$ м. Найдите $g$ на поверхности. ($G = 6.67 \cdot 10^{-11}$).</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint5')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Используйте формулу $g = G \cdot \dfrac{M}{R^2}$.</div>
+                        <div class="answer">✅ Ответ: $g \approx 3.71$ м/с²</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 6 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Сравнение силы тяжести на Земле и на Луне</div>
+                <div class="task-condition"><strong>Условие:</strong> На Земле $g_З = 9.8$ м/с², на Луне $g_Л = 1.6$ м/с². Тело массой $m = 25$ кг. Найдите силу тяжести на Земле и на Луне.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint6')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Сила тяжести $F = mg$. Подставьте массу и соответствующее $g$ для Земли и Луны.</div>
+                        <div class="answer">✅ Ответ: $F_З = 245$ Н, $F_Л = 40$ Н</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 7 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Вес в лифте (подъём)</div>
+                <div class="task-condition"><strong>Условие:</strong> Человек массой $m = 80$ кг в лифте, который поднимается вверх с ускорением $a = 1.5$ м/с². Найдите вес. ($g = 9.8$).</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint7')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> При движении вверх вес увеличивается: $P = m(g + a)$.</div>
+                        <div class="answer">✅ Ответ: $P = 904$ Н</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 8 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Вес в лифте (спуск)</div>
+                <div class="task-condition"><strong>Условие:</strong> Тот же человек ($m = 80$ кг) в лифте, который опускается вниз с ускорением $a = 2.5$ м/с². Найдите вес. ($g = 9.8$).</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint8')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> При движении вниз вес уменьшается: $P = m(g - a)$.</div>
+                        <div class="answer">✅ Ответ: $P = 584$ Н</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 9 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. Невесомость в лифте</div>
+                <div class="task-condition"><strong>Условие:</strong> С каким ускорением должен двигаться лифт, чтобы человек массой $m = 75$ кг оказался в состоянии невесомости?</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint9')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Невесомость означает $P = 0$. Используйте формулу для движения вниз: $P = m(g - a)$.</div>
+                        <div class="answer">✅ Ответ: $a = 9.8$ м/с²</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 10 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. Масса по весу на другой планете</div>
+                <div class="task-condition"><strong>Условие:</strong> На Марсе $g_М = 3.7$ м/с². Тело весит $P = 222$ Н. Найдите массу тела и его вес на Земле. ($g_З = 9.8$).</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint10')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Масса находится из веса на Марсе: $m = \dfrac{P_М}{g_М}$. Затем вес на Земле: $P_З = m \cdot g_З$.</div>
+                        <div class="answer">✅ Ответ: $m = 60$ кг, $P_З = 588$ Н</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     <div class="back-link-wrapper">
         <a href="mechanics.html" class="back-link">← Назад</a>
@@ -1080,9 +1217,9 @@
             btn.textContent = '📕 Скрыть подсказку';
         }
     }
-    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    
     (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+    
 </script>
 
 <!-- 3D-модель -->
@@ -1312,5 +1449,7 @@
         animate();
     })();
 </script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
 </body>
 </html>

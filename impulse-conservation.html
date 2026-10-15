@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -54,8 +54,9 @@
         }
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
-        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
-        .theme-toggle:hover{transform:scale(1.1);}
+        
+
+        
         h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
         .section{margin-bottom:14px;}
         .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
@@ -283,6 +284,18 @@
             transition: all 0.2s;
         }
         .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
+        .hint-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .hint-btn:hover { transform: scale(1.03); opacity: 0.9; }
         .task-solution { display: none; margin-top: 12px; }
         .task-solution.open { display: block; }
         .task-solution .step {
@@ -328,27 +341,9 @@
             text-align: center;
             margin-top: 10px;
         }
-        .favorite-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 26px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-            backdrop-filter: blur(4px);
-        }
-        .favorite-btn:hover { transform: scale(1.1); }
-        .favorite-btn.active { color: #facc15; }
+        
+        
+        
         .info-display {
             position: absolute;
             top: 12px;
@@ -462,14 +457,11 @@
             chtml: { scale: 1.2 }
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script src="es5/tex-chtml.js" async></script>
     <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
 </head>
 <body>
 <div class="container">
-    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
-    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-
     <h1>Импульс. Закон сохранения импульса. Работа. Мощность</h1>
 
     <!-- ТЕОРИЯ 1: Импульс и ЗСИ -->
@@ -653,6 +645,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $p$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint1')">💡 Подсказка</button>
+                <div id="hint1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Импульс находится по формуле $p = mv$.</div>
+                        <div class="answer">✅ Ответ: $p = 12$ кг·м/с</div>
+                    </div>
+                </div>
                 <div id="sol1" class="task-solution">
                     <div class="step"><span class="formula">$p = mv = 3 \cdot 4 = 12$ кг·м/с</span></div>
                     <div class="answer">✅ Ответ: $p = 12$ кг·м/с</div>
@@ -668,6 +667,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $A$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint2')">💡 Подсказка</button>
+                <div id="hint2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Работа равна произведению силы на перемещение: $A = FS$.</div>
+                        <div class="answer">✅ Ответ: $A = 100$ Дж</div>
+                    </div>
+                </div>
                 <div id="sol2" class="task-solution">
                     <div class="step"><span class="formula">$A = F S = 20 \cdot 5 = 100$ Дж</span></div>
                     <div class="answer">✅ Ответ: $A = 100$ Дж</div>
@@ -683,6 +689,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $N$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint3')">💡 Подсказка</button>
+                <div id="hint3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Мощность — это работа, делённая на время: $N = A/t$.</div>
+                        <div class="answer">✅ Ответ: $N = 60$ Вт</div>
+                    </div>
+                </div>
                 <div id="sol3" class="task-solution">
                     <div class="step"><span class="formula">$N = \frac{A}{t} = \frac{600}{10} = 60$ Вт</span></div>
                     <div class="answer">✅ Ответ: $N = 60$ Вт</div>
@@ -698,6 +711,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $v'$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint4')">💡 Подсказка</button>
+                <div id="hint4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> При неупругом ударе тела слипаются, используйте ЗСИ: $m_1v_1 + m_2v_2 = (m_1+m_2)v'$.</div>
+                        <div class="answer">✅ Ответ: $v' \approx 2.33$ м/с</div>
+                    </div>
+                </div>
                 <div id="sol4" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> ЗСИ: $m_1 v_1 + m_2 v_2 = (m_1 + m_2) v'$.</div>
                     <div class="step"><strong>Шаг 2.</strong> $2 \cdot 3 + 1 \cdot 1 = (2 + 1) v' \Rightarrow 6 + 1 = 3v' \Rightarrow v' = \frac{7}{3} \approx 2.33$ м/с.</div>
@@ -715,6 +735,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $v_1'$, $v_2'$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint5')">💡 Подсказка</button>
+                <div id="hint5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Для упругого удара используйте ЗСИ и ЗСЭ. Учтите знак скорости второго шара.</div>
+                        <div class="answer">✅ Ответ: $v_1' = -2$ м/с, $v_2' = 1$ м/с</div>
+                    </div>
+                </div>
                 <div id="sol5" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> ЗСИ: $1 \cdot 2 + 2 \cdot (-1) = 1 \cdot v_1' + 2 \cdot v_2' \Rightarrow 0 = v_1' + 2v_2'$.</div>
                     <div class="step"><strong>Шаг 2.</strong> ЗСЭ: $\frac{1}{2} \cdot 1 \cdot 2^2 + \frac{1}{2} \cdot 2 \cdot 1^2 = \frac{1}{2} \cdot 1 \cdot v_1'^2 + \frac{1}{2} \cdot 2 \cdot v_2'^2 \Rightarrow 2 + 1 = 0.5 v_1'^2 + v_2'^2$.</div>
@@ -734,6 +761,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $v'$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint6')">💡 Подсказка</button>
+                <div id="hint6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> ЗСИ с учётом скорости топлива относительно Земли: $v_{топл} = v - u$.</div>
+                        <div class="answer">✅ Ответ: $v' \approx 3.11$ м/с</div>
+                    </div>
+                </div>
                 <div id="sol6" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> ЗСИ: $M v = (M - m) v' + m (v - u)$.</div>
                     <div class="step"><strong>Шаг 2.</strong> $10 \cdot 2 = (10 - 1) v' + 1 \cdot (2 - 10) \Rightarrow 20 = 9v' - 8 \Rightarrow 9v' = 28 \Rightarrow v' \approx 3.11$ м/с.</div>
@@ -751,6 +785,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $A$, $S$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint7')">💡 Подсказка</button>
+                <div id="hint7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Работа равна изменению кинетической энергии: $A = \Delta E_k = \frac{mv^2}{2}$.</div>
+                        <div class="answer">✅ Ответ: $A = 36$ Дж, $S = 3$ м</div>
+                    </div>
+                </div>
                 <div id="sol7" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $A = \Delta E_k = \frac{mv^2}{2} - 0 = \frac{2 \cdot 36}{2} = 36$ Дж.</div>
                     <div class="step"><strong>Шаг 2.</strong> $A = F S \Rightarrow S = \frac{A}{F} = \frac{36}{12} = 3$ м.</div>
@@ -768,6 +809,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $N$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint8')">💡 Подсказка</button>
+                <div id="hint8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> При постоянной скорости мощность равна $N = Fv$.</div>
+                        <div class="answer">✅ Ответ: $N = 40$ кВт</div>
+                    </div>
+                </div>
                 <div id="sol8" class="task-solution">
                     <div class="step"><span class="formula">$N = F v = 2000 \cdot 20 = 40000$ Вт $= 40$ кВт</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Мощность — это скорость совершения работы. При движении с постоянной скоростью $N = F v$.</div>
@@ -784,6 +832,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint9')">💡 Подсказка</button>
+                <div id="hint9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> КПД — это отношение полезной работы к затраченной, умноженное на 100%.</div>
+                        <div class="answer">✅ Ответ: $\eta = 62.5\%$</div>
+                    </div>
+                </div>
                 <div id="sol9" class="task-solution">
                     <div class="step"><span class="formula">$\eta = \frac{A_{пол}}{A_{затр}} \cdot 100\% = \frac{500}{800} \cdot 100\% = 62.5\%$</span></div>
                     <div class="answer">✅ Ответ: $\eta = 62.5\%$</div>
@@ -799,6 +854,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $A_{тр}$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint10')">💡 Подсказка</button>
+                <div id="hint10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Сила трения $F_{тр} = \mu mg$, работа отрицательна, так как направлена против движения.</div>
+                        <div class="answer">✅ Ответ: $A_{тр} = -39.2$ Дж</div>
+                    </div>
+                </div>
                 <div id="sol10" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $F_{тр} = \mu mg = 0.2 \cdot 5 \cdot 9.8 = 9.8$ Н.</div>
                     <div class="step"><strong>Шаг 2.</strong> Работа силы трения: $A_{тр} = -F_{тр} S = -9.8 \cdot 4 = -39.2$ Дж.</div>
@@ -816,6 +878,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $v_1'$, $v_2'$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint11')">💡 Подсказка</button>
+                <div id="hint11" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Упругий удар: используйте ЗСИ и ЗСЭ, второе тело покоится ($v_2 = 0$).</div>
+                        <div class="answer">✅ Ответ: $v_1' = -2$ м/с, $v_2' = 2$ м/с</div>
+                    </div>
+                </div>
                 <div id="sol11" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> ЗСИ: $1 \cdot 4 + 3 \cdot 0 = 1 \cdot v_1' + 3 \cdot v_2' \Rightarrow 4 = v_1' + 3v_2'$.</div>
                     <div class="step"><strong>Шаг 2.</strong> ЗСЭ: $\frac{1}{2} \cdot 1 \cdot 16 = \frac{1}{2} \cdot 1 \cdot v_1'^2 + \frac{1}{2} \cdot 3 \cdot v_2'^2 \Rightarrow 16 = v_1'^2 + 3v_2'^2$.</div>
@@ -834,6 +903,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $A_{тяж}$, $A_{под}$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint12')">💡 Подсказка</button>
+                <div id="hint12" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Работа силы тяжести $A_{тяж} = -mgh$, работа подъёмной силы $A_{под} = mgh$.</div>
+                        <div class="answer">✅ Ответ: $A_{тяж} = -980$ Дж, $A_{под} = 980$ Дж</div>
+                    </div>
+                </div>
                 <div id="sol12" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $A_{тяж} = -mgh = -20 \cdot 9.8 \cdot 5 = -980$ Дж.</div>
                     <div class="step"><strong>Шаг 2.</strong> Так как скорость постоянна, $F_{под} = mg = 196$ Н. $A_{под} = F_{под} \cdot h = 196 \cdot 5 = 980$ Дж.</div>
@@ -851,6 +927,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $m$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint13')">💡 Подсказка</button>
+                <div id="hint13" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $A = Nt$, затем $m = A/(gh)$.</div>
+                        <div class="answer">✅ Ответ: $m \approx 306$ кг</div>
+                    </div>
+                </div>
                 <div id="sol13" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $A = N t = 500 \cdot 60 = 30000$ Дж.</div>
                     <div class="step"><strong>Шаг 2.</strong> $A = mgh \Rightarrow m = \frac{A}{gh} = \frac{30000}{9.8 \cdot 10} \approx 306.1$ кг.</div>
@@ -867,6 +950,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $E_k$, $E_p$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint14')">💡 Подсказка</button>
+                <div id="hint14" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Полная энергия $E = \frac{mv_0^2}{2}$, потенциальная $E_p = mgh$, кинетическая $E_k = E - E_p$.</div>
+                        <div class="answer">✅ Ответ: $E_k = 41.2$ Дж, $E_p = 58.8$ Дж</div>
+                    </div>
+                </div>
                 <div id="sol14" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $E_p = mgh = 2 \cdot 9.8 \cdot 3 = 58.8$ Дж.</div>
                     <div class="step"><strong>Шаг 2.</strong> Полная энергия: $E = \frac{mv_0^2}{2} = \frac{2 \cdot 100}{2} = 100$ Дж.</div>
@@ -885,6 +975,13 @@
                     <div class="find"><strong>🔍 Найти:</strong> $v'$, $\Delta E$, $Q$</div>
                 </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <button class="hint-btn" onclick="toggleHint('hint15')">💡 Подсказка</button>
+                <div id="hint15" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Неупругий удар: ЗСИ для общей скорости, потеря энергии равна выделившейся теплоте $Q = E_0 - E_k$.</div>
+                        <div class="answer">✅ Ответ: $v' = -\frac{1}{3}$ м/с, $Q \approx 8.33$ Дж</div>
+                    </div>
+                </div>
                 <div id="sol15" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> ЗСИ: $m_1 v_1 + m_2 v_2 = (m_1 + m_2) v' \Rightarrow 1 \cdot 3 + 2 \cdot (-2) = 3v' \Rightarrow 3 - 4 = 3v' \Rightarrow v' = -\frac{1}{3}$ м/с.</div>
                     <div class="step"><strong>Шаг 2.</strong> Начальная энергия: $E_0 = \frac{1}{2} \cdot 1 \cdot 9 + \frac{1}{2} \cdot 2 \cdot 4 = 4.5 + 4 = 8.5$ Дж.</div>
@@ -898,6 +995,164 @@
         </div>
     </div>
 
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения</div>
+        <div class="section-content">
+
+            <!-- Самостоятельная задача 1 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Импульс тела</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг движется со скоростью $v = 6$ м/с. Найдите импульс тела.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint1')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Импульс находится по формуле $p = mv$.</div>
+                        <div class="answer">✅ Ответ: $p = 30$ кг·м/с</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 2 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Работа силы</div>
+                <div class="task-condition"><strong>Условие:</strong> Сила $F = 30$ Н перемещает тело на $S = 4$ м в направлении силы. Найдите работу.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint2')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Работа равна произведению силы на перемещение: $A = FS$.</div>
+                        <div class="answer">✅ Ответ: $A = 120$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 3 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. Мощность</div>
+                <div class="task-condition"><strong>Условие:</strong> Работа $A = 900$ Дж совершена за $t = 15$ с. Найдите мощность.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint3')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Мощность — это работа, делённая на время: $N = A/t$.</div>
+                        <div class="answer">✅ Ответ: $N = 60$ Вт</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 4 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. Неупругий удар</div>
+                <div class="task-condition"><strong>Условие:</strong> Шар массой $m_1 = 3$ кг, движущийся со скоростью $v_1 = 4$ м/с, догоняет шар массой $m_2 = 1$ кг, движущийся со скоростью $v_2 = 2$ м/с в том же направлении. Происходит неупругий удар. Найдите скорость шаров после удара.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint4')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> При неупругом ударе тела слипаются, используйте ЗСИ: $m_1v_1 + m_2v_2 = (m_1+m_2)v'$.</div>
+                        <div class="answer">✅ Ответ: $v' = 3.5$ м/с</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 5 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Упругий удар</div>
+                <div class="task-condition"><strong>Условие:</strong> Два шара массами $m_1 = 2$ кг и $m_2 = 3$ кг движутся навстречу друг другу со скоростями $v_1 = 3$ м/с и $v_2 = 2$ м/с. Происходит центральный упругий удар. Найдите скорости шаров после удара.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint5')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Для упругого удара используйте ЗСИ и ЗСЭ. Учтите знак скорости второго шара.</div>
+                        <div class="answer">✅ Ответ: $v_1' = -3.4$ м/с, $v_2' = 1.6$ м/с</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 6 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Реактивное движение</div>
+                <div class="task-condition"><strong>Условие:</strong> Ракета массой $M = 12$ кг (вместе с топливом) движется со скоростью $v = 3$ м/с. Из неё выбрасывается порция топлива массой $m = 2$ кг со скоростью $u = 8$ м/с относительно ракеты в направлении, противоположном движению. Найдите скорость ракеты после выброса.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint6')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> ЗСИ с учётом скорости топлива относительно Земли: $v_{топл} = v - u$.</div>
+                        <div class="answer">✅ Ответ: $v' \approx 4.6$ м/с</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 7 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Работа и изменение кинетической энергии</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг разгоняется из состояния покоя до скорости $v = 5$ м/с под действием силы $F = 10$ Н. Найдите работу силы и путь, пройденный телом.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint7')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Работа равна изменению кинетической энергии: $A = \Delta E_k = \frac{mv^2}{2}$.</div>
+                        <div class="answer">✅ Ответ: $A = 50$ Дж, $S = 5$ м</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 8 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Мощность и скорость</div>
+                <div class="task-condition"><strong>Условие:</strong> Автомобиль массой $m = 1500$ кг движется со скоростью $v = 15$ м/с. Сила тяги двигателя $F = 3000$ Н. Найдите мощность двигателя.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint8')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> При постоянной скорости мощность равна $N = Fv$.</div>
+                        <div class="answer">✅ Ответ: $N = 45$ кВт</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 9 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. КПД</div>
+                <div class="task-condition"><strong>Условие:</strong> Двигатель совершил полезную работу $A_{пол} = 600$ Дж, затратив $A_{затр} = 1000$ Дж энергии. Найдите КПД двигателя.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint9')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> КПД — это отношение полезной работы к затраченной, умноженное на 100%.</div>
+                        <div class="answer">✅ Ответ: $\eta = 60\%$</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Самостоятельная задача 10 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. Комбинированная задача</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 2$ кг и $m_2 = 3$ кг движутся навстречу друг другу со скоростями $v_1 = 4$ м/с и $v_2 = 3$ м/с. Происходит неупругий удар. Найдите скорость после удара и количество теплоты, выделившееся при ударе.</div>
+                <div class="btn-row">
+                    <button class="hint-btn" onclick="toggleHint('self-hint10')">💡 Подсказка</button>
+                </div>
+                <div id="self-hint10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Неупругий удар: ЗСИ для общей скорости, потеря энергии равна выделившейся теплоте $Q = E_0 - E_k$.</div>
+                        <div class="answer">✅ Ответ: $v' = -0.2$ м/с, $Q \approx 24.9$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <!-- Кнопка Назад по центру -->
     <div class="back-link-wrapper">
         <a href="mechanics.html" class="back-link">← Назад</a>
@@ -905,10 +1160,31 @@
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
-    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть решение';
+        }
+    }
+    function toggleHint(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='💡 Подсказка';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть подсказку';
+        }
+    }
+    
     (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}updateFavoriteBtn();
+    
 
     function switchModel(model) {
         document.querySelectorAll('.model-tab').forEach(tab => {
@@ -1050,7 +1326,6 @@
         sphere2.position.set(pos2, r2Init, 0);
         group.add(sphere2);
 
-        // ===== ТЕНИ ШАРОВ =====
         const shadowMat1 = new THREE.MeshBasicMaterial({
             color: 0x000000,
             transparent: true,
@@ -1092,7 +1367,6 @@
         group.add(arrowGroup1);
         group.add(arrowGroup2);
 
-        // ==== updateArrow: теперь принимает hex (для 3D) и cssColor (для подписи) ====
         function updateArrow(sphere, v, group, hexColor, cssColor) {
             while(group.children.length) { const c = group.children[0]; group.remove(c); if(c.geometry) c.geometry.dispose(); }
             if (Math.abs(v) > 0.01) {
@@ -1151,7 +1425,6 @@
             phase = 'idle';
             animating = false;
             startBtn.textContent = '💥 Удар';
-            // Тело 1 — зелёный, тело 2 — красный
             updateArrow(sphere1, v1, arrowGroup1, 0x44ff88, '#44ff88');
             updateArrow(sphere2, v2, arrowGroup2, 0xff4444, '#ff4444');
             updateInfo();
@@ -1469,7 +1742,6 @@
             while(speedArrowGroup.children.length) { const c = speedArrowGroup.children[0]; speedArrowGroup.remove(c); if(c.geometry) c.geometry.dispose(); }
             while(arcGroup.children.length) { const c = arcGroup.children[0]; arcGroup.remove(c); if(c.geometry) c.geometry.dispose(); }
 
-            // Вектор силы
             if (F > 0.1 && pos < 3) {
                 const alphaRad2 = alphaDeg * Math.PI / 180;
                 const len = Math.min(F * 0.15, 1.2);
@@ -1480,7 +1752,6 @@
                 arrowGroup.add(label);
             }
 
-            // Вектор скорости
             if (v > 0.01) {
                 const len = Math.min(v * 0.2, 1.0);
                 const end = box.position.clone().add(new THREE.Vector3(len, 0, 0));
@@ -1490,7 +1761,6 @@
                 speedArrowGroup.add(label);
             }
 
-            // ===== ДУГА УГЛА α =====
             if (alphaDeg > 1 && alphaDeg < 89 && pos < 3) {
                 const arcCenter = new THREE.Vector3(box.position.x, box.position.y, 0);
                 const arcRadius = 0.55;
@@ -1603,5 +1873,7 @@
         animate();
     })();
 </script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
 </body>
 </html>

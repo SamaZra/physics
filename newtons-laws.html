@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -52,8 +52,9 @@
         }
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
-        .theme-toggle{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--card-shadow);transition:all 0.2s;z-index:100;color:var(--text);}
-        .theme-toggle:hover{transform:scale(1.1);}
+        
+
+        
         h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
         .model-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
         .model-tab { padding: 8px 16px; border-radius: 20px; background: var(--card-bg); color: var(--text-secondary); border: 1px solid var(--border); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.3s; }
@@ -97,9 +98,9 @@
         .back-link-wrapper { display: flex; justify-content: center; margin: 16px 0 8px; }
         .back-link{ display:inline-block; padding:10px 20px; background:var(--special-border); color:white; text-decoration:none; font-weight:bold; border-radius:20px; font-size:0.95rem; transition:background 0.2s; }
         .back-link:hover{opacity:0.8;}
-        .favorite-btn { position: fixed; bottom: 20px; left: 20px; width: 44px; height: 44px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border); cursor: pointer; font-size: 26px; display: flex; align-items: center; justify-content: center; z-index: 1000; color: var(--text-secondary); transition: all 0.2s; backdrop-filter: blur(4px); }
-        .favorite-btn:hover { transform: scale(1.1); }
-        .favorite-btn.active { color: #facc15; }
+        
+        
+        
         .note-box { background: var(--info-bg); border-left: 4px solid var(--special-border); border-radius: 18px; padding: 16px 18px; margin: 16px 0; font-size: 1rem; line-height: 1.8; color: var(--text); transition: background 0.3s,color 0.3s; }
         .note-box .important { color: var(--special-border); font-weight: 700; }
         .force-legend { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: var(--label-bg); backdrop-filter: blur(8px); padding: 4px 14px; border-radius: 20px; color: var(--label-color); font-size: 0.6rem; z-index: 10; display: flex; gap: 16px; align-items: center; border: 1px solid var(--special-border); box-shadow: 0 2px 10px var(--card-shadow); transition: background 0.3s,color 0.3s,border 0.3s; flex-wrap: wrap; justify-content: center; }
@@ -163,14 +164,11 @@
             chtml: { scale: 1.2 }
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script src="es5/tex-chtml.js" async></script>
     <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
 </head>
 <body>
 <div class="container">
-    <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
-    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-
     <h1>📜 Законы Ньютона</h1>
 
     <!-- Вкладки -->
@@ -885,9 +883,9 @@
 </div>
 
 <script>
-    function toggleTheme(){const html=document.documentElement;const btn=document.getElementById('themeBtn');if(html.classList.contains('light-mode')){html.classList.remove('light-mode');localStorage.setItem('physicsTheme','dark');btn.textContent='🌙';}else{html.classList.add('light-mode');localStorage.setItem('physicsTheme','light');btn.textContent='☀️';}}
+    
     (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    const FAV_KEY='physics_favorites';function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}function isFavorite(){const u=window.location.pathname.split('/').pop();return getFavorites().includes(u);}function toggleFavorite(){const u=window.location.pathname.split('/').pop();let f=getFavorites();const btn=document.getElementById('favoriteBtn');if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}else{f.push(u);btn.textContent='★';btn.classList.add('active');}saveFavorites(f);}function updateFavoriteBtn(){const btn=document.getElementById('favoriteBtn');if(btn){if(isFavorite()){btn.textContent='★';btn.classList.add('active');}else{btn.textContent='☆';btn.classList.remove('active');}}}updateFavoriteBtn();
+    
 
     function toggleSolution(id){
         const el = document.getElementById(id);
@@ -1838,5 +1836,7 @@
         animate();
     })();
 </script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
 </body>
 </html>

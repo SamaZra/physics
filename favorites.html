@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -48,24 +48,9 @@
             position: relative;
         }
 
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            color: var(--text);
-        }
-        .theme-toggle:hover { transform: scale(1.1); }
+        
+
+        
 
         .header {
             text-align: center;
@@ -193,8 +178,6 @@
 </head>
 <body>
 <div class="container">
-    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-
     <div class="header">
         <h1>⭐ Избранное</h1>
         <div class="subtitle">Ваши сохранённые страницы</div>
@@ -426,14 +409,7 @@
         }
     })();
 
-    function toggleTheme() {
-        const html = document.documentElement;
-        const btn = document.getElementById('themeBtn');
-        if (html.classList.contains('light-mode')) {
-            html.classList.remove('light-mode');
-            localStorage.setItem('mathTheme', 'dark');
-            btn.textContent = '🌙';
-        } else {
+     else {
             html.classList.add('light-mode');
             localStorage.setItem('mathTheme', 'light');
             btn.textContent = '☀️';
@@ -444,5 +420,7 @@
 
     renderFavorites();
 </script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
 </body>
 </html>

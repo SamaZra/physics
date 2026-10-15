@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -102,26 +102,6 @@
         }
         .page-title .icon { font-size: 1.8rem; }
 
-        .theme-toggle {
-            position: absolute;
-            top: -34px;
-            right: 0;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 6px var(--card-shadow);
-            transition: all 0.2s ease;
-            color: var(--text);
-        }
-        .theme-toggle:hover { transform: scale(1.1); }
-
         /* ===== МЕНЮ ===== */
         .menu-card {
             background: var(--menu-card-bg);
@@ -202,36 +182,11 @@
             transition: color 0.3s;
         }
 
-        /* ===== ИЗБРАННОЕ (фиксированная кнопка внизу слева) ===== */
-        .favorite-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 26px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 2px 10px var(--card-shadow);
-        }
-        .favorite-btn:hover { transform: scale(1.1); }
-        .favorite-btn.active { color: #facc15; }
-
         @media (max-width: 550px) {
             body { padding: 4px; }
             .container { padding: 44px 12px 36px; border-radius: 16px; }
             .page-title { font-size: 1.2rem; }
             .page-title .icon { font-size: 1.5rem; }
-            .theme-toggle { top: -30px; width: 32px; height: 32px; font-size: 16px; }
             .group-header { padding: 14px 16px; }
             .submenu-item { padding: 12px 14px 12px 36px; }
             .group-icon { width: 40px; height: 40px; font-size: 20px; margin-right: 12px; }
@@ -239,7 +194,6 @@
             .group-title { font-size: 0.95rem; }
             .submenu-title { font-size: 0.88rem; }
             .back-link-bottom { font-size: 0.8rem; padding: 8px 16px; }
-            .favorite-btn { width: 38px; height: 38px; font-size: 20px; bottom: 12px; left: 12px; }
         }
     </style>
 </head>
@@ -248,7 +202,6 @@
 <div class="container">
     <!-- ===== ВЕРХНЯЯ ПАНЕЛЬ ===== -->
     <div class="top-bar">
-        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
         <div class="page-title">
             <span>Механика</span>
         </div>
@@ -350,38 +303,9 @@
 
 </div>
 
-<!-- ===== ИЗБРАННОЕ (фиксированная кнопка) ===== -->
-<button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">☆</button>
-
 <script>
     // ============================================================
-    // 1. ТЕМА
-    // ============================================================
-    (function() {
-        var savedTheme = localStorage.getItem('physicsTheme');
-        if (savedTheme === 'light') {
-            document.documentElement.classList.add('light-mode');
-            var btn = document.getElementById('themeBtn');
-            if (btn) btn.textContent = '☀️';
-        }
-    })();
-
-    function toggleTheme() {
-        var html = document.documentElement;
-        var btn = document.getElementById('themeBtn');
-        if (html.classList.contains('light-mode')) {
-            html.classList.remove('light-mode');
-            localStorage.setItem('physicsTheme', 'dark');
-            if (btn) btn.textContent = '🌙';
-        } else {
-            html.classList.add('light-mode');
-            localStorage.setItem('physicsTheme', 'light');
-            if (btn) btn.textContent = '☀️';
-        }
-    }
-
-    // ============================================================
-    // 2. ГРУППЫ МЕНЮ (раскрывающиеся списки)
+    // 1. ГРУППЫ МЕНЮ (раскрывающиеся списки)
     // ============================================================
     function toggleGroup(header) {
         header.classList.toggle('open');
@@ -391,57 +315,38 @@
     }
 
     function saveOpenGroups() {
-        var openGroups = [];
-        document.querySelectorAll('.group-header').forEach(function(g) {
-            if (g.classList.contains('open')) {
-                var id = g.getAttribute('data-group');
-                if (id) openGroups.push(id);
-            }
-        });
-        localStorage.setItem('physicsMechanicsGroups', JSON.stringify(openGroups));
+        try {
+            var openGroups = [];
+            document.querySelectorAll('.group-header').forEach(function(g) {
+                if (g.classList.contains('open')) {
+                    var id = g.getAttribute('data-group');
+                    if (id) openGroups.push(id);
+                }
+            });
+            localStorage.setItem('physicsMechanicsGroups', JSON.stringify(openGroups));
+        } catch (e) {}
     }
 
     // Восстанавливаем состояние групп по data-group
     (function() {
-        var savedGroups = localStorage.getItem('physicsMechanicsGroups');
-        if (!savedGroups) return;
-        var openIds;
-        try { openIds = JSON.parse(savedGroups); } catch (e) { return; }
-        if (!Array.isArray(openIds)) return;
-        document.querySelectorAll('.group-header').forEach(function(group) {
-            var id = group.getAttribute('data-group');
-            if (id && openIds.includes(id)) {
-                group.classList.add('open');
-                var submenu = group.nextElementSibling;
-                if (submenu && submenu.classList.contains('submenu')) submenu.classList.add('open');
-            }
-        });
+        try {
+            var savedGroups = localStorage.getItem('physicsMechanicsGroups');
+            if (!savedGroups) return;
+            var openIds = JSON.parse(savedGroups);
+            if (!Array.isArray(openIds)) return;
+            document.querySelectorAll('.group-header').forEach(function(group) {
+                var id = group.getAttribute('data-group');
+                if (id && openIds.indexOf(id) !== -1) {
+                    group.classList.add('open');
+                    var submenu = group.nextElementSibling;
+                    if (submenu && submenu.classList.contains('submenu')) submenu.classList.add('open');
+                }
+            });
+        } catch (e) {}
     })();
 
     // ============================================================
-    // 3. ИЗБРАННОЕ
-    // ============================================================
-    const FAV_KEY = 'physics_favorites';
-    function getFavorites(){const s=localStorage.getItem(FAV_KEY);return s?JSON.parse(s):[];}
-    function saveFavorites(f){localStorage.setItem(FAV_KEY,JSON.stringify(f));}
-    function currentPage(){return window.location.pathname.split('/').pop() || 'index.html';}
-    function isFavorite(){const u=currentPage();return getFavorites().includes(u);}
-    function toggleFavorite(){
-        const u=currentPage();
-        let f=getFavorites();
-        const btn=document.getElementById('favoriteBtn');
-        if(f.includes(u)){f=f.filter(x=>x!==u);btn.textContent='☆';btn.classList.remove('active');}
-        else{f.push(u);btn.textContent='★';btn.classList.add('active');}
-        saveFavorites(f);
-    }
-    function updateFavoriteBtn(){
-        const btn=document.getElementById('favoriteBtn');
-        if(btn){if(isFavorite()){btn.textContent='★';btn.classList.add('active');}else{btn.textContent='☆';btn.classList.remove('active');}}
-    }
-    updateFavoriteBtn();
-
-    // ============================================================
-    // 4. PWA
+    // 2. PWA
     // ============================================================
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
@@ -449,5 +354,8 @@
             .catch(function() { console.log('❌ Ошибка регистрации Service Worker'); });
     }
 </script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
 </body>
 </html>

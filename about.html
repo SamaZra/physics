@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -47,29 +47,10 @@
             position: relative;
         }
 
-        .theme-toggle {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
-            z-index: 100;
-            color: var(--text);
-        }
+        
 
-        .theme-toggle:hover {
-            transform: scale(1.1);
-        }
+
+        
 
         .back-btn {
             display: inline-flex;
@@ -209,8 +190,6 @@
 </head>
 <body>
 <div class="container">
-    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-
     <a href="index.html" class="back-btn">← На главную</a>
 
     <div class="about-card">
@@ -285,14 +264,7 @@
         }
     })();
 
-    function toggleTheme() {
-        var html = document.documentElement;
-        var btn = document.getElementById('themeBtn');
-        if (html.classList.contains('light-mode')) {
-            html.classList.remove('light-mode');
-            localStorage.setItem('mathTheme', 'dark');
-            if (btn) btn.textContent = '🌙';
-        } else {
+     else {
             html.classList.add('light-mode');
             localStorage.setItem('mathTheme', 'light');
             if (btn) btn.textContent = '☀️';
@@ -320,5 +292,7 @@
         }
     }
 </script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
 </body>
 </html>
