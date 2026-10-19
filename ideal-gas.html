@@ -48,9 +48,6 @@
         }
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
-        
-
-        
         h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
         .section{margin-bottom:14px;}
         .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
@@ -106,9 +103,7 @@
         .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
         .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
         .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
-        
-        
-        
+        .btn-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
         mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
         .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
         .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
@@ -446,16 +441,194 @@
         </div>
     </div>
 
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения</div>
+        <div class="section-content">
+
+            <!-- Сам. задача 1 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Давление газа</div>
+                <div class="task-condition"><strong>Условие:</strong> Концентрация молекул газа $n = 4 \cdot 10^{25}$ м$^{-3}$, средняя квадратичная скорость $\bar{v} = 400$ м/с, масса молекулы $m_0 = 4 \cdot 10^{-26}$ кг. Найдите давление газа.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self1')">💡 Подсказка</button>
+                </div>
+                <div id="self1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Используйте основное уравнение МКТ: $p = \dfrac{1}{3} m_0 n \bar{v}^2$.</div>
+                        <div class="answer">✅ Ответ: $p \approx 8{,}53 \cdot 10^4$ Па</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 2 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Средняя кинетическая энергия</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите среднюю кинетическую энергию поступательного движения молекулы идеального газа при температуре $T = 500$ К.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self2')">💡 Подсказка</button>
+                </div>
+                <div id="self2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Формула $\bar{E}_k = \dfrac{3}{2}kT$, где $k = 1{,}38 \cdot 10^{-23}$ Дж/К.</div>
+                        <div class="answer">✅ Ответ: $\bar{E}_k \approx 1{,}035 \cdot 10^{-20}$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 3 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. Средняя квадратичная скорость</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите среднюю квадратичную скорость молекул азота $N_2$ при температуре $T = 400$ К. Молярная масса $M = 28$ г/моль.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self3')">💡 Подсказка</button>
+                </div>
+                <div id="self3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $\bar{v} = \sqrt{\dfrac{3RT}{M}}$, $R = 8{,}31$ Дж/(моль·К), $M = 0{,}028$ кг/моль.</div>
+                        <div class="answer">✅ Ответ: $\bar{v} \approx 597$ м/с</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 4 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. Переход от Цельсия к Кельвину</div>
+                <div class="task-condition"><strong>Условие:</strong> Температура воздуха равна $t = 47$ °C. Найдите абсолютную температуру и среднюю кинетическую энергию молекулы.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self4')">💡 Подсказка</button>
+                </div>
+                <div id="self4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $T = t + 273$, $\bar{E}_k = \dfrac{3}{2}kT$.</div>
+                        <div class="answer">✅ Ответ: $T = 320$ К, $\bar{E}_k \approx 6{,}62 \cdot 10^{-21}$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 5 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Давление через температуру</div>
+                <div class="task-condition"><strong>Условие:</strong> Концентрация молекул газа $n = 5 \cdot 10^{25}$ м$^{-3}$, температура $T = 250$ К. Найдите давление газа.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self5')">💡 Подсказка</button>
+                </div>
+                <div id="self5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $p = nkT$, $k = 1{,}38 \cdot 10^{-23}$ Дж/К.</div>
+                        <div class="answer">✅ Ответ: $p \approx 1{,}725 \cdot 10^5$ Па</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 6 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Масса молекулы по скорости</div>
+                <div class="task-condition"><strong>Условие:</strong> При температуре $T = 400$ К средняя квадратичная скорость молекул газа равна $\bar{v} = 500$ м/с. Найдите массу одной молекулы.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self6')">💡 Подсказка</button>
+                </div>
+                <div id="self6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Из $\bar{v} = \sqrt{\dfrac{3kT}{m_0}}$ выразите $m_0 = \dfrac{3kT}{\bar{v}^2}$.</div>
+                        <div class="answer">✅ Ответ: $m_0 \approx 6{,}62 \cdot 10^{-26}$ кг</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 7 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Сравнение скоростей двух газов</div>
+                <div class="task-condition"><strong>Условие:</strong> Во сколько раз средняя квадратичная скорость молекул гелия He ($M_1 = 4$ г/моль) больше скорости молекул азота $N_2$ ($M_2 = 28$ г/моль) при одной и той же температуре?</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self7')">💡 Подсказка</button>
+                </div>
+                <div id="self7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $\dfrac{\bar{v}_1}{\bar{v}_2} = \sqrt{\dfrac{M_2}{M_1}}$.</div>
+                        <div class="answer">✅ Ответ: $\dfrac{\bar{v}_1}{\bar{v}_2} \approx 2{,}65$</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 8 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Давление через среднюю энергию</div>
+                <div class="task-condition"><strong>Условие:</strong> Концентрация молекул газа $n = 3 \cdot 10^{25}$ м$^{-3}$, средняя кинетическая энергия одной молекулы $\bar{E}_k = 6 \cdot 10^{-21}$ Дж. Найдите давление газа.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self8')">💡 Подсказка</button>
+                </div>
+                <div id="self8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $p = \dfrac{2}{3} n \bar{E}_k$.</div>
+                        <div class="answer">✅ Ответ: $p = 1{,}2 \cdot 10^5$ Па</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 9 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. Температура по средней энергии</div>
+                <div class="task-condition"><strong>Условие:</strong> Средняя кинетическая энергия молекулы газа равна $\bar{E}_k = 1{,}66 \cdot 10^{-20}$ Дж. Найдите температуру газа.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self9')">💡 Подсказка</button>
+                </div>
+                <div id="self9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $T = \dfrac{2\bar{E}_k}{3k}$.</div>
+                        <div class="answer">✅ Ответ: $T \approx 800$ К</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 10 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. Скорость при изменении температуры</div>
+                <div class="task-condition"><strong>Условие:</strong> При температуре $T_1 = 100$ К средняя квадратичная скорость молекул газа равна $\bar{v}_1 = 200$ м/с. Какой станет скорость при $T_2 = 900$ К?</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self10')">💡 Подсказка</button>
+                </div>
+                <div id="self10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $\dfrac{\bar{v}_2}{\bar{v}_1} = \sqrt{\dfrac{T_2}{T_1}}$.</div>
+                        <div class="answer">✅ Ответ: $\bar{v}_2 = 600$ м/с</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div class="back-link-wrapper">
         <a href="molecular-physics.html" class="back-link">← Назад</a>
     </div>
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
-    
-    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть решение';
+        }
+    }
+    function toggleHint(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling.querySelector
+            ? el.previousElementSibling.querySelector('.show-solution-btn')
+            : el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            if(btn) btn.textContent='💡 Подсказка';
+        }else{
+            el.classList.add('open');
+            if(btn) btn.textContent='📕 Скрыть подсказку';
+        }
+    }
 </script>
 
 <!-- 3D-модель идеального газа -->
@@ -497,7 +670,6 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        // Сосуд — куб со стороной 6
         const BOX = 6;
         const HALF = BOX / 2;
 
@@ -506,7 +678,6 @@
         const boxLines = new THREE.LineSegments(boxEdges, new THREE.LineBasicMaterial({ color: 0x8ba5b8, transparent: true, opacity: 0.5 }));
         group.add(boxLines);
 
-        // Прозрачные стенки
         const wallMat = new THREE.MeshBasicMaterial({ color: 0x4488ff, transparent: true, opacity: 0.05, side: THREE.BackSide });
         const boxMesh = new THREE.Mesh(boxGeo, wallMat);
         group.add(boxMesh);
@@ -534,12 +705,7 @@
                     Math.random() - 0.5,
                     Math.random() - 0.5
                 ).normalize();
-                molecules.push({
-                    mesh,
-                    vx: dir.x,
-                    vy: dir.y,
-                    vz: dir.z
-                });
+                molecules.push({ mesh, vx: dir.x, vy: dir.y, vz: dir.z });
             }
         }
 
@@ -553,7 +719,6 @@
         const resetBtn = document.getElementById('ideal-reset');
 
         function updateVDisplay() {
-            // Средняя скорость пропорциональна sqrt(T)
             const v = Math.round(Math.sqrt(T / 300) * 500);
             vDisplay.textContent = v;
         }
@@ -596,7 +761,6 @@
             requestAnimationFrame(animate);
             controls.update();
 
-            // Скорость пропорциональна sqrt(T)
             const speed = Math.sqrt(T / 300) * 0.06;
 
             molecules.forEach(m => {
@@ -604,7 +768,6 @@
                 m.mesh.position.y += m.vy * speed;
                 m.mesh.position.z += m.vz * speed;
 
-                // Отражение от стенок
                 if (m.mesh.position.x > HALF - 0.15) { m.mesh.position.x = HALF - 0.15; m.vx *= -1; }
                 if (m.mesh.position.x < -HALF + 0.15) { m.mesh.position.x = -HALF + 0.15; m.vx *= -1; }
                 if (m.mesh.position.y > HALF - 0.15) { m.mesh.position.y = HALF - 0.15; m.vy *= -1; }
@@ -618,6 +781,7 @@
         animate();
     })();
 </script>
+
 <script src="favorites.js"></script>
 <script src="theme.js"></script>
 </body>

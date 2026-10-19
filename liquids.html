@@ -502,6 +502,113 @@
 
         </div>
     </div>
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите силу поверхностного натяжения, действующую на границу длиной $l = 0{,}12$ м, если коэффициент поверхностного натяжения $\sigma = 0{,}04$ Н/м (мыльный раствор).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Сила поверхностного натяжения действует вдоль поверхности и равна произведению $\sigma$ на длину границы: $F = \sigma l$. Просто перемножь два числа.</div>
+                    <div class="answer">✅ Ответ: $F = 0{,}04 \cdot 0{,}12 = 4{,}8 \cdot 10^{-3}$ Н $= 4{,}8$ мН</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> Площадь поверхности жидкости $S = 0{,}05$ м², $\sigma = 0{,}04$ Н/м. Найдите энергию поверхностного слоя.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Энергия поверхностного слоя прямо пропорциональна площади поверхности: $E = \sigma S$. Это как «цена за квадратный метр».</div>
+                    <div class="answer">✅ Ответ: $E = 0{,}04 \cdot 0{,}05 = 2 \cdot 10^{-3}$ Дж $= 2$ мДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> В капилляре радиусом $r = 0{,}2$ мм вода поднимается. Найдите высоту подъёма. $\sigma = 0{,}073$ Н/м, $\rho = 1000$ кг/м³, $g = 9{,}8$ м/с².</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Работает формула $h = \dfrac{2\sigma}{\rho g r}$. Главная ловушка — радиус дан в <strong>миллиметрах</strong>: переведи его в метры ($0{,}2$ мм $= 2 \cdot 10^{-4}$ м), иначе ответ будет в 1000 раз неверным.</div>
+                    <div class="answer">✅ Ответ: $h = \dfrac{2 \cdot 0{,}073}{1000 \cdot 9{,}8 \cdot 2 \cdot 10^{-4}} \approx 0{,}0745$ м $\approx 7{,}5$ см</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Вода поднялась в капилляре на высоту $h = 5$ см. Найдите радиус капилляра. $\sigma = 0{,}073$ Н/м, $\rho = 1000$ кг/м³.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Это обратная задача к формуле $h = \dfrac{2\sigma}{\rho g r}$ — вырази $r = \dfrac{2\sigma}{\rho g h}$. Не забудь перевести $h = 5$ см в метры ($0{,}05$ м).</div>
+                    <div class="answer">✅ Ответ: $r = \dfrac{2 \cdot 0{,}073}{1000 \cdot 9{,}8 \cdot 0{,}05} \approx 2{,}98 \cdot 10^{-4}$ м $\approx 0{,}3$ мм</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите добавочное давление под сферической поверхностью мыльного пузыря радиусом $r = 2$ мм. $\sigma = 0{,}04$ Н/м.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Осторожно: у мыльного пузыря <strong>две</strong> поверхности (внутренняя и внешняя), поэтому в формуле Лапласа стоит множитель $4$, а не $2$: $\Delta p = \dfrac{4\sigma}{r}$. Радиус переведи в метры.</div>
+                    <div class="answer">✅ Ответ: $\Delta p = \dfrac{4 \cdot 0{,}04}{2 \cdot 10^{-3}} = 80$ Па</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> Мыльную плёнку растянули, увеличив её площадь на $\Delta S = 0{,}01$ м². $\sigma = 0{,}04$ Н/м. Найдите работу.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Плёнка имеет <strong>две</strong> поверхности, поэтому $A = 2\sigma \cdot \Delta S$. Множитель 2 — самая частая ошибка в этой задаче.</div>
+                    <div class="answer">✅ Ответ: $A = 2 \cdot 0{,}04 \cdot 0{,}01 = 8 \cdot 10^{-4}$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> Вода поднимается в капилляре радиусом $r_1 = 0{,}4$ мм на высоту $h_1$. Во сколько раз выше она поднимется в капилляре радиусом $r_2 = 0{,}1$ мм?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Считать сами высоты не нужно! Из формулы $h = \dfrac{2\sigma}{\rho g r}$ видно, что $h$ обратно пропорциональна $r$. Значит, отношение высот равно обратному отношению радиусов.</div>
+                    <div class="answer">✅ Ответ: $\dfrac{h_2}{h_1} = \dfrac{r_1}{r_2} = \dfrac{0{,}4}{0{,}1} = 4$ — $h_2$ больше в 4 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> В капилляре вода поднимается на высоту $h_1$ при $g = 9{,}8$ м/с². Как изменится высота, если лифт движется вниз с ускорением $a = 2$ м/с²?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> В неинерциальной системе вместо $g$ работает эффективное ускорение. Лифт едет <strong>вниз</strong> с ускорением — значит $g_{эф} = g - a$. Дальше используй, что $h \propto \dfrac{1}{g_{эф}}$.</div>
+                    <div class="answer">✅ Ответ: $\dfrac{h_2}{h_1} = \dfrac{g}{g - a} = \dfrac{9{,}8}{7{,}8} \approx 1{,}26$ — высота увеличится примерно на 26%</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> В стеклянный сосуд налита вода, а в другой — ртуть. Опишите форму мениска в каждом случае и объясните причину различия.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Всё решает соотношение сил: притягиваются молекулы жидкости <strong>к стенке</strong> или <strong>друг к другу</strong>? Если к стенке сильнее — жидкость смачивает (краевой угол $\theta < 90°$). Если друг к другу сильнее — не смачивает ($\theta > 90°$).</div>
+                    <div class="answer">✅ Ответ: вода смачивает стекло — мениск <strong>вогнутый</strong>; ртуть не смачивает стекло — мениск <strong>выпуклый</strong></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> Капля воды имеет объём $V = 0{,}5$ см³. Найдите её радиус и энергию поверхностного слоя. $\sigma = 0{,}073$ Н/м.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Две формулы подряд: объём шара $V = \dfrac{4}{3}\pi r^3$ (отсюда радиус), затем площадь сферы $S = 4\pi r^2$ и энергия $E = \sigma S$. Следи за единицами: $1$ см³ $= 10^{-6}$ м³, значит $0{,}5$ см³ $= 5 \cdot 10^{-7}$ м³.</div>
+                    <div class="answer">✅ Ответ: $r = \sqrt[3]{\dfrac{3V}{4\pi}} \approx 4{,}9$ мм; $S = 4\pi r^2 \approx 3{,}0 \cdot 10^{-4}$ м²; $E = \sigma S \approx 2{,}2 \cdot 10^{-5}$ Дж</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     <div class="back-link-wrapper">
         <a href="molecular-physics.html" class="back-link">← Назад</a>

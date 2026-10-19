@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электрический заряд. Закон Кулона</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle{background:#3b82f6;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-toggle:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle.off{background:#666;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <h1>Электрический заряд. Закон сохранения заряда.<br>Закон Кулона</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Электрический заряд</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Электрический заряд</strong> — физическая величина, характеризующая свойство тел вступать в электромагнитные взаимодействия.</p>
+                <p><strong>Свойства заряда:</strong></p>
+                <ul>
+                    <li>Существует два вида зарядов: <span class="important">положительные</span> и <span class="important">отрицательные</span>.</li>
+                    <li>Одноимённые заряды <strong>отталкиваются</strong>, разноимённые — <strong>притягиваются</strong>.</li>
+                    <li>Заряд <span class="important">дискретен</span> — любой заряд кратен элементарному заряду $e = 1{,}6 \cdot 10^{-19}$ Кл.</li>
+                    <li>Заряд <span class="important">инвариантен</span> — его величина не зависит от системы отсчёта.</li>
+                </ul>
+                <p><strong>Носители заряда:</strong> электроны (отрицательный), протоны (положительный).</p>
+                <p><strong>Ионы.</strong> Если у нейтрального атома убрать электрон, он становится положительным ионом. Если добавить — отрицательным.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Закон сохранения электрического заряда</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Закон сохранения заряда:</strong> алгебраическая сумма зарядов замкнутой системы остаётся постоянной при любых процессах, происходящих внутри системы.</p>
+                <div class="formula-block">
+                    <span class="f">$q_1 + q_2 + \dots + q_n = \text{const}$</span>
+                    <span class="f-label">— закон сохранения заряда</span>
+                </div>
+                <p><strong>Следствие:</strong> при электризации тел заряд не создаётся и не уничтожается, а лишь перераспределяется между телами. Суммарный заряд двух тел до и после натирания остаётся равным нулю.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Закон Кулона</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Закон Кулона:</strong> сила взаимодействия двух точечных зарядов в вакууме прямо пропорциональна произведению модулей зарядов и обратно пропорциональна квадрату расстояния между ними.</p>
+                <div class="formula-block">
+                    <span class="f">$F = k \dfrac{|q_1| \cdot |q_2|}{r^2}$</span>
+                    <span class="f-label">— закон Кулона в вакууме</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$F$ — сила взаимодействия (Н);</li>
+                    <li>$k = \dfrac{1}{4\pi\varepsilon_0} = 9 \cdot 10^9$ Н·м²/Кл² — электрическая постоянная;</li>
+                    <li>$q_1, q_2$ — величины зарядов (Кл);</li>
+                    <li>$r$ — расстояние между зарядами (м).</li>
+                </ul>
+
+                <p>В среде сила взаимодействия уменьшается в $\varepsilon$ раз:</p>
+                <div class="formula-block">
+                    <span class="f">$F = \dfrac{1}{4\pi\varepsilon_0 \varepsilon} \dfrac{|q_1| \cdot |q_2|}{r^2}$</span>
+                    <span class="f-label">— закон Кулона в среде</span>
+                </div>
+                <p>где $\varepsilon$ — относительная диэлектрическая проницаемость среды.</p>
+                <p><strong>Примеры $\varepsilon$:</strong> воздух $\approx 1$, вода — 81, стекло — 5–7.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="atom" onclick="switchModel('atom')">⚛️ Строение атома</div>
+                <div class="model-tab" data-model="charging" onclick="switchModel('charging')">🔬 Электризация</div>
+                <div class="model-tab" data-model="interaction" onclick="switchModel('interaction')">⚡ Закон Кулона</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: СТРОЕНИЕ АТОМА -->
+            <div id="model-atom" class="model-content">
+                <div class="model-container" id="container-atom">
+                    <canvas id="canvas-atom" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-atom">⛶</button>
+                    <div class="info-display">
+                        <div>Заряд: <span class="val" id="atom-charge">Нейтральный</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <button class="btn-toggle" id="atom-remove-btn" style="background:#ef4444;">➖ Убрать электрон</button>
+                    <button class="btn-toggle" id="atom-add-btn" style="background:#3b82f6;">➕ Добавить электрон</button>
+                    <button class="btn-reset" id="atom-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Убирайте или добавляйте электроны, чтобы менять заряд</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Строение атома.</strong> В центре находится положительное ядро. Вокруг него вращаются отрицательные электроны.</p>
+                    <p>В обычном (нейтральном) состоянии число протонов и электронов одинаково.</p>
+                    <p>Если добавить электрон — атом станет <span class="important">отрицательным ионом</span>. Если убрать — <span class="important">положительным</span>.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: ЭЛЕКТРИЗАЦИЯ -->
+            <div id="model-charging" class="model-content" style="display:none;">
+                <div class="model-container" id="container-charging">
+                    <canvas id="canvas-charging" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-charging">⛶</button>
+                    <div class="info-display">
+                        <div>Заряд 1: <span class="val" id="chg-q1">0</span></div>
+                        <div>Заряд 2: <span class="val" id="chg-q2">0</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <button class="btn-toggle" id="chg-btn" style="background:#f59e0b;">🧤 Натереть тела</button>
+                    <button class="btn-reset" id="chg-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Нажмите кнопку, чтобы перенести электроны</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель электризации.</strong> При трении двух разных тел часть электронов переходит с одного тела на другое.</p>
+                    <p><span class="important">Тело, отдавшее электроны</span>, приобретает положительный заряд.</p>
+                    <p><span class="important">Тело, получившее электроны</span>, приобретает отрицательный заряд.</p>
+                    <p>При этом суммарный заряд остаётся равным нулю — работает закон сохранения заряда.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 3: ЗАКОН КУЛОНА -->
+            <div id="model-interaction" class="model-content" style="display:none;">
+                <div class="model-container" id="container-interaction">
+                    <canvas id="canvas-interaction" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-interaction">⛶</button>
+                    <div class="info-display">
+                        <div>$F$ = <span class="val" id="int-force">9.0</span> Н</div>
+                        <div>$r$ = <span class="val" id="int-dist">3.0</span> м</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Расстояние $r$ (м)</label>
+                        <input type="range" id="int-dist-slider" min="1" max="10" step="0.5" value="3">
+                        <span class="control-value" id="int-dist-value">3.0</span>
+                    </div>
+                    <button class="btn-toggle" id="int-type-btn">⚡ Отталкивание (+ +)</button>
+                    <button class="btn-toggle" id="int-play-btn" style="background:#22c55e;">▶ Пуск</button>
+                    <button class="btn-reset" id="int-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Запустите анимацию и посмотрите, как они движутся</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель закона Кулона.</strong> Два заряда на расстоянии $r$.</p>
+                    <p><span class="important">Одноимённые</span> заряды отталкиваются, <span class="important">разноимённые</span> притягиваются.</p>
+                    <p>Слева от сцены находится график зависимости силы от расстояния. Двигайте ползунок и смотрите, как точка на графике скользит по кривой.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сила Кулона</div>
+                <div class="task-condition"><strong>Условие:</strong> Два точечных заряда $q_1 = 2 \cdot 10^{-6}$ Кл и $q_2 = 3 \cdot 10^{-6}$ Кл находятся на расстоянии $r = 0{,}3$ м в вакууме. Найдите силу взаимодействия.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q_1 = 2 \cdot 10^{-6}$ Кл, $q_2 = 3 \cdot 10^{-6}$ Кл, $r = 0{,}3$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $F = k \dfrac{|q_1 q_2|}{r^2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = 9 \cdot 10^9 \dfrac{2 \cdot 10^{-6} \cdot 3 \cdot 10^{-6}}{(0{,}3)^2} = \dfrac{54 \cdot 10^{-3}}{0{,}09} = 0{,}6 \text{ Н}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сила 0,6 Н — довольно заметная для таких маленьких зарядов.</div>
+                    <div class="answer">✅ Ответ: $F = 0{,}6$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Расстояние между зарядами</div>
+                <div class="task-condition"><strong>Условие:</strong> Два заряда по $q = 1 \cdot 10^{-7}$ Кл взаимодействуют с силой $F = 0{,}9$ Н. Найдите расстояние между ними.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q_1 = q_2 = 10^{-7}$ Кл, $F = 0{,}9$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $r$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $F = k \dfrac{q^2}{r^2}$ выразим $r = \sqrt{k \dfrac{q^2}{F}}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$r = \sqrt{9 \cdot 10^9 \dfrac{10^{-14}}{0{,}9}} = \sqrt{0{,}1} \approx 0{,}316 \text{ м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Заряды находятся на расстоянии около 32 см.</div>
+                    <div class="answer">✅ Ответ: $r \approx 0{,}32$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Сила в воде</div>
+                <div class="task-condition"><strong>Условие:</strong> Во сколько раз уменьшится сила взаимодействия двух зарядов, если их из воздуха перенести в воду? $\varepsilon_{воды} = 81$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\varepsilon_{возд} \approx 1$, $\varepsilon_{воды} = 81$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{F_{возд}}{F_{воды}}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $F_{среда} = \dfrac{F_{вак}}{\varepsilon}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{F_{возд}}{F_{воды}} = \dfrac{81}{1} = 81$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В воде сила ослабевает в 81 раз из-за поляризации молекул воды.</div>
+                    <div class="answer">✅ Ответ: уменьшится в 81 раз</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Заряд электрона</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько электронов содержит заряд $q = -1{,}6 \cdot 10^{-15}$ Кл? Заряд электрона $e = -1{,}6 \cdot 10^{-19}$ Кл.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = -1{,}6 \cdot 10^{-15}$ Кл, $e = -1{,}6 \cdot 10^{-19}$ Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $N = \dfrac{q}{e}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$N = \dfrac{1{,}6 \cdot 10^{-15}}{1{,}6 \cdot 10^{-19}} = 10^4 = 10000$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Заряд — это избыток или недостаток 10 000 электронов.</div>
+                    <div class="answer">✅ Ответ: $N = 10000$ электронов</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Закон сохранения заряда</div>
+                <div class="task-condition"><strong>Условие:</strong> Два одинаковых металлических шарика с зарядами $q_1 = +4$ мкКл и $q_2 = -2$ мкКл привели в соприкосновение и развели. Какие заряды будут на шариках?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q_1 = 4$ мкКл, $q_2 = -2$ мкКл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $q_1'$, $q_2'$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Суммарный заряд: $Q = q_1 + q_2 = 4 - 2 = 2$ мкКл.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Так как шарики одинаковые, заряд поделится поровну: $q' = \dfrac{Q}{2} = 1$ мкКл.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Заряд сохранился (2 мкКл), но перераспределился.</div>
+                    <div class="answer">✅ Ответ: $q_1' = q_2' = +1$ мкКл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Сила взаимодействия в керосине</div>
+                <div class="task-condition"><strong>Условие:</strong> Два заряда $q_1 = 5$ нКл и $q_2 = 10$ нКл находятся в керосине ($\varepsilon = 2$) на расстоянии $r = 0{,}5$ м. Найдите силу.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q_1 = 5 \cdot 10^{-9}$ Кл, $q_2 = 10 \cdot 10^{-9}$ Кл, $r = 0{,}5$ м, $\varepsilon = 2$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $F = \dfrac{k |q_1 q_2|}{\varepsilon r^2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = \dfrac{9 \cdot 10^9 \cdot 5 \cdot 10^{-9} \cdot 10 \cdot 10^{-9}}{2 \cdot 0{,}25} = \dfrac{450 \cdot 10^{-9}}{0{,}5} = 9 \cdot 10^{-7} \text{ Н}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сила очень мала (900 нН), так как заряды крошечные.</div>
+                    <div class="answer">✅ Ответ: $F = 9 \cdot 10^{-7}$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Сравнение сил</div>
+                <div class="task-condition"><strong>Условие:</strong> Как изменится сила Кулона, если один из зарядов увеличить в 3 раза, а расстояние уменьшить в 2 раза?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q_1' = 3q_1$, $r' = r/2$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{F'}{F}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $F \sim \dfrac{q_1}{r^2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{F'}{F} = 3 \cdot \left(\dfrac{r}{r/2}\right)^2 = 3 \cdot 4 = 12$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сила вырастет в 12 раз.</div>
+                    <div class="answer">✅ Ответ: увеличится в 12 раз</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Найти заряд</div>
+                <div class="task-condition"><strong>Условие:</strong> Два одинаковых заряда на расстоянии $r = 0{,}1$ м взаимодействуют с силой $F = 3{,}6$ Н. Найдите величину каждого заряда.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r = 0{,}1$ м, $F = 3{,}6$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $F = k \dfrac{q^2}{r^2} \Rightarrow q = \sqrt{\dfrac{F r^2}{k}}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$q = \sqrt{\dfrac{3{,}6 \cdot 0{,}01}{9 \cdot 10^9}} = \sqrt{4 \cdot 10^{-12}} = 2 \cdot 10^{-6} \text{ Кл} = 2 \text{ мкКл}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Заряд 2 мкКл — типичный для электростатических опытов.</div>
+                    <div class="answer">✅ Ответ: $q = 2$ мкКл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Равновесие трёх зарядов</div>
+                <div class="task-condition"><strong>Условие:</strong> Два заряда $q_1 = 1$ мкКл и $q_2 = 4$ мкКл находятся на расстоянии $d = 3$ м. На каком расстоянии от $q_1$ нужно поместить третий заряд, чтобы он находился в равновесии?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q_1 = 1$ мкКл, $q_2 = 4$ мкКл, $d = 3$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $x$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Условие равновесия: $k \dfrac{q_1 q}{x^2} = k \dfrac{q_2 q}{(d-x)^2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $\dfrac{1}{x^2} = \dfrac{4}{(3-x)^2} \Rightarrow \dfrac{1}{x} = \dfrac{2}{3-x}$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $3 - x = 2x \Rightarrow 3x = 3 \Rightarrow x = 1$ м.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Точка равновесия ближе к меньшему заряду.</div>
+                    <div class="answer">✅ Ответ: $x = 1$ м от $q_1$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Электризация</div>
+                <div class="task-condition"><strong>Условие:</strong> При трении стеклянной палочки о шёлк палочка приобрела заряд $q = +3{,}2 \cdot 10^{-8}$ Кл. Сколько электронов перешло с палочки на шёлк?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 3{,}2 \cdot 10^{-8}$ Кл, $e = 1{,}6 \cdot 10^{-19}$ Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $N = \dfrac{|q|}{e}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$N = \dfrac{3{,}2 \cdot 10^{-8}}{1{,}6 \cdot 10^{-19}} = 2 \cdot 10^{11}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Палочка потеряла 200 миллиардов электронов — это и есть её положительный заряд.</div>
+                    <div class="answer">✅ Ответ: $N = 2 \cdot 10^{11}$ электронов</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> Два заряда по $10^{-8}$ Кл каждый находятся на расстоянии $0{,}1$ м. Найдите силу взаимодействия в вакууме.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Закон Кулона: $F = k \dfrac{q_1 q_2}{r^2}$.</div>
+                    <div class="answer">✅ Ответ: $F = 9 \cdot 10^9 \cdot \dfrac{10^{-16}}{0{,}01} = 9 \cdot 10^{-5}$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> Как изменится сила Кулона, если расстояние между зарядами увеличить в 3 раза?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Сила обратно пропорциональна квадрату расстояния.</div>
+                    <div class="answer">✅ Ответ: уменьшится в 9 раз</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Заряд $-4{,}8 \cdot 10^{-19}$ Кл. Сколько избыточных электронов содержит тело?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $N = |q| / e$, где $e = 1{,}6 \cdot 10^{-19}$ Кл.</div>
+                    <div class="answer">✅ Ответ: $N = 3$ электрона</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Два заряда $q_1 = 2$ мкКл и $q_2 = -5$ мкКл находятся на расстоянии $0{,}2$ м. Найдите силу и укажите, притягиваются они или отталкиваются.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Берите модули зарядов для силы. Разноимённые заряды притягиваются.</div>
+                    <div class="answer">✅ Ответ: $F = 9 \cdot 10^9 \cdot \dfrac{10^{-11}}{0{,}04} = 2{,}25$ Н; притягиваются</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Сила взаимодействия двух зарядов в воде ($\varepsilon = 81$) равна $0{,}01$ Н. Какой была бы сила в вакууме?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> В вакууме сила в $\varepsilon$ раз больше.</div>
+                    <div class="answer">✅ Ответ: $F_{вак} = 0{,}01 \cdot 81 = 0{,}81$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> Металлический шарик имел заряд $+6$ мкКл. К нему прикоснулись таким же шариком с зарядом $-2$ мкКл. Какие заряды будут после разделения?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Закон сохранения заряда. Суммарный заряд делится пополам.</div>
+                    <div class="answer">✅ Ответ: $(6 - 2)/2 = +2$ мкКл на каждом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите расстояние, на котором два заряда по $1$ мкКл взаимодействуют с силой $0{,}9$ Н.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Выразите $r = \sqrt{k q^2 / F}$.</div>
+                    <div class="answer">✅ Ответ: $r = \sqrt{9 \cdot 10^9 \cdot 10^{-12} / 0{,}9} = \sqrt{0{,}01} = 0{,}1$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> Два заряда взаимодействуют с силой $F$. Один заряд увеличили в 2 раза, расстояние увеличили в 2 раза. Как изменится сила?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $F' = k \dfrac{2q_1 q_2}{(2r)^2} = \dfrac{2}{4} F$.</div>
+                    <div class="answer">✅ Ответ: уменьшится в 2 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> На каком расстоянии от заряда $q_1 = 1$ мкКл нужно поместить заряд $q_3$, чтобы он был в равновесии между $q_1 = 1$ мкКл и $q_2 = 9$ мкКл, находящимися на расстоянии $4$ м?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $\dfrac{q_1}{x^2} = \dfrac{q_2}{(d-x)^2} \Rightarrow \dfrac{1}{x} = \dfrac{3}{4-x}$.</div>
+                    <div class="answer">✅ Ответ: $4 - x = 3x \Rightarrow x = 1$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько электронов нужно перенести с одного тела на другое, чтобы они приобрели заряды $+1{,}6$ мкКл и $-1{,}6$ мкКл?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $N = 1{,}6 \cdot 10^{-6} / 1{,}6 \cdot 10^{-19}$.</div>
+                    <div class="answer">✅ Ответ: $N = 10^{13}$ электронов</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-atom').style.display = model === 'atom' ? 'block' : 'none';
+        document.getElementById('model-charging').style.display = model === 'charging' ? 'block' : 'none';
+        document.getElementById('model-interaction').style.display = model === 'interaction' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- ===== МОДЕЛЬ 1: СТРОЕНИЕ АТОМА ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-atom');
+        const canvas = document.getElementById('canvas-atom');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 5, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // ===== СОЗДАНИЕ ЯДРА (СФЕРА С 3 ПРОТОНАМИ) =====
+        const nucleusShellMat = new THREE.MeshStandardMaterial({
+            color: 0xff4444,
+            emissive: 0x441111,
+            transparent: true,
+            opacity: 0.25
+        });
+        const nucleusShell = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), nucleusShellMat);
+        group.add(nucleusShell);
+
+        const protonMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111 });
+        const protonGeo = new THREE.SphereGeometry(0.35, 16, 16);
+
+        const protonPositions = [
+            new THREE.Vector3(0, 0.4, 0),
+            new THREE.Vector3(-0.35, -0.2, 0),
+            new THREE.Vector3(0.35, -0.2, 0)
+        ];
+
+        protonPositions.forEach((pos) => {
+            const p = new THREE.Mesh(protonGeo, protonMat);
+            p.position.copy(pos);
+            group.add(p);
+
+            const div = document.createElement('div');
+            div.textContent = '+';
+            div.style.color = '#ffffff';
+            div.style.fontSize = '0.9rem';
+            div.style.fontWeight = 'bold';
+            div.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
+            const lbl = new CSS2DObject(div);
+            p.add(lbl);
+        });
+
+        const nucleusLabelDiv = document.createElement('div');
+        nucleusLabelDiv.textContent = 'Ядро (+3)';
+        nucleusLabelDiv.style.color = '#ffcccc';
+        nucleusLabelDiv.style.fontSize = '0.85rem';
+        nucleusLabelDiv.style.fontWeight = 'bold';
+        nucleusLabelDiv.style.marginTop = '-10px';
+        const nucleusLabel = new CSS2DObject(nucleusLabelDiv);
+        nucleusLabel.position.set(0, 1.5, 0);
+        group.add(nucleusLabel);
+
+        // ===== ОРБИТЫ И ЭЛЕКТРОНЫ =====
+        const ORBIT_CONFIGS = [
+            { radius: 2.2, rotX: 0, rotY: 0 },
+            { radius: 2.7, rotX: Math.PI / 2, rotY: 0 },
+            { radius: 3.2, rotX: Math.PI / 3, rotY: Math.PI / 4 },
+            { radius: 3.7, rotX: -Math.PI / 4, rotY: Math.PI / 2 },
+            { radius: 4.2, rotX: Math.PI / 6, rotY: -Math.PI / 4 }
+        ];
+
+        const orbitGroup = new THREE.Group();
+        group.add(orbitGroup);
+
+        const electrons = [];
+        const electronMat = new THREE.MeshStandardMaterial({ color: 0x4444ff, emissive: 0x111144 });
+        const electronGeo = new THREE.SphereGeometry(0.25, 16, 16);
+
+        let activeElectrons = 3;
+
+        function updateAtom() {
+            while(orbitGroup.children.length > 0) {
+                const c = orbitGroup.children[0];
+                orbitGroup.remove(c);
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) c.material.dispose();
+            }
+
+            while(electrons.length > 0) {
+                const e = electrons.pop();
+                group.remove(e.mesh);
+            }
+
+            for (let i = 0; i < activeElectrons; i++) {
+                const conf = ORBIT_CONFIGS[i];
+
+                const points = [];
+                for (let j = 0; j <= 64; j++) {
+                    const angle = (j / 64) * Math.PI * 2;
+                    points.push(new THREE.Vector3(Math.cos(angle) * conf.radius, Math.sin(angle) * conf.radius, 0));
+                }
+                const geo = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x8ba5b8, transparent: true, opacity: 0.3 }));
+                line.rotation.x = conf.rotX;
+                line.rotation.y = conf.rotY;
+                orbitGroup.add(line);
+
+                const e = new THREE.Mesh(electronGeo, electronMat);
+                group.add(e);
+
+                const div = document.createElement('div');
+                div.textContent = '−';
+                div.style.color = '#ffffff';
+                div.style.fontSize = '0.9rem';
+                div.style.fontWeight = 'bold';
+                div.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
+                const lbl = new CSS2DObject(div);
+                e.add(lbl);
+
+                electrons.push({
+                    mesh: e,
+                    radius: conf.radius,
+                    rotX: conf.rotX,
+                    rotY: conf.rotY,
+                    phase: i * (Math.PI * 2 / 3),
+                    speed: 1.5 + i * 0.2
+                });
+            }
+
+            const chargeDisplay = document.getElementById('atom-charge');
+            if (activeElectrons === 3) {
+                chargeDisplay.textContent = 'Нейтральный (3p, 3e)';
+                chargeDisplay.style.color = '';
+            } else if (activeElectrons > 3) {
+                chargeDisplay.textContent = `Отрицательный ион (3p, ${activeElectrons}e)`;
+                chargeDisplay.style.color = '#4444ff';
+            } else {
+                chargeDisplay.textContent = `Положительный ион (3p, ${activeElectrons}e)`;
+                chargeDisplay.style.color = '#ff4444';
+            }
+
+            document.getElementById('atom-remove-btn').disabled = (activeElectrons <= 1);
+            document.getElementById('atom-add-btn').disabled = (activeElectrons >= 5);
+        }
+
+        document.getElementById('atom-remove-btn').addEventListener('click', () => {
+            if (activeElectrons > 1) {
+                activeElectrons--;
+                updateAtom();
+            }
+        });
+
+        document.getElementById('atom-add-btn').addEventListener('click', () => {
+            if (activeElectrons < 5) {
+                activeElectrons++;
+                updateAtom();
+            }
+        });
+
+        document.getElementById('atom-reset').addEventListener('click', () => {
+            activeElectrons = 3;
+            updateAtom();
+        });
+
+        document.getElementById('fs-atom').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        let time = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            time += 0.02;
+
+            electrons.forEach(e => {
+                const angle = time * e.speed + e.phase;
+                const x = Math.cos(angle) * e.radius;
+                const y = Math.sin(angle) * e.radius;
+                const z = 0;
+
+                const vec = new THREE.Vector3(x, y, z);
+                vec.applyEuler(new THREE.Euler(e.rotX, e.rotY, 0));
+                e.mesh.position.copy(vec);
+            });
+
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+
+        updateAtom();
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 2: ЭЛЕКТРИЗАЦИЯ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-charging');
+        const canvas = document.getElementById('canvas-charging');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 16);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Два тела
+        const bodyGeo = new THREE.BoxGeometry(2.5, 5.5, 1.5);
+        const bodyMat1 = new THREE.MeshStandardMaterial({ color: 0x44aa44, transparent: true, opacity: 0.15 });
+        const bodyMat2 = new THREE.MeshStandardMaterial({ color: 0xaa4444, transparent: true, opacity: 0.15 });
+
+        const body1 = new THREE.Mesh(bodyGeo, bodyMat1);
+        body1.position.set(-2.0, 0, 0);
+        group.add(body1);
+
+        const body2 = new THREE.Mesh(bodyGeo, bodyMat2);
+        body2.position.set(2.0, 0, 0);
+        group.add(body2);
+
+        // Атомы (Ядро + Электроны)
+        const atoms = [];
+        const nucleusGeo = new THREE.SphereGeometry(0.35, 16, 16);
+        const electronGeo = new THREE.SphereGeometry(0.22, 16, 16);
+        const nucleusMat = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+        const electronMat = new THREE.MeshStandardMaterial({ color: 0x4444ff });
+
+        // ===== ТРАЕКТОРИИ (ПУНКТИРНЫЕ ЛИНИИ) =====
+        const trajGroup = new THREE.Group();
+        group.add(trajGroup);
+        trajGroup.visible = false;
+
+        for (let i = 0; i < 5; i++) {
+            const yOffset = -2 + i * 1.0;
+            const pts = [
+                new THREE.Vector3(-1.5, yOffset, 0.8),
+                new THREE.Vector3(0, yOffset + 0.5, 1.2),
+                new THREE.Vector3(1.5, yOffset, 0.8)
+            ];
+            const curve = new THREE.CatmullRomCurve3(pts);
+            const curvePoints = curve.getPoints(30);
+
+            const geo = new THREE.BufferGeometry().setFromPoints(curvePoints);
+            const mat = new THREE.LineDashedMaterial({
+                color: 0xffcc00,
+                dashSize: 0.2,
+                gapSize: 0.1,
+                opacity: 0.8,
+                transparent: true
+            });
+            const line = new THREE.Line(geo, mat);
+            line.computeLineDistances();
+            trajGroup.add(line);
+        }
+
+        // Создаем атомы для первого тела
+        for (let i = 0; i < 10; i++) {
+            const atom = new THREE.Group();
+            const n = new THREE.Mesh(nucleusGeo, nucleusMat);
+            atom.add(n);
+
+            const e1 = new THREE.Mesh(electronGeo, electronMat);
+            e1.position.set(0.5, 0, 0);
+            atom.add(e1);
+            const e2 = new THREE.Mesh(electronGeo, electronMat);
+            e2.position.set(-0.5, 0, 0);
+            atom.add(e2);
+
+            atom.position.set(-2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
+
+            group.add(atom);
+            atoms.push({ mesh: atom, body: 1, electrons: [e1, e2] });
+        }
+
+        // Создаем атомы для второго тела
+        for (let i = 0; i < 10; i++) {
+            const atom = new THREE.Group();
+            const n = new THREE.Mesh(nucleusGeo, nucleusMat);
+            atom.add(n);
+
+            const e1 = new THREE.Mesh(electronGeo, electronMat);
+            e1.position.set(0.5, 0, 0);
+            atom.add(e1);
+            const e2 = new THREE.Mesh(electronGeo, electronMat);
+            e2.position.set(-0.5, 0, 0);
+            atom.add(e2);
+
+            atom.position.set(2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
+
+            group.add(atom);
+            atoms.push({ mesh: atom, body: 2, electrons: [e1, e2] });
+        }
+
+        const chgBtn = document.getElementById('chg-btn');
+        const q1Display = document.getElementById('chg-q1');
+        const q2Display = document.getElementById('chg-q2');
+
+        let isCharged = false;
+
+        chgBtn.addEventListener('click', () => {
+            isCharged = !isCharged;
+
+            if (isCharged) {
+                chgBtn.textContent = '✨ Разрядить (вернуть)';
+                chgBtn.style.background = '#666';
+                q1Display.textContent = '+5';
+                q1Display.style.color = '#ff4444';
+                q2Display.textContent = '-5';
+                q2Display.style.color = '#4444ff';
+                trajGroup.visible = true;
+
+                let transferred = 0;
+                atoms.forEach(a => {
+                    if (a.body === 1 && transferred < 5) {
+                        a.electrons[0].visible = false;
+
+                        const e = new THREE.Mesh(electronGeo, electronMat);
+                        e.position.set(a.mesh.position.x + 4.0, a.mesh.position.y, a.mesh.position.z);
+                        group.add(e);
+                        a.mesh.userData.transferredElectron = e;
+                        transferred++;
+                    }
+                });
+            } else {
+                chgBtn.textContent = '🧤 Натереть тела';
+                chgBtn.style.background = '#f59e0b';
+                q1Display.textContent = '0';
+                q1Display.style.color = '';
+                q2Display.textContent = '0';
+                q2Display.style.color = '';
+                trajGroup.visible = false;
+
+                atoms.forEach(a => {
+                    if (a.body === 1) {
+                        a.electrons[0].visible = true;
+                        if (a.mesh.userData.transferredElectron) {
+                            group.remove(a.mesh.userData.transferredElectron);
+                            a.mesh.userData.transferredElectron = null;
+                        }
+                    }
+                });
+            }
+        });
+
+        document.getElementById('chg-reset').addEventListener('click', () => {
+            isCharged = false;
+            chgBtn.textContent = '🧤 Натереть тела';
+            chgBtn.style.background = '#f59e0b';
+            q1Display.textContent = '0';
+            q1Display.style.color = '';
+            q2Display.textContent = '0';
+            q2Display.style.color = '';
+            trajGroup.visible = false;
+
+            atoms.forEach(a => {
+                if (a.body === 1) {
+                    a.electrons[0].visible = true;
+                    if (a.mesh.userData.transferredElectron) {
+                        group.remove(a.mesh.userData.transferredElectron);
+                        a.mesh.userData.transferredElectron = null;
+                    }
+                }
+            });
+        });
+
+        document.getElementById('fs-charging').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 3: ЗАКОН КУЛОНА ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-interaction');
+        const canvas = document.getElementById('canvas-interaction');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 22);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const BOUND_X = 6.0;
+        const RADIUS = 0.4;
+        const MIN_DIST = RADIUS * 2;
+
+        const sphereGeo = new THREE.SphereGeometry(RADIUS, 32, 32);
+        const matPos = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111, roughness: 0.3 });
+        const matNeg = new THREE.MeshStandardMaterial({ color: 0x4444ff, emissive: 0x111144, roughness: 0.3 });
+
+        const q1 = new THREE.Mesh(sphereGeo, matPos);
+        const q2 = new THREE.Mesh(sphereGeo, matNeg);
+        group.add(q1);
+        group.add(q2);
+
+        function makeLabel(text, color) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = '1.2rem';
+            div.style.fontWeight = 'bold';
+            div.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
+            return new CSS2DObject(div);
+        }
+        let lbl1 = makeLabel('+', '#ffcccc');
+        let lbl2 = makeLabel('+', '#ffcccc');
+        q1.add(lbl1);
+        q2.add(lbl2);
+
+        function makeArrow(color) {
+            const g = new THREE.Group();
+            const shaft = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.03, 0.03, 1, 8),
+                new THREE.MeshStandardMaterial({ color })
+            );
+            shaft.position.y = 0.5;
+            const head = new THREE.Mesh(
+                new THREE.ConeGeometry(0.1, 0.3, 10),
+                new THREE.MeshStandardMaterial({ color })
+            );
+            head.position.y = 1.05;
+            g.add(shaft); g.add(head);
+            return g;
+        }
+
+        const arrow1 = makeArrow(0xffaa00);
+        const arrow2 = makeArrow(0xffaa00);
+        group.add(arrow1);
+        group.add(arrow2);
+
+        const distSlider = document.getElementById('int-dist-slider');
+        const distValue = document.getElementById('int-dist-value');
+        const distDisplay = document.getElementById('int-dist');
+        const forceDisplay = document.getElementById('int-force');
+        const typeBtn = document.getElementById('int-type-btn');
+        const playBtn = document.getElementById('int-play-btn');
+
+        let isRepulsion = true;
+        let isPlaying = false;
+
+        let x1 = -3.0;
+        let x2 = 3.0;
+        let v1 = 0;
+        let v2 = 0;
+
+        // График
+        const canvasGraph = document.createElement('canvas');
+        canvasGraph.width = 200;
+        canvasGraph.height = 150;
+        canvasGraph.style.position = 'absolute';
+        canvasGraph.style.left = '20px';
+        canvasGraph.style.bottom = '20px';
+        canvasGraph.style.background = 'rgba(0,0,0,0.3)';
+        canvasGraph.style.borderRadius = '12px';
+        canvasGraph.style.border = '1px solid var(--border)';
+        container.appendChild(canvasGraph);
+        const ctx = canvasGraph.getContext('2d');
+
+        function drawGraph(currentR) {
+            ctx.clearRect(0, 0, 200, 150);
+            ctx.beginPath();
+            ctx.strokeStyle = '#8ba5b8';
+            ctx.lineWidth = 2;
+            ctx.moveTo(20, 10);
+            ctx.lineTo(20, 130);
+            ctx.lineTo(190, 130);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 3;
+            for (let r = 1; r <= 10; r += 0.1) {
+                const F = 15 / (r * r);
+                const px = 20 + (r / 10) * 170;
+                const py = 130 - (F / 15) * 120;
+                if (r === 1) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // Текущая точка
+            const F = 15 / (currentR * currentR);
+            const px = 20 + (currentR / 10) * 170;
+            const py = 130 - (F / 15) * 120;
+            ctx.beginPath();
+            ctx.fillStyle = '#ff4444';
+            ctx.arc(px, py, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#8ba5b8';
+            ctx.font = '10px sans-serif';
+            ctx.fillText('F', 5, 15);
+            ctx.fillText('r', 190, 145);
+        }
+
+        function resetPositions() {
+            const r = parseFloat(distSlider.value);
+            const startDist = r * 0.6;
+            x1 = -startDist;
+            x2 = startDist;
+            v1 = 0; v2 = 0;
+            isPlaying = false;
+            playBtn.textContent = '▶ Пуск';
+            playBtn.style.background = '#22c55e';
+            updateVisuals();
+        }
+
+        function updateVisuals() {
+            q1.position.set(x1, 0, 0);
+            q2.position.set(x2, 0, 0);
+
+            const currentR = Math.abs(x2 - x1);
+            const displayR = currentR * 1.5;
+            distDisplay.textContent = displayR.toFixed(1);
+
+            const F = 15 / (displayR * displayR);
+            forceDisplay.textContent = F.toFixed(2);
+
+            const scale = Math.min(F * 1.5, 2.0);
+            const dir = isRepulsion ? -1 : 1;
+
+            arrow1.position.set(x1 + dir * (RADIUS + 0.2), 0, 0);
+            arrow1.rotation.z = dir === -1 ? Math.PI / 2 : -Math.PI / 2;
+            arrow1.scale.set(1, scale, 1);
+
+            arrow2.position.set(x2 + dir * -(RADIUS + 0.2), 0, 0);
+            arrow2.rotation.z = dir === -1 ? -Math.PI / 2 : Math.PI / 2;
+            arrow2.scale.set(1, scale, 1);
+
+            drawGraph(displayR);
+        }
+
+        distSlider.addEventListener('input', () => {
+            const r = parseFloat(distSlider.value);
+            distValue.textContent = r.toFixed(1);
+            if (!isPlaying) {
+                const startDist = r * 0.6;
+                x1 = -startDist;
+                x2 = startDist;
+                updateVisuals();
+            }
+        });
+
+        typeBtn.addEventListener('click', () => {
+            isRepulsion = !isRepulsion;
+            if (isRepulsion) {
+                typeBtn.textContent = '⚡ Отталкивание (+ +)';
+                matPos.color.setHex(0xff4444);
+                matNeg.color.setHex(0xff4444);
+                lbl1.element.textContent = '+';
+                lbl2.element.textContent = '+';
+            } else {
+                typeBtn.textContent = '🧲 Притяжение (+ -)';
+                matPos.color.setHex(0xff4444);
+                matNeg.color.setHex(0x4444ff);
+                lbl1.element.textContent = '+';
+                lbl2.element.textContent = '-';
+            }
+            v1 = 0; v2 = 0;
+            isPlaying = false;
+            playBtn.textContent = '▶ Пуск';
+            playBtn.style.background = '#22c55e';
+            updateVisuals();
+        });
+
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                playBtn.textContent = '⏸ Пауза';
+                playBtn.style.background = '#f59e0b';
+            } else {
+                playBtn.textContent = '▶ Пуск';
+                playBtn.style.background = '#22c55e';
+            }
+        });
+
+        document.getElementById('int-reset').addEventListener('click', () => {
+            distSlider.value = 5;
+            distValue.textContent = '5.0';
+            isRepulsion = true;
+            typeBtn.textContent = '⚡ Отталкивание (+ +)';
+            matPos.color.setHex(0xff4444);
+            matNeg.color.setHex(0xff4444);
+            lbl1.element.textContent = '+';
+            lbl2.element.textContent = '+';
+            resetPositions();
+        });
+
+        document.getElementById('fs-interaction').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.enableRotate = false;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        resetPositions();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (isPlaying) {
+                const currentR = Math.abs(x2 - x1);
+
+                let accel = 3.0 / (currentR * currentR);
+                if (accel > 2.5) accel = 2.5;
+
+                if (isRepulsion) {
+                    v1 -= accel * 0.05;
+                    v2 += accel * 0.05;
+                    v1 *= 0.98;
+                    v2 *= 0.98;
+
+                    if (x1 < -BOUND_X + RADIUS) {
+                        x1 = -BOUND_X + RADIUS;
+                        v1 = Math.abs(v1) * 0.3;
+                    }
+                    if (x2 > BOUND_X - RADIUS) {
+                        x2 = BOUND_X - RADIUS;
+                        v2 = -Math.abs(v2) * 0.3;
+                    }
+
+                    if (Math.abs(v1) < 0.02 && Math.abs(v2) < 0.02) {
+                        isPlaying = false;
+                        playBtn.textContent = '▶ Пуск';
+                        playBtn.style.background = '#22c55e';
+                    }
+                } else {
+                    if (currentR > MIN_DIST) {
+                        v1 += accel * 0.05;
+                        v2 -= accel * 0.05;
+                        v1 *= 0.98;
+                        v2 *= 0.98;
+                    } else {
+                        x1 = -MIN_DIST / 2;
+                        x2 = MIN_DIST / 2;
+                        v1 = 0; v2 = 0;
+                        isPlaying = false;
+                        playBtn.textContent = '▶ Пуск';
+                        playBtn.style.background = '#22c55e';
+                    }
+                }
+
+                x1 += v1;
+                x2 += v2;
+
+                if (!isRepulsion && x2 - x1 < MIN_DIST) {
+                    x2 = x1 + MIN_DIST;
+                }
+
+                updateVisuals();
+            }
+
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+</body>
+</html>

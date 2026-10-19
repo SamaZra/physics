@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Агрегатные состояния — задачи с профессиональной направленностью</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+            --badge-welder: #ff6644;
+            --badge-electric: #ffcc00;
+            --badge-auto: #44aaff;
+            --badge-mech: #aa66ff;
+            --badge-it: #44ff88;
+            --self-border: #3b82f6;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+            --badge-welder: #dc2626;
+            --badge-electric: #ca8a04;
+            --badge-auto: #2563eb;
+            --badge-mech: #7c3aed;
+            --badge-it: #059669;
+            --self-border: #2563eb;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .intro-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:14px 16px;margin:12px 0;transition:background 0.3s;}
+        .intro-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .intro-card ul{color:var(--text);padding-left:20px;line-height:1.8;}
+        .intro-card .important{color:var(--special-border);font-weight:700;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:600000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .prof-header{display:flex;align-items:center;gap:10px;background:var(--info-bg);border-left:5px solid var(--special-border);border-radius:14px;padding:12px 16px;margin:18px 0 10px 0;}
+        .prof-header .prof-icon{font-size:1.8rem;}
+        .prof-header .prof-title{font-size:1.1rem;font-weight:700;color:var(--text);}
+        .prof-header .prof-sub{font-size:0.8rem;color:var(--text-secondary);margin-top:2px;}
+        .prof-header.welder{border-left-color:var(--badge-welder);}
+        .prof-header.electric{border-left-color:var(--badge-electric);}
+        .prof-header.auto{border-left-color:var(--badge-auto);}
+        .prof-header.mech{border-left-color:var(--badge-mech);}
+        .prof-header.it{border-left-color:var(--badge-it);}
+        .prof-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;margin-left:auto;}
+        .prof-badge.welder{background:var(--badge-welder);}
+        .prof-badge.electric{background:var(--badge-electric);}
+        .prof-badge.auto{background:var(--badge-auto);}
+        .prof-badge.mech{background:var(--badge-mech);}
+        .prof-badge.it{background:var(--badge-it);}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block.hard{border-left:5px solid #ff4444;background:linear-gradient(135deg, var(--task-bg) 0%, rgba(255,68,68,0.05) 100%);}
+        .task-block.self{border-left:5px solid var(--self-border);background:linear-gradient(135deg, var(--task-bg) 0%, rgba(59,130,246,0.06) 100%);}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .hard-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:#ff4444;margin-left:8px;vertical-align:middle;}
+        .self-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:var(--self-border);margin-left:8px;vertical-align:middle;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid var(--self-border);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:var(--self-border);}
+        .hint-box mjx-container{font-size:1rem !important;}
+
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        @media(max-width:700px){
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+    <h1>Агрегатные состояния — задачи с профессиональной направленностью</h1>
+
+    <div class="intro-card">
+        <p><strong>📌 О разделе.</strong> Задачи по теме «Агрегатные состояния вещества» (пары, жидкости, твёрдые тела, плавление), связанные с реальными профессиональными ситуациями.</p>
+        <p>По каждой специальности — <strong>5 задач</strong>:</p>
+        <ul>
+            <li>🔴 1 задача <strong>сложная</strong> — с подробным решением.</li>
+            <li>🟠 2 задачи <strong>обычные</strong> — с подробным решением.</li>
+            <li>🔵 2 задачи <strong>для самостоятельного решения</strong> — только условие и подсказка.</li>
+        </ul>
+        <p>Специальности:</p>
+        <ul>
+            <li>🔧 <strong>Сварщик</strong> — плавление металла, испарение защитных газов, смачивание.</li>
+            <li>⚡ <strong>Электрик</strong> — влажность, конденсат, капиллярный эффект в изоляции.</li>
+            <li>🚗 <strong>Автомеханик</strong> — антифриз, конденсат, нагрев шин, закон Гука.</li>
+            <li>⚙️ <strong>Машиностроение</strong> — закон Гука, капилляры, пар под давлением.</li>
+            <li>💻 <strong>Информационные системы</strong> — влажность в серверных, тепловые трубки, конденсация.</li>
+        </ul>
+    </div>
+
+    <!-- ===== СВАРЩИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔧 Задачи для сварщика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header welder">
+                <div class="prof-icon">🔧</div>
+                <div>
+                    <div class="prof-title">Сварочное производство</div>
+                    <div class="prof-sub">Плавление металла, испарение, смачивание</div>
+                </div>
+                <span class="prof-badge welder">Сварщик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Плавление присадочного прутка</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Для сварки используется алюминиевый пруток массой $m = 0{,}02$ кг. Удельная теплота плавления алюминия $\lambda = 3{,}9 \cdot 10^5$ Дж/кг. Какое количество теплоты нужно, чтобы расплавить пруток при температуре плавления?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}02$ кг, $\lambda = 3{,}9 \cdot 10^5$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('w1')">📖 Показать решение</button>
+                <div id="w1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $Q = \lambda m$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 3{,}9 \cdot 10^5 \cdot 0{,}02 = 7800 \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Для расплавления прутка нужно 7,8 кДж. Это небольшая энергия по сравнению с нагревом до температуры плавления (660 °C).</div>
+                    <div class="answer">✅ Ответ: $Q = 7{,}8$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Испарение ацетона</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При подготовке поверхности сварщик использует ацетон. За смену испарилось $m = 0{,}1$ кг ацетона. Удельная теплота парообразования ацетона $L = 5{,}2 \cdot 10^5$ Дж/кг. Какое количество теплоты поглотилось из окружающей среды?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}1$ кг, $L = 5{,}2 \cdot 10^5$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('w2')">📖 Показать решение</button>
+                <div id="w2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q = Lm$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 5{,}2 \cdot 10^5 \cdot 0{,}1 = 52000 \text{ Дж} = 52 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Испарение забирает тепло из окружающей среды, поэтому поверхность детали охлаждается, и на ней может конденсироваться влага.</div>
+                    <div class="answer">✅ Ответ: $Q = 52$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Нагрев и плавление электрода <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Стальной электрод массой $m = 0{,}05$ кг нужно нагреть от $20$ °C до температуры плавления ($1500$ °C) и расплавить. Удельная теплоёмкость стали $c = 500$ Дж/(кг·°C), удельная теплота плавления $\lambda = 8{,}4 \cdot 10^4$ Дж/кг. Найдите общую теплоту.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}05$ кг, $t_1 = 20$ °C, $t_{пл} = 1500$ °C, $c = 500$ Дж/(кг·°C), $\lambda = 8{,}4 \cdot 10^4$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('w3')">📖 Показать решение</button>
+                <div id="w3" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (нагрев).</strong> $Q_1 = cm(t_{пл} - t_1) = 500 \cdot 0{,}05 \cdot 1480 = 37000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2 (плавление).</strong> $Q_2 = \lambda m = 8{,}4 \cdot 10^4 \cdot 0{,}05 = 4200$ Дж.</div>
+                    <div class="step"><strong>Шаг 3 (всего).</strong> $Q_{общ} = 37000 + 4200 = 41200$ Дж = $41{,}2$ кДж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Основная энергия уходит на нагрев, а не на само плавление. Поэтому важно быстро подводить тепло к зоне сварки, чтобы не перегревать весь электрод.</div>
+                    <div class="answer">✅ Ответ: $Q_{общ} = 41{,}2$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Смачивание при пайке <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> При пайке флюс улучшает смачивание припоя. Как изменится растекание припоя, если коэффициент поверхностного натяжения уменьшится с $0{,}5$ Н/м до $0{,}3$ Н/м?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Чем меньше коэффициент поверхностного натяжения, тем лучше жидкость смачивает поверхность и растекается. Припой будет распределяться лучше, заполняя неровности.</div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Плавление олова <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Для пайки используется олово массой $m = 0{,}015$ кг. Удельная теплота плавления олова $\lambda = 5{,}9 \cdot 10^4$ Дж/кг. Сколько теплоты нужно для плавления?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $Q = \lambda m = 5{,}9 \cdot 10^4 \cdot 0{,}015$. Ответ — 885 Дж.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЭЛЕКТРИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚡ Задачи для электрика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header electric">
+                <div class="prof-icon">⚡</div>
+                <div>
+                    <div class="prof-title">Электротехника</div>
+                    <div class="prof-sub">Влажность, конденсат, капилляры</div>
+                </div>
+                <span class="prof-badge electric">Электрик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Конденсат в электрощите</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Температура воздуха в помещении $t = 25$ °C, относительная влажность $\varphi = 80\%$. Ночью температура падает до $t_2 = 15$ °C. Выпадет ли конденсат на металлических частях щита? Давление насыщенного пара при 25 °C — $3{,}17$ кПа, при 15 °C — $1{,}71$ кПа.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $t = 25$ °C, $\varphi = 0{,}8$, $t_2 = 15$ °C, $p_{н1} = 3170$ Па, $p_{н2} = 1710$ Па</div>
+                    <div class="find"><strong>🔍 Найти:</strong> выпадет ли конденсат?</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('e1')">📖 Показать решение</button>
+                <div id="e1" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (парциальное давление).</strong> $p = \varphi \cdot p_{н1} = 0{,}8 \cdot 3170 = 2536$ Па.</div>
+                    <div class="step"><strong>Шаг 2 (сравнение).</strong> При 15 °C давление насыщенного пара 1710 Па. Полученное $p = 2536$ Па > 1710 Па.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Пар перенасыщен — конденсат выпадет.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Это может привести к короткому замыканию. Поэтому в электрощитах устанавливают подогрев или герметизацию.</div>
+                    <div class="answer">✅ Ответ: да, конденсат выпадет</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Капиллярный эффект в изоляции</div>
+                <div class="task-condition"><strong>Ситуация:</strong> В кабеле с пористой изоляцией есть капилляры радиусом $r = 0{,}1$ мм. Насколько поднимется вода по этим капиллярам? $\sigma = 0{,}073$ Н/м, $\rho = 1000$ кг/м³, $g = 9{,}8$ м/с².</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r = 0{,}1$ мм $= 10^{-4}$ м, $\sigma = 0{,}073$ Н/м, $\rho = 1000$ кг/м³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $h$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('e2')">📖 Показать решение</button>
+                <div id="e2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $h = \dfrac{2\sigma}{\rho g r}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$h = \dfrac{2 \cdot 0{,}073}{1000 \cdot 9{,}8 \cdot 10^{-4}} = \dfrac{0{,}146}{0{,}98} \approx 0{,}149 \text{ м} \approx 15 \text{ см}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Влага может подниматься по изоляции на 15 см, что со временем приведёт к снижению сопротивления и пробою.</div>
+                    <div class="answer">✅ Ответ: $h \approx 15$ см</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Высыхание изоляции <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Мокрую изоляцию массой $m = 0{,}2$ кг нужно высушить. Влага составляет 10% массы. Сколько теплоты нужно, чтобы испарить эту влагу? Начальная температура воды 20 °C, конечная 100 °C. $c = 4200$ Дж/(кг·°C), $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}2$ кг, влага — 10%, $t_1 = 20$ °C, $t_2 = 100$ °C</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('e3')">📖 Показать решение</button>
+                <div id="e3" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (масса воды).</strong> $m_в = 0{,}1 \cdot 0{,}2 = 0{,}02$ кг.</div>
+                    <div class="step"><strong>Шаг 2 (нагрев).</strong> $Q_1 = cm_в(t_2 - t_1) = 4200 \cdot 0{,}02 \cdot 80 = 6720$ Дж.</div>
+                    <div class="step"><strong>Шаг 3 (испарение).</strong> $Q_2 = Lm_в = 2{,}3 \cdot 10^6 \cdot 0{,}02 = 46000$ Дж.</div>
+                    <div class="step"><strong>Шаг 4.</strong> $Q_{общ} = 6720 + 46000 = 52720$ Дж $\approx 52{,}7$ кДж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сушка изоляции требует значительных затрат энергии, особенно на испарение.</div>
+                    <div class="answer">✅ Ответ: $Q_{общ} \approx 52{,}7$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Влажность в трансформаторной <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Влажность воздуха в трансформаторной при 30 °C составляет $\varphi = 60\%$. Плотность насыщенного пара при 30 °C $\rho_{н} = 30{,}4$ г/м³. Найдите абсолютную влажность.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $\rho = \varphi \cdot \rho_{н} = 0{,}6 \cdot 30{,}4$. Ответ — 18,24 г/м³.</div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Испарение воды с поверхности провода <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> За ночь с поверхности провода испарилось $m = 0{,}005$ кг воды. Сколько теплоты поглотилось? $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $Q = Lm = 2{,}3 \cdot 10^6 \cdot 0{,}005$. Ответ — 11500 Дж.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== АВТОМЕХАНИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🚗 Задачи для автомеханика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header auto">
+                <div class="prof-icon">🚗</div>
+                <div>
+                    <div class="prof-title">Автосервис</div>
+                    <div class="prof-sub">Антифриз, конденсат, нагрев шин</div>
+                </div>
+                <span class="prof-badge auto">Автомеханик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Кипение антифриза</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Антифриз на основе этиленгликоля закипает при температуре $t = 197$ °C при нормальном давлении. В системе охлаждения давление повышено до $p = 2 \cdot 10^5$ Па. Как это влияет на температуру кипения?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $p_{внеш} = 2 \cdot 10^5$ Па (выше атмосферного)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> как изменится $t_{кип}$?</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('a1')">📖 Показать решение</button>
+                <div id="a1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Условие кипения: $p_{нас} = p_{внеш}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Чем выше внешнее давление, тем выше должна быть температура, чтобы давление насыщенного пара достигло этого значения.</div>
+                    <div class="step"><strong>Шаг 3.</strong> При $p = 2 \cdot 10^5$ Па антифриз закипит при температуре выше 197 °C (примерно 220–230 °C).</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Именно поэтому система охлаждения герметична и работает под давлением — это предотвращает закипание антифриза и образование паровых пробок.</div>
+                    <div class="answer">✅ Ответ: температура кипения повысится</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Нагрев тормозной жидкости</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При интенсивном торможении тормозная жидкость массой $m = 0{,}5$ кг нагревается на $\Delta t = 50$ °C. Удельная теплоёмкость $c = 2100$ Дж/(кг·°C). Найдите количество теплоты, выделившееся при торможении.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ кг, $\Delta t = 50$ °C, $c = 2100$ Дж/(кг·°C)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('a2')">📖 Показать решение</button>
+                <div id="a2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $Q = cm\Delta t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 2100 \cdot 0{,}5 \cdot 50 = 52500 \text{ Дж} = 52{,}5 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Тормозная жидкость должна иметь высокую температуру кипения, иначе при нагреве образуются паровые пузыри и тормоза откажут.</div>
+                    <div class="answer">✅ Ответ: $Q = 52{,}5$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Упругость шины <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Шина имеет жёсткость $k = 2 \cdot 10^5$ Н/м. При нагрузке от автомобиля $F = 4000$ Н шина деформируется. Найдите деформацию шины. Как изменится деформация при увеличении нагрузки в 1,5 раза?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 2 \cdot 10^5$ Н/м, $F_1 = 4000$ Н, $F_2 = 6000$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x_1$, $\Delta x_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('a3')">📖 Показать решение</button>
+                <div id="a3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Закон Гука: $F = k\Delta x \Rightarrow \Delta x = \dfrac{F}{k}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\Delta x_1 = \dfrac{4000}{2 \cdot 10^5} = 0{,}02 \text{ м} = 2 \text{ см}$</span></div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$\Delta x_2 = \dfrac{6000}{2 \cdot 10^5} = 0{,}03 \text{ м} = 3 \text{ см}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Деформация растёт пропорционально нагрузке. Превышение допустимой нагрузки приведёт к остаточной деформации или разрыву.</div>
+                    <div class="answer">✅ Ответ: $\Delta x_1 = 2$ см; $\Delta x_2 = 3$ см</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Конденсат в глушителе <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Зимой в глушителе образуется конденсат. За поездку сконденсировалось $m = 0{,}2$ кг водяного пара. Сколько теплоты выделилось? $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> При конденсации теплота выделяется: $Q = Lm = 2{,}3 \cdot 10^6 \cdot 0{,}2$. Ответ — 460 кДж.</div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Расширение охлаждающей жидкости <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> В системе охлаждения объёмом $V = 5$ л антифриз расширяется на $\Delta V = 0{,}2$ л. Какая работа совершается жидкостью при расширении, если давление в системе $p = 1{,}5 \cdot 10^5$ Па?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $A = p\Delta V = 1{,}5 \cdot 10^5 \cdot 0{,}2 \cdot 10^{-3}$. Ответ — 30 Дж.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ТЕХНОЛОГИЯ МАШИНОСТРОЕНИЯ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚙️ Задачи для технологии машиностроения (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header mech">
+                <div class="prof-icon">⚙️</div>
+                <div>
+                    <div class="prof-title">Машиностроение</div>
+                    <div class="prof-sub">Закон Гука, капилляры, пар</div>
+                </div>
+                <span class="prof-badge mech">Машиностроение</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Растяжение болта</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Болт из стали имеет длину $l_0 = 0{,}1$ м. При затяжке он удлиняется на $\Delta x = 0{,}1$ мм. Найдите относительное удлинение и напряжение, если модуль Юнга $E = 2 \cdot 10^{11}$ Па.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 0{,}1$ м, $\Delta x = 10^{-4}$ м, $E = 2 \cdot 10^{11}$ Па</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\varepsilon$, $\sigma$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('m1')">📖 Показать решение</button>
+                <div id="m1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Относительное удлинение: $\varepsilon = \dfrac{\Delta x}{l_0} = \dfrac{10^{-4}}{0{,}1} = 10^{-3}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Напряжение: $\sigma = E\varepsilon = 2 \cdot 10^{11} \cdot 10^{-3} = 2 \cdot 10^8$ Па = 200 МПа.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Напряжение 200 МПа — в пределах упругости для стали, но близко к пределу текучести. Дальнейшая затяжка может привести к пластической деформации.</div>
+                    <div class="answer">✅ Ответ: $\varepsilon = 10^{-3}$; $\sigma = 200$ МПа</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Пар в трубопроводе</div>
+                <div class="task-condition"><strong>Ситуация:</strong> В паропроводе конденсируется $m = 0{,}5$ кг пара. Сколько теплоты выделится? $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ кг, $L = 2{,}3 \cdot 10^6$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('m2')">📖 Показать решение</button>
+                <div id="m2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q = Lm$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 2{,}3 \cdot 10^6 \cdot 0{,}5 = 1{,}15 \cdot 10^6 \text{ Дж} = 1{,}15 \text{ МДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Конденсация пара выделяет огромное количество теплоты, поэтому пар используют для отопления и в тепловых машинах.</div>
+                    <div class="answer">✅ Ответ: $Q = 1{,}15$ МДж</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Капиллярный контроль <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> При капиллярной дефектоскопии трещина имеет ширину $d = 0{,}05$ мм. На какую глубину проникнет в неё индикаторная жидкость, если она полностью смачивает металл? $\sigma = 0{,}03$ Н/м, $\rho = 800$ кг/м³.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r = d/2 = 0{,}025$ мм $= 2{,}5 \cdot 10^{-5}$ м, $\sigma = 0{,}03$ Н/м, $\rho = 800$ кг/м³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $h$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('m3')">📖 Показать решение</button>
+                <div id="m3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $h = \dfrac{2\sigma}{\rho g r}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$h = \dfrac{2 \cdot 0{,}03}{800 \cdot 9{,}8 \cdot 2{,}5 \cdot 10^{-5}} = \dfrac{0{,}06}{0{,}196} \approx 0{,}306 \text{ м} \approx 30 \text{ см}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Жидкость проникает на 30 см — этого достаточно для обнаружения глубоких трещин. Чем тоньше трещина, тем выше поднимается жидкость.</div>
+                    <div class="answer">✅ Ответ: $h \approx 30$ см</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Удлинение троса <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Стальной трос длиной $l_0 = 10$ м и площадью сечения $S = 1 \cdot 10^{-4}$ м² растягивается силой $F = 5000$ Н. Модуль Юнга $E = 2 \cdot 10^{11}$ Па. Найдите удлинение.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $\Delta x = \dfrac{Fl_0}{ES} = \dfrac{5000 \cdot 10}{2 \cdot 10^{11} \cdot 10^{-4}}$. Ответ — 2,5 мм.</div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Испарение смазочно-охлаждающей жидкости <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> При обработке детали испарилось $m = 0{,}05$ кг СОЖ. Удельная теплота парообразования $L = 4 \cdot 10^5$ Дж/кг. Сколько теплоты поглотилось из зоны резания?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $Q = Lm = 4 \cdot 10^5 \cdot 0{,}05$. Ответ — 20 кДж.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ИНФОРМАЦИОННЫЕ СИСТЕМЫ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">💻 Задачи для информационных систем (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header it">
+                <div class="prof-icon">💻</div>
+                <div>
+                    <div class="prof-title">Информационные системы</div>
+                    <div class="prof-sub">Влажность, тепловые трубки, конденсация</div>
+                </div>
+                <span class="prof-badge it">ИС</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Конденсация на радиаторе</div>
+                <div class="task-condition"><strong>Ситуация:</strong> В серверной на радиаторе с температурой ниже точки росы конденсируется влага. За сутки сконденсировалось $m = 0{,}05$ кг воды. Сколько теплоты при этом выделилось? $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}05$ кг, $L = 2{,}3 \cdot 10^6$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('i1')">📖 Показать решение</button>
+                <div id="i1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q = Lm$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 2{,}3 \cdot 10^6 \cdot 0{,}05 = 1{,}15 \cdot 10^5 \text{ Дж} = 115 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Конденсация выделяет тепло, которое дополнительно нагревает оборудование. Поэтому в серверных важна не только температура, но и влажность.</div>
+                    <div class="answer">✅ Ответ: $Q = 115$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Влажность и точка росы в дата-центре</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Температура в серверной $t = 22$ °C, относительная влажность $\varphi = 45\%$. При какой температуре начнётся конденсация (точка росы)? Давление насыщенного пара при 22 °C — $2{,}64$ кПа, при 10 °C — $1{,}23$ кПа, при 12 °C — $1{,}40$ кПа.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $t = 22$ °C, $\varphi = 0{,}45$, $p_{н}(22) = 2{,}64$ кПа, $p_{н}(10) = 1{,}23$ кПа, $p_{н}(12) = 1{,}40$ кПа</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t_{росы}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('i2')">📖 Показать решение</button>
+                <div id="i2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Парциальное давление: $p = \varphi \cdot p_{н}(22) = 0{,}45 \cdot 2{,}64 = 1{,}188$ кПа.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Сравниваем с таблицей: $p_{н}(10) = 1{,}23$ кПа. Значение 1,188 кПа чуть меньше, значит точка росы чуть ниже 10 °C (около 9,5 °C).</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Если температура в серверной опустится ниже 9,5 °C, начнётся конденсация. Системы охлаждения не должны допускать такого переохлаждения.</div>
+                    <div class="answer">✅ Ответ: $t_{росы} \approx 9{,}5$ °C</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Тепловая трубка <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> В тепловой трубке процессора испаряется $m = 0{,}01$ кг дистиллированной воды при 100 °C, затем пар конденсируется в другой части трубки. Найдите: а) теплоту, поглощённую при испарении; б) теплоту, выделенную при конденсации; в) почему трубка эффективна? $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}01$ кг, $L = 2{,}3 \cdot 10^6$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{исп}$, $Q_{конд}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('i3')">📖 Показать решение</button>
+                <div id="i3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q_{исп} = Lm = 2{,}3 \cdot 10^6 \cdot 0{,}01 = 23000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $Q_{конд} = Lm = 23000$ Дж.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Тепловая трубка эффективна потому, что теплота переносится не за счёт теплопроводности, а за счёт фазовых переходов (испарение + конденсация), которые переносят огромное количество энергии при малом перепаде температур.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 1 г воды переносит 2,3 кДж тепла. Это позволяет охлаждать мощные процессоры.</div>
+                    <div class="answer">✅ Ответ: $Q_{исп} = 23$ кДж; $Q_{конд} = 23$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Влажность в серверной <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> В серверной при $t = 20$ °C абсолютная влажность $\rho = 8$ г/м³. Плотность насыщенного пара при 20 °C $\rho_{н} = 17{,}3$ г/м³. Найдите относительную влажность.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $\varphi = \dfrac{\rho}{\rho_{н}} \cdot 100\% = \dfrac{8}{17{,}3} \cdot 100\%$. Ответ — около 46%.</div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Испарение с поверхности чипа <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> С поверхности чипа в системе с испарительным охлаждением за час испаряется $m = 0{,}02$ кг жидкости с удельной теплотой парообразования $L = 8 \cdot 10^5$ Дж/кг. Какая мощность теплоотвода?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Мощность $P = \dfrac{Q}{t} = \dfrac{Lm}{t} = \dfrac{8 \cdot 10^5 \cdot 0{,}02}{3600}$. Ответ — около 4,4 Вт.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+</script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+</body>
+</html>

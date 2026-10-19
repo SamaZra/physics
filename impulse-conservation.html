@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -54,9 +54,7 @@
         }
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
-        
 
-        
         h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
         .section{margin-bottom:14px;}
         .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
@@ -296,7 +294,7 @@
             transition: all 0.2s;
         }
         .hint-btn:hover { transform: scale(1.03); opacity: 0.9; }
-        .task-solution { display: none; margin-top: 12px; }
+        .task-solution { display: none; margin-top: 12px; color: var(--text); }
         .task-solution.open { display: block; }
         .task-solution .step {
             padding: 10px 16px;
@@ -341,9 +339,8 @@
             text-align: center;
             margin-top: 10px;
         }
-        
-        
-        
+        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+
         .info-display {
             position: absolute;
             top: 12px;
@@ -507,6 +504,21 @@
                 <p><span class="important">КПД</span> — отношение полезной работы к затраченной: $\eta = \frac{A_{пол}}{A_{затр}} \cdot 100\%$</p>
                 <p><span class="important">Энергия</span> — способность тела совершать работу. Кинетическая энергия: $E_k = \frac{mv^2}{2}$. Потенциальная энергия: $E_p = mgh$.</p>
             </div>
+            <!-- КПД: подробное объяснение -->
+            <div class="def-card">
+                <p><strong>КПД (коэффициент полезного действия)</strong> — безразмерная величина (часто в процентах), показывающая, какая доля затраченной энергии превратилась в полезную работу. Ни один реальный механизм не имеет КПД 100%: часть энергии всегда теряется на трение, нагрев, деформацию, звук и т.п.</p>
+                <p><span class="important">Полезная работа ($A_{\text{пол}}$)</span> — работа, ради которой создан механизм (подъём груза, перемещение автомобиля, вращение вала).</p>
+                <p><span class="important">Затраченная работа ($A_{\text{затр}}$)</span> — вся подведённая энергия (сожжённое топливо, потреблённая электроэнергия, работа человека).</p>
+                <p>$\eta = \dfrac{A_{\text{пол}}}{A_{\text{затр}}} \cdot 100\%$</p>
+                <p><strong>Пример.</strong> Кран поднимает груз $m = 100$ кг на высоту $h = 5$ м. Полезная работа против силы тяжести: $A_{\text{пол}} = mgh = 100 \cdot 9{,}8 \cdot 5 = 4900$ Дж. Двигатель потребил $7000$ Дж. Тогда $\eta = \dfrac{4900}{7000} \cdot 100\% = 70\%$. Остальные 30% ушли на трение и нагрев.</p>
+                <p><strong>Связь с мощностью:</strong> $\eta = \dfrac{N_{\text{пол}}}{N_{\text{затр}}} \cdot 100\%$, где $N_{\text{пол}}$ — полезная мощность, $N_{\text{затр}}$ — мощность источника энергии.</p>
+                <p><strong>Что важно запомнить:</strong></p>
+                <ul>
+                    <li>$A_{\text{пол}} \le A_{\text{затр}}$, поэтому $0 < \eta \le 100\%$.</li>
+                    <li>КПД можно выражать долей единицы: $\eta = 0{,}7$ — то же самое, что $70\%$.</li>
+                    <li>Потери энергии не исчезают — они переходят во внутреннюю энергию (нагрев) и другие формы, что согласуется с законом сохранения энергии.</li>
+                </ul>
+            </div>
             <div class="formula-block">
                 <span class="f">$A = F S \cos \alpha$</span>
                 <span class="f-label">— работа</span>
@@ -516,6 +528,10 @@
                 <span class="f-label">— кинетическая энергия</span>
                 <span class="f">$E_p = mgh$</span>
                 <span class="f-label">— потенциальная энергия</span>
+                <span class="f">$\eta = \dfrac{A_{\text{пол}}}{A_{\text{затр}}} \cdot 100\%$</span>
+                <span class="f-label">— КПД через работы</span>
+                <span class="f">$\eta = \dfrac{N_{\text{пол}}}{N_{\text{затр}}} \cdot 100\%$</span>
+                <span class="f-label">— КПД через мощности</span>
             </div>
         </div>
     </div>
@@ -644,8 +660,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $v = 4$ м/с</div>
                     <div class="find"><strong>🔍 Найти:</strong> $p$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint1')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint1')">💡 Подсказка</button>
+                </div>
                 <div id="hint1" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Импульс находится по формуле $p = mv$.</div>
@@ -666,8 +684,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $F = 20$ Н, $S = 5$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $A$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint2')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint2')">💡 Подсказка</button>
+                </div>
                 <div id="hint2" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Работа равна произведению силы на перемещение: $A = FS$.</div>
@@ -688,8 +708,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $A = 600$ Дж, $t = 10$ с</div>
                     <div class="find"><strong>🔍 Найти:</strong> $N$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint3')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint3')">💡 Подсказка</button>
+                </div>
                 <div id="hint3" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Мощность — это работа, делённая на время: $N = A/t$.</div>
@@ -710,8 +732,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $v_1 = 3$ м/с, $m_2 = 1$ кг, $v_2 = 1$ м/с</div>
                     <div class="find"><strong>🔍 Найти:</strong> $v'$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint4')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint4')">💡 Подсказка</button>
+                </div>
                 <div id="hint4" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> При неупругом ударе тела слипаются, используйте ЗСИ: $m_1v_1 + m_2v_2 = (m_1+m_2)v'$.</div>
@@ -734,8 +758,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $v_1 = 2$ м/с, $m_2 = 2$ кг, $v_2 = -1$ м/с</div>
                     <div class="find"><strong>🔍 Найти:</strong> $v_1'$, $v_2'$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint5')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint5')">💡 Подсказка</button>
+                </div>
                 <div id="hint5" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Для упругого удара используйте ЗСИ и ЗСЭ. Учтите знак скорости второго шара.</div>
@@ -760,8 +786,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $M = 10$ кг, $v = 2$ м/с, $m = 1$ кг, $u = 10$ м/с</div>
                     <div class="find"><strong>🔍 Найти:</strong> $v'$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint6')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint6')">💡 Подсказка</button>
+                </div>
                 <div id="hint6" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> ЗСИ с учётом скорости топлива относительно Земли: $v_{топл} = v - u$.</div>
@@ -784,8 +812,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $v_0 = 0$, $v = 6$ м/с, $F = 12$ Н</div>
                     <div class="find"><strong>🔍 Найти:</strong> $A$, $S$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint7')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint7')">💡 Подсказка</button>
+                </div>
                 <div id="hint7" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Работа равна изменению кинетической энергии: $A = \Delta E_k = \frac{mv^2}{2}$.</div>
@@ -808,8 +838,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 1000$ кг, $v = 20$ м/с, $F = 2000$ Н</div>
                     <div class="find"><strong>🔍 Найти:</strong> $N$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint8')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint8')">💡 Подсказка</button>
+                </div>
                 <div id="hint8" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> При постоянной скорости мощность равна $N = Fv$.</div>
@@ -831,8 +863,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $A_{пол} = 500$ Дж, $A_{затр} = 800$ Дж</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint9')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint9')">💡 Подсказка</button>
+                </div>
                 <div id="hint9" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> КПД — это отношение полезной работы к затраченной, умноженное на 100%.</div>
@@ -853,8 +887,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $\mu = 0.2$, $S = 4$ м, $g = 9.8$ м/с²</div>
                     <div class="find"><strong>🔍 Найти:</strong> $A_{тр}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint10')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint10')">💡 Подсказка</button>
+                </div>
                 <div id="hint10" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Сила трения $F_{тр} = \mu mg$, работа отрицательна, так как направлена против движения.</div>
@@ -877,8 +913,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $m_2 = 3$ кг, $v_1 = 4$ м/с, $v_2 = 0$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $v_1'$, $v_2'$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint11')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint11')">💡 Подсказка</button>
+                </div>
                 <div id="hint11" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Упругий удар: используйте ЗСИ и ЗСЭ, второе тело покоится ($v_2 = 0$).</div>
@@ -902,8 +940,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 20$ кг, $h = 5$ м, $g = 9.8$ м/с²</div>
                     <div class="find"><strong>🔍 Найти:</strong> $A_{тяж}$, $A_{под}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint12')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint12')">💡 Подсказка</button>
+                </div>
                 <div id="hint12" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Работа силы тяжести $A_{тяж} = -mgh$, работа подъёмной силы $A_{под} = mgh$.</div>
@@ -926,8 +966,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $N = 500$ Вт, $h = 10$ м, $t = 60$ с, $g = 9.8$ м/с²</div>
                     <div class="find"><strong>🔍 Найти:</strong> $m$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint13')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint13')">💡 Подсказка</button>
+                </div>
                 <div id="hint13" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> $A = Nt$, затем $m = A/(gh)$.</div>
@@ -949,8 +991,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $v_0 = 10$ м/с, $h = 3$ м, $g = 9.8$ м/с²</div>
                     <div class="find"><strong>🔍 Найти:</strong> $E_k$, $E_p$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint14')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint14')">💡 Подсказка</button>
+                </div>
                 <div id="hint14" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Полная энергия $E = \frac{mv_0^2}{2}$, потенциальная $E_p = mgh$, кинетическая $E_k = E - E_p$.</div>
@@ -974,8 +1018,10 @@
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $v_1 = 3$ м/с, $m_2 = 2$ кг, $v_2 = -2$ м/с</div>
                     <div class="find"><strong>🔍 Найти:</strong> $v'$, $\Delta E$, $Q$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
-                <button class="hint-btn" onclick="toggleHint('hint15')">💡 Подсказка</button>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                    <button class="hint-btn" onclick="toggleHint('hint15')">💡 Подсказка</button>
+                </div>
                 <div id="hint15" class="task-solution">
                     <div class="step">
                         <div class="explanation"><strong>Подсказка:</strong> Неупругий удар: ЗСИ для общей скорости, потеря энергии равна выделившейся теплоте $Q = E_0 - E_k$.</div>
@@ -1160,31 +1206,41 @@
 </div>
 
 <script>
+    function findToggleButton(id) {
+        const buttons = document.querySelectorAll('button[onclick]');
+        for (const b of buttons) {
+            const attr = b.getAttribute('onclick');
+            if (attr && attr.includes("'" + id + "'")) return b;
+        }
+        return null;
+    }
+
     function toggleSolution(id){
-        const el=document.getElementById(id);
-        const btn=el.previousElementSibling;
+        const el = document.getElementById(id);
+        const btn = findToggleButton(id);
+        if(!el || !btn) return;
         if(el.classList.contains('open')){
             el.classList.remove('open');
-            btn.textContent='📖 Показать решение';
-        }else{
+            btn.textContent = '📖 Показать решение';
+        } else {
             el.classList.add('open');
-            btn.textContent='📕 Скрыть решение';
+            btn.textContent = '📕 Скрыть решение';
         }
     }
     function toggleHint(id){
-        const el=document.getElementById(id);
-        const btn=el.previousElementSibling;
+        const el = document.getElementById(id);
+        const btn = findToggleButton(id);
+        if(!el || !btn) return;
         if(el.classList.contains('open')){
             el.classList.remove('open');
-            btn.textContent='💡 Подсказка';
-        }else{
+            btn.textContent = '💡 Подсказка';
+        } else {
             el.classList.add('open');
-            btn.textContent='📕 Скрыть подсказку';
+            btn.textContent = '📕 Скрыть подсказку';
         }
     }
-    
-    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');}})();
 
     function switchModel(model) {
         document.querySelectorAll('.model-tab').forEach(tab => {

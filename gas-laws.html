@@ -48,9 +48,6 @@
         }
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
-        
-
-        
         h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
         .section{margin-bottom:14px;}
         .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
@@ -109,9 +106,14 @@
         .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
         .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
         .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
-        
-        
-        
+        .answer{padding:12px 18px;background:var(--special-border);color:#ffffff !important;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .answer mjx-container{color:#ffffff !important;}
+        .btn-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+        .process-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:0.9rem;}
+        .process-table th,.process-table td{border:1px solid var(--border);padding:8px 10px;text-align:left;color:var(--text);}
+        .process-table th{background:var(--info-bg);color:var(--special-border);font-weight:700;}
+        .process-table tr:nth-child(even) td{background:rgba(245,158,11,0.04);}
+        .diagram-svg{display:block;margin:12px auto;max-width:100%;}
         mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
         .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
         .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
@@ -128,6 +130,7 @@
             .model-tabs{gap:4px;}
             .model-tab{padding:6px 12px;font-size:0.75rem;}
             .info-display{font-size:0.6rem;padding:4px 10px;min-width:100px;top:8px;right:8px;}
+            .process-table{font-size:0.8rem;}
         }
         @media(max-width:450px){
             .model-container{min-height:260px;}
@@ -224,6 +227,138 @@
         </div>
     </div>
 
+    <!-- ===== ТЕОРИЯ 3: КАК ЧИТАТЬ ГРАФИКИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Как читать графики изопроцессов</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>В задачах ЕГЭ и ОГЭ часто дают <span class="important">замкнутый цикл</span> в координатах $(p, V)$, $(V, T)$ или $(p, T)$. Требуется:
+                    — назвать процесс на каждом участке;
+                    — указать, как меняются параметры ($p$, $V$, $T$);
+                    — найти работу газа, изменение внутренней энергии или количество теплоты.</p>
+
+                <p><strong>Что означает форма линии на графике:</strong></p>
+                <table class="process-table">
+                    <tr>
+                        <th>График</th>
+                        <th>Горизонтальная линия</th>
+                        <th>Вертикальная линия</th>
+                        <th>Наклонная прямая через 0</th>
+                    </tr>
+                    <tr>
+                        <td>$p(V)$ — давление от объёма</td>
+                        <td>$p = \text{const}$ → изобара</td>
+                        <td>$V = \text{const}$ → изохора</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>$V(T)$ — объём от температуры</td>
+                        <td>$V = \text{const}$ → изохора</td>
+                        <td>$T = \text{const}$ → изотерма</td>
+                        <td>$V \sim T$ → изобара</td>
+                    </tr>
+                    <tr>
+                        <td>$p(T)$ — давление от температуры</td>
+                        <td>$p = \text{const}$ → изобара</td>
+                        <td>$T = \text{const}$ → изотерма</td>
+                        <td>$p \sim T$ → изохора</td>
+                    </tr>
+                </table>
+
+                <p><strong>Алгоритм чтения цикла:</strong></p>
+                <ul>
+                    <li>1. Определите, в каких координатах построен график: $(p,V)$, $(V,T)$ или $(p,T)$.</li>
+                    <li>2. Для каждого участка посмотрите, какая величина <strong>не меняется</strong>: если линия горизонтальна — постоянна вертикальная ось, если вертикальна — постоянна горизонтальная ось, если прямая через начало координат — постоянна величина, стоящая в знаменателе.</li>
+                    <li>3. Назовите процесс на каждом участке.</li>
+                    <li>4. Опишите, что происходит с остальными параметрами: где растут, где убывают.</li>
+                    <li>5. Если нужно — найдите работу газа как площадь под графиком $p(V)$ (для замкнутого цикла — площадь внутри контура).</li>
+                </ul>
+
+                <p><strong>Полезно запомнить:</strong></p>
+                <ul>
+                    <li>В $p(V)$: горизонталь — изобара, вертикаль — изохора, гипербола — изотерма.</li>
+                    <li>В $V(T)$: горизонталь — изохора, вертикаль — изотерма, прямая через 0 — изобара.</li>
+                    <li>В $p(T)$: горизонталь — изобара, вертикаль — изотерма, прямая через 0 — изохора.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ПРИМЕР РАЗБОРА ГРАФИКА ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Пример подробного разбора задачи на график</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Задача.</strong> На рисунке изображён замкнутый цикл 1 → 2 → 3 → 4 → 1 в координатах $p$–$V$. Опишите каждый участок и найдите работу газа за цикл, если $p_1 = 200$ кПа, $p_2 = 100$ кПа, $V_1 = 1$ л, $V_2 = 4$ л.</p>
+
+                <svg class="diagram-svg" viewBox="0 0 340 240" width="340" height="240" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrEx" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
+                        </marker>
+                    </defs>
+                    <line x1="50" y1="200" x2="310" y2="200" stroke="#8ba5b8" stroke-width="1"/>
+                    <line x1="50" y1="200" x2="50" y2="30" stroke="#8ba5b8" stroke-width="1"/>
+                    <text x="312" y="204" fill="#8ba5b8" font-size="12">V</text>
+                    <text x="30" y="30" fill="#8ba5b8" font-size="12">p</text>
+                    <polygon points="100,60 250,60 250,150 100,150" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrEx)"/>
+                    <text x="85" y="55" fill="#f59e0b" font-size="12">1</text>
+                    <text x="255" y="55" fill="#f59e0b" font-size="12">2</text>
+                    <text x="255" y="167" fill="#f59e0b" font-size="12">3</text>
+                    <text x="85" y="167" fill="#f59e0b" font-size="12">4</text>
+                    <text x="60" y="70" fill="#8ba5b8" font-size="10">p₁</text>
+                    <text x="60" y="160" fill="#8ba5b8" font-size="10">p₂</text>
+                    <text x="100" y="215" fill="#8ba5b8" font-size="10">V₁</text>
+                    <text x="245" y="215" fill="#8ba5b8" font-size="10">V₂</text>
+                </svg>
+
+                <p><strong>Шаг 1. Определяем, в каких координатах построен график.</strong><br>
+                    По осям отложены $p$ (вертикальная) и $V$ (горизонтальная). Значит, перед нами диаграмма $p$–$V$. В таких координатах:
+                    горизонтальная линия — <strong>изобара</strong> ($p = \text{const}$),
+                    вертикальная линия — <strong>изохора</strong> ($V = \text{const}$),
+                    гипербола — <strong>изотерма</strong> ($T = \text{const}$).</p>
+
+                <p><strong>Шаг 2. Участок 1 → 2.</strong><br>
+                    Линия горизонтальна → $p = p_1 = 200$ кПа = const. Это <strong>изобарный процесс</strong>.<br>
+                    Объём растёт: $V_1 = 1$ л → $V_2 = 4$ л.<br>
+                    По закону Гей-Люссака $\dfrac{V}{T} = \text{const}$, значит температура тоже растёт: $T_2 > T_1$.<br>
+                    Газ <strong>расширяется и нагревается</strong>.</p>
+
+                <p><strong>Шаг 3. Участок 2 → 3.</strong><br>
+                    Линия вертикальна → $V = V_2 = 4$ л = const. Это <strong>изохорный процесс</strong>.<br>
+                    Давление падает: $p_1 = 200$ кПа → $p_2 = 100$ кПа.<br>
+                    По закону Шарля $\dfrac{p}{T} = \text{const}$, значит температура падает: $T_3 < T_2$.<br>
+                    Газ <strong>охлаждается</strong> при постоянном объёме.</p>
+
+                <p><strong>Шаг 4. Участок 3 → 4.</strong><br>
+                    Линия горизонтальна → $p = p_2 = 100$ кПа = const. Это <strong>изобарный процесс</strong>.<br>
+                    Объём уменьшается: $V_2 = 4$ л → $V_1 = 1$ л.<br>
+                    Значит, температура падает: $T_4 < T_3$.<br>
+                    Газ <strong>сжимается и охлаждается</strong>.</p>
+
+                <p><strong>Шаг 5. Участок 4 → 1.</strong><br>
+                    Линия вертикальна → $V = V_1 = 1$ л = const. Это <strong>изохорный процесс</strong>.<br>
+                    Давление растёт: $p_2 = 100$ кПа → $p_1 = 200$ кПа.<br>
+                    Значит, температура растёт: $T_1 > T_4$.<br>
+                    Газ <strong>нагревается</strong> при постоянном объёме.</p>
+
+                <p><strong>Шаг 6. Работа газа за цикл.</strong><br>
+                    В координатах $p$–$V$ работа численно равна <strong>площади под графиком</strong>. Для замкнутого цикла — площади фигуры внутри контура.</p>
+                <div class="formula-block">
+                    <span class="f">$A = \Delta p \cdot \Delta V = (p_1 - p_2)(V_2 - V_1)$</span>
+                </div>
+                <p>Переводим в СИ: $\Delta p = (200 - 100) \cdot 10^3 = 10^5$ Па; $\Delta V = (4 - 1) \cdot 10^{-3} = 3 \cdot 10^{-3}$ м³.</p>
+                <div class="formula-block">
+                    <span class="f">$A = 10^5 \cdot 3 \cdot 10^{-3} = 300$ Дж</span>
+                </div>
+
+                <p><strong>Проверка.</strong> Знак работы положительный, потому что расширение (1 → 2) происходит при большем давлении, чем сжатие (3 → 4). Значит, за цикл газ совершает положительную работу — «двигатель работает».</p>
+
+                <div class="answer">✅ Ответ: 1→2 — изобара (расширение, нагрев); 2→3 — изохора (охлаждение); 3→4 — изобара (сжатие, охлаждение); 4→1 — изохора (нагрев); работа за цикл $A = 300$ Дж</div>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== 3D-МОДЕЛИ: ИЗОПРОЦЕССЫ ===== -->
     <div class="section">
         <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели изопроцессов</div>
@@ -257,7 +392,7 @@
                 </div>
                 <div class="def-card">
                     <p><strong>Изотермический процесс</strong> — $T = \text{const}$. Закон Бойля–Мариотта: $pV = \text{const}$.</p>
-                    <p>Уменьшаем объём — давление растёт, и наоборот. Молекулы бьют о поршень чаще, когда объём меньше.</p>
+                    <p>Уменьшаем объём — давление растёт, и наоборот.</p>
                 </div>
             </div>
 
@@ -283,7 +418,7 @@
                 </div>
                 <div class="def-card">
                     <p><strong>Изобарный процесс</strong> — $p = \text{const}$. Закон Гей-Люссака: $\dfrac{V}{T} = \text{const}$.</p>
-                    <p>Нагреваем газ — он расширяется, поршень поднимается. При охлаждении — сжимается.</p>
+                    <p>Нагреваем газ — он расширяется, поршень поднимается.</p>
                 </div>
             </div>
 
@@ -309,7 +444,7 @@
                 </div>
                 <div class="def-card">
                     <p><strong>Изохорный процесс</strong> — $V = \text{const}$. Закон Шарля: $\dfrac{p}{T} = \text{const}$.</p>
-                    <p>Объём сосуда не меняется. Нагреваем газ — молекулы бьют о стенки сильнее и чаще, давление растёт.</p>
+                    <p>Объём сосуда не меняется. Нагреваем газ — давление растёт.</p>
                 </div>
             </div>
 
@@ -318,7 +453,7 @@
 
     <!-- ===== ЗАДАЧИ ===== -->
     <div class="section collapsed">
-        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (15 задач)</div>
         <div class="section-content">
 
             <div class="task-block">
@@ -333,7 +468,7 @@
                     <div class="step"><strong>Шаг 1.</strong> Уравнение Менделеева–Клапейрона: <span class="formula">$pV = \dfrac{m}{M}RT$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> Выражаем объём: $V = \dfrac{mRT}{Mp}$.</div>
                     <div class="step"><strong>Шаг 3.</strong> <span class="formula">$V = \dfrac{2 \cdot 8{,}31 \cdot 300}{0{,}032 \cdot 10^5} = \dfrac{4986}{3200} \approx 1{,}56 \text{ м}^3$</span></div>
-                    <div class="step explanation"><strong>Пояснение:</strong> 2 кг кислорода при нормальных условиях занимают объём около 1,56 м³ — примерно как большой мешок.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 2 кг кислорода при нормальных условиях занимают объём около 1,56 м³.</div>
                     <div class="answer">✅ Ответ: $V \approx 1{,}56$ м³</div>
                 </div>
             </div>
@@ -350,7 +485,7 @@
                     <div class="step"><strong>Шаг 1.</strong> Закон Бойля–Мариотта: <span class="formula">$p_1 V_1 = p_2 V_2$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> Выражаем $p_2 = \dfrac{p_1 V_1}{V_2}$.</div>
                     <div class="step"><strong>Шаг 3.</strong> <span class="formula">$p_2 = \dfrac{200 \cdot 4}{2} = 400 \text{ кПа}$</span></div>
-                    <div class="step explanation"><strong>Пояснение:</strong> При уменьшении объёма в 2 раза давление увеличивается в 2 раза — обратная пропорциональность.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При уменьшении объёма в 2 раза давление увеличивается в 2 раза.</div>
                     <div class="answer">✅ Ответ: $p_2 = 400$ кПа</div>
                 </div>
             </div>
@@ -417,7 +552,7 @@
                 <div id="sol6" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Из $pV = \dfrac{m}{M}RT$ и $\rho = \dfrac{m}{V}$: <span class="formula">$\rho = \dfrac{pM}{RT}$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\rho = \dfrac{2 \cdot 10^5 \cdot 0{,}032}{8{,}31 \cdot 280} = \dfrac{6400}{2326{,}8} \approx 2{,}75 \text{ кг/м}^3$</span></div>
-                    <div class="step explanation"><strong>Пояснение:</strong> Плотность кислорода при этих условиях — около 2,75 кг/м³. Для сравнения, при нормальных условиях (0 °C, 100 кПа) плотность кислорода ≈ 1,43 кг/м³.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Плотность кислорода при этих условиях — около 2,75 кг/м³.</div>
                     <div class="answer">✅ Ответ: $\rho \approx 2{,}75$ кг/м³</div>
                 </div>
             </div>
@@ -433,7 +568,7 @@
                 <div id="sol7" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $pV = \nu RT \Rightarrow \nu = \dfrac{pV}{RT}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\nu = \dfrac{1{,}5 \cdot 10^6 \cdot 0{,}04}{8{,}31 \cdot 300} = \dfrac{60000}{2493} \approx 24{,}1 \text{ моль}$</span></div>
-                    <div class="step explanation"><strong>Пояснение:</strong> В баллоне около 24 молей газа. Если это, например, кислород, масса газа составила бы $24 \cdot 32 \approx 770$ г.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В баллоне около 24 молей газа.</div>
                     <div class="answer">✅ Ответ: $\nu \approx 24{,}1$ моль</div>
                 </div>
             </div>
@@ -449,7 +584,7 @@
                 <div id="sol8" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Закон Бойля–Мариотта: $p_1 V_1 = p_2 V_2$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p_2 = \dfrac{p_1 V_1}{V_2} = \dfrac{120 \cdot 8}{3} = 320 \text{ кПа}$</span></div>
-                    <div class="step explanation"><strong>Пояснение:</strong> При уменьшении объёма примерно в 2,7 раза давление растёт во столько же раз. Закон Бойля–Мариотта работает только при постоянной температуре.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При уменьшении объёма примерно в 2,7 раза давление растёт во столько же раз.</div>
                     <div class="answer">✅ Ответ: $p_2 = 320$ кПа</div>
                 </div>
             </div>
@@ -465,7 +600,7 @@
                 <div id="sol9" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $pV = \dfrac{m}{M}RT \Rightarrow m = \dfrac{pVM}{RT}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = \dfrac{3 \cdot 10^6 \cdot 0{,}1 \cdot 0{,}032}{8{,}31 \cdot 290} = \dfrac{9600}{2409{,}9} \approx 3{,}98 \text{ кг}$</span></div>
-                    <div class="step explanation"><strong>Пояснение:</strong> Масса кислорода в баллоне около 4 кг. При таком высоком давлении газ сильно сжат.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Масса кислорода в баллоне около 4 кг.</div>
                     <div class="answer">✅ Ответ: $m \approx 3{,}98$ кг</div>
                 </div>
             </div>
@@ -481,8 +616,441 @@
                 <div id="sol10" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Закон Дальтона: <span class="formula">$p = p_1 + p_2$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> $p = 40 + 60 = 100$ кПа.</div>
-                    <div class="step explanation"><strong>Пояснение:</strong> Давление смеси газов равно сумме их парциальных давлений. Каждый газ ведёт себя так, как будто других газов нет.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Давление смеси газов равно сумме их парциальных давлений.</div>
                     <div class="answer">✅ Ответ: $p = 100$ кПа</div>
+                </div>
+            </div>
+
+            <!-- ===== ЗАДАЧИ НА ГРАФИКИ ===== -->
+            <div style="margin:24px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Задачи на чтение графиков изопроцессов</div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 11. Цикл в координатах p–V (прямоугольник)</div>
+                <div class="task-condition">
+                    <strong>Условие:</strong> На рисунке изображён замкнутый цикл 1 → 2 → 3 → 4 → 1 в координатах $p$–$V$. Участок 1 → 2 — горизонтальная линия при $p_1$; 2 → 3 — вертикальная при $V_2$; 3 → 4 — горизонтальная при $p_2 < p_1$; 4 → 1 — вертикальная при $V_1 < V_2$. Опишите каждый участок: назовите процесс, укажите, как меняются $p$, $V$, $T$.
+                    <svg class="diagram-svg" viewBox="0 0 320 220" width="320" height="220" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrPV" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
+                            </marker>
+                        </defs>
+                        <line x1="40" y1="180" x2="290" y2="180" stroke="#8ba5b8" stroke-width="1"/>
+                        <line x1="40" y1="180" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1"/>
+                        <text x="292" y="184" fill="#8ba5b8" font-size="12">V</text>
+                        <text x="20" y="20" fill="#8ba5b8" font-size="12">p</text>
+                        <polygon points="90,50 240,50 240,150 90,150" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrPV)"/>
+                        <text x="75" y="45" fill="#f59e0b" font-size="12">1</text>
+                        <text x="245" y="45" fill="#f59e0b" font-size="12">2</text>
+                        <text x="245" y="167" fill="#f59e0b" font-size="12">3</text>
+                        <text x="75" y="167" fill="#f59e0b" font-size="12">4</text>
+                    </svg>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
+                <div id="sol11" class="task-solution">
+                    <div class="step">
+                        <strong>Шаг 1. Разбираем участок 1 → 2.</strong> Линия горизонтальна → <strong>$p = \text{const}$</strong> — изобарный процесс. Объём растёт ($V_1 \to V_2$), значит температура тоже растёт: $T_2 > T_1$. Газ расширяется, нагревается.
+                    </div>
+                    <div class="step">
+                        <strong>Шаг 2. Участок 2 → 3.</strong> Линия вертикальна → <strong>$V = \text{const}$</strong> — изохорный процесс. Давление падает ($p_1 \to p_2$), значит температура падает: $T_3 < T_2$. Газ охлаждается.
+                    </div>
+                    <div class="step">
+                        <strong>Шаг 3. Участок 3 → 4.</strong> Линия горизонтальна → <strong>$p = \text{const}$</strong> — изобарный процесс. Объём уменьшается ($V_2 \to V_1$), температура падает: $T_4 < T_3$. Газ сжимается, охлаждается.
+                    </div>
+                    <div class="step">
+                        <strong>Шаг 4. Участок 4 → 1.</strong> Линия вертикальна → <strong>$V = \text{const}$</strong> — изохорный процесс. Давление растёт ($p_2 \to p_1$), температура растёт: $T_1 > T_4$. Газ нагревается.
+                    </div>
+                    <div class="step explanation">
+                        <strong>Вывод.</strong> Цикл состоит из двух изобар (1→2 и 3→4) и двух изохор (2→3 и 4→1). Работа газа за цикл численно равна площади прямоугольника.
+                    </div>
+                    <div class="answer">✅ Ответ: 1→2 — изобара (расширение, нагрев), 2→3 — изохора (охлаждение), 3→4 — изобара (сжатие), 4→1 — изохора (нагрев)</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 12. Цикл в координатах V–T (прямоугольник)</div>
+                <div class="task-condition">
+                    <strong>Условие:</strong> На рисунке изображён цикл 1 → 2 → 3 → 4 → 1 в координатах $V$–$T$. Участок 1 → 2 — горизонтальная линия при $V_1$; 2 → 3 — вертикальная при $T_2$; 3 → 4 — горизонтальная при $V_2 > V_1$; 4 → 1 — вертикальная при $T_1 < T_2$. Опишите процессы.
+                    <svg class="diagram-svg" viewBox="0 0 320 220" width="320" height="220" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrVT" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
+                            </marker>
+                        </defs>
+                        <line x1="40" y1="180" x2="290" y2="180" stroke="#8ba5b8" stroke-width="1"/>
+                        <line x1="40" y1="180" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1"/>
+                        <text x="292" y="184" fill="#8ba5b8" font-size="12">T</text>
+                        <text x="20" y="20" fill="#8ba5b8" font-size="12">V</text>
+                        <polygon points="90,150 240,150 240,50 90,50" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrVT)"/>
+                        <text x="75" y="145" fill="#f59e0b" font-size="12">1</text>
+                        <text x="245" y="145" fill="#f59e0b" font-size="12">2</text>
+                        <text x="245" y="45" fill="#f59e0b" font-size="12">3</text>
+                        <text x="75" y="45" fill="#f59e0b" font-size="12">4</text>
+                    </svg>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
+                <div id="sol12" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Участок 1 → 2.</strong> Горизонталь → <strong>$V = \text{const}$</strong> — изохорный процесс. Температура растёт ($T_1 \to T_2$), значит давление растёт (закон Шарля). Газ нагревается.</div>
+                    <div class="step"><strong>Шаг 2. Участок 2 → 3.</strong> Вертикаль → <strong>$T = \text{const}$</strong> — изотермический процесс. Объём растёт ($V_1 \to V_2$), значит давление падает. Газ расширяется.</div>
+                    <div class="step"><strong>Шаг 3. Участок 3 → 4.</strong> Горизонталь → <strong>$V = \text{const}$</strong> — изохорный процесс. Температура падает ($T_2 \to T_1$), значит давление падает. Газ охлаждается.</div>
+                    <div class="step"><strong>Шаг 4. Участок 4 → 1.</strong> Вертикаль → <strong>$T = \text{const}$</strong> — изотермический процесс. Объём уменьшается ($V_2 \to V_1$), значит давление растёт. Газ сжимается.</div>
+                    <div class="step explanation"><strong>Вывод.</strong> Цикл: изохора + изотерма + изохора + изотерма.</div>
+                    <div class="answer">✅ Ответ: 1→2 — изохора (нагрев), 2→3 — изотерма (расширение), 3→4 — изохора (охлаждение), 4→1 — изотерма (сжатие)</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 13. Цикл в координатах p–T (прямоугольник)</div>
+                <div class="task-condition">
+                    <strong>Условие:</strong> Дан цикл 1 → 2 → 3 → 4 → 1 в координатах $p$–$T$. 1 → 2 — горизонталь при $p_1$; 2 → 3 — вертикаль при $T_2$; 3 → 4 — горизонталь при $p_2 < p_1$; 4 → 1 — вертикаль при $T_1 < T_2$. Опишите процессы и укажите, где газ расширяется, а где сжимается.
+                    <svg class="diagram-svg" viewBox="0 0 320 220" width="320" height="220" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrPT" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
+                            </marker>
+                        </defs>
+                        <line x1="40" y1="180" x2="290" y2="180" stroke="#8ba5b8" stroke-width="1"/>
+                        <line x1="40" y1="180" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1"/>
+                        <text x="292" y="184" fill="#8ba5b8" font-size="12">T</text>
+                        <text x="20" y="20" fill="#8ba5b8" font-size="12">p</text>
+                        <polygon points="90,50 240,50 240,150 90,150" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrPT)"/>
+                        <text x="75" y="45" fill="#f59e0b" font-size="12">1</text>
+                        <text x="245" y="45" fill="#f59e0b" font-size="12">2</text>
+                        <text x="245" y="167" fill="#f59e0b" font-size="12">3</text>
+                        <text x="75" y="167" fill="#f59e0b" font-size="12">4</text>
+                    </svg>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
+                <div id="sol13" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Участок 1 → 2.</strong> Горизонталь → <strong>$p = \text{const}$</strong> — изобарный процесс. Температура растёт ($T_1 \to T_2$), значит объём растёт. Газ <strong>расширяется</strong>.</div>
+                    <div class="step"><strong>Шаг 2. Участок 2 → 3.</strong> Вертикаль → <strong>$T = \text{const}$</strong> — изотерма. Давление падает ($p_1 \to p_2$), значит объём растёт. Газ <strong>расширяется</strong>.</div>
+                    <div class="step"><strong>Шаг 3. Участок 3 → 4.</strong> Горизонталь → <strong>$p = \text{const}$</strong> — изобара. Температура падает ($T_2 \to T_1$), значит объём падает. Газ <strong>сжимается</strong>.</div>
+                    <div class="step"><strong>Шаг 4. Участок 4 → 1.</strong> Вертикаль → <strong>$T = \text{const}$</strong> — изотерма. Давление растёт ($p_2 \to p_1$), значит объём уменьшается. Газ <strong>сжимается</strong>.</div>
+                    <div class="step explanation"><strong>Вывод.</strong> Расширение идёт на 1→2 и 2→3, сжатие — на 3→4 и 4→1.</div>
+                    <div class="answer">✅ Ответ: 1→2 — изобара (расширение), 2→3 — изотерма (расширение), 3→4 — изобара (сжатие), 4→1 — изотерма (сжатие)</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 14. Работа газа в цикле (площадь)</div>
+                <div class="task-condition">
+                    <strong>Условие:</strong> Газ совершает цикл в координатах $p$–$V$: расширяется при $p_1 = 200$ кПа от $V_1 = 2$ л до $V_2 = 6$ л (изобара), затем при $V_2 = 6$ л охлаждается так, что давление падает до $p_2 = 100$ кПа (изохора), затем сжимается при $p_2 = 100$ кПа обратно до $V_1 = 2$ л (изобара), затем изохорно возвращается в исходное состояние. Найдите работу газа за цикл.
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
+                <div id="sol14" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Работа на 1→2 (изобара, расширение).</strong><br><span class="formula">$A_{12} = p_1 (V_2 - V_1) = 200 \cdot 10^3 \cdot (6 - 2) \cdot 10^{-3} = 800 \text{ Дж}$</span></div>
+                    <div class="step"><strong>Шаг 2. Работа на 2→3 (изохора).</strong> $A_{23} = 0$, так как $\Delta V = 0$.</div>
+                    <div class="step"><strong>Шаг 3. Работа на 3→4 (изобара, сжатие).</strong><br><span class="formula">$A_{34} = p_2 (V_1 - V_2) = 100 \cdot 10^3 \cdot (2 - 6) \cdot 10^{-3} = -400 \text{ Дж}$</span></div>
+                    <div class="step"><strong>Шаг 4. Работа на 4→1 (изохора).</strong> $A_{41} = 0$.</div>
+                    <div class="step"><strong>Шаг 5. Полная работа за цикл.</strong><br><span class="formula">$A = 800 + 0 - 400 + 0 = 400 \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Проверка через площадь.</strong> Цикл — прямоугольник со сторонами $\Delta p = 100$ кПа и $\Delta V = 4$ л. Площадь: $A = 10^5 \cdot 4 \cdot 10^{-3} = 400$ Дж. Совпадает.</div>
+                    <div class="answer">✅ Ответ: $A = 400$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 15. Комбинированный цикл в координатах p–V</div>
+                <div class="task-condition">
+                    <strong>Условие:</strong> Газ совершает цикл: 1 → 2 — изотермическое расширение от $V_1 = 2$ л до $V_2 = 8$ л при $T = 300$ К; 2 → 3 — изобарное сжатие до $V_3 = 2$ л; 3 → 1 — изохорный нагрев. Известно, что $p_1 = 400$ кПа. Найдите давление $p_2$ (в точке 2) и опишите все процессы.
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
+                <div id="sol15" class="task-solution">
+                    <div class="step"><strong>Шаг 1. Участок 1 → 2 — изотерма.</strong> $T = \text{const}$, значит $p_1 V_1 = p_2 V_2$.<br><span class="formula">$p_2 = \dfrac{p_1 V_1}{V_2} = \dfrac{400 \cdot 2}{8} = 100 \text{ кПа}$</span></div>
+                    <div class="step"><strong>Шаг 2. Участок 2 → 3 — изобара при $p_2 = 100$ кПа.</strong> Объём уменьшается с 8 л до 2 л, значит температура падает. Газ сжимается и охлаждается.</div>
+                    <div class="step"><strong>Шаг 3. Участок 3 → 1 — изохора при $V = 2$ л.</strong> Давление растёт с 100 кПа до 400 кПа, значит температура растёт (закон Шарля). Газ нагревается.</div>
+                    <div class="step explanation">
+                        <strong>Итог.</strong> 1→2 — изотерма (расширение), 2→3 — изобара (сжатие + охлаждение), 3→1 — изохора (нагрев).
+                    </div>
+                    <div class="answer">✅ Ответ: $p_2 = 100$ кПа; процессы: изотерма → изобара → изохора</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения</div>
+        <div class="section-content">
+
+            <!-- Сам. задача 1 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Уравнение Менделеева–Клапейрона</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите объём $m = 1$ кг азота $N_2$ при температуре $T = 280$ К и давлении $p = 2 \cdot 10^5$ Па. Молярная масса $M = 28$ г/моль.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self1')">💡 Подсказка</button>
+                </div>
+                <div id="self1" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $V = \dfrac{mRT}{Mp}$, $R = 8{,}31$ Дж/(моль·К).</div>
+                        <div class="answer">✅ Ответ: $V \approx 0{,}42$ м³</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 2 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Закон Бойля–Мариотта</div>
+                <div class="task-condition"><strong>Условие:</strong> Газ занимает объём $V_1 = 6$ л при давлении $p_1 = 150$ кПа. Каким станет давление, если изотермически сжать газ до $V_2 = 3$ л?</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self2')">💡 Подсказка</button>
+                </div>
+                <div id="self2" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $p_1 V_1 = p_2 V_2 \Rightarrow p_2 = \dfrac{p_1 V_1}{V_2}$.</div>
+                        <div class="answer">✅ Ответ: $p_2 = 300$ кПа</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 3 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. Закон Гей-Люссака</div>
+                <div class="task-condition"><strong>Условие:</strong> При $T_1 = 250$ К газ занимает объём $V_1 = 4$ л. Каким станет объём при $T_2 = 500$ К, если давление постоянно?</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self3')">💡 Подсказка</button>
+                </div>
+                <div id="self3" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $\dfrac{V_1}{T_1} = \dfrac{V_2}{T_2} \Rightarrow V_2 = \dfrac{V_1 T_2}{T_1}$.</div>
+                        <div class="answer">✅ Ответ: $V_2 = 8$ л</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 4 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. Закон Шарля</div>
+                <div class="task-condition"><strong>Условие:</strong> В закрытом сосуде при $T_1 = 300$ К давление $p_1 = 120$ кПа. Каким станет давление при нагревании до $T_2 = 400$ К?</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self4')">💡 Подсказка</button>
+                </div>
+                <div id="self4" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $\dfrac{p_1}{T_1} = \dfrac{p_2}{T_2} \Rightarrow p_2 = \dfrac{p_1 T_2}{T_1}$.</div>
+                        <div class="answer">✅ Ответ: $p_2 = 160$ кПа</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 5 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Объединённый газовый закон</div>
+                <div class="task-condition"><strong>Условие:</strong> Газ находится в состоянии $p_1 = 200$ кПа, $V_1 = 3$ л, $T_1 = 250$ К. Его перевели в состояние $p_2 = 100$ кПа, $T_2 = 500$ К. Найдите $V_2$.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self5')">💡 Подсказка</button>
+                </div>
+                <div id="self5" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $\dfrac{p_1 V_1}{T_1} = \dfrac{p_2 V_2}{T_2} \Rightarrow V_2 = \dfrac{p_1 V_1 T_2}{T_1 p_2}$.</div>
+                        <div class="answer">✅ Ответ: $V_2 = 12$ л</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 6 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Плотность газа</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите плотность азота $N_2$ при давлении $p = 1{,}5 \cdot 10^5$ Па и температуре $T = 300$ К. Молярная масса $M = 28$ г/моль.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self6')">💡 Подсказка</button>
+                </div>
+                <div id="self6" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $\rho = \dfrac{pM}{RT}$.</div>
+                        <div class="answer">✅ Ответ: $\rho \approx 1{,}68$ кг/м³</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 7 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Количество вещества из уравнения</div>
+                <div class="task-condition"><strong>Условие:</strong> В баллоне объёмом $V = 20$ л находится газ при давлении $p = 2 \cdot 10^6$ Па и температуре $T = 320$ К. Найдите количество вещества.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self7')">💡 Подсказка</button>
+                </div>
+                <div id="self7" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $\nu = \dfrac{pV}{RT}$, $V = 0{,}02$ м³.</div>
+                        <div class="answer">✅ Ответ: $\nu \approx 15{,}0$ моль</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 8 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Изотермическое расширение</div>
+                <div class="task-condition"><strong>Условие:</strong> Газ изотермически расширяется от $V_1 = 2$ л до $V_2 = 10$ л. Начальное давление $p_1 = 500$ кПа. Найдите конечное давление.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self8')">💡 Подсказка</button>
+                </div>
+                <div id="self8" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $p_1 V_1 = p_2 V_2 \Rightarrow p_2 = \dfrac{p_1 V_1}{V_2}$.</div>
+                        <div class="answer">✅ Ответ: $p_2 = 100$ кПа</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 9 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. Масса газа в баллоне</div>
+                <div class="task-condition"><strong>Условие:</strong> В баллоне объёмом $V = 0{,}05$ м³ находится азот при давлении $p = 4 \cdot 10^6$ Па и температуре $T = 280$ К. Найдите массу газа. $M = 28$ г/моль.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self9')">💡 Подсказка</button>
+                </div>
+                <div id="self9" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $m = \dfrac{pVM}{RT}$.</div>
+                        <div class="answer">✅ Ответ: $m \approx 2{,}4$ кг</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 10 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. Закон Дальтона</div>
+                <div class="task-condition"><strong>Условие:</strong> В сосуде смесь трёх газов с парциальными давлениями $p_1 = 30$ кПа, $p_2 = 50$ кПа, $p_3 = 20$ кПа. Найдите общее давление.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self10')">💡 Подсказка</button>
+                </div>
+                <div id="self10" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> $p = p_1 + p_2 + p_3$.</div>
+                        <div class="answer">✅ Ответ: $p = 100$ кПа</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== САМ. ЗАДАЧИ НА ГРАФИКИ ===== -->
+            <div style="margin:24px 0 8px;font-size:1rem;font-weight:700;color:var(--special-border);">📌 Задачи на чтение графиков</div>
+
+            <!-- Сам. задача 11 (график p–V) -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 11. Цикл в координатах p–V</div>
+                <div class="task-condition">
+                    <strong>Условие:</strong> На рисунке изображён цикл 1 → 2 → 3 → 4 → 1 в координатах $p$–$V$. 1 → 2 — горизонтальная линия при $p_1$; 2 → 3 — вертикальная при $V_2$; 3 → 4 — горизонтальная при $p_2 < p_1$; 4 → 1 — вертикальная при $V_1 < V_2$. Опишите каждый участок: назовите процесс и укажите, как меняются $p$, $V$, $T$.
+                    <svg class="diagram-svg" viewBox="0 0 320 220" width="320" height="220" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrPVself" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
+                            </marker>
+                        </defs>
+                        <line x1="40" y1="180" x2="290" y2="180" stroke="#8ba5b8" stroke-width="1"/>
+                        <line x1="40" y1="180" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1"/>
+                        <text x="292" y="184" fill="#8ba5b8" font-size="12">V</text>
+                        <text x="20" y="20" fill="#8ba5b8" font-size="12">p</text>
+                        <polygon points="90,50 240,50 240,150 90,150" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrPVself)"/>
+                        <text x="75" y="45" fill="#f59e0b" font-size="12">1</text>
+                        <text x="245" y="45" fill="#f59e0b" font-size="12">2</text>
+                        <text x="245" y="167" fill="#f59e0b" font-size="12">3</text>
+                        <text x="75" y="167" fill="#f59e0b" font-size="12">4</text>
+                    </svg>
+                </div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self11')">💡 Подсказка</button>
+                </div>
+                <div id="self11" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Горизонталь в $p$–$V$ — изобара, вертикаль — изохора. На изобаре $V \sim T$, на изохоре $p \sim T$.</div>
+                        <div class="answer">✅ Ответ: 1→2 — изобара (расширение, нагрев); 2→3 — изохора (охлаждение, $p$ падает); 3→4 — изобара (сжатие, охлаждение); 4→1 — изохора (нагрев, $p$ растёт)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 12 (график V–T) -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 12. Цикл в координатах V–T</div>
+                <div class="task-condition">
+                    <strong>Условие:</strong> Дан цикл 1 → 2 → 3 → 4 → 1 в координатах $V$–$T$. 1 → 2 — горизонталь при $V_1$; 2 → 3 — вертикаль при $T_2$; 3 → 4 — горизонталь при $V_2 > V_1$; 4 → 1 — вертикаль при $T_1 < T_2$. Опишите процессы.
+                    <svg class="diagram-svg" viewBox="0 0 320 220" width="320" height="220" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrVTself" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
+                            </marker>
+                        </defs>
+                        <line x1="40" y1="180" x2="290" y2="180" stroke="#8ba5b8" stroke-width="1"/>
+                        <line x1="40" y1="180" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1"/>
+                        <text x="292" y="184" fill="#8ba5b8" font-size="12">T</text>
+                        <text x="20" y="20" fill="#8ba5b8" font-size="12">V</text>
+                        <polygon points="90,150 240,150 240,50 90,50" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrVTself)"/>
+                        <text x="75" y="145" fill="#f59e0b" font-size="12">1</text>
+                        <text x="245" y="145" fill="#f59e0b" font-size="12">2</text>
+                        <text x="245" y="45" fill="#f59e0b" font-size="12">3</text>
+                        <text x="75" y="45" fill="#f59e0b" font-size="12">4</text>
+                    </svg>
+                </div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self12')">💡 Подсказка</button>
+                </div>
+                <div id="self12" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Горизонталь в $V$–$T$ — изохора, вертикаль — изотерма.</div>
+                        <div class="answer">✅ Ответ: 1→2 — изохора (нагрев, $p$ растёт); 2→3 — изотерма (расширение, $p$ падает); 3→4 — изохора (охлаждение, $p$ падает); 4→1 — изотерма (сжатие, $p$ растёт)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 13 (график p–T) -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 13. Цикл в координатах p–T</div>
+                <div class="task-condition">
+                    <strong>Условие:</strong> Дан цикл 1 → 2 → 3 → 4 → 1 в координатах $p$–$T$. 1 → 2 — горизонталь при $p_1$; 2 → 3 — вертикаль при $T_2$; 3 → 4 — горизонталь при $p_2 < p_1$; 4 → 1 — вертикаль при $T_1 < T_2$. Опишите процессы, укажите, где газ расширяется, а где сжимается.
+                    <svg class="diagram-svg" viewBox="0 0 320 220" width="320" height="220" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrPTself" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
+                            </marker>
+                        </defs>
+                        <line x1="40" y1="180" x2="290" y2="180" stroke="#8ba5b8" stroke-width="1"/>
+                        <line x1="40" y1="180" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1"/>
+                        <text x="292" y="184" fill="#8ba5b8" font-size="12">T</text>
+                        <text x="20" y="20" fill="#8ba5b8" font-size="12">p</text>
+                        <polygon points="90,50 240,50 240,150 90,150" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrPTself)"/>
+                        <text x="75" y="45" fill="#f59e0b" font-size="12">1</text>
+                        <text x="245" y="45" fill="#f59e0b" font-size="12">2</text>
+                        <text x="245" y="167" fill="#f59e0b" font-size="12">3</text>
+                        <text x="75" y="167" fill="#f59e0b" font-size="12">4</text>
+                    </svg>
+                </div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self13')">💡 Подсказка</button>
+                </div>
+                <div id="self13" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Горизонталь в $p$–$T$ — изобара, вертикаль — изотерма. На изобаре $V \sim T$, на изотерме $V \sim 1/p$.</div>
+                        <div class="answer">✅ Ответ: 1→2 — изобара (расширение); 2→3 — изотерма (расширение); 3→4 — изобара (сжатие); 4→1 — изотерма (сжатие)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 14 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 14. Работа газа в цикле</div>
+                <div class="task-condition"><strong>Условие:</strong> Газ совершает цикл в координатах $p$–$V$: изобарное расширение при $p_1 = 300$ кПа от $V_1 = 1$ л до $V_2 = 5$ л, затем изохорное охлаждение до $p_2 = 100$ кПа, затем изобарное сжатие до $V_1 = 1$ л, затем изохорный возврат. Найдите работу газа за цикл.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self14')">💡 Подсказка</button>
+                </div>
+                <div id="self14" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> Работа в цикле = площадь прямоугольника в координатах $p$–$V$: $A = \Delta p \cdot \Delta V$.</div>
+                        <div class="answer">✅ Ответ: $A = 800$ Дж</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сам. задача 15 -->
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 15. Комбинированный цикл</div>
+                <div class="task-condition"><strong>Условие:</strong> Газ совершает цикл: 1 → 2 — изотерма при $T = 400$ К от $V_1 = 1$ л до $V_2 = 4$ л; 2 → 3 — изобара до $V_3 = 1$ л; 3 → 1 — изохора. Известно, что $p_1 = 800$ кПа. Найдите давление в точке 2 и опишите процессы.</div>
+                <div class="btn-row">
+                    <button class="show-solution-btn" onclick="toggleHint('self15')">💡 Подсказка</button>
+                </div>
+                <div id="self15" class="task-solution">
+                    <div class="step">
+                        <div class="explanation"><strong>Подсказка:</strong> На изотерме $p_1 V_1 = p_2 V_2$. Участок 2→3 — изобара при $p_2$, 3→1 — изохора при $V_1$.</div>
+                        <div class="answer">✅ Ответ: $p_2 = 200$ кПа; процессы: изотерма → изобара → изохора</div>
+                    </div>
                 </div>
             </div>
 
@@ -495,10 +1063,30 @@
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
-    
-    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть решение';
+        }
+    }
+    function toggleHint(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling.querySelector
+            ? el.previousElementSibling.querySelector('.show-solution-btn')
+            : el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            if(btn) btn.textContent='💡 Подсказка';
+        }else{
+            el.classList.add('open');
+            if(btn) btn.textContent='📕 Скрыть подсказку';
+        }
+    }
 
     function switchModel(model) {
         document.querySelectorAll('.model-tab').forEach(tab => {
@@ -550,35 +1138,43 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        // Цилиндр с поршнем
         const RADIUS = 2;
         const HEIGHT_MAX = 8;
 
-        // Стенки цилиндра (прозрачные)
-        const cylGeo = new THREE.CylinderGeometry(RADIUS, RADIUS, HEIGHT_MAX, 32, 1, true);
+        const cylGeo = new THREE.CylinderGeometry(RADIUS, RADIUS, HEIGHT_MAX, 48, 1, true);
         const cylMat = new THREE.MeshStandardMaterial({
-            color: 0x4488ff, transparent: true, opacity: 0.08,
-            side: THREE.DoubleSide, metalness: 0.1, roughness: 0.4
+            color: 0x4488ff, transparent: true, opacity: 0.06,
+            side: THREE.DoubleSide, metalness: 0.1, roughness: 0.4, depthWrite: false
         });
         const cylinder = new THREE.Mesh(cylGeo, cylMat);
         cylinder.position.y = HEIGHT_MAX / 2;
         group.add(cylinder);
 
-        // Крышка снизу
-        const bottomGeo = new THREE.CircleGeometry(RADIUS, 32);
-        const bottomMat = new THREE.MeshStandardMaterial({ color: 0x66aaff, metalness: 0.5, roughness: 0.3 });
-        const bottom = new THREE.Mesh(bottomGeo, bottomMat);
+        // ===== ТОЛЬКО 2 КОНТУРНЫЕ ОКРУЖНОСТИ =====
+        const contourMat = new THREE.LineBasicMaterial({ color: 0x66aaff, transparent: true, opacity: 0.85 });
+        const N_SEG = 48;
+        const circleTopPts = [];
+        const circleBotPts = [];
+        for (let i = 0; i <= N_SEG; i++) {
+            const t = (i / N_SEG) * Math.PI * 2;
+            circleTopPts.push(new THREE.Vector3(RADIUS * Math.cos(t), HEIGHT_MAX, RADIUS * Math.sin(t)));
+            circleBotPts.push(new THREE.Vector3(RADIUS * Math.cos(t), 0, RADIUS * Math.sin(t)));
+        }
+        group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(circleTopPts), contourMat));
+        group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(circleBotPts), contourMat));
+
+        const bottom = new THREE.Mesh(new THREE.CircleGeometry(RADIUS, 32),
+            new THREE.MeshStandardMaterial({ color: 0x66aaff, metalness: 0.5, roughness: 0.3 }));
         bottom.rotation.x = -Math.PI / 2;
         bottom.position.y = 0.01;
         group.add(bottom);
 
-        // Поршень
-        const pistonGeo = new THREE.CylinderGeometry(RADIUS - 0.05, RADIUS - 0.05, 0.4, 32);
-        const pistonMat = new THREE.MeshStandardMaterial({ color: 0xff8800, metalness: 0.6, roughness: 0.3, emissive: 0x441100 });
-        const piston = new THREE.Mesh(pistonGeo, pistonMat);
+        const piston = new THREE.Mesh(
+            new THREE.CylinderGeometry(RADIUS - 0.05, RADIUS - 0.05, 0.4, 32),
+            new THREE.MeshStandardMaterial({ color: 0xff8800, metalness: 0.6, roughness: 0.3, emissive: 0x441100 })
+        );
         group.add(piston);
 
-        // Молекулы
         const molGeo = new THREE.SphereGeometry(0.1, 10, 10);
         const molMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
         const molecules = [];
@@ -600,7 +1196,6 @@
             });
         }
 
-        let volume = 8; // условные единицы
         let currentPistonY = 4;
         const volSlider = document.getElementById('iso-volume');
         const volValue = document.getElementById('iso-volume-value');
@@ -609,14 +1204,10 @@
 
         function updateFromVolume() {
             const V = parseFloat(volSlider.value);
-            volume = V;
             volValue.textContent = V.toFixed(1);
             Vdisp.textContent = V.toFixed(1);
-            // pV = const → p = 800 / V
             const p = Math.round(800 / V);
             Pdisp.textContent = p;
-            // Поршень: объём пропорционален высоте
-            // V=4 → высота 2, V=16 → высота 8
             currentPistonY = 0.5 + (V / 16) * 7.5;
         }
 
@@ -642,14 +1233,8 @@
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
-
-            // Поршень
             piston.position.y = currentPistonY;
-
-            // Скорость молекул
             const speed = 0.06;
-
-            // Верхняя граница для молекул — поршень
             const topY = currentPistonY - 0.2;
 
             molecules.forEach(m => {
@@ -657,13 +1242,11 @@
                 m.mesh.position.y += m.vy * speed;
                 m.mesh.position.z += m.vz * speed;
 
-                // Цилиндрическая граница
                 const r2 = m.mesh.position.x * m.mesh.position.x + m.mesh.position.z * m.mesh.position.z;
                 if (r2 > (RADIUS - 0.1) * (RADIUS - 0.1)) {
                     const r = Math.sqrt(r2);
                     m.mesh.position.x = m.mesh.position.x / r * (RADIUS - 0.1);
                     m.mesh.position.z = m.mesh.position.z / r * (RADIUS - 0.1);
-                    // Отражаем
                     m.vx *= -1;
                     m.vz *= -1;
                 }
@@ -719,14 +1302,27 @@
         const RADIUS = 2;
         const HEIGHT_MAX = 8;
 
-        const cylGeo = new THREE.CylinderGeometry(RADIUS, RADIUS, HEIGHT_MAX, 32, 1, true);
+        const cylGeo = new THREE.CylinderGeometry(RADIUS, RADIUS, HEIGHT_MAX, 48, 1, true);
         const cylMat = new THREE.MeshStandardMaterial({
-            color: 0x44aaff, transparent: true, opacity: 0.08,
-            side: THREE.DoubleSide, metalness: 0.1, roughness: 0.4
+            color: 0x44aaff, transparent: true, opacity: 0.06,
+            side: THREE.DoubleSide, metalness: 0.1, roughness: 0.4, depthWrite: false
         });
         const cylinder = new THREE.Mesh(cylGeo, cylMat);
         cylinder.position.y = HEIGHT_MAX / 2;
         group.add(cylinder);
+
+        // ===== ТОЛЬКО 2 КОНТУРНЫЕ ОКРУЖНОСТИ =====
+        const contourMat = new THREE.LineBasicMaterial({ color: 0x66aaff, transparent: true, opacity: 0.85 });
+        const N_SEG = 48;
+        const circleTopPts = [];
+        const circleBotPts = [];
+        for (let i = 0; i <= N_SEG; i++) {
+            const t = (i / N_SEG) * Math.PI * 2;
+            circleTopPts.push(new THREE.Vector3(RADIUS * Math.cos(t), HEIGHT_MAX, RADIUS * Math.sin(t)));
+            circleBotPts.push(new THREE.Vector3(RADIUS * Math.cos(t), 0, RADIUS * Math.sin(t)));
+        }
+        group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(circleTopPts), contourMat));
+        group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(circleBotPts), contourMat));
 
         const bottom = new THREE.Mesh(new THREE.CircleGeometry(RADIUS, 32),
             new THREE.MeshStandardMaterial({ color: 0x66aaff, metalness: 0.5, roughness: 0.3 }));
@@ -772,7 +1368,6 @@
             T = parseFloat(tempSlider.value);
             tempValue.textContent = T;
             Tdisp.textContent = T;
-            // V/T = const → V = T * (8/300), чтобы при 300 К было 8
             const V = (T / 300) * 8;
             Vdisp.textContent = V.toFixed(1);
             currentPistonY = 0.5 + (V / 16) * 7.5;
@@ -801,7 +1396,6 @@
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
-
             piston.position.y = currentPistonY;
             const topY = currentPistonY - 0.2;
 
@@ -866,7 +1460,6 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        // Закрытый сосуд — куб
         const BOX = 6;
         const HALF = BOX / 2;
         const boxGeo = new THREE.BoxGeometry(BOX, BOX, BOX);
@@ -910,7 +1503,6 @@
             T = parseFloat(tempSlider.value);
             tempValue.textContent = T;
             Tdisp.textContent = T;
-            // p/T = const → p = T * (100/300)
             const p = Math.round((T / 300) * 100);
             Pdisp.textContent = p;
             currentSpeed = 0.03 + (T / 600) * 0.12;
@@ -957,6 +1549,7 @@
         animate();
     })();
 </script>
+
 <script src="favorites.js"></script>
 <script src="theme.js"></script>
 </body>

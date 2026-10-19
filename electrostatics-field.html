@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Свойства и характеристики электрического поля. Диэлектрики</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle{background:#3b82f6;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-toggle:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle.off{background:#666;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <h1>Свойства и характеристики электрического поля.<br>Диэлектрики в электрическом поле</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Напряжённость электрического поля</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Электрическое поле</strong> — особый вид материи, существующий вокруг электрических зарядов и действующий на другие заряды с некоторой силой.</p>
+                <p><strong>Напряжённость</strong> $\vec{E}$ — силовая характеристика электрического поля. Она равна отношению силы $\vec{F}$, действующей на пробный заряд $q_0$, к величине этого заряда:</p>
+                <div class="formula-block">
+                    <span class="f">$\vec{E} = \dfrac{\vec{F}}{q_0}$</span>
+                    <span class="f-label">— напряжённость (Н/Кл или В/м)</span>
+                </div>
+                <p>Напряжённость — <strong>векторная величина</strong>. Направление вектора $\vec{E}$ совпадает с направлением силы, действующей на <strong>положительный</strong> заряд.</p>
+                <p>Для поля точечного заряда $q$ напряжённость равна:</p>
+                <div class="formula-block">
+                    <span class="f">$E = k \dfrac{|q|}{r^2}$</span>
+                    <span class="f-label">— напряжённость поля точечного заряда</span>
+                </div>
+                <p><strong>Принцип суперпозиции:</strong> напряжённость поля системы зарядов равна векторной сумме напряжённостей полей каждого заряда:</p>
+                <div class="formula-block">
+                    <span class="f">$\vec{E} = \vec{E}_1 + \vec{E}_2 + \dots + \vec{E}_n$</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Силовые линии поля</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Силовые линии</strong> (линии напряжённости) — линии, касательные к которым в каждой точке совпадают с направлением вектора $\vec{E}$.</p>
+                <ul>
+                    <li>Линии начинаются на <strong>положительных</strong> зарядах и заканчиваются на <strong>отрицательных</strong>.</li>
+                    <li>Линии <strong>непрерывны</strong> и <strong>не пересекаются</strong>.</li>
+                    <li>Густота линий пропорциональна величине напряжённости: чем ближе линии, тем сильнее поле.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Диэлектрики в электрическом поле</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Диэлектрик</strong> — это вещество, которое в обычных условиях <strong>не проводит электрический ток</strong>.</p>
+                <p>В отличие от проводников (металлов), в диэлектриках <strong>нет свободных заряженных частиц</strong> (электронов или ионов), которые могли бы свободно перемещаться по всему объёму. Все электроны прочно связаны со своими атомами.</p>
+                <p><strong>Что происходит при внесении в поле?</strong> Свободные заряды двигаться не могут, поэтому возникает <span class="important">поляризация</span>.</p>
+                <ul>
+                    <li><strong>Поляризация</strong> — это упругое смещение связанных зарядов (электронов и ядер) внутри атомов или ориентация молекул-диполей вдоль силовых линий внешнего поля.</li>
+                    <li>В результате поляризации на поверхности диэлектрика появляются <strong>связанные заряды</strong>. Они создают собственное поле, направленное <strong>против</strong> внешнего поля. Поэтому общее поле внутри диэлектрика ослабевает.</li>
+                </ul>
+                <p><strong>Диэлектрическая проницаемость</strong> $\varepsilon$ показывает, во сколько раз поле в диэлектрике слабее, чем в вакууме:</p>
+                <div class="formula-block">
+                    <span class="f">$E = \dfrac{E_0}{\varepsilon}$</span>
+                    <span class="f-label">— напряжённость в диэлектрике</span>
+                </div>
+                <p>где $E_0$ — напряжённость поля в вакууме.</p>
+                <p><strong>Важно:</strong> Если напряжённость внешнего поля превысит предел прочности диэлектрика (напряжение пробоя), связанные электроны оторвутся, и диэлектрик начнёт проводить ток (произойдёт пробой, например, молния или искра).</p>
+                <p><strong>Примеры:</strong> стекло (5–7), фарфор, резина, сухое дерево, керамика.</p>
+                <p><strong>А как же вода?</strong> Это отличный пример! Химически <strong>чистая (дистиллированная) вода</strong> — это диэлектрик с огромной проницаемостью ($\varepsilon = 81$), потому что её молекулы — природные диполи. Однако <strong>обычная водопроводная или морская вода проводит ток</strong>, так как в ней растворены соли, создающие свободные ионы. Поэтому в электротехнике воду считают проводником.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="vector" onclick="switchModel('vector')">📐 Вектор напряжённости</div>
+                <div class="model-tab" data-model="dielectric" onclick="switchModel('dielectric')">🧊 Поляризация</div>
+                <div class="model-tab" data-model="uniform" onclick="switchModel('uniform')">⚡ Однородное поле</div>
+                <div class="model-tab" data-model="structure" onclick="switchModel('structure')">🔬 Строение диэлектрика</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: ВЕКТОР НАПРЯЖЁННОСТИ -->
+            <div id="model-vector" class="model-content">
+                <div class="model-container" id="container-vector">
+                    <canvas id="canvas-vector" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-vector">⛶</button>
+                    <div class="info-display">
+                        <div>$E$ = <span class="val" id="vec-E">9.0</span> В/м</div>
+                        <div>$r$ = <span class="val" id="vec-r">1.0</span> м</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Расстояние $r$ (м)</label>
+                        <input type="range" id="vec-r-slider" min="1" max="5" step="0.5" value="1">
+                        <span class="control-value" id="vec-r-value">1.0</span>
+                    </div>
+                    <button class="btn-reset" id="vec-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Двигайте ползунок, чтобы приблизить пробный заряд</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель вектора напряжённости.</strong> В центре находится положительный заряд $Q$.</p>
+                    <p><span class="important">Жёлтые стрелки</span> — это векторы напряжённости $\vec{E}$ в разных точках поля.</p>
+                    <p>Если в точку, где находится стрелка, поместить положительный пробный заряд, он будет отталкиваться от центрального заряда — именно в направлении стрелки.</p>
+                    <p>Ползунок «Расстояние» меняет радиус, на котором мы рассматриваем поле. Чем ближе к заряду, тем больше длина стрелок — значит, поле сильнее.</p>
+                </div>
+
+            <!-- МОДЕЛЬ 2: ПОЛЯРИЗАЦИЯ ДИЭЛЕКТРИКА -->
+            <div id="model-dielectric" class="model-content" style="display:none;">
+                <div class="model-container" id="container-dielectric">
+                    <canvas id="canvas-dielectric" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-dielectric">⛶</button>
+                    <div class="info-display">
+                        <div>Поле: <span class="val" id="diel-field">Выключено</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <button class="btn-toggle off" id="diel-toggle">⚡ Включить внешнее поле</button>
+                    <button class="btn-reset" id="diel-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Включите поле и посмотрите на ориентацию диполей</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель поляризации.</strong> Между пластинами конденсатора находится диэлектрик (молекулы-диполи).</p>
+                    <p>Когда поле <span class="important">выключено</span>, диполи ориентированы хаотично.</p>
+                    <p>Когда поле <span class="important">включено</span>, появляются силовые линии (сверху вниз), и диполи выстраиваются вдоль поля — положительные концы к нижней пластине.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 3: ОДНОРОДНОЕ ПОЛЕ -->
+            <div id="model-uniform" class="model-content" style="display:none;">
+                <div class="model-container" id="container-uniform">
+                    <canvas id="canvas-uniform" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-uniform">⛶</button>
+                    <div class="info-display">
+                        <div>Напряжение: <span class="val" id="uni-volts">10</span> В</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Напряжение $U$ (В)</label>
+                        <input type="range" id="uni-slider" min="2" max="20" step="1" value="10">
+                        <span class="control-value" id="uni-value">10</span>
+                    </div>
+                    <button class="btn-reset" id="uni-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Меняйте напряжение — густота линий будет меняться</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель однородного поля.</strong> Поле между двумя заряженными пластинами (конденсатор).</p>
+                    <p><span class="important">Линии</span> идут от положительной пластины к отрицательной.</p>
+                    <p>Чем больше напряжение, тем сильнее поле и тем гуще линии.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 4: СТРОЕНИЕ ДИЭЛЕКТРИКА -->
+            <div id="model-structure" class="model-content" style="display:none;">
+                <div class="model-container" id="container-structure">
+                    <canvas id="canvas-structure" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-structure">⛶</button>
+                    <div class="info-display">
+                        <div>Проводимость: <span class="val" id="str-status">Отсутствует</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <button class="btn-toggle" id="str-toggle">⚡ Подать напряжение</button>
+                    <button class="btn-reset" id="str-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Подайте напряжение и посмотрите, как смещаются электронные оболочки</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Строение диэлектрика.</strong> Атомы в узлах кристаллической решётки.</p>
+                    <p>В диэлектрике <span class="important">нет свободных электронов</span> — они все привязаны к своим ядрам.</p>
+                    <p>Когда вы подаёте напряжение (создаёте внешнее поле), электронные оболочки атомов немного смещаются в сторону положительного полюса, а ядра — в сторону отрицательного. Весь материал поляризуется, но ток не течёт.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Напряжённость поля</div>
+                <div class="task-condition"><strong>Условие:</strong> На заряд $q_0 = 2 \cdot 10^{-8}$ Кл в поле действует сила $F = 4 \cdot 10^{-5}$ Н. Найдите напряжённость поля.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q_0 = 2 \cdot 10^{-8}$ Кл, $F = 4 \cdot 10^{-5}$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $E = \dfrac{F}{q_0}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = \dfrac{4 \cdot 10^{-5}}{2 \cdot 10^{-8}} = 2 \cdot 10^3 \text{ Н/Кл} = 2 \text{ кН/Кл}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Напряжённость 2 кН/Кл — средняя для школьных задач.</div>
+                    <div class="answer">✅ Ответ: $E = 2000$ Н/Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Сила, действующая на заряд</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжённость поля $E = 5000$ В/м. Какая сила действует на заряд $q = 3 \cdot 10^{-6}$ Кл?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $E = 5000$ В/м, $q = 3 \cdot 10^{-6}$ Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $E = \dfrac{F}{q}$ следует $F = E \cdot q$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = 5000 \cdot 3 \cdot 10^{-6} = 0{,}015 \text{ Н}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сила небольшая, но достаточная для движения лёгких заряженных частиц.</div>
+                    <div class="answer">✅ Ответ: $F = 15$ мН</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Напряжённость поля точечного заряда</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите напряжённость поля, созданного зарядом $Q = 4 \cdot 10^{-8}$ Кл на расстоянии $r = 0{,}2$ м.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q = 4 \cdot 10^{-8}$ Кл, $r = 0{,}2$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $E = k \dfrac{|Q|}{r^2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = 9 \cdot 10^9 \dfrac{4 \cdot 10^{-8}}{0{,}04} = \dfrac{360}{0{,}04} = 9000 \text{ Н/Кл}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Поле точечного заряда быстро убывает с расстоянием.</div>
+                    <div class="answer">✅ Ответ: $E = 9000$ Н/Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Поле в воде</div>
+                <div class="task-condition"><strong>Условие:</strong> Как изменится напряжённость электрического поля, если источник поля поместить в воду ($\varepsilon = 81$)?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\varepsilon_{воды} = 81$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{E_{вак}}{E_{воды}}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $E_{среда} = \dfrac{E_{вак}}{\varepsilon}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{E_{вак}}{E_{воды}} = 81$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Вода — сильный диэлектрик, она ослабляет поле в 81 раз.</div>
+                    <div class="answer">✅ Ответ: уменьшится в 81 раз</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Сила в диэлектрике</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжённость поля в вакууме $E_0 = 200$ В/м. Какова напряжённость в диэлектрике с проницаемостью $\varepsilon = 4$?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $E_0 = 200$ В/м, $\varepsilon = 4$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $E = \dfrac{E_0}{\varepsilon}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = \dfrac{200}{4} = 50 \text{ В/м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Диэлектрик ослабляет поле, потому что его молекулы поляризуются и создают встречное поле.</div>
+                    <div class="answer">✅ Ответ: $E = 50$ В/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Принцип суперпозиции</div>
+                <div class="task-condition"><strong>Условие:</strong> Два заряда $q_1 = 2$ нКл и $q_2 = -2$ нКл находятся в точках A и B на расстоянии $d = 0{,}1$ м друг от друга. Найдите напряжённость в точке C, находящейся посередине между ними.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q_1 = 2 \cdot 10^{-9}$ Кл, $q_2 = -2 \cdot 10^{-9}$ Кл, $r_1 = r_2 = 0{,}05$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E_C$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $E_1 = k \dfrac{|q_1|}{r_1^2} = 9 \cdot 10^9 \dfrac{2 \cdot 10^{-9}}{0{,}0025} = 7200$ Н/Кл.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $E_2 = k \dfrac{|q_2|}{r_2^2} = 7200$ Н/Кл.</div>
+                    <div class="step"><strong>Шаг 3.</strong> В точке C поля направлены в одну сторону (от $+$ к $-$). $E_C = E_1 + E_2 = 14400$ Н/Кл.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Для разноимённых зарядов векторы напряжённости между ними складываются.</div>
+                    <div class="answer">✅ Ответ: $E_C = 14{,}4$ кН/Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Заряд по напряжённости</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжённость поля точечного заряда на расстоянии $r = 0{,}3$ м равна $E = 4000$ В/м. Найдите заряд.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $r = 0{,}3$ м, $E = 4000$ В/м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $E = k \dfrac{|Q|}{r^2}$ выразим $Q = \dfrac{E r^2}{k}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = \dfrac{4000 \cdot 0{,}09}{9 \cdot 10^9} = \dfrac{360}{9 \cdot 10^9} = 4 \cdot 10^{-8} \text{ Кл} = 40 \text{ нКл}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Заряд 40 нКл — типичная величина для задач.</div>
+                    <div class="answer">✅ Ответ: $Q = 40$ нКл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Расстояние по полю</div>
+                <div class="task-condition"><strong>Условие:</strong> На каком расстоянии от заряда $Q = 10^{-7}$ Кл напряжённость поля равна $E = 9000$ Н/Кл?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q = 10^{-7}$ Кл, $E = 9000$ Н/Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $r$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $E = k \dfrac{Q}{r^2}$ выразим $r = \sqrt{k \dfrac{Q}{E}}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$r = \sqrt{9 \cdot 10^9 \dfrac{10^{-7}}{9000}} = \sqrt{0{,}1} \approx 0{,}316 \text{ м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Около 32 см от заряда.</div>
+                    <div class="answer">✅ Ответ: $r \approx 0{,}32$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Работа в диэлектрике</div>
+                <div class="task-condition"><strong>Условие:</strong> В вакууме напряжённость поля $E_0 = 400$ В/м. В среде с $\varepsilon = 2$ на заряд $q = 5$ нКл действует сила $F$. Найдите эту силу.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $E_0 = 400$ В/м, $\varepsilon = 2$, $q = 5 \cdot 10^{-9}$ Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Напряжённость в среде: $E = \dfrac{400}{2} = 200$ В/м.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $F = E \cdot q = 200 \cdot 5 \cdot 10^{-9} = 10^{-6}$ Н.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В диэлектрике сила в 2 раза меньше, чем в вакууме.</div>
+                    <div class="answer">✅ Ответ: $F = 1$ мкН</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Суперпозиция под углом</div>
+                <div class="task-condition"><strong>Условие:</strong> В вершинах квадрата со стороной $a = 0{,}1$ м находятся одинаковые заряды $q = 1$ нКл. Найдите напряжённость поля в центре квадрата.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 10^{-9}$ Кл, $a = 0{,}1$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E_{центр}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Расстояние от вершины до центра: $r = \dfrac{a\sqrt{2}}{2} \approx 0{,}0707$ м.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Поля от противоположных зарядов направлены в противоположные стороны и компенсируют друг друга.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Суммарная напряжённость в центре квадрата равна нулю.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В центре квадрата с одинаковыми зарядами по вершинам поля компенсируются.</div>
+                    <div class="answer">✅ Ответ: $E_{центр} = 0$</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> На заряд $q = 10^{-7}$ Кл действует сила $F = 2 \cdot 10^{-4}$ Н. Найдите напряжённость поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $E = F / q$.</div>
+                    <div class="answer">✅ Ответ: $E = 2000$ Н/Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжённость поля $E = 500$ В/м. Какая сила действует на заряд $q = 4 \cdot 10^{-8}$ Кл?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $F = E \cdot q$.</div>
+                    <div class="answer">✅ Ответ: $F = 2 \cdot 10^{-5}$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите напряжённость поля заряда $Q = 2 \cdot 10^{-8}$ Кл на расстоянии $r = 0{,}1$ м.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $E = k Q / r^2$.</div>
+                    <div class="answer">✅ Ответ: $E = 18000$ Н/Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Во сколько раз ослабнет поле в керосине ($\varepsilon = 2$)?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $E = E_0 / \varepsilon$.</div>
+                    <div class="answer">✅ Ответ: в 2 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Поле в вакууме $E_0 = 1000$ В/м. Найдите поле в стекле ($\varepsilon = 5$).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $E = 1000 / 5$.</div>
+                    <div class="answer">✅ Ответ: $E = 200$ В/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> На заряд $q = 2$ нКл в поле действует сила $F = 8 \cdot 10^{-5}$ Н. Найдите напряжённость.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $E = F / q$.</div>
+                    <div class="answer">✅ Ответ: $E = 40000$ В/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите заряд, создающий поле $E = 5000$ Н/Кл на расстоянии $r = 0{,}2$ м.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $Q = E r^2 / k$.</div>
+                    <div class="answer">✅ Ответ: $Q \approx 2{,}2 \cdot 10^{-8}$ Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> Два заряда по $10^{-9}$ Кл находятся на расстоянии $0{,}2$ м. Найдите напряжённость поля в точке посередине между ними (заряды одноимённые).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> В середине поля направлены в противоположные стороны и компенсируются.</div>
+                    <div class="answer">✅ Ответ: $E = 0$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> Поле в вакууме $E_0 = 2000$ В/м. Заряд $q = 10$ нКл поместили в воду ($\varepsilon = 81$). Найдите силу.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $E = E_0 / \varepsilon$; $F = E \cdot q$.</div>
+                    <div class="answer">✅ Ответ: $F \approx 2{,}47 \cdot 10^{-7}$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> На каком расстоянии от заряда $Q = 2 \cdot 10^{-7}$ Кл поле равно $E = 2000$ В/м?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $r = \sqrt{k Q / E}$.</div>
+                    <div class="answer">✅ Ответ: $r \approx 0{,}95$ м</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-vector').style.display = model === 'vector' ? 'block' : 'none';
+        document.getElementById('model-dielectric').style.display = model === 'dielectric' ? 'block' : 'none';
+        document.getElementById('model-uniform').style.display = model === 'uniform' ? 'block' : 'none';
+        document.getElementById('model-structure').style.display = model === 'structure' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- ===== МОДЕЛЬ 1: ВЕКТОР НАПРЯЖЁННОСТИ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-vector');
+        const canvas = document.getElementById('canvas-vector');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 5, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 10, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Центральный заряд
+        const sourceCharge = new THREE.Mesh(
+            new THREE.SphereGeometry(0.8, 32, 32),
+            new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111 })
+        );
+        group.add(sourceCharge);
+
+        // Модель стрелки
+        function makeArrow(color) {
+            const g = new THREE.Group();
+            const shaft = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.04, 0.04, 1, 8),
+                new THREE.MeshStandardMaterial({ color })
+            );
+            shaft.position.y = 0.5;
+            const head = new THREE.Mesh(
+                new THREE.ConeGeometry(0.12, 0.3, 10),
+                new THREE.MeshStandardMaterial({ color })
+            );
+            head.position.y = 1.05;
+            g.add(shaft); g.add(head);
+            return g;
+        }
+
+        // Стрелки напряжённости
+        const arrows = [];
+        const N_ARROWS = 16;
+        for (let i = 0; i < N_ARROWS; i++) {
+            const angle = (i / N_ARROWS) * Math.PI * 2;
+            const a = makeArrow(0xffcc00);
+            group.add(a);
+            arrows.push({ mesh: a, angle });
+        }
+
+        const rSlider = document.getElementById('vec-r-slider');
+        const rValue = document.getElementById('vec-r-value');
+        const EDisplay = document.getElementById('vec-E');
+        const rDisplay = document.getElementById('vec-r');
+
+        function update() {
+            const r = parseFloat(rSlider.value);
+            rValue.textContent = r.toFixed(1);
+            rDisplay.textContent = r.toFixed(1);
+
+            // E = k * Q / r^2 (условно Q=1 нКл)
+            const E = 9 * Math.pow(10, 9) * Math.pow(10, -9) / (r * r);
+            EDisplay.textContent = E.toFixed(1);
+
+            // Масштаб стрелок зависит от E
+            const scale = Math.min(E * 0.5, 2.5);
+
+            arrows.forEach(item => {
+                const dist = 1.2 + r * 0.5; // Расстояние от центра
+                const x = Math.cos(item.angle) * dist;
+                const z = Math.sin(item.angle) * dist;
+                const y = 0;
+
+                item.mesh.position.set(x, y, z);
+                // Направление: наружу от заряда
+                const dir = new THREE.Vector3(x, y, z).normalize();
+                item.mesh.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(
+                    new THREE.Vector3(0, 1, 0), dir
+                ));
+                item.mesh.scale.set(1, scale, 1);
+            });
+        }
+
+        rSlider.addEventListener('input', update);
+        document.getElementById('vec-reset').addEventListener('click', () => {
+            rSlider.value = 1;
+            update();
+        });
+
+        document.getElementById('fs-vector').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 2: ПОЛЯРИЗАЦИЯ ДИЭЛЕКТРИКА ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-dielectric');
+        const canvas = document.getElementById('canvas-dielectric');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 14);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Пластины конденсатора
+        const plateGeo = new THREE.BoxGeometry(8, 0.2, 4);
+        const plateMatPos = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+        const plateMatNeg = new THREE.MeshStandardMaterial({ color: 0x4444ff });
+
+        const topPlate = new THREE.Mesh(plateGeo, plateMatPos);
+        topPlate.position.set(0, 3, 0);
+        group.add(topPlate);
+
+        const bottomPlate = new THREE.Mesh(plateGeo, plateMatNeg);
+        bottomPlate.position.set(0, -3, 0);
+        group.add(bottomPlate);
+
+        // Подписи пластин (+ и -)
+        function makeLabel(text, color, yPos) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = '2rem';
+            div.style.fontWeight = 'bold';
+            const lbl = new CSS2DObject(div);
+            lbl.position.set(-4.5, yPos, 0);
+            return lbl;
+        }
+        group.add(makeLabel('+', '#ffcccc', 3));
+        group.add(makeLabel('−', '#ccccff', -3));
+
+        // Стрелки поля
+        const fieldGroup = new THREE.Group();
+        group.add(fieldGroup);
+        fieldGroup.visible = false;
+
+        function buildFieldArrows() {
+            while (fieldGroup.children.length) {
+                const c = fieldGroup.children[0];
+                fieldGroup.remove(c);
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) c.material.dispose();
+            }
+            for (let x = -3; x <= 3; x += 1.5) {
+                for (let z = -1.5; z <= 1.5; z += 1.5) {
+                    const arrow = new THREE.ArrowHelper(
+                        new THREE.Vector3(0, -1, 0),
+                        new THREE.Vector3(x, 2.8, z),
+                        5.5,
+                        0xffcc00,
+                        0.4,
+                        0.2
+                    );
+                    fieldGroup.add(arrow);
+                }
+            }
+        }
+        buildFieldArrows();
+
+        // Молекулы (диполи)
+        const molecules = [];
+        const N_MOLS = 20;
+
+        const posMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111 });
+        const negMat = new THREE.MeshStandardMaterial({ color: 0x4444ff, emissive: 0x111144 });
+
+        for (let i = 0; i < N_MOLS; i++) {
+            const molGroup = new THREE.Group();
+
+            // Положительный заряд снизу, отрицательный сверху
+            const pos = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), posMat);
+            pos.position.y = -0.3;
+            const neg = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), negMat);
+            neg.position.y = 0.3;
+
+            molGroup.add(pos);
+            molGroup.add(neg);
+
+            const x = (Math.random() - 0.5) * 7;
+            const y = (Math.random() - 0.5) * 5;
+            const z = (Math.random() - 0.5) * 3;
+            molGroup.position.set(x, y, z);
+
+            molGroup.rotation.set(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI,
+                Math.random() * Math.PI
+            );
+
+            group.add(molGroup);
+            molecules.push({
+                mesh: molGroup,
+                originalRot: molGroup.rotation.clone()
+            });
+        }
+
+        const toggleBtn = document.getElementById('diel-toggle');
+        const fieldDisplay = document.getElementById('diel-field');
+
+        let isFieldOn = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isFieldOn = !isFieldOn;
+
+            if (isFieldOn) {
+                toggleBtn.textContent = '🛑 Выключить поле';
+                toggleBtn.classList.remove('off');
+                fieldDisplay.textContent = 'Включено';
+                fieldGroup.visible = true;
+            } else {
+                toggleBtn.textContent = '⚡ Включить внешнее поле';
+                toggleBtn.classList.add('off');
+                fieldDisplay.textContent = 'Выключено';
+                fieldGroup.visible = false;
+            }
+        });
+
+        document.getElementById('diel-reset').addEventListener('click', () => {
+            isFieldOn = false;
+            toggleBtn.textContent = '⚡ Включить внешнее поле';
+            toggleBtn.classList.add('off');
+            fieldDisplay.textContent = 'Выключено';
+            fieldGroup.visible = false;
+            molecules.forEach(m => {
+                m.mesh.rotation.copy(m.originalRot);
+            });
+        });
+
+        document.getElementById('fs-dielectric').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (isFieldOn) {
+                // Выстраиваем диполи вдоль поля (положительный конец вниз, отрицательный вверх)
+                molecules.forEach(m => {
+                    m.mesh.rotation.x = THREE.MathUtils.lerp(m.mesh.rotation.x, 0, 0.1);
+                    m.mesh.rotation.y = THREE.MathUtils.lerp(m.mesh.rotation.y, 0, 0.1);
+                    m.mesh.rotation.z = THREE.MathUtils.lerp(m.mesh.rotation.z, 0, 0.1);
+                });
+            } else {
+                // Возвращаем в исходное
+                molecules.forEach(m => {
+                    m.mesh.rotation.x = THREE.MathUtils.lerp(m.mesh.rotation.x, m.originalRot.x, 0.1);
+                    m.mesh.rotation.y = THREE.MathUtils.lerp(m.mesh.rotation.y, m.originalRot.y, 0.1);
+                    m.mesh.rotation.z = THREE.MathUtils.lerp(m.mesh.rotation.z, m.originalRot.z, 0.1);
+                });
+            }
+
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 3: ОДНОРОДНОЕ ПОЛЕ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-uniform');
+        const canvas = document.getElementById('canvas-uniform');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 3, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Пластины
+        const plateGeo = new THREE.BoxGeometry(6, 0.2, 3);
+        const plateMatPos = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+        const plateMatNeg = new THREE.MeshStandardMaterial({ color: 0x4444ff });
+
+        const topPlate = new THREE.Mesh(plateGeo, plateMatPos);
+        topPlate.position.set(0, 3, 0);
+        group.add(topPlate);
+
+        const bottomPlate = new THREE.Mesh(plateGeo, plateMatNeg);
+        bottomPlate.position.set(0, -3, 0);
+        group.add(bottomPlate);
+
+        // Подписи пластин (+ и -)
+        function makeLabel(text, color, yPos) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = '2rem';
+            div.style.fontWeight = 'bold';
+            const lbl = new CSS2DObject(div);
+            lbl.position.set(-3.5, yPos, 0);
+            return lbl;
+        }
+        group.add(makeLabel('+', '#ffcccc', 3));
+        group.add(makeLabel('−', '#ccccff', -3));
+
+        let linesGroup = new THREE.Group();
+        group.add(linesGroup);
+
+        function buildLines(voltage) {
+            while (linesGroup.children.length) {
+                const c = linesGroup.children[0];
+                linesGroup.remove(c);
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) c.material.dispose();
+            }
+
+            const density = Math.floor(voltage / 2);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.6 });
+            const arrowMat = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+
+            for (let x = -2.5; x <= 2.5; x += 5 / density) {
+                for (let z = -1; z <= 1; z += 1) {
+                    const pts = [
+                        new THREE.Vector3(x, 2.8, z),
+                        new THREE.Vector3(x, -2.8, z)
+                    ];
+                    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                    linesGroup.add(new THREE.Line(geo, lineMat));
+
+                    const arrowPos = new THREE.Vector3(x, 0, z);
+                    const arrow = new THREE.Mesh(
+                        new THREE.ConeGeometry(0.1, 0.3, 8),
+                        arrowMat
+                    );
+                    arrow.position.copy(arrowPos);
+                    arrow.rotation.x = Math.PI;
+                    linesGroup.add(arrow);
+                }
+            }
+        }
+
+        const slider = document.getElementById('uni-slider');
+        const valueDisplay = document.getElementById('uni-value');
+        const voltsDisplay = document.getElementById('uni-volts');
+
+        function update() {
+            const val = parseFloat(slider.value);
+            valueDisplay.textContent = val;
+            voltsDisplay.textContent = val;
+            buildLines(val);
+        }
+
+        slider.addEventListener('input', update);
+        document.getElementById('uni-reset').addEventListener('click', () => {
+            slider.value = 10;
+            update();
+        });
+
+        document.getElementById('fs-uniform').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 4: СТРОЕНИЕ ДИЭЛЕКТРИКА ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-structure');
+        const canvas = document.getElementById('canvas-structure');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 14);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // ===== ПЛАСТИНЫ КОНДЕНСАТОРА (СВЕРХУ +, СНИЗУ -) =====
+        const plateGeo = new THREE.BoxGeometry(8, 0.2, 4);
+        const plateMatPos = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+        const plateMatNeg = new THREE.MeshStandardMaterial({ color: 0x4444ff });
+
+        const topPlate = new THREE.Mesh(plateGeo, plateMatPos);
+        topPlate.position.set(0, 4, 0);
+        group.add(topPlate);
+
+        const bottomPlate = new THREE.Mesh(plateGeo, plateMatNeg);
+        bottomPlate.position.set(0, -4, 0);
+        group.add(bottomPlate);
+
+        // Подписи пластин (+ и -)
+        function makeLabel(text, color, yPos) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = '2rem';
+            div.style.fontWeight = 'bold';
+            const lbl = new CSS2DObject(div);
+            lbl.position.set(-4.5, yPos, 0);
+            return lbl;
+        }
+        group.add(makeLabel('+', '#ffcccc', 4));
+        group.add(makeLabel('−', '#ccccff', -4));
+
+        // ===== МОДЕЛИ АТОМОВ =====
+        const atomGroups = [];
+        const N_ATOMS = 25;
+
+        // Цвета: ядро - красное, электроны - синие
+        const nucleusMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111 });
+        const electronMat = new THREE.MeshStandardMaterial({ color: 0x4444ff, emissive: 0x111144 });
+
+        for (let i = 0; i < N_ATOMS; i++) {
+            const atom = new THREE.Group();
+
+            // Ядро (положительное) - остаётся на месте
+            const nucleus = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), nucleusMat);
+            atom.add(nucleus);
+
+            // Электронное облако (отрицательное) - смещается вверх при подаче поля
+            const electron = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), electronMat.clone());
+            electron.material.transparent = true;
+            electron.material.opacity = 0.6;
+            atom.add(electron);
+
+            // Случайное расположение
+            const x = (Math.random() - 0.5) * 7;
+            const y = (Math.random() - 0.5) * 6;
+            const z = (Math.random() - 0.5) * 3;
+            atom.position.set(x, y, z);
+
+            group.add(atom);
+            atomGroups.push({
+                mesh: atom,
+                electron: electron,
+                originalPos: electron.position.clone()
+            });
+        }
+
+        const toggleBtn = document.getElementById('str-toggle');
+        const statusDisplay = document.getElementById('str-status');
+
+        let isVoltageOn = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isVoltageOn = !isVoltageOn;
+
+            if (isVoltageOn) {
+                toggleBtn.textContent = '🛑 Убрать напряжение';
+                statusDisplay.textContent = 'Поляризация';
+            } else {
+                toggleBtn.textContent = '⚡ Подать напряжение';
+                statusDisplay.textContent = 'Отсутствует';
+            }
+        });
+
+        document.getElementById('str-reset').addEventListener('click', () => {
+            isVoltageOn = false;
+            toggleBtn.textContent = '⚡ Подать напряжение';
+            statusDisplay.textContent = 'Отсутствует';
+            atomGroups.forEach(a => {
+                a.electron.position.copy(a.originalPos);
+            });
+        });
+
+        document.getElementById('fs-structure').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (isVoltageOn) {
+                // Электронная оболочка (синяя) притягивается к плюсу (вверх, +Y)
+                atomGroups.forEach(a => {
+                    a.electron.position.y = THREE.MathUtils.lerp(a.electron.position.y, 0.25, 0.1);
+                });
+            } else {
+                // Возвращаем на место
+                atomGroups.forEach(a => {
+                    a.electron.position.y = THREE.MathUtils.lerp(a.electron.position.y, 0, 0.1);
+                });
+            }
+
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+</script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+</body>
+</html>

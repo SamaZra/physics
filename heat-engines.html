@@ -49,8 +49,6 @@
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
         
-
-        
         h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
         .section{margin-bottom:14px;}
         .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
@@ -109,9 +107,7 @@
         .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
         .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
         .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
-        
-        
-        
+
         mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
         .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
         .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
@@ -222,7 +218,7 @@
             <div class="def-card">
                 <p><strong>Второе начало термодинамики</strong> указывает направление, в котором могут происходить тепловые процессы. Существует несколько эквивалентных формулировок.</p>
 
-                <p><strong>Формулировка Клаузиуса:</strong> невозможно самопроизвольный переход теплоты от менее нагретого тела к более нагретому. Теплота всегда переходит от горячего к холодному, а не наоборот.</p>
+                <p><strong>Формулировка Клаузиуса:</strong> невозможен самопроизвольный переход теплоты от менее нагретого тела к более нагретому. Теплота всегда переходит от горячего к холодному, а не наоборот.</p>
 
                 <p><strong>Формулировка Кельвина:</strong> невозможно создать периодически действующий двигатель, который полностью превращал бы теплоту в работу (без отдачи части её холодильнику).</p>
 
@@ -271,14 +267,14 @@
                 </div>
                 <div class="controls-panel">
                     <div class="control-group">
-                        <label>$T_1$ (К)</label>
-                        <input type="range" id="eng-t1" min="400" max="1200" step="10" value="600">
-                        <span class="control-value" id="eng-t1-value">600</span>
+                        <label for="eng-t1-slider">$T_1$ (К)</label>
+                        <input type="range" id="eng-t1-slider" min="400" max="1200" step="10" value="600">
+                        <span class="control-value" id="eng-t1-val">600</span>
                     </div>
                     <div class="control-group">
-                        <label>$T_2$ (К)</label>
-                        <input type="range" id="eng-t2" min="200" max="500" step="10" value="300">
-                        <span class="control-value" id="eng-t2-value">300</span>
+                        <label for="eng-t2-slider">$T_2$ (К)</label>
+                        <input type="range" id="eng-t2-slider" min="200" max="500" step="10" value="300">
+                        <span class="control-value" id="eng-t2-val">300</span>
                     </div>
                     <button class="btn-reset" id="eng-reset">⟳ Сброс</button>
                     <span class="control-label">⬤ $\eta = 1 - T_2/T_1$ — растёт при увеличении $T_1$ и уменьшении $T_2$</span>
@@ -304,14 +300,14 @@
                 </div>
                 <div class="controls-panel">
                     <div class="control-group">
-                        <label>$T_1$ (К)</label>
-                        <input type="range" id="car-t1" min="400" max="1200" step="10" value="600">
-                        <span class="control-value" id="car-t1-value">600</span>
+                        <label for="car-t1-slider">$T_1$ (К)</label>
+                        <input type="range" id="car-t1-slider" min="400" max="1200" step="10" value="600">
+                        <span class="control-value" id="car-t1-val">600</span>
                     </div>
                     <div class="control-group">
-                        <label>$T_2$ (К)</label>
-                        <input type="range" id="car-t2" min="200" max="500" step="10" value="300">
-                        <span class="control-value" id="car-t2-value">300</span>
+                        <label for="car-t2-slider">$T_2$ (К)</label>
+                        <input type="range" id="car-t2-slider" min="200" max="500" step="10" value="300">
+                        <span class="control-value" id="car-t2-val">300</span>
                     </div>
                     <button class="btn-reset" id="car-reset">⟳ Сброс</button>
                     <span class="control-label">⬤ 4 этапа цикла Карно: 2 изотермы + 2 адиабаты</span>
@@ -503,6 +499,114 @@
         </div>
     </div>
 
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> Тепловой двигатель получает от нагревателя $Q_1 = 1200$ Дж и отдаёт холодильнику $Q_2 = 900$ Дж. Найдите КПД двигателя.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Используй формулу $\eta = \dfrac{Q_1 - Q_2}{Q_1}$. Сначала найди полезную работу $A = Q_1 - Q_2$, потом раздели на $Q_1$.</div>
+                    <div class="answer">✅ Ответ: $\eta = \dfrac{1200 - 900}{1200} = \dfrac{300}{1200} = 0{,}25 = 25\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> КПД теплового двигателя $\eta = 35\%$. Он получает от нагревателя $Q_1 = 800$ Дж. Найдите полезную работу.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Из формулы $\eta = \dfrac{A}{Q_1}$ вырази работу: $A = \eta \cdot Q_1$. Проценты переведи в доли: $35\% = 0{,}35$.</div>
+                    <div class="answer">✅ Ответ: $A = 0{,}35 \cdot 800 = 280$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Температура нагревателя $T_1 = 900$ К, температура холодильника $T_2 = 300$ К. Найдите максимально возможный КПД (цикл Карно).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Формула Карно: $\eta_{max} = \dfrac{T_1 - T_2}{T_1} = 1 - \dfrac{T_2}{T_1}$. Температуры обязательно в кельвинах — они уже даны в К.</div>
+                    <div class="answer">✅ Ответ: $\eta_{max} = \dfrac{900 - 300}{900} = \dfrac{600}{900} \approx 0{,}667 = 66{,}7\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Тепловой двигатель получает от нагревателя $Q_1 = 1500$ Дж и совершает работу $A = 450$ Дж. Найдите количество теплоты, отданное холодильнику, и КПД.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Из закона сохранения энергии $Q_1 = A + Q_2$, откуда $Q_2 = Q_1 - A$. Затем найди КПД: $\eta = \dfrac{A}{Q_1}$.</div>
+                    <div class="answer">✅ Ответ: $Q_2 = 1500 - 450 = 1050$ Дж; $\eta = \dfrac{450}{1500} = 0{,}3 = 30\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Температура нагревателя паровой турбины $T_1 = 800$ К, температура конденсатора $T_2 = 300$ К. Найдите максимально возможный КПД.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Используй формулу Карно: $\eta_{max} = \dfrac{T_1 - T_2}{T_1}$. Разница температур делится на температуру нагревателя.</div>
+                    <div class="answer">✅ Ответ: $\eta_{max} = \dfrac{800 - 300}{800} = \dfrac{500}{800} = 0{,}625 = 62{,}5\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> КПД цикла Карно $\eta = 50\%$, температура нагревателя $T_1 = 600$ К. Найдите температуру холодильника.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Из формулы $\eta = 1 - \dfrac{T_2}{T_1}$ вырази $T_2$: $T_2 = T_1 \cdot (1 - \eta)$. Подставь $\eta = 0{,}5$.</div>
+                    <div class="answer">✅ Ответ: $T_2 = 600 \cdot (1 - 0{,}5) = 600 \cdot 0{,}5 = 300$ К</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> Идеальный цикл Карно имеет $T_1 = 1000$ К, $T_2 = 400$ К. Реальный двигатель при тех же температурах имеет КПД 35%. Во сколько раз КПД идеального двигателя больше?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Сначала найди $\eta_{max} = \dfrac{T_1 - T_2}{T_1}$. Затем раздели $\eta_{max}$ на $\eta_{реал}$ (в процентах или долях — главное, в одних единицах).</div>
+                    <div class="answer">✅ Ответ: $\eta_{max} = \dfrac{600}{1000} = 0{,}6 = 60\%$; отношение $\dfrac{60}{35} \approx 1{,}71$ — КПД идеального двигателя больше в 1,71 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> Двигатель совершает полезную работу $A = 5 \cdot 10^7$ Дж, КПД $\eta = 20\%$. Сколько теплоты выделилось при сгорании топлива?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Из формулы $\eta = \dfrac{A}{Q_1}$ вырази $Q_1 = \dfrac{A}{\eta}$. Проценты переведи в доли: $20\% = 0{,}2$.</div>
+                    <div class="answer">✅ Ответ: $Q_1 = \dfrac{5 \cdot 10^7}{0{,}2} = 2{,}5 \cdot 10^8$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> Тепловой двигатель работает по циклу Карно между $T_1 = 500$ К и $T_2 = 250$ К. За цикл он получает от нагревателя $Q_1 = 2000$ Дж. Найдите: а) КПД; б) полезную работу; в) количество теплоты, отданное холодильнику.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Сначала найди КПД по формуле Карно: $\eta = 1 - \dfrac{T_2}{T_1}$. Затем работу $A = \eta \cdot Q_1$ и теплоту холодильнику $Q_2 = Q_1 - A$.</div>
+                    <div class="answer">✅ Ответ: $\eta = \dfrac{500 - 250}{500} = 0{,}5 = 50\%$; $A = 0{,}5 \cdot 2000 = 1000$ Дж; $Q_2 = 2000 - 1000 = 1000$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> Может ли тепловой двигатель иметь КПД 100% при $T_1 = 800$ К? Обоснуйте ответ. Какую роль играет второй закон термодинамики?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Вспомни формулу $\eta = 1 - \dfrac{T_2}{T_1}$. Чтобы КПД был 100%, нужно $T_2 = 0$ К. Но абсолютный нуль недостижим — это третье начало термодинамики. Второе начало запрещает полное превращение теплоты в работу в циклическом процессе.</div>
+                    <div class="answer">✅ Ответ: нет, невозможно. По второму началу термодинамики КПД любого реального циклического двигателя меньше 100%, а для КПД = 100% потребовалась бы температура холодильника $T_2 = 0$ К, что недостижимо</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div class="back-link-wrapper">
         <a href="molecular-physics.html" class="back-link">← Назад</a>
     </div>
@@ -510,9 +614,9 @@
 
 <script>
     function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
-    
+
     (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    
+
 
     function switchModel(model) {
         document.querySelectorAll('.model-tab').forEach(tab => {
@@ -586,7 +690,6 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        // НАГРЕВАТЕЛЬ (слева, красный)
         const heaterMat = new THREE.MeshStandardMaterial({
             color: 0xff3322, emissive: 0x661100, roughness: 0.3, metalness: 0.2
         });
@@ -596,7 +699,6 @@
         const heaterLabel = makeLabel('Нагреватель T₁', '#ff3322', new THREE.Vector3(-5, 1.8, 0), '0.75rem');
         group.add(heaterLabel);
 
-        // ХОЛОДИЛЬНИК (справа, синий)
         const coolerMat = new THREE.MeshStandardMaterial({
             color: 0x3399ff, emissive: 0x001133, roughness: 0.3, metalness: 0.2
         });
@@ -606,7 +708,6 @@
         const coolerLabel = makeLabel('Холодильник T₂', '#3399ff', new THREE.Vector3(5, 1.8, 0), '0.75rem');
         group.add(coolerLabel);
 
-        // РАБОЧЕЕ ТЕЛО (в центре, жёлтый цилиндр)
         const workMat = new THREE.MeshStandardMaterial({
             color: 0xffaa00, emissive: 0x664400, roughness: 0.4, metalness: 0.3
         });
@@ -616,7 +717,6 @@
         const workLabel = makeLabel('Рабочее тело', '#ffaa00', new THREE.Vector3(0, 1.5, 0), '0.75rem');
         group.add(workLabel);
 
-        // Стрелки потоков теплоты
         function createArrow(from, to, color) {
             const g = new THREE.Group();
             const dir = to.clone().sub(from);
@@ -638,32 +738,28 @@
             return g;
         }
 
-        // Поток от нагревателя к рабочему телу (Q1)
         const flowQ1 = createArrow(new THREE.Vector3(-3.5, 0, 0), new THREE.Vector3(-0.9, 0, 0), 0xff6644);
         group.add(flowQ1);
         const q1Label = makeLabel('Q₁', '#ff6644', new THREE.Vector3(-2.2, 0.6, 0), '0.85rem');
         group.add(q1Label);
 
-        // Поток от рабочего тела к холодильнику (Q2)
         const flowQ2 = createArrow(new THREE.Vector3(0.9, 0, 0), new THREE.Vector3(3.5, 0, 0), 0x66aaff);
         group.add(flowQ2);
         const q2Label = makeLabel('Q₂', '#66aaff', new THREE.Vector3(2.2, 0.6, 0), '0.85rem');
         group.add(q2Label);
 
-        // Стрелка работы (вверх)
         const flowA = createArrow(new THREE.Vector3(0, 1.1, 0), new THREE.Vector3(0, 2.5, 0), 0xffcc00);
         group.add(flowA);
         const aLabel = makeLabel('A', '#ffcc00', new THREE.Vector3(0.5, 1.8, 0), '0.85rem');
         group.add(aLabel);
 
-        // Параметры
         let T1 = 600, T2 = 300;
         const Q1 = 1000;
 
-        const t1Slider = document.getElementById('eng-t1');
-        const t2Slider = document.getElementById('eng-t2');
-        const t1Value = document.getElementById('eng-t1-value');
-        const t2Value = document.getElementById('eng-t2-value');
+        const t1Slider = document.getElementById('eng-t1-slider');
+        const t2Slider = document.getElementById('eng-t2-slider');
+        const t1Val = document.getElementById('eng-t1-val');
+        const t2Val = document.getElementById('eng-t2-val');
         const T1Display = document.getElementById('eng-T1');
         const T2Display = document.getElementById('eng-T2');
         const Q1Display = document.getElementById('eng-Q1');
@@ -674,8 +770,8 @@
             T1 = parseFloat(t1Slider.value);
             T2 = parseFloat(t2Slider.value);
             if (T2 >= T1) T2 = T1 - 10;
-            t1Value.textContent = T1;
-            t2Value.textContent = T2;
+            t1Val.textContent = T1;
+            t2Val.textContent = T2;
             T1Display.textContent = T1;
             T2Display.textContent = T2;
             Q1Display.textContent = Q1;
@@ -685,14 +781,12 @@
             ADisplay.textContent = A.toFixed(0);
             etaDisplay.textContent = (eta * 100).toFixed(0);
 
-            // Изменяем яркость нагревателя и холодильника
             const t1Ratio = (T1 - 400) / 800;
             heaterMat.emissive.setRGB(0.4 + t1Ratio * 0.4, 0.1 + t1Ratio * 0.15, 0.05);
 
             const t2Ratio = 1 - (T2 - 200) / 300;
             coolerMat.emissive.setRGB(0, 0.07 + t2Ratio * 0.1, 0.2 + t2Ratio * 0.15);
 
-            // Масштаб стрелки A по КПД
             const scale = Math.max(0.3, eta);
             flowA.scale.set(scale, scale, scale);
         }
@@ -721,7 +815,6 @@
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
-            // Вращение рабочего тела
             work.rotation.y += 0.01;
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
@@ -792,25 +885,17 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        // Рисуем цикл Карно в координатах p-V (упрощённо, как замкнутый контур)
-        // Этап 1-2: изотерма при T1 (горизонталь наверху)
-        // Этап 2-3: адиабата (спуск вправо)
-        // Этап 3-4: изотерма при T2 (горизонталь внизу)
-        // Этап 4-1: адиабата (подъём влево)
-
         const pts = [
-            new THREE.Vector3(-3, 2, 0),   // 1
-            new THREE.Vector3(1, 2, 0),    // 2
-            new THREE.Vector3(3, -2, 0),   // 3
-            new THREE.Vector3(-1, -2, 0)   // 4
+            new THREE.Vector3(-3, 2, 0),
+            new THREE.Vector3(1, 2, 0),
+            new THREE.Vector3(3, -2, 0),
+            new THREE.Vector3(-1, -2, 0)
         ];
 
-        // Контур цикла
         const cycleGeo = new THREE.BufferGeometry().setFromPoints([...pts, pts[0]]);
         const cycleLine = new THREE.Line(cycleGeo, new THREE.LineBasicMaterial({ color: 0xffaa00, linewidth: 3 }));
         group.add(cycleLine);
 
-        // Точки вершин
         pts.forEach((p, i) => {
             const dot = new THREE.Mesh(
                 new THREE.SphereGeometry(0.15, 12, 12),
@@ -822,7 +907,6 @@
             group.add(label);
         });
 
-        // Стрелки вдоль контура (направление движения)
         function createArrowAlong(from, to, color) {
             const g = new THREE.Group();
             const dir = to.clone().sub(from);
@@ -840,12 +924,11 @@
             return g;
         }
 
-        group.add(createArrowAlong(pts[0], pts[1], 0xff6644));  // 1→2 изотерма T1
-        group.add(createArrowAlong(pts[1], pts[2], 0xffaa00));  // 2→3 адиабата
-        group.add(createArrowAlong(pts[2], pts[3], 0x66aaff));  // 3→4 изотерма T2
-        group.add(createArrowAlong(pts[3], pts[0], 0xffaa00));  // 4→1 адиабата
+        group.add(createArrowAlong(pts[0], pts[1], 0xff6644));
+        group.add(createArrowAlong(pts[1], pts[2], 0xffaa00));
+        group.add(createArrowAlong(pts[2], pts[3], 0x66aaff));
+        group.add(createArrowAlong(pts[3], pts[0], 0xffaa00));
 
-        // Подписи этапов
         const label12 = makeLabel('1→2: изотерма T₁ (Q₁)', '#ff6644', new THREE.Vector3(-1, 2.5, 0), '0.7rem');
         group.add(label12);
         const label23 = makeLabel('2→3: адиабата', '#ffaa00', new THREE.Vector3(2.4, 0.3, 0), '0.7rem');
@@ -855,7 +938,6 @@
         const label41 = makeLabel('4→1: адиабата', '#ffaa00', new THREE.Vector3(-2.4, 0.3, 0), '0.7rem');
         group.add(label41);
 
-        // Рабочее тело — движущаяся точка по контуру
         const workBody = new THREE.Mesh(
             new THREE.SphereGeometry(0.25, 16, 16),
             new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x664400 })
@@ -863,10 +945,10 @@
         group.add(workBody);
 
         let T1 = 600, T2 = 300;
-        const t1Slider = document.getElementById('car-t1');
-        const t2Slider = document.getElementById('car-t2');
-        const t1Value = document.getElementById('car-t1-value');
-        const t2Value = document.getElementById('car-t2-value');
+        const t1Slider = document.getElementById('car-t1-slider');
+        const t2Slider = document.getElementById('car-t2-slider');
+        const t1Val = document.getElementById('car-t1-val');
+        const t2Val = document.getElementById('car-t2-val');
         const T1Display = document.getElementById('car-T1');
         const T2Display = document.getElementById('car-T2');
         const etaDisplay = document.getElementById('car-eta');
@@ -876,8 +958,8 @@
             T1 = parseFloat(t1Slider.value);
             T2 = parseFloat(t2Slider.value);
             if (T2 >= T1) T2 = T1 - 10;
-            t1Value.textContent = T1;
-            t2Value.textContent = T2;
+            t1Val.textContent = T1;
+            t2Val.textContent = T2;
             T1Display.textContent = T1;
             T2Display.textContent = T2;
             const eta = Math.max(0, (T1 - T2) / T1);
@@ -905,13 +987,10 @@
 
         updateCarnot();
 
-        // Анимация движения рабочего тела по контуру
         let t = 0;
-        const totalLength = 4; // 4 этапа
         const speed = 0.15;
 
         function getPosOnCycle(progress) {
-            // progress от 0 до 4
             const stage = Math.floor(progress) % 4;
             const local = progress - Math.floor(progress);
             const from = pts[stage];

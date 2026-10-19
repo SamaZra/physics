@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Плавление и кристаллизация. Удельная теплота плавления</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="container">
+    <h1>Плавление и кристаллизация.<br>Удельная теплота плавления</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Плавление и кристаллизация</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Плавление</strong> — переход вещества из твёрдого состояния в жидкое. Происходит при нагревании.</p>
+                <p><strong>Кристаллизация (отвердевание)</strong> — обратный процесс: переход из жидкого состояния в твёрдое. Происходит при охлаждении.</p>
+                <p><strong>Температура плавления</strong> — температура, при которой вещество плавится (и кристаллизуется). Для кристаллических тел она постоянна при данном внешнем давлении.</p>
+                <ul>
+                    <li>У аморфных тел (стекло, пластик) нет чёткой температуры плавления — они постепенно размягчаются.</li>
+                    <li>Во время плавления (и кристаллизации) температура тела <strong>не меняется</strong>, хотя теплота подводится (или отводится).</li>
+                </ul>
+                <p><strong>Удельная теплота плавления</strong> $\lambda$ — количество теплоты, необходимое для плавления 1 кг кристаллического вещества при температуре плавления.</p>
+                <div class="formula-block">
+                    <span class="f">$Q = \lambda m$</span>
+                    <span class="f-label">— теплота плавления / кристаллизации</span>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$Q$ — количество теплоты (Дж);</li>
+                    <li>$\lambda$ — удельная теплота плавления (Дж/кг);</li>
+                    <li>$m$ — масса вещества (кг).</li>
+                </ul>
+                <p>Для льда: $\lambda = 3{,}4 \cdot 10^5$ Дж/кг. При плавлении теплота <strong>поглощается</strong>, при кристаллизации — <strong>выделяется</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 График фазовых переходов</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>График нагревания и плавления</strong> показывает зависимость температуры от времени (или от количества подведённой теплоты).</p>
+                <p><strong>Участки графика:</strong></p>
+                <ul>
+                    <li><strong>Нагрев твёрдого тела</strong> — температура растёт, пока не достигнет $t_{пл}$.</li>
+                    <li><strong>Плавление</strong> — горизонтальный участок: температура постоянна, вещество переходит из твёрдого в жидкое.</li>
+                    <li><strong>Нагрев жидкости</strong> — температура снова растёт до кипения.</li>
+                </ul>
+                <p>При охлаждении и кристаллизации график выглядит зеркально: горизонтальный участок — процесс кристаллизации при постоянной температуре.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Тепловой баланс при плавлении</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>Часто в задачах требуется нагреть лёд до температуры плавления, расплавить его, а затем нагреть полученную воду. Общая теплота складывается из трёх частей:</p>
+                <div class="formula-block">
+                    <span class="f">$Q_{общ} = c_1 m (t_{пл} - t_1) + \lambda m + c_2 m (t_2 - t_{пл})$</span>
+                    <span class="f-label">— нагрев твёрдого, плавление, нагрев жидкости</span>
+                </div>
+                <p>где $c_1$ и $c_2$ — удельные теплоёмкости твёрдого тела и жидкости соответственно.</p>
+                <p><strong>Уравнение теплового баланса:</strong> при теплообмене количество теплоты, отданное одними телами, равно количеству теплоты, полученному другими:</p>
+                <div class="formula-block">
+                    <span class="f">$Q_{отд} = Q_{пол}$</span>
+                    <span class="f-label">— уравнение теплового баланса</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="phase" onclick="switchModel('phase')">🧊 Фазовый переход</div>
+                <div class="model-tab" data-model="graph" onclick="switchModel('graph')">📈 График плавления</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: ФАЗОВЫЙ ПЕРЕХОД -->
+            <div id="model-phase" class="model-content">
+                <div class="model-container" id="container-phase">
+                    <canvas id="canvas-phase" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-phase">⛶</button>
+                    <div class="info-display">
+                        <div>Температура: <span class="val" id="phase-temp">-20 °C</span></div>
+                        <div>Состояние: <span class="val" id="phase-state">Твёрдое</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Температура $t$ (°C)</label>
+                        <input type="range" id="phase-temp-slider" min="-20" max="20" step="1" value="-20">
+                        <span class="control-value" id="phase-temp-val">-20</span>
+                    </div>
+                    <button class="btn-reset" id="phase-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Нагревайте лёд, чтобы расплавить его</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель фазового перехода.</strong> Внизу — лёд (молекулы в решётке), при нагреве до 0 °C начинается плавление.</p>
+                    <p><span class="important">От 0 °C до 0 °C (пока плавится):</span> температура не меняется, но структура разрушается.</p>
+                    <p>После полного плавления вода начинает нагреваться дальше.</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: ГРАФИК ПЛАВЛЕНИЯ -->
+            <div id="model-graph" class="model-content" style="display:none;">
+                <div class="model-container" id="container-graph">
+                    <canvas id="canvas-graph" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-graph">⛶</button>
+                    <div class="info-display">
+                        <div>Время: <span class="val" id="graph-time">0 с</span></div>
+                        <div>Температура: <span class="val" id="graph-temp">-20 °C</span></div>
+                        <div>Состояние: <span class="val" id="graph-state">Твёрдое</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Время $t$ (с)</label>
+                        <input type="range" id="graph-time-slider" min="0" max="100" step="1" value="0">
+                        <span class="control-value" id="graph-time-val">0</span>
+                    </div>
+                    <button class="btn-reset" id="graph-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Прокручивайте время, чтобы видеть все этапы</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель графика.</strong> Наблюдайте, как меняется температура льда при постоянном подводе теплоты.</p>
+                    <p><span class="important">Участок 1:</span> нагрев льда (температура растёт).</p>
+                    <p><span class="important">Участок 2:</span> плавление (температура постоянна 0 °C).</p>
+                    <p><span class="important">Участок 3:</span> нагрев воды.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Теплота плавления</div>
+                <div class="task-condition"><strong>Условие:</strong> Какое количество теплоты необходимо для плавления $m = 2$ кг льда, взятого при 0 °C? $\lambda = 3{,}4 \cdot 10^5$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $Q = \lambda m$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 3{,}4 \cdot 10^5 \cdot 2 = 6{,}8 \cdot 10^5 \text{ Дж} = 680 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Плавление льда требует большого количества энергии.</div>
+                    <div class="answer">✅ Ответ: $Q = 680$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Теплота кристаллизации</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько теплоты выделится при кристаллизации $m = 0{,}5$ кг воды при 0 °C?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ кг, $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q = \lambda m$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 3{,}4 \cdot 10^5 \cdot 0{,}5 = 1{,}7 \cdot 10^5 \text{ Дж} = 170 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При кристаллизации теплота выделяется, а не поглощается.</div>
+                    <div class="answer">✅ Ответ: $Q = 170$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Нагрев и плавление льда</div>
+                <div class="task-condition"><strong>Условие:</strong> Какое количество теплоты нужно, чтобы нагреть $m = 1$ кг льда от $-10$ °C до 0 °C и полностью расплавить? $c_л = 2100$ Дж/(кг·°C), $\lambda = 3{,}4 \cdot 10^5$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 1$ кг, $t_1 = -10$ °C, $t_2 = 0$ °C, $c_л = 2100$ Дж/(кг·°C), $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (нагрев).</strong> $Q_1 = c_л m (t_2 - t_1) = 2100 \cdot 1 \cdot 10 = 21000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2 (плавление).</strong> $Q_2 = \lambda m = 3{,}4 \cdot 10^5 \cdot 1 = 340000$ Дж.</div>
+                    <div class="step"><strong>Шаг 3 (всего).</strong> $Q_{общ} = 21000 + 340000 = 361000$ Дж = $361$ кДж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> На само плавление уходит в 16 раз больше энергии, чем на нагрев на 10 градусов.</div>
+                    <div class="answer">✅ Ответ: $Q_{общ} = 361$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Нагрев от -20 до +20</div>
+                <div class="task-condition"><strong>Условие:</strong> Лёд массой $m = 2$ кг нагревают от $-20$ °C до полного плавления, затем воду нагревают до $+20$ °C. Найдите общую теплоту. $c_л = 2100$, $c_в = 4200$ Дж/(кг·°C), $\lambda = 3{,}4 \cdot 10^5$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $t_1 = -20$ °C, $t_{пл} = 0$ °C, $t_2 = 20$ °C</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (нагрев льда).</strong> $Q_1 = 2100 \cdot 2 \cdot 20 = 84000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2 (плавление).</strong> $Q_2 = 3{,}4 \cdot 10^5 \cdot 2 = 680000$ Дж.</div>
+                    <div class="step"><strong>Шаг 3 (нагрев воды).</strong> $Q_3 = 4200 \cdot 2 \cdot 20 = 168000$ Дж.</div>
+                    <div class="step"><strong>Шаг 4.</strong> $Q_{общ} = 84000 + 680000 + 168000 = 932000$ Дж = $932$ кДж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Самая энергоёмкая часть — само плавление.</div>
+                    <div class="answer">✅ Ответ: $Q_{общ} = 932$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Масса расплавленного льда</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько льда при 0 °C можно расплавить, затратив $Q = 1{,}7 \cdot 10^6$ Дж теплоты?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q = 1{,}7 \cdot 10^6$ Дж, $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $Q = \lambda m$ выразим $m = \dfrac{Q}{\lambda}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = \dfrac{1{,}7 \cdot 10^6}{3{,}4 \cdot 10^5} = 5 \text{ кг}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 5 кг льда — это довольно много, и для этого нужно много энергии.</div>
+                    <div class="answer">✅ Ответ: $m = 5$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Смешивание льда и воды</div>
+                <div class="task-condition"><strong>Условие:</strong> В воду массой $m_1 = 2$ кг при $t_1 = 40$ °C положили лёд массой $m_2 = 0{,}5$ кг при 0 °C. Весь ли лёд растает? $c_в = 4200$ Дж/(кг·°C), $\lambda = 3{,}4 \cdot 10^5$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $t_1 = 40$ °C, $m_2 = 0{,}5$ кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> растает ли весь лёд?</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (теплота от воды).</strong> При остывании до 0 °C вода отдаст $Q_{отд} = 4200 \cdot 2 \cdot 40 = 336000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2 (теплота на плавление).</strong> Для плавления всего льда нужно $Q_{пл} = 3{,}4 \cdot 10^5 \cdot 0{,}5 = 170000$ Дж.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Так как $Q_{отд} > Q_{пл}$ (336 кДж > 170 кДж), льда хватит теплоты, чтобы растаять полностью.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Вода отдаст больше теплоты, чем нужно для плавления льда, поэтому лёд растает весь, и вода ещё останется тёплой.</div>
+                    <div class="answer">✅ Ответ: да, лёд растает полностью</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Конечная температура после плавления</div>
+                <div class="task-condition"><strong>Условие:</strong> В воду массой $m_1 = 1$ кг при $t_1 = 50$ °C положили лёд массой $m_2 = 0{,}2$ кг при 0 °C. Найдите конечную температуру. $c_в = 4200$ Дж/(кг·°C), $\lambda = 3{,}4 \cdot 10^5$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $t_1 = 50$ °C, $m_2 = 0{,}2$ кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t_{кон}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (плавление).</strong> На плавление льда нужно $Q_{пл} = 3{,}4 \cdot 10^5 \cdot 0{,}2 = 68000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2 (теплота воды).</strong> Если вода остынет до 0 °C, отдаст $Q_{отд} = 4200 \cdot 1 \cdot 50 = 210000$ Дж. Этого хватит с запасом.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Значит, лёд растает, и смесь нагреется до $t_{кон}$. Уравнение: $4200 \cdot 1 \cdot (50 - t_{кон}) = 68000 + 4200 \cdot 0{,}2 \cdot t_{кон}$.</div>
+                    <div class="step"><strong>Шаг 4.</strong> $210000 - 4200 t_{кон} = 68000 + 840 t_{кон}$.<br>$142000 = 5040 t_{кон}$.<br>$t_{кон} \approx 28{,}2$ °C.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Вода отдаст тепло на плавление льда и нагрев полученной талой воды.</div>
+                    <div class="answer">✅ Ответ: $t_{кон} \approx 28{,}2$ °C</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Удельная теплота плавления</div>
+                <div class="task-condition"><strong>Условие:</strong> При плавлении $m = 0{,}4$ кг вещества было затрачено $Q = 4{,}8 \cdot 10^4$ Дж теплоты. Найдите удельную теплоту плавления.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}4$ кг, $Q = 4{,}8 \cdot 10^4$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\lambda$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $Q = \lambda m$ выразим $\lambda = \dfrac{Q}{m}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\lambda = \dfrac{4{,}8 \cdot 10^4}{0{,}4} = 1{,}2 \cdot 10^5 \text{ Дж/кг}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Это значение близко к удельной теплоте плавления некоторых металлов (например, олова).</div>
+                    <div class="answer">✅ Ответ: $\lambda = 1{,}2 \cdot 10^5$ Дж/кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Тепловой баланс с паром</div>
+                <div class="task-condition"><strong>Условие:</strong> В воду массой $m_1 = 1$ кг при $t_1 = 20$ °C впустили $m_2 = 0{,}1$ кг пара при 100 °C. Найдите конечную температуру. $c_в = 4200$, $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $t_1 = 20$ °C, $m_2 = 0{,}1$ кг, $t_2 = 100$ °C</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t_{кон}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1 (конденсация).</strong> $Q_{конд} = 2{,}3 \cdot 10^6 \cdot 0{,}1 = 230000$ Дж.</div>
+                    <div class="step"><strong>Шаг 2 (остывание сконденсированной воды).</strong> $Q_{ост} = 4200 \cdot 0{,}1 \cdot (100 - t_{кон}) = 420(100 - t_{кон})$.</div>
+                    <div class="step"><strong>Шаг 3 (нагрев холодной воды).</strong> $Q_{нагр} = 4200 \cdot 1 \cdot (t_{кон} - 20) = 4200(t_{кон} - 20)$.</div>
+                    <div class="step"><strong>Шаг 4 (уравнение).</strong> $230000 + 42000 - 420t_{кон} = 4200t_{кон} - 84000$.</div>
+                    <div class="step"><strong>Шаг 5 (решение).</strong> $356000 = 4620 t_{кон}$.<br>$t_{кон} \approx 77$ °C.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Пар отдаёт очень много тепла при конденсации, поэтому вода нагревается значительно.</div>
+                    <div class="answer">✅ Ответ: $t_{кон} \approx 77$ °C</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Работа по плавлению</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько льда при 0 °C можно расплавить, затратив $Q = 1{,}7 \cdot 10^6$ Дж теплоты? (проверка на понимание)</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q = 1{,}7 \cdot 10^6$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $Q = \lambda m$ выразим $m = \dfrac{Q}{\lambda}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = \dfrac{1{,}7 \cdot 10^6}{3{,}4 \cdot 10^5} = 5 \text{ кг}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Удельная теплота плавления льда 340 кДж/кг. 1,7 МДж / 340 кДж/кг = 5 кг.</div>
+                    <div class="answer">✅ Ответ: $m = 5$ кг</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите количество теплоты для плавления $m = 0{,}5$ кг льда при 0 °C. $\lambda = 3{,}4 \cdot 10^5$ Дж/кг.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Формула плавления $Q = \lambda m$.</div>
+                    <div class="answer">✅ Ответ: $Q = 3{,}4 \cdot 10^5 \cdot 0{,}5 = 1{,}7 \cdot 10^5$ Дж $= 170$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько теплоты выделится при кристаллизации $m = 2$ кг воды при 0 °C?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Используйте формулу $Q = \lambda m$ с $\lambda = 3{,}4 \cdot 10^5$ Дж/кг.</div>
+                    <div class="answer">✅ Ответ: $Q = 3{,}4 \cdot 10^5 \cdot 2 = 6{,}8 \cdot 10^5$ Дж $= 680$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Какое количество теплоты нужно, чтобы нагреть $m = 2$ кг льда от $-10$ °C до 0 °C и расплавить? $c_л = 2100$ Дж/(кг·°C), $\lambda = 3{,}4 \cdot 10^5$ Дж/кг.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Сначала нагрев $Q_1 = c_л m \Delta t$, потом плавление $Q_2 = \lambda m$. Суммируйте.</div>
+                    <div class="answer">✅ Ответ: $Q_1 = 2100 \cdot 2 \cdot 10 = 42000$ Дж; $Q_2 = 3{,}4 \cdot 10^5 \cdot 2 = 680000$ Дж; $Q_{общ} = 722000$ Дж $= 722$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Лёд массой $m = 1$ кг нагрели от $-5$ °C до 0 °C, расплавили и нагрели воду до $+10$ °C. Найдите общую теплоту. $c_л = 2100$, $c_в = 4200$ Дж/(кг·°C).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Три этапа: $Q_1 = c_л m \cdot 5$, $Q_2 = \lambda m$, $Q_3 = c_в m \cdot 10$.</div>
+                    <div class="answer">✅ Ответ: $Q_1 = 10500$ Дж; $Q_2 = 340000$ Дж; $Q_3 = 42000$ Дж; $Q_{общ} = 392500$ Дж $= 392{,}5$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько льда при 0 °C можно расплавить, затратив $Q = 3{,}4 \cdot 10^5$ Дж?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Из $Q = \lambda m$ выразите массу $m = \dfrac{Q}{\lambda}$.</div>
+                    <div class="answer">✅ Ответ: $m = \dfrac{3{,}4 \cdot 10^5}{3{,}4 \cdot 10^5} = 1$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> В воду массой $m_1 = 3$ кг при $t_1 = 30$ °C положили лёд массой $m_2 = 0{,}3$ кг при 0 °C. Растает ли весь лёд? $c_в = 4200$ Дж/(кг·°C).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Вода может отдать $Q_{отд} = c_в m_1 t_1$. Для плавления нужно $Q_{пл} = \lambda m_2$. Сравните.</div>
+                    <div class="answer">✅ Ответ: $Q_{отд} = 4200 \cdot 3 \cdot 30 = 378000$ Дж; $Q_{пл} = 3{,}4 \cdot 10^5 \cdot 0{,}3 = 102000$ Дж. $Q_{отд} > Q_{пл}$, лёд растает полностью.</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> В воду массой $m_1 = 1$ кг при $t_1 = 60$ °C положили лёд массой $m_2 = 0{,}1$ кг при 0 °C. Найдите конечную температуру. $c_в = 4200$ Дж/(кг·°C), $\lambda = 3{,}4 \cdot 10^5$ Дж/кг.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Уравнение: $c_в m_1 (t_1 - t_{кон}) = \lambda m_2 + c_в m_2 t_{кон}$.</div>
+                    <div class="answer">✅ Ответ: $4200 \cdot 1 \cdot (60 - t_{кон}) = 34000 + 420 \cdot t_{кон}$; $252000 - 4200 t_{кон} = 34000 + 420 t_{кон}$; $218000 = 4620 t_{кон}$; $t_{кон} \approx 47{,}2$ °C</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> При плавлении $m = 0{,}5$ кг вещества было затрачено $Q = 5 \cdot 10^4$ Дж. Найдите удельную теплоту плавления.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $\lambda = \dfrac{Q}{m}$.</div>
+                    <div class="answer">✅ Ответ: $\lambda = \dfrac{5 \cdot 10^4}{0{,}5} = 1 \cdot 10^5$ Дж/кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> В воду массой $m_1 = 2$ кг при $t_1 = 20$ °C впустили $m_2 = 0{,}2$ кг пара при 100 °C. Найдите конечную температуру. $c_в = 4200$ Дж/(кг·°C), $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Пар отдаёт теплоту на конденсацию $L m_2$ и остывание $c_в m_2 (100 - t_{кон})$. Вода получает $c_в m_1 (t_{кон} - 20)$.</div>
+                    <div class="answer">✅ Ответ: $460000 + 84000 - 840 t_{кон} = 8400 t_{кон} - 168000$; $712000 = 9240 t_{кон}$; $t_{кон} \approx 77$ °C</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько льда при 0 °C можно расплавить, затратив $Q = 1{,}7 \cdot 10^6$ Дж?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $m = \dfrac{Q}{\lambda}$.</div>
+                    <div class="answer">✅ Ответ: $m = \dfrac{1{,}7 \cdot 10^6}{3{,}4 \cdot 10^5} = 5$ кг</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="molecular-physics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-phase').style.display = model === 'phase' ? 'block' : 'none';
+        document.getElementById('model-graph').style.display = model === 'graph' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- ===== МОДЕЛЬ 1: ФАЗОВЫЙ ПЕРЕХОД ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-phase');
+        const canvas = document.getElementById('canvas-phase');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 4, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const molGeo = new THREE.SphereGeometry(0.15, 12, 12);
+        const molMatSolid = new THREE.MeshStandardMaterial({ color: 0x66ccff, emissive: 0x224466, roughness: 0.4 });
+        const molMatLiquid = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x002244, transparent: true, opacity: 0.8 });
+
+        const molecules = [];
+        const N_MOLS = 64;
+        const gridSize = 4;
+        const spacing = 0.6;
+
+        for (let x = 0; x < gridSize; x++) {
+            for (let y = 0; y < gridSize; y++) {
+                for (let z = 0; z < gridSize; z++) {
+                    const m = new THREE.Mesh(molGeo, molMatSolid);
+                    const px = (x - 1.5) * spacing;
+                    const py = (y - 1.5) * spacing;
+                    const pz = (z - 1.5) * spacing;
+                    m.position.set(px, py, pz);
+                    group.add(m);
+                    molecules.push({
+                        mesh: m,
+                        solidPos: new THREE.Vector3(px, py, pz),
+                        liquidVel: new THREE.Vector3((Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.05),
+                        angle: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+        }
+
+        let temp = -20;
+        const tempSlider = document.getElementById('phase-temp-slider');
+        const tempVal = document.getElementById('phase-temp-val');
+        const tempDisplay = document.getElementById('phase-temp');
+        const stateDisplay = document.getElementById('phase-state');
+
+        function updateTemp() {
+            temp = parseFloat(tempSlider.value);
+            tempVal.textContent = temp;
+            tempDisplay.textContent = temp + ' °C';
+
+            if (temp < 0) {
+                stateDisplay.textContent = 'Твёрдое';
+                molecules.forEach(m => {
+                    m.mesh.material = molMatSolid;
+                });
+            } else if (temp === 0) {
+                stateDisplay.textContent = 'Плавление';
+                molecules.forEach(m => {
+                    m.mesh.material = molMatLiquid;
+                });
+            } else {
+                stateDisplay.textContent = 'Жидкое';
+                molecules.forEach(m => {
+                    m.mesh.material = molMatLiquid;
+                });
+            }
+        }
+
+        tempSlider.addEventListener('input', updateTemp);
+        document.getElementById('phase-reset').addEventListener('click', () => {
+            tempSlider.value = -20;
+            updateTemp();
+        });
+
+        document.getElementById('fs-phase').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateTemp();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const t = Date.now() * 0.001;
+
+            molecules.forEach(m => {
+                if (temp < 0) {
+                    // Кристаллическая решётка: колеблются около узлов
+                    const jitter = 0.05;
+                    m.mesh.position.x = m.solidPos.x + Math.sin(t + m.angle) * jitter;
+                    m.mesh.position.y = m.solidPos.y + Math.cos(t * 1.3 + m.angle) * jitter;
+                    m.mesh.position.z = m.solidPos.z + Math.sin(t * 0.8 + m.angle) * jitter;
+                } else if (temp === 0) {
+                    // Плавление: переходное состояние (частично колеблются, частично движутся)
+                    const jitter = 0.15;
+                    m.mesh.position.x = m.solidPos.x + Math.sin(t * 2 + m.angle) * jitter;
+                    m.mesh.position.y = m.solidPos.y + Math.cos(t * 2.5 + m.angle) * jitter;
+                    m.mesh.position.z = m.solidPos.z + Math.sin(t * 1.5 + m.angle) * jitter;
+                } else {
+                    // Жидкость: свободное движение
+                    const speed = 0.02 + (temp / 20) * 0.03;
+                    m.mesh.position.x += m.liquidVel.x * speed;
+                    m.mesh.position.y += m.liquidVel.y * speed;
+                    m.mesh.position.z += m.liquidVel.z * speed;
+
+                    // Ограничим движение в кубе
+                    if (Math.abs(m.mesh.position.x) > 1.5) m.liquidVel.x *= -1;
+                    if (Math.abs(m.mesh.position.y) > 1.5) m.liquidVel.y *= -1;
+                    if (Math.abs(m.mesh.position.z) > 1.5) m.liquidVel.z *= -1;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 2: ГРАФИК ПЛАВЛЕНИЯ ===== -->
+<script type="module">
+    (function() {
+        const container = document.getElementById('container-graph');
+        const canvas = document.getElementById('canvas-graph');
+        if (!container || !canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w;
+            canvas.height = h;
+            draw();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        const timeSlider = document.getElementById('graph-time-slider');
+        const timeVal = document.getElementById('graph-time-val');
+        const timeDisplay = document.getElementById('graph-time');
+        const tempDisplay = document.getElementById('graph-temp');
+        const stateDisplay = document.getElementById('graph-state');
+
+        let timeVal_ = 0;
+
+        // Настройки графика
+        const graphConfig = {
+            paddingLeft: 60,
+            paddingBottom: 50,
+            paddingTop: 40,
+            paddingRight: 30,
+            minTemp: -20,
+            maxTemp: 100,
+            totalTime: 100
+        };
+
+        function getTempByTime(t) {
+            if (t < 20) {
+                // Нагрев льда от -20 до 0 (t от 0 до 20)
+                return -20 + (t / 20) * 20;
+            } else if (t < 60) {
+                // Плавление (t от 20 до 60)
+                return 0;
+            } else {
+                // Нагрев воды от 0 до 100 (t от 60 до 100)
+                return ((t - 60) / 40) * 100;
+            }
+        }
+
+        function draw() {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const gW = w - graphConfig.paddingLeft - graphConfig.paddingRight;
+            const gH = h - graphConfig.paddingTop - graphConfig.paddingBottom;
+
+            const isDark = !document.documentElement.classList.contains('light-mode');
+            const textColor = isDark ? '#8ba5b8' : '#5a7a94';
+            const lineColor = isDark ? 'rgba(245, 158, 11, 0.3)' : 'rgba(217, 119, 6, 0.3)';
+            const mainLineColor = isDark ? '#f59e0b' : '#d97706';
+
+            // Оси
+            ctx.beginPath();
+            ctx.strokeStyle = textColor;
+            ctx.lineWidth = 2;
+            // Ось Y
+            ctx.moveTo(graphConfig.paddingLeft, graphConfig.paddingTop);
+            ctx.lineTo(graphConfig.paddingLeft, h - graphConfig.paddingBottom);
+            // Ось X
+            ctx.lineTo(w - graphConfig.paddingRight, h - graphConfig.paddingBottom);
+            ctx.stroke();
+
+            // Сетка и подписи осей Y
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.font = '12px sans-serif';
+            ctx.fillStyle = textColor;
+
+            for (let temp = -20; temp <= 100; temp += 20) {
+                const y = h - graphConfig.paddingBottom - ((temp - graphConfig.minTemp) / (graphConfig.maxTemp - graphConfig.minTemp)) * gH;
+                ctx.beginPath();
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 1;
+                ctx.moveTo(graphConfig.paddingLeft - 5, y);
+                ctx.lineTo(w - graphConfig.paddingRight, y);
+                ctx.stroke();
+                ctx.fillText(temp + '°C', graphConfig.paddingLeft - 10, y);
+            }
+
+            // Подписи осей X
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            for (let time = 0; time <= graphConfig.totalTime; time += 20) {
+                const x = graphConfig.paddingLeft + (time / graphConfig.totalTime) * gW;
+                ctx.beginPath();
+                ctx.moveTo(x, h - graphConfig.paddingBottom);
+                ctx.lineTo(x, h - graphConfig.paddingBottom + 5);
+                ctx.stroke();
+                ctx.fillText(time + ' с', x, h - graphConfig.paddingBottom + 10);
+            }
+
+            // Отрисовка графика до текущего времени
+            ctx.beginPath();
+            ctx.strokeStyle = mainLineColor;
+            ctx.lineWidth = 3;
+            let first = true;
+
+            for (let t = 0; t <= timeVal_; t += 0.5) {
+                const temp = getTempByTime(t);
+                const x = graphConfig.paddingLeft + (t / graphConfig.totalTime) * gW;
+                const y = h - graphConfig.paddingBottom - ((temp - graphConfig.minTemp) / (graphConfig.maxTemp - graphConfig.minTemp)) * gH;
+
+                if (first) {
+                    ctx.moveTo(x, y);
+                    first = false;
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+
+            // Точка на графике
+            if (timeVal_ > 0) {
+                const temp = getTempByTime(timeVal_);
+                const x = graphConfig.paddingLeft + (timeVal_ / graphConfig.totalTime) * gW;
+                const y = h - graphConfig.paddingBottom - ((temp - graphConfig.minTemp) / (graphConfig.maxTemp - graphConfig.minTemp)) * gH;
+
+                ctx.beginPath();
+                ctx.fillStyle = '#ff4444';
+                ctx.arc(x, y, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function update() {
+            timeVal_ = parseFloat(timeSlider.value);
+            timeVal.textContent = timeVal_;
+            timeDisplay.textContent = timeVal_ + ' с';
+
+            const temp = getTempByTime(timeVal_);
+            tempDisplay.textContent = Math.round(temp) + ' °C';
+
+            if (timeVal_ < 20) {
+                stateDisplay.textContent = 'Нагрев льда';
+            } else if (timeVal_ <= 60) {
+                stateDisplay.textContent = 'Плавление';
+            } else {
+                stateDisplay.textContent = 'Нагрев воды';
+            }
+
+            draw();
+        }
+
+        timeSlider.addEventListener('input', update);
+        document.getElementById('graph-reset').addEventListener('click', () => {
+            timeSlider.value = 0;
+            update();
+        });
+
+        document.getElementById('fs-graph').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        // При смене темы перерисовать
+        window.addEventListener('themeChange', draw);
+        update();
+    })();
+</script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+</body>
+</html>

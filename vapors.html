@@ -49,8 +49,6 @@
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
         
-
-        
         h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
         .section{margin-bottom:14px;}
         .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
@@ -109,9 +107,9 @@
         .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
         .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
         .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
-        
-        
-        
+
+
+
         mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
         .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
         .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
@@ -257,6 +255,7 @@
             <div class="model-tabs">
                 <div class="model-tab active" data-model="evaporation" onclick="switchModel('evaporation')">💧 Испарение</div>
                 <div class="model-tab" data-model="boiling" onclick="switchModel('boiling')">🔥 Кипение</div>
+                <div class="model-tab" data-model="condensation" onclick="switchModel('condensation')">🌧️ Конденсация</div>
             </div>
 
             <!-- МОДЕЛЬ 1: ИСПАРЕНИЕ -->
@@ -314,6 +313,33 @@
                     <p><strong>Модель кипения.</strong> Кипение начинается, когда давление насыщенного пара становится равным внешнему давлению.</p>
                     <p><span class="important">Меняйте температуру</span> — при достижении температуры кипения появляются пузырьки по всему объёму.</p>
                     <p><span class="important">Меняйте внешнее давление</span> — при высоком давлении вода кипит при более высокой температуре (эффект скороварки), при низком — при более низкой (горы).</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 3: КОНДЕНСАЦИЯ -->
+            <div id="model-condensation" class="model-content" style="display:none;">
+                <div class="model-container" id="container-condensation">
+                    <canvas id="canvas-condensation" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-condensation">⛶</button>
+                    <div class="info-display">
+                        <div>$T$ = <span class="val" id="cond-T">300</span> К</div>
+                        <div>молекул в жидкости: <span class="val" id="cond-count">0</span></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Температура $T$ (К)</label>
+                        <input type="range" id="cond-temp" min="250" max="350" step="5" value="300">
+                        <span class="control-value" id="cond-temp-value">300</span>
+                    </div>
+                    <button class="btn-reset" id="cond-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Чем ниже температура — тем больше молекул пара конденсируется</span>
+                </div>
+                <div class="def-card">
+                    <p><strong>Модель конденсации.</strong> Вверху — пар (молекулы свободно летают), внизу — жидкость (молекулы плотно).</p>
+                    <p><span class="important">Ползунок температуры</span> управляет процессом. При <strong>понижении</strong> температуры пар охлаждается, и всё больше молекул переходит в жидкость — конденсация преобладает.</p>
+                    <p>При <strong>повышении</strong> температуры жидкость начинает испаряться, и молекулы возвращаются в пар.</p>
+                    <p>Процесс конденсации сопровождается <strong>выделением теплоты</strong> $Q = Lm$ — именно поэтому пар так эффективен для отопления и в тепловых машинах.</p>
                 </div>
             </div>
 
@@ -449,8 +475,8 @@
                 <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
                 <div id="sol8" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Теплота от конденсации пара: $Q_1 = Lm_2 = 2{,}3 \cdot 10^6 \cdot 0{,}2 = 460000$ Дж.</div>
-                    <div class="step"><strong>Шаг 2.</strong> Теплота от остывания сконденсированной воды (от 100 °C до $t_{кон}$): $Q_2 = cm_2(100 - t_{кон}) = 4200 \cdot 0{,}2 \cdot (100 - t_{кон}) = 840(100 - t_{кон})$.</div>
-                    <div class="step"><strong>Шаг 3.</strong> Теплота на нагрев воды: $Q_3 = cm_1(t_{кон} - 20) = 4200 \cdot 5 \cdot (t_{кон} - 20) = 21000(t_{кон} - 20)$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Теплота от остывания сконденсированной воды: $Q_2 = 4200 \cdot 0{,}2 \cdot (100 - t_{кон}) = 840(100 - t_{кон})$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Теплота на нагрев воды: $Q_3 = 4200 \cdot 5 \cdot (t_{кон} - 20) = 21000(t_{кон} - 20)$.</div>
                     <div class="step"><strong>Шаг 4.</strong> Уравнение теплового баланса: $Q_1 + Q_2 = Q_3$.</div>
                     <div class="step">$460000 + 84000 - 840t_{кон} = 21000t_{кон} - 420000$.</div>
                     <div class="step">$544000 + 420000 = 21840t_{кон}$ → $t_{кон} = \dfrac{964000}{21840} \approx 44$ °C.</div>
@@ -497,6 +523,114 @@
         </div>
     </div>
 
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> Какое количество теплоты нужно, чтобы превратить в пар $m = 0{,}8$ кг воды при 100 °C? Удельная теплота парообразования воды $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Используй формулу $Q = Lm$. Просто перемножь удельную теплоту парообразования на массу.</div>
+                    <div class="answer">✅ Ответ: $Q = 2{,}3 \cdot 10^6 \cdot 0{,}8 = 1{,}84 \cdot 10^6$ Дж $= 1{,}84$ МДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько теплоты выделится при конденсации $m = 1{,}5$ кг водяного пара при 100 °C?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> При конденсации теплота выделяется по той же формуле $Q = Lm$, где $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                    <div class="answer">✅ Ответ: $Q = 2{,}3 \cdot 10^6 \cdot 1{,}5 = 3{,}45 \cdot 10^6$ Дж $= 3{,}45$ МДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Абсолютная влажность воздуха $\rho = 10{,}5$ г/м³ при 22 °C. Плотность насыщенного пара при 22 °C $\rho_{нас} = 19{,}4$ г/м³. Найдите относительную влажность.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Используй формулу $\varphi = \dfrac{\rho}{\rho_{нас}} \cdot 100\%$. Раздели абсолютную влажность на плотность насыщенного пара и умножь на 100%.</div>
+                    <div class="answer">✅ Ответ: $\varphi = \dfrac{10{,}5}{19{,}4} \cdot 100\% \approx 54\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Какое количество теплоты нужно, чтобы нагреть $m = 3$ кг воды от 10 °C до 100 °C и полностью её испарить? $c = 4200$ Дж/(кг·К), $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Задача в два этапа: сначала нагрев $Q_1 = cm(t_2 - t_1)$, затем испарение $Q_2 = Lm$. Общая теплота $Q = Q_1 + Q_2$.</div>
+                    <div class="answer">✅ Ответ: $Q_1 = 4200 \cdot 3 \cdot 90 = 1\,134\,000$ Дж; $Q_2 = 2{,}3 \cdot 10^6 \cdot 3 = 6\,900\,000$ Дж; $Q_{общ} \approx 8{,}03$ МДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Парциальное давление водяного пара в воздухе при 25 °C равно $p = 2{,}0$ кПа. Давление насыщенного пара при 25 °C $p_{нас} = 3{,}17$ кПа. Найдите относительную влажность.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Относительная влажность через давление: $\varphi = \dfrac{p}{p_{нас}} \cdot 100\%$. Оба давления даны в кПа — единицы совпадают, переводить не нужно.</div>
+                    <div class="answer">✅ Ответ: $\varphi = \dfrac{2{,}0}{3{,}17} \cdot 100\% \approx 63\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> Электрочайник мощностью $P = 2000$ Вт нагревает воду. Сколько времени потребуется, чтобы испарить $m = 0{,}6$ кг уже кипящей воды? $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Сначала найди теплоту парообразования $Q = Lm$. Затем из формулы мощности $P = \dfrac{Q}{t}$ вырази время: $t = \dfrac{Q}{P}$.</div>
+                    <div class="answer">✅ Ответ: $Q = 2{,}3 \cdot 10^6 \cdot 0{,}6 = 1{,}38 \cdot 10^6$ Дж; $t = \dfrac{1{,}38 \cdot 10^6}{2000} = 690$ с $\approx 11{,}5$ мин</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> Вечером при $t_1 = 20$ °C относительная влажность $\varphi = 65\%$. Ночью температура опустилась до $t_2 = 12$ °C. Выпадет ли роса? Давление насыщенного пара при 20 °C — 2,33 кПа, при 12 °C — 1,40 кПа.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Сначала найди парциальное давление пара: $p = \varphi \cdot p_{нас}(t_1)$. Затем сравни его с давлением насыщенного пара при $t_2$. Если $p > p_{нас}(t_2)$ — выпадет роса.</div>
+                    <div class="answer">✅ Ответ: $p = 0{,}65 \cdot 2{,}33 = 1{,}515$ кПа; $1{,}515$ кПа > $1{,}40$ кПа → роса выпадет</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> В воду массой $m_1 = 4$ кг при 15 °C впустили $m_2 = 0{,}15$ кг пара при 100 °C. Найдите конечную температуру смеси. $c = 4200$ Дж/(кг·К), $L = 2{,}3 \cdot 10^6$ Дж/кг.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Уравнение теплового баланса: теплота от конденсации пара $Lm_2$ + теплота от остывания сконденсированной воды $cm_2(100 - t_{кон})$ = теплота на нагрев воды $cm_1(t_{кон} - 15)$.</div>
+                    <div class="answer">✅ Ответ: $Lm_2 = 2{,}3 \cdot 10^6 \cdot 0{,}15 = 345\,000$ Дж; $cm_2 = 630$; $cm_1 = 16\,800$; $345\,000 + 63\,000 - 630 t_{кон} = 16\,800 t_{кон} - 252\,000$; $660\,000 = 17\,430 t_{кон}$; $t_{кон} \approx 37{,}9$ °C</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> В скороварке давление достигает $p = 200$ кПа. При какой примерно температуре кипит вода? Считайте, что давление насыщенного пара растёт примерно на 3 кПа при повышении температуры на 1 °C вблизи 100 °C. При 100 °C давление насыщенного пара 101 кПа.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Условие кипения: $p_{нас} = p_{внеш} = 200$ кПа. Нужно найти температуру, при которой $p_{нас}$ достигает 200 кПа. Разница $200 - 101 = 99$ кПа. При скорости 3 кПа/°C это даёт $\Delta t \approx 33$ °C.</div>
+                    <div class="answer">✅ Ответ: $t_{кип} \approx 100 + 33 \approx 133$ °C</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> При температуре $t = 26$ °C относительная влажность $\varphi = 60\%$. Найдите точку росы. Давление насыщенного пара при 26 °C — 3,36 кПа, при 20 °C — 2,33 кПа, при 22 °C — 2,64 кПа.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Сначала найди парциальное давление пара: $p = \varphi \cdot p_{нас}(26°C)$. Затем найди температуру, при которой давление насыщенного пара равно этому значению — это и есть точка росы.</div>
+                    <div class="answer">✅ Ответ: $p = 0{,}6 \cdot 3{,}36 = 2{,}016$ кПа. Это близко к $p_{нас}(20°C) = 2{,}33$ кПа и чуть меньше $p_{нас}(18°C) \approx 2{,}06$ кПа. Точка росы $\approx 18$ °C</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div class="back-link-wrapper">
         <a href="molecular-physics.html" class="back-link">← Назад</a>
     </div>
@@ -504,9 +638,9 @@
 
 <script>
     function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
-    
+
     (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    
+
 
     function switchModel(model) {
         document.querySelectorAll('.model-tab').forEach(tab => {
@@ -514,6 +648,7 @@
         });
         document.getElementById('model-evaporation').style.display = model === 'evaporation' ? 'block' : 'none';
         document.getElementById('model-boiling').style.display = model === 'boiling' ? 'block' : 'none';
+        document.getElementById('model-condensation').style.display = model === 'condensation' ? 'block' : 'none';
         setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
     }
 </script>
@@ -557,7 +692,7 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        // Жидкость внизу — полупрозрачный блок
+        // Жидкость внизу
         const liquidGeo = new THREE.BoxGeometry(10, 0.4, 4);
         const liquidMat = new THREE.MeshStandardMaterial({
             color: 0x3388ff, transparent: true, opacity: 0.35,
@@ -571,7 +706,6 @@
         const liquidMolMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x002244 });
         const vaporMolMat = new THREE.MeshStandardMaterial({ color: 0xaaddff, emissive: 0x335577, transparent: true, opacity: 0.85 });
 
-        // Молекулы в жидкости (много, плотно)
         const liquidMols = [];
         const N_LIQ = 80;
         for (let i = 0; i < N_LIQ; i++) {
@@ -585,7 +719,6 @@
             liquidMols.push({ mesh: m });
         }
 
-        // Молекулы пара (свободно летают)
         const vaporMols = [];
         const N_VAPOR = 40;
         for (let i = 0; i < N_VAPOR; i++) {
@@ -595,7 +728,7 @@
                 -1.5 + Math.random() * 4,
                 (Math.random() - 0.5) * 4
             );
-            m.visible = false; // изначально скрыты
+            m.visible = false;
             group.add(m);
             vaporMols.push({
                 mesh: m,
@@ -618,7 +751,6 @@
             tempValue.textContent = T;
             TDisplay.textContent = T;
 
-            // Чем выше T — тем больше активных молекул пара
             const ratio = Math.max(0, Math.min(1, (T - 280) / 120));
             vaporCount = Math.round(N_VAPOR * ratio);
             countDisplay.textContent = vaporCount;
@@ -642,7 +774,6 @@
         tempSlider.addEventListener('input', updateFromTemp);
         document.getElementById('evap-reset').addEventListener('click', () => {
             tempSlider.value = 300;
-            // Сбросить пар вниз
             vaporMols.forEach(v => {
                 v.mesh.position.set(
                     (Math.random() - 0.5) * 10,
@@ -678,7 +809,6 @@
                 v.mesh.position.y += v.vy * speed * 0.5;
                 v.mesh.position.z += v.vz * speed;
 
-                // Отскок от границ
                 if (Math.abs(v.mesh.position.x) > 5) v.vx *= -1;
                 if (v.mesh.position.y > 3) v.vy = -Math.abs(v.vy) * 0.5;
                 if (v.mesh.position.y < -1.8) { v.mesh.position.y = -1.5; v.vy = Math.abs(v.vy); }
@@ -730,7 +860,6 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        // Сосуд-стакан с водой
         const cupGeo = new THREE.CylinderGeometry(3, 3, 5, 32, 1, true);
         const cupMat = new THREE.MeshStandardMaterial({
             color: 0x8ba5b8, transparent: true, opacity: 0.1,
@@ -740,7 +869,6 @@
         cup.position.y = -0.5;
         group.add(cup);
 
-        // Вода в сосуде
         const waterGeo = new THREE.CylinderGeometry(2.9, 2.9, 3, 32);
         const waterMat = new THREE.MeshStandardMaterial({
             color: 0x3388ff, transparent: true, opacity: 0.35,
@@ -750,7 +878,6 @@
         water.position.y = -2;
         group.add(water);
 
-        // Молекулы воды в жидкости
         const molGeo = new THREE.SphereGeometry(0.1, 8, 8);
         const molMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x002244 });
         const molecules = [];
@@ -773,7 +900,6 @@
             });
         }
 
-        // Пузырьки (появляются при кипении)
         const bubbles = [];
         const bubbleGeo = new THREE.SphereGeometry(0.15, 10, 10);
         const bubbleMat = new THREE.MeshStandardMaterial({
@@ -806,8 +932,6 @@
         const PDisplay = document.getElementById('boil-p');
         const statusDisplay = document.getElementById('boil-status');
 
-        // Упрощённая зависимость: T_кип ≈ 373 К при P = 101 кПа
-        // Эмпирически: T_кип ≈ 373 + (P - 101) * 0.3 (в К)
         function getBoilingTemp(P) {
             return 373 + (P - 101) * 0.3;
         }
@@ -824,7 +948,6 @@
             const isBoiling = T >= Tboil;
             statusDisplay.textContent = isBoiling ? 'ДА' : 'нет';
 
-            // Активировать/деактивировать пузырьки
             bubbles.forEach((b, i) => {
                 if (isBoiling && i < 20) {
                     b.active = true;
@@ -840,7 +963,6 @@
                 }
             });
 
-            // Цвет воды: холодная — синяя, горячая — фиолетовая/красная
             const tempRatio = Math.max(0, Math.min(1, (T - 280) / 170));
             waterMat.color.setRGB(0.2 + tempRatio * 0.6, 0.4 - tempRatio * 0.2, 0.9 - tempRatio * 0.5);
         }
@@ -872,7 +994,6 @@
 
             const speed = 0.02 + (T - 280) / 6000;
 
-            // Движение молекул в воде
             molecules.forEach(m => {
                 m.mesh.position.x += m.vx * speed;
                 m.mesh.position.y += m.vy * speed;
@@ -889,7 +1010,6 @@
                 if (m.mesh.position.y < -3.3) { m.mesh.position.y = -3.3; m.vy *= -1; }
             });
 
-            // Пузырьки всплывают
             bubbles.forEach(b => {
                 if (!b.active) return;
                 b.mesh.position.y += b.vy;
@@ -899,6 +1019,197 @@
                     b.mesh.position.z = (Math.random() - 0.5) * 5;
                 }
             });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 3: КОНДЕНСАЦИЯ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-condensation');
+        const canvas = document.getElementById('canvas-condensation');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 3, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(3, 5, 4);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Слой жидкости внизу — растёт при конденсации
+        const liquidGeo = new THREE.BoxGeometry(10, 1, 4);
+        const liquidMat = new THREE.MeshStandardMaterial({
+            color: 0x3388ff, transparent: true, opacity: 0.4,
+            emissive: 0x002244
+        });
+        const liquid = new THREE.Mesh(liquidGeo, liquidMat);
+        liquid.position.y = -2.5;
+        group.add(liquid);
+
+        // Молекулы пара — свободно летают
+        const molGeo = new THREE.SphereGeometry(0.12, 10, 10);
+        const vaporMolMat = new THREE.MeshStandardMaterial({ color: 0xaaddff, emissive: 0x335577, transparent: true, opacity: 0.85 });
+
+        const vaporMols = [];
+        const N = 60;
+        for (let i = 0; i < N; i++) {
+            const m = new THREE.Mesh(molGeo, vaporMolMat.clone());
+            m.position.set(
+                (Math.random() - 0.5) * 10,
+                -1.5 + Math.random() * 4,
+                (Math.random() - 0.5) * 4
+            );
+            group.add(m);
+            vaporMols.push({
+                mesh: m,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 1.5,
+                vz: (Math.random() - 0.5) * 2,
+                condensed: false,
+                condenseProgress: 0,
+                startY: m.position.y
+            });
+        }
+
+        let T = 300;
+        let liquidCount = 0;
+        let targetLiquid = 0;
+        const tempSlider = document.getElementById('cond-temp');
+        const tempValue = document.getElementById('cond-temp-value');
+        const TDisplay = document.getElementById('cond-T');
+        const countDisplay = document.getElementById('cond-count');
+
+        function updateFromTemp() {
+            T = parseFloat(tempSlider.value);
+            tempValue.textContent = T;
+            TDisplay.textContent = T;
+
+            // Чем ниже T — тем больше молекул конденсируется
+            // 250 K → все в жидкости, 350 K → все в паре
+            const ratio = Math.max(0, Math.min(1, (350 - T) / 100));
+            targetLiquid = Math.round(N * ratio);
+            liquidCount = targetLiquid;
+            countDisplay.textContent = targetLiquid;
+        }
+
+        tempSlider.addEventListener('input', updateFromTemp);
+        document.getElementById('cond-reset').addEventListener('click', () => {
+            tempSlider.value = 300;
+            // Сброс всех молекул пара
+            vaporMols.forEach(v => {
+                v.condensed = false;
+                v.condenseProgress = 0;
+                v.mesh.position.set(
+                    (Math.random() - 0.5) * 10,
+                    -1.5 + Math.random() * 4,
+                    (Math.random() - 0.5) * 4
+                );
+                v.mesh.material.opacity = 0.85;
+                v.mesh.scale.set(1, 1, 1);
+            });
+            updateFromTemp();
+        });
+
+        document.getElementById('fs-condensation').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateFromTemp();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Определяем, какие молекулы должны быть сконденсированы
+            // Первые targetLiquid — конденсируются, остальные — в паре
+            vaporMols.forEach((v, i) => {
+                const shouldCondense = i < targetLiquid;
+
+                if (shouldCondense && !v.condensed) {
+                    v.condensed = true;
+                    v.condenseProgress = 0;
+                } else if (!shouldCondense && v.condensed) {
+                    v.condensed = false;
+                    v.condenseProgress = 0;
+                    v.mesh.material.opacity = 0.85;
+                    v.mesh.scale.set(1, 1, 1);
+                    // Возвращаем в пар
+                    v.mesh.position.set(
+                        (Math.random() - 0.5) * 10,
+                        -1.5 + Math.random() * 4,
+                        (Math.random() - 0.5) * 4
+                    );
+                }
+
+                if (v.condensed) {
+                    // Анимируем опускание молекулы в жидкость
+                    v.condenseProgress = Math.min(1, v.condenseProgress + 0.03);
+                    const targetY = -2.5 + Math.random() * 0.3;
+                    const startY = v.startY;
+                    v.mesh.position.y = startY + (targetY - startY) * v.condenseProgress;
+                    // Плавно уменьшаем прозрачность
+                    v.mesh.material.opacity = 0.85 - 0.5 * v.condenseProgress;
+                    // Немного сжимаем
+                    const s = 1 - 0.2 * v.condenseProgress;
+                    v.mesh.scale.set(s, s, s);
+                } else {
+                    // Свободный полёт в паре
+                    const speed = 0.03 + (T - 250) / 5000;
+                    v.mesh.position.x += v.vx * speed;
+                    v.mesh.position.y += v.vy * speed;
+                    v.mesh.position.z += v.vz * speed;
+
+                    if (Math.abs(v.mesh.position.x) > 5) v.vx *= -1;
+                    if (v.mesh.position.y > 3) v.vy = -Math.abs(v.vy);
+                    if (v.mesh.position.y < -1.5) v.vy = Math.abs(v.vy);
+                    if (Math.abs(v.mesh.position.z) > 2) v.vz *= -1;
+                }
+            });
+
+            // Меняем цвет жидкости в зависимости от температуры
+            const tempRatio = Math.max(0, Math.min(1, (T - 250) / 100));
+            liquidMat.color.setRGB(0.2 + tempRatio * 0.4, 0.4 - tempRatio * 0.15, 0.85 - tempRatio * 0.4);
+
+            // Масштаб жидкости — растёт при конденсации
+            const fill = targetLiquid / N;
+            liquid.scale.y = 0.5 + fill * 2;
+            liquid.position.y = -2.5 - (fill * 2 - 0.5) * 0.15;
 
             renderer.render(scene, camera);
         }
