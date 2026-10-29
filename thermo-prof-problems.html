@@ -132,6 +132,602 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
+<style id="titles-center-fix">
+/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
+.section-title {
+    justify-content: center !important;
+    text-align: center !important;
+    position: relative !important;
+    padding-left: 16px !important;
+    padding-right: 28px !important;
+}
+.section-title::after {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin-left: 0 !important;
+}
+.section.collapsed .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+/* Названия файлов / страниц — по центру */
+h1, .page-title, .file-title, .title {
+    text-align: center !important;
+}
+</style>
+<style id="section-gradient-fix">
+/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
+/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+
+.section { position: relative; }
+
+/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
+
+/* Закрыт: градиента нет */
+.section.collapsed > .section-title {
+    background-image: none;
+    transition: background-image 0.35s ease;
+}
+
+/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
+.section.collapsed > .section-title:hover {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Открыт: тот же градиент постоянно */
+.section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Светлая тема — цвет из --special-border (#d97706) */
+:root.light-mode .section.collapsed > .section-title:hover,
+:root.light-mode .section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(217, 119, 6, 0.18) 0%,
+        rgba(217, 119, 6, 0.06) 45%,
+        rgba(217, 119, 6, 0.00) 100%);
+}
+
+/* ---------- СТРЕЛКА ---------- */
+
+/* Закрыт: светящаяся синяя */
+.section.collapsed > .section-title::after {
+    color: var(--accent, #3b82f6) !important;
+    text-shadow:
+        0 0 6px rgba(59, 130, 246, 0.85),
+        0 0 14px rgba(59, 130, 246, 0.55);
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
+    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+}
+
+/* Открыт: свечение убираем, стрелка обычная */
+.section:not(.collapsed) > .section-title::after {
+    color: var(--text-secondary, #8ba5b8) !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
+.section.collapsed > .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+.section:not(.collapsed) > .section-title::after {
+    transform: translateY(-50%) rotate(0deg) !important;
+}
+
+/* Светлая тема: синий чуть темнее, свечение мягче */
+:root.light-mode .section.collapsed > .section-title::after {
+    color: var(--accent, #2563eb) !important;
+    text-shadow:
+        0 0 6px rgba(37, 99, 235, 0.6),
+        0 0 12px rgba(37, 99, 235, 0.35);
+    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
+}
+</style>
+<style id="modern-visual-fix">
+/* ==== 7. Плавный скролл + отступ у заголовков ==== */
+html { scroll-behavior: smooth; }
+.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+
+/* ==== 8. Радиальный градиент на фоне ==== */
+body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
+        var(--bg) !important;
+}
+:root.light-mode body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
+        var(--bg) !important;
+}
+
+/* ==== 3. «Стеклянная» шапка ==== */
+@media (prefers-reduced-motion: no-preference) {
+    .header {
+        background: rgba(30, 53, 69, 0.72) !important;
+        backdrop-filter: blur(14px) saturate(140%);
+        -webkit-backdrop-filter: blur(14px) saturate(140%);
+        border-bottom: 1px solid var(--border);
+    }
+    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
+}
+
+/* ==== 5. Скелетоны для формул ==== */
+.skeleton {
+    display: inline-block;
+    min-width: 60px;
+    height: 1.1em;
+    vertical-align: middle;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmerSk 1.2s infinite linear;
+}
+@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+/* ==== 6. Чипы категорий в поиске ==== */
+.search-result-category {
+    display: inline-block;
+    padding: 2px 10px;
+    margin-top: 4px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #fff;
+    background: var(--accent, #3b82f6);
+}
+.search-result-category.cat-mech  { background: #3b82f6; }
+.search-result-category.cat-thermo{ background: #f59e0b; }
+.search-result-category.cat-elec  { background: #eab308; }
+.search-result-category.cat-other { background: #64748b; }
+
+/* ==== 4. Нижняя навигация ==== */
+.bottom-nav {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 22px;
+    background: rgba(30, 53, 69, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
+    z-index: 900;
+    transition: background 0.3s, border 0.3s;
+}
+:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+.bottom-nav a, .bottom-nav button {
+    display: flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px; border-radius: 14px;
+    border: none; background: transparent;
+    color: var(--text-secondary); font-size: 22px;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.2s;
+}
+.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
+    background: rgba(59,130,246,0.15);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+body { padding-bottom: 78px; }
+
+/* ==== 10. Круг смены темы ==== */
+.theme-circle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    background: var(--bg);
+    transform: scale(0);
+    opacity: 0.95;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
+}
+.theme-circle.expand { transform: scale(1); opacity: 0; }
+
+/* ==== 2. Ripple при тапе ==== */
+.ripple-host { position: relative !important; overflow: hidden !important; }
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(59,130,246,0.35);
+    transform: scale(0);
+    animation: rippleAnim 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 0;
+}
+@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+</style>
+<style id="search-clean-fix">
+/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
+.search-result-icon {
+    display: none !important;
+}
+
+/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
+.search-results {
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/Edge */
+}
+.search-results::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
+body::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+}
+body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+</style>
+<style id="nav-back-hide-index">
+/* На главной кнопка «Назад» не нужна */
+body.is-index .nav-back-btn { display: none !important; }
+</style>
+<style id="bottom-nav-autohide">
+/* Автоскрытие нижней панели при скролле вниз */
+.bottom-nav {
+    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
+}
+.bottom-nav.nav-hidden {
+    transform: translate(-50%, 120%);
+    opacity: 0;
+    pointer-events: none;
+}
+/* На главной панель всегда видна */
+body.is-index .bottom-nav.nav-hidden {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+}
+</style>
+<style id="fav-nav-yellow">
+/* Избранное в нижней панели — жёлтое выделение, когда активно */
+.bottom-nav a[href="favorites.html"].active,
+.bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(250, 204, 21, 0.18) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover,
+.bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(250, 204, 21, 0.28) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(234, 179, 8, 0.18) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(234, 179, 8, 0.28) !important;
+    color: #92400e !important;
+}
+/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
+
+</style>
+<style id="nav-order-fix">
+/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
+.bottom-nav { display: flex; align-items: center; }
+.bottom-nav .nav-back-btn { order: 1; }
+.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+.bottom-nav a[href="favorites.html"] { order: 4; }
+
+/* Звезда активна — жёлтая */
+.bottom-nav a[href="favorites.html"].active {
+    background: rgba(250, 204, 21, 0.20) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(250, 204, 21, 0.30) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active {
+    background: rgba(234, 179, 8, 0.20) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(234, 179, 8, 0.30) !important;
+    color: #92400e !important;
+}
+</style>
+<style id="unified-buttons">
+/* ==== Единый стиль кнопок ==== */
+
+/* База для всех кнопок */
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.show-solution-btn,
+.btn-reset,
+.model-tab,
+.clear-all-btn,
+.search-clear,
+.back-link,
+.fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.2;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s,
+                box-shadow 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    white-space: nowrap;
+}
+
+/* Hover / active — общий отклик */
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-danger:hover,
+.show-solution-btn:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover,
+.back-link:hover,
+.fullscreen-btn:hover {
+    transform: translateY(-1px);
+}
+.btn-primary:active,
+.btn-secondary:active,
+.btn-danger:active,
+.show-solution-btn:active,
+.btn-reset:active,
+.model-tab:active,
+.clear-all-btn:active,
+.back-link:active,
+.fullscreen-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ==== PRIMARY (синий акцент) ==== */
+.btn-primary,
+.show-solution-btn,
+.back-link {
+    background: var(--accent, #3b82f6);
+    color: #fff;
+    border-color: var(--accent, #3b82f6);
+}
+.btn-primary:hover,
+.show-solution-btn:hover,
+.back-link:hover {
+    background: var(--accent-hover, #60a5fa);
+    border-color: var(--accent-hover, #60a5fa);
+    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
+}
+:root.light-mode .btn-primary,
+:root.light-mode .show-solution-btn,
+:root.light-mode .back-link {
+    background: var(--accent, #2563eb);
+    border-color: var(--accent, #2563eb);
+}
+:root.light-mode .btn-primary:hover,
+:root.light-mode .show-solution-btn:hover,
+:root.light-mode .back-link:hover {
+    background: var(--accent-hover, #3b82f6);
+    border-color: var(--accent-hover, #3b82f6);
+}
+
+/* ==== SECONDARY (нейтральный) ==== */
+.btn-secondary,
+.btn-reset,
+.model-tab,
+.clear-all-btn {
+    background: var(--menu-item-hover, #233e50);
+    color: var(--text, #fff);
+    border-color: var(--border, rgba(59,130,246,0.15));
+}
+.btn-secondary:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover {
+    background: var(--group-header-bg, #1a3a5a);
+    border-color: var(--accent, #3b82f6);
+    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
+}
+:root.light-mode .btn-secondary,
+:root.light-mode .btn-reset,
+:root.light-mode .model-tab,
+:root.light-mode .clear-all-btn {
+    background: var(--menu-item-hover, #f0f4fa);
+    color: var(--text, #1a2a3f);
+}
+
+/* Активный таб — как primary */
+.model-tab.active {
+    background: var(--accent, #3b82f6) !important;
+    color: #fff !important;
+    border-color: var(--accent, #3b82f6) !important;
+    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
+}
+.model-tab.active:hover {
+    background: var(--accent-hover, #60a5fa) !important;
+    border-color: var(--accent-hover, #60a5fa) !important;
+}
+
+/* ==== DANGER (красный) ==== */
+.btn-danger,
+.clear-all-btn.danger,
+.clear-all-btn:hover {
+    background: #ef4444 !important;
+    color: #fff !important;
+    border-color: #ef4444 !important;
+}
+.btn-danger:hover,
+.clear-all-btn.danger:hover,
+.clear-all-btn:hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
+}
+
+/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
+.search-clear {
+    background: transparent;
+    border: none;
+    padding: 6px 10px;
+    min-height: auto;
+    color: var(--text-secondary, #8ba5b8);
+    border-radius: 50%;
+}
+.search-clear:hover {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent, #3b82f6);
+    transform: none;
+}
+
+/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
+.fullscreen-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 20px;
+}
+.fullscreen-btn:hover {
+    background: var(--accent, #3b82f6);
+    border-color: var(--accent, #3b82f6);
+}
+
+/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
+.remove-fav {
+    border-radius: 50%;
+    min-height: 32px;
+    min-width: 32px;
+    padding: 4px 8px;
+}
+.remove-fav:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+}
+
+/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--accent, #3b82f6);
+    padding: 0;
+    min-height: auto;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.btn-link:hover {
+    color: var(--accent-hover, #60a5fa);
+    transform: none;
+    box-shadow: none;
+}
+</style>
+<style id="page-fade-in">
+/* ==== Плавное появление страницы (fade-in) ==== */
+
+/* Мягкий вход всей страницы */
+body {
+    animation: pageFade 0.3s ease-out;
+}
+@keyframes pageFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Контент чуть «подъезжает» снизу */
+.container,
+.main-content {
+    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@keyframes pageFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Если в системе включено «уменьшить движение» — анимации отключаем */
+@media (prefers-reduced-motion: reduce) {
+    body,
+    .container,
+    .main-content {
+        animation: none !important;
+    }
+}
+</style>
+<style id="share-btn-right">
+/* Прижимаем кнопку «Поделиться» к правому краю панели */
+.bottom-nav button[title="Поделиться"] {
+    order: 99 !important;
+    margin-left: auto !important;
+}
+</style>
+<style id="no-tap-highlight">
+/* Убираем системный голубой/серый прямоугольник при тапе */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+}
+a, button, div, span, label, input, textarea, select {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+}
+</style>
+<style id="no-tap-highlight-accordion">
+/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
+.section-title,
+.group-header,
+.menu-item,
+.submenu-item,
+.model-tab,
+.search-result-item {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+/* Лёгкий отклик при нажатии (вместо системного квадратика) */
+.section-title:active,
+.group-header:active {
+    transform: scale(0.99);
+    transition: transform 0.1s;
+}
+</style>
 </head>
 <body>
 <div class="container">
@@ -172,12 +768,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 1. Работа газа при сварке</div>
                 <div class="task-condition"><strong>Ситуация:</strong> При сварке в баллоне объёмом $V = 40$ л газ изобарно расширяется при давлении $p = 10^5$ Па, его объём увеличивается на $\Delta V = 0{,}5$ л. Найдите работу газа.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('w1')">📖 Показать решение</button>
+                <div id="w1" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $p = 10^5$ Па, $\Delta V = 0{,}5$ л $= 5 \cdot 10^{-4}$ м³</div>
                     <div class="find"><strong>🔍 Найти:</strong> $A$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('w1')">📖 Показать решение</button>
-                <div id="w1" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Работа газа при изобарном процессе: $A = p \cdot \Delta V$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$A = 10^5 \cdot 5 \cdot 10^{-4} = 50 \text{ Дж}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Небольшое расширение газа в баллоне совершает работу всего 50 Дж — этого недостаточно для существенных изменений.</div>
@@ -188,12 +784,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 2. КПД нагрева при сварке</div>
                 <div class="task-condition"><strong>Ситуация:</strong> При сварке выделилось $Q_1 = 10000$ Дж теплоты. Из них в изделие ушло только $Q_{полезн} = 6000$ Дж. Найдите КПД процесса нагрева.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('w2')">📖 Показать решение</button>
+                <div id="w2" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q_1 = 10000$ Дж, $Q_{полезн} = 6000$ Дж</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('w2')">📖 Показать решение</button>
-                <div id="w2" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Формула: $\eta = \dfrac{Q_{полезн}}{Q_1}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta = \dfrac{6000}{10000} = 0{,}6 = 60\%$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> 40% теплоты потеряно: ушло в окружающую среду, на нагрев воздуха и т.д.</div>
@@ -204,12 +800,12 @@
             <div class="task-block hard">
                 <div class="task-title">📘 Задача 3. Тепловой баланс при сварке <span class="hard-badge">СЛОЖНАЯ</span></div>
                 <div class="task-condition"><strong>Ситуация:</strong> При сварке деталь массой $m = 0{,}5$ кг из стали (удельная теплоёмкость $c = 500$ Дж/(кг·К)) нагревается от $t_1 = 20$ °C. Выделилось $Q = 50$ кДж теплоты, КПД процесса $\eta = 60\%$. Найдите: а) полезную теплоту; б) конечную температуру детали; в) потери теплоты в окружающую среду.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('w3')">📖 Показать решение</button>
+                <div id="w3" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ кг, $c = 500$ Дж/(кг·К), $t_1 = 20$ °C, $Q = 50000$ Дж, $\eta = 0{,}6$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $Q_{пол}$, $t_2$, $Q_{пот}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('w3')">📖 Показать решение</button>
-                <div id="w3" class="task-solution">
                     <div class="step"><strong>Шаг 1 (полезная теплота).</strong> $Q_{пол} = \eta \cdot Q = 0{,}6 \cdot 50000 = 30000$ Дж.</div>
                     <div class="step"><strong>Шаг 2 (нагрев детали).</strong> $Q_{пол} = cm\Delta t \Rightarrow \Delta t = \dfrac{Q_{пол}}{cm}$.</div>
                     <div class="step"><span class="formula">$\Delta t = \dfrac{30000}{500 \cdot 0{,}5} = \dfrac{30000}{250} = 120 \text{ °C}$</span></div>
@@ -256,12 +852,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 1. Изменение внутренней энергии проводника</div>
                 <div class="task-condition"><strong>Ситуация:</strong> При протекании тока проводник получил $Q = 500$ Дж теплоты. Работа не совершается. Найдите изменение внутренней энергии и температуры, если масса $m = 0{,}1$ кг, $c = 400$ Дж/(кг·К).</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('e1')">📖 Показать решение</button>
+                <div id="e1" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q = 500$ Дж, $m = 0{,}1$ кг, $c = 400$ Дж/(кг·К)</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\Delta U$, $\Delta T$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('e1')">📖 Показать решение</button>
-                <div id="e1" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $A = 0$, поэтому $\Delta U = Q = 500$ Дж.</div>
                     <div class="step"><strong>Шаг 2.</strong> $\Delta T = \dfrac{Q}{cm} = \dfrac{500}{400 \cdot 0{,}1} = \dfrac{500}{40} = 12{,}5$ К.</div>
                     <div class="step explanation"><strong>Пояснение:</strong> Вся теплота пошла на нагрев проводника. Температура выросла на 12,5 °C.</div>
@@ -272,12 +868,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 2. КПД электродвигателя</div>
                 <div class="task-condition"><strong>Ситуация:</strong> Электродвигатель совершил полезную работу $A = 8000$ Дж, затратив $Q = 10000$ Дж электроэнергии. Найдите КПД.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('e2')">📖 Показать решение</button>
+                <div id="e2" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $A = 8000$ Дж, $Q = 10000$ Дж</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('e2')">📖 Показать решение</button>
-                <div id="e2" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $\eta = \dfrac{A}{Q}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta = \dfrac{8000}{10000} = 0{,}8 = 80\%$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Потери 20% — это нагрев обмоток (джоулево тепло) и трение в подшипниках.</div>
@@ -288,12 +884,12 @@
             <div class="task-block hard">
                 <div class="task-title">📘 Задача 3. Тепловой баланс в электрощите <span class="hard-badge">СЛОЖНАЯ</span></div>
                 <div class="task-condition"><strong>Ситуация:</strong> В трансформаторном отсеке работают два прибора: один выделяет $Q_1 = 500$ Дж/с, второй $Q_2 = 300$ Дж/с. Отсек имеет вентиляцию, отводящую $Q_{отв} = 600$ Дж/с. Найдите: а) общее тепловыделение; б) накопление теплоты в отсеке за $t = 60$ с; в) изменение температуры воздуха массой $m = 50$ кг за это время ($c = 1005$ Дж/(кг·К)).</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('e3')">📖 Показать решение</button>
+                <div id="e3" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q_1 = 500$ Дж/с, $Q_2 = 300$ Дж/с, $Q_{отв} = 600$ Дж/с, $t = 60$ с, $m = 50$ кг, $c = 1005$ Дж/(кг·К)</div>
                     <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$, $\Delta Q$, $\Delta T$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('e3')">📖 Показать решение</button>
-                <div id="e3" class="task-solution">
                     <div class="step"><strong>Шаг 1 (общее тепловыделение).</strong> $Q_{общ} = Q_1 + Q_2 = 800$ Дж/с.</div>
                     <div class="step"><strong>Шаг 2 (накопление).</strong> Разница между выделением и отводом: $Q_{ост} = 800 - 600 = 200$ Дж/с.</div>
                     <div class="step"><strong>Шаг 3.</strong> За $t = 60$ с накопится $\Delta Q = 200 \cdot 60 = 12000$ Дж.</div>
@@ -339,12 +935,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 1. КПД двигателя</div>
                 <div class="task-condition"><strong>Ситуация:</strong> Двигатель получил от сгорания топлива $Q_1 = 40000$ Дж теплоты и совершил работу $A = 12000$ Дж. Найдите КПД.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('a1')">📖 Показать решение</button>
+                <div id="a1" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q_1 = 40000$ Дж, $A = 12000$ Дж</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('a1')">📖 Показать решение</button>
-                <div id="a1" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $\eta = \dfrac{A}{Q_1}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta = \dfrac{12000}{40000} = 0{,}3 = 30\%$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Это типичный КПД ДВС. Остальные 70% теплоты уходят в выхлопные газы и систему охлаждения.</div>
@@ -355,12 +951,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 2. Теплота, отданная холодильнику</div>
                 <div class="task-condition"><strong>Ситуация:</strong> Двигатель получает $Q_1 = 50000$ Дж, КПД $\eta = 35\%$. Найдите полезную работу и теплоту, отданную в атмосферу.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('a2')">📖 Показать решение</button>
+                <div id="a2" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q_1 = 50000$ Дж, $\eta = 0{,}35$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $A$, $Q_2$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('a2')">📖 Показать решение</button>
-                <div id="a2" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $A = \eta \cdot Q_1 = 0{,}35 \cdot 50000 = 17500$ Дж.</div>
                     <div class="step"><strong>Шаг 2.</strong> $Q_2 = Q_1 - A = 50000 - 17500 = 32500$ Дж.</div>
                     <div class="step explanation"><strong>Пояснение:</strong> Более половины теплоты уходит в атмосферу — поэтому двигатели греются и нуждаются в радиаторе.</div>
@@ -371,12 +967,12 @@
             <div class="task-block hard">
                 <div class="task-title">📘 Задача 3. Полный анализ работы двигателя <span class="hard-badge">СЛОЖНАЯ</span></div>
                 <div class="task-condition"><strong>Ситуация:</strong> Двигатель работает по циклу Карно между температурами $T_1 = 900$ К и $T_2 = 400$ К. За цикл от нагревателя получено $Q_1 = 8000$ Дж. Найдите: а) КПД; б) полезную работу; в) теплоту, отданную холодильнику; г) как изменится КПД, если $T_2$ уменьшить до 300 К.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('a3')">📖 Показать решение</button>
+                <div id="a3" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $T_1 = 900$ К, $T_2 = 400$ К, $Q_1 = 8000$ Дж</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\eta$, $A$, $Q_2$, $\eta'$ (при $T_2 = 300$ К)</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('a3')">📖 Показать решение</button>
-                <div id="a3" class="task-solution">
                     <div class="step"><strong>Шаг 1 (КПД).</strong> <span class="formula">$\eta = \dfrac{900 - 400}{900} = \dfrac{500}{900} \approx 0{,}556 = 55{,}6\%$</span></div>
                     <div class="step"><strong>Шаг 2 (работа).</strong> $A = 0{,}556 \cdot 8000 \approx 4444$ Дж.</div>
                     <div class="step"><strong>Шаг 3 (теплота холодильнику).</strong> $Q_2 = 8000 - 4444 = 3556$ Дж.</div>
@@ -422,12 +1018,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 1. КПД паровой турбины</div>
                 <div class="task-condition"><strong>Ситуация:</strong> Паровая турбина получает пар с температурой $T_1 = 750$ К, отработанный пар имеет температуру $T_2 = 350$ К. Найдите максимально возможный КПД (цикл Карно).</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('m1')">📖 Показать решение</button>
+                <div id="m1" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $T_1 = 750$ К, $T_2 = 350$ К</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\eta_{max}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('m1')">📖 Показать решение</button>
-                <div id="m1" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $\eta_{max} = \dfrac{T_1 - T_2}{T_1}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta_{max} = \dfrac{750 - 350}{750} = \dfrac{400}{750} \approx 0{,}533 = 53{,}3\%$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Реальные паровые турбины имеют КПД 35–45% — ниже идеального цикла Карно из-за трения и потерь.</div>
@@ -438,12 +1034,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 2. Полезная работа турбины</div>
                 <div class="task-condition"><strong>Ситуация:</strong> Турбина получает $Q_1 = 100000$ Дж теплоты от пара и отдаёт холодильнику $Q_2 = 60000$ Дж. Найдите КПД и полезную работу.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('m2')">📖 Показать решение</button>
+                <div id="m2" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q_1 = 100000$ Дж, $Q_2 = 60000$ Дж</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\eta$, $A$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('m2')">📖 Показать решение</button>
-                <div id="m2" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $A = Q_1 - Q_2 = 40000$ Дж.</div>
                     <div class="step"><strong>Шаг 2.</strong> $\eta = \dfrac{A}{Q_1} = \dfrac{40000}{100000} = 40\%$.</div>
                     <div class="step explanation"><strong>Пояснение:</strong> 40% теплоты превращается в работу — это типичный КПД турбины. Остальные 60% рассеиваются в конденсаторе.</div>
@@ -454,12 +1050,12 @@
             <div class="task-block hard">
                 <div class="task-title">📘 Задача 3. Оптимизация теплового двигателя <span class="hard-badge">СЛОЖНАЯ</span></div>
                 <div class="task-condition"><strong>Ситуация:</strong> Тепловой двигатель работает по циклу Карно. Инженер хочет повысить КПД с 40% до 50%. Начальные температуры: $T_1 = 500$ К, $T_2 = 300$ К. Найдите: а) на сколько нужно повысить $T_1$ при неизменном $T_2$; б) на сколько нужно понизить $T_2$ при неизменном $T_1$. Какой способ эффективнее?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('m3')">📖 Показать решение</button>
+                <div id="m3" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $T_1 = 500$ К, $T_2 = 300$ К, $\eta_1 = 40\%$, $\eta_2 = 50\%$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\Delta T_1$, $\Delta T_2$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('m3')">📖 Показать решение</button>
-                <div id="m3" class="task-solution">
                     <div class="step"><strong>Шаг 1 (повышение $T_1$).</strong> $\eta = 1 - \dfrac{T_2}{T_1} = 0{,}5 \Rightarrow \dfrac{T_2}{T_1} = 0{,}5 \Rightarrow T_1 = \dfrac{T_2}{0{,}5} = 600$ К.</div>
                     <div class="step"><span class="formula">$\Delta T_1 = 600 - 500 = 100 \text{ К}$</span></div>
                     <div class="step"><strong>Шаг 2 (понижение $T_2$).</strong> $\dfrac{T_2}{500} = 0{,}5 \Rightarrow T_2 = 250$ К.</div>
@@ -505,12 +1101,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 1. Тепловыделение процессора</div>
                 <div class="task-condition"><strong>Ситуация:</strong> Процессор выделяет $Q = 80$ Вт тепла. Какое количество теплоты выделится за $t = 30$ минут работы?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('i1')">📖 Показать решение</button>
+                <div id="i1" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q = 80$ Вт, $t = 30$ мин $= 1800$ с</div>
                     <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('i1')">📖 Показать решение</button>
-                <div id="i1" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $Q_{общ} = Q \cdot t$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q_{общ} = 80 \cdot 1800 = 144000 \text{ Дж} = 144 \text{ кДж}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> За 30 минут процессор выделяет 144 кДж тепла. Это сравнимо с нагревом 1 литра воды на 34 °C.</div>
@@ -521,12 +1117,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 2. КПД системы охлаждения</div>
                 <div class="task-condition"><strong>Ситуация:</strong> Система охлаждения отводит $Q_{отв} = 36000$ Дж тепла из $Q_{общ} = 40000$ Дж, выделяемых сервером. Найдите КПД системы охлаждения.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('i2')">📖 Показать решение</button>
+                <div id="i2" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q_{общ} = 40000$ Дж, $Q_{отв} = 36000$ Дж</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\eta$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('i2')">📖 Показать решение</button>
-                <div id="i2" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $\eta = \dfrac{Q_{отв}}{Q_{общ}}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\eta = \dfrac{36000}{40000} = 0{,}9 = 90\%$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Система отводит 90% теплоты — хороший показатель. Оставшиеся 10% накапливаются в корпусе, повышая температуру.</div>
@@ -537,12 +1133,12 @@
             <div class="task-block hard">
                 <div class="task-title">📘 Задача 3. Тепловой баланс дата-центра <span class="hard-badge">СЛОЖНАЯ</span></div>
                 <div class="task-condition"><strong>Ситуация:</strong> Дата-центр содержит $N = 50$ серверов по $P = 500$ Вт каждый. Система охлаждения работает как тепловой насос: затрачивает $P_{охл} = 10$ кВт, отводит 90% всего тепла. Найдите: а) общее тепловыделение серверов; б) отведённое тепло; в) КПД системы; г) итоговое тепловыделение в помещение.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('i3')">📖 Показать решение</button>
+                <div id="i3" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $N = 50$, $P = 500$ Вт, $P_{охл} = 10000$ Вт, $\eta_{отв} = 0{,}9$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $Q_{серв}$, $Q_{отв}$, $\eta$, $Q_{ост}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('i3')">📖 Показать решение</button>
-                <div id="i3" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Общее тепловыделение серверов: $Q_{серв} = 50 \cdot 500 = 25000$ Вт = 25 кВт.</div>
                     <div class="step"><strong>Шаг 2.</strong> С учётом системы охлаждения: общее выделение $Q_{общ} = 25000 + 10000 = 35000$ Вт.</div>
                     <div class="step"><strong>Шаг 3.</strong> Отведено: $Q_{отв} = 0{,}9 \cdot 35000 = 31500$ Вт = 31,5 кВт.</div>
@@ -585,5 +1181,188 @@
 </script>
 <script src="favorites.js"></script>
 <script src="theme.js"></script>
-</body>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+    </nav>
+<script>
+/* ==== 5. Скелетоны для формул MathJax ==== */
+(function(){
+    function addSkeletons(){
+        document.querySelectorAll('.formula-block').forEach(function(el){
+            if (el.querySelector('mjx-container')) return;
+            if (el.dataset.sk) return;
+            el.dataset.sk = '1';
+            var s = document.createElement('span');
+            s.className = 'skeleton';
+            s.style.width = (60 + Math.random()*80) + 'px';
+            el.appendChild(s);
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+    else addSkeletons();
+    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+})();
+
+/* ==== 6. Чипы категорий в результатах поиска ==== */
+(function(){
+    function classify(cat){
+        var c = (cat||'').toLowerCase();
+        if (c.indexOf('механик') >= 0) return 'cat-mech';
+        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+        if (c.indexOf('электр') >= 0) return 'cat-elec';
+        return 'cat-other';
+    }
+    function decorate(){
+        document.querySelectorAll('.search-result-category').forEach(function(el){
+            if (el.dataset.chip) return;
+            el.dataset.chip = '1';
+            el.classList.add(classify(el.textContent));
+        });
+    }
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            decorate();
+        };
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+    else decorate();
+})();
+
+/* ==== 10. Анимация смены темы «как на iPhone» ==== */
+(function(){
+    function animateThemeChange(x, y){
+        var circle = document.createElement('div');
+        circle.className = 'theme-circle';
+        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+        circle.style.width = circle.style.height = (maxR*2) + 'px';
+        circle.style.left = (x - maxR) + 'px';
+        circle.style.top  = (y - maxR) + 'px';
+        document.body.appendChild(circle);
+        requestAnimationFrame(function(){ circle.classList.add('expand'); });
+        setTimeout(function(){ circle.remove(); }, 700);
+    }
+    document.addEventListener('click', function(e){
+        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+        if (!t) return;
+        var r = t.getBoundingClientRect();
+        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+    }, true);
+})();
+
+/* ==== 2. Ripple при тапе ==== */
+(function(){
+    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+    function bind(el){
+        if (el.dataset.rippleBound) return;
+        el.dataset.rippleBound = '1';
+        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+        el.addEventListener('pointerdown', function(e){
+            var rect = el.getBoundingClientRect();
+            var size = Math.max(rect.width, rect.height);
+            var r = document.createElement('span');
+            r.className = 'ripple';
+            r.style.width = r.style.height = size + 'px';
+            r.style.left = (e.clientX - rect.left - size/2) + 'px';
+            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+            el.appendChild(r);
+            setTimeout(function(){ r.remove(); }, 650);
+        });
+    }
+    function bindAll(){
+        document.querySelectorAll(sel).forEach(bind);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+    else bindAll();
+    /* Перепривязка после поиска */
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            setTimeout(bindAll, 30);
+        };
+    }
+})();
+</script>
+<script src="search-overlay.js"></script>
+<!-- bottom-nav-autohide-script -->
+<script>
+/* Автоскрытие нижней панели при скролле */
+(function(){
+    var nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    var lastY = window.scrollY;
+    var threshold = 8;
+    var ticking = false;
+    function onScroll(){
+        var y = window.scrollY;
+        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+        if (y > lastY && y > 80) {
+            nav.classList.add('nav-hidden');
+        } else {
+            nav.classList.remove('nav-hidden');
+        }
+        lastY = y;
+        ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+    }, { passive: true });
+})();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>`r`n</body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

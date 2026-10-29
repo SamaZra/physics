@@ -187,28 +187,639 @@
             }
         }
     </style>
+<style id="back-link-center-fix">
+.back-link-wrapper {
+    display: flex !important;
+    justify-content: center !important;
+    margin: 16px 0 8px !important;
+    width: 100% !important;
+}
+.back-link-wrapper .back-link,
+.back-link-wrapper .back-btn,
+.back-link-wrapper .back-button {
+    display: inline-block !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+</style>
+<style id="titles-center-fix">
+/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
+.section-title {
+    justify-content: center !important;
+    text-align: center !important;
+    position: relative !important;
+    padding-left: 16px !important;
+    padding-right: 28px !important;
+}
+.section-title::after {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin-left: 0 !important;
+}
+.section.collapsed .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+/* Названия файлов / страниц — по центру */
+h1, .page-title, .file-title, .title {
+    text-align: center !important;
+}
+</style>
+<style id="section-gradient-fix">
+/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
+/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+
+.section { position: relative; }
+
+/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
+
+/* Закрыт: градиента нет */
+.section.collapsed > .section-title {
+    background-image: none;
+    transition: background-image 0.35s ease;
+}
+
+/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
+.section.collapsed > .section-title:hover {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Открыт: тот же градиент постоянно */
+.section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Светлая тема — цвет из --special-border (#d97706) */
+:root.light-mode .section.collapsed > .section-title:hover,
+:root.light-mode .section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(217, 119, 6, 0.18) 0%,
+        rgba(217, 119, 6, 0.06) 45%,
+        rgba(217, 119, 6, 0.00) 100%);
+}
+
+/* ---------- СТРЕЛКА ---------- */
+
+/* Закрыт: светящаяся синяя */
+.section.collapsed > .section-title::after {
+    color: var(--accent, #3b82f6) !important;
+    text-shadow:
+        0 0 6px rgba(59, 130, 246, 0.85),
+        0 0 14px rgba(59, 130, 246, 0.55);
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
+    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+}
+
+/* Открыт: свечение убираем, стрелка обычная */
+.section:not(.collapsed) > .section-title::after {
+    color: var(--text-secondary, #8ba5b8) !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
+.section.collapsed > .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+.section:not(.collapsed) > .section-title::after {
+    transform: translateY(-50%) rotate(0deg) !important;
+}
+
+/* Светлая тема: синий чуть темнее, свечение мягче */
+:root.light-mode .section.collapsed > .section-title::after {
+    color: var(--accent, #2563eb) !important;
+    text-shadow:
+        0 0 6px rgba(37, 99, 235, 0.6),
+        0 0 12px rgba(37, 99, 235, 0.35);
+    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
+}
+</style>
+<style id="modern-visual-fix">
+/* ==== 7. Плавный скролл + отступ у заголовков ==== */
+html { scroll-behavior: smooth; }
+.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+
+/* ==== 8. Радиальный градиент на фоне ==== */
+body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
+        var(--bg) !important;
+}
+:root.light-mode body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
+        var(--bg) !important;
+}
+
+/* ==== 3. «Стеклянная» шапка ==== */
+@media (prefers-reduced-motion: no-preference) {
+    .header {
+        background: rgba(30, 53, 69, 0.72) !important;
+        backdrop-filter: blur(14px) saturate(140%);
+        -webkit-backdrop-filter: blur(14px) saturate(140%);
+        border-bottom: 1px solid var(--border);
+    }
+    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
+}
+
+/* ==== 5. Скелетоны для формул ==== */
+.skeleton {
+    display: inline-block;
+    min-width: 60px;
+    height: 1.1em;
+    vertical-align: middle;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmerSk 1.2s infinite linear;
+}
+@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+/* ==== 6. Чипы категорий в поиске ==== */
+.search-result-category {
+    display: inline-block;
+    padding: 2px 10px;
+    margin-top: 4px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #fff;
+    background: var(--accent, #3b82f6);
+}
+.search-result-category.cat-mech  { background: #3b82f6; }
+.search-result-category.cat-thermo{ background: #f59e0b; }
+.search-result-category.cat-elec  { background: #eab308; }
+.search-result-category.cat-other { background: #64748b; }
+
+/* ==== 4. Нижняя навигация ==== */
+.bottom-nav {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 22px;
+    background: rgba(30, 53, 69, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
+    z-index: 900;
+    transition: background 0.3s, border 0.3s;
+}
+:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+.bottom-nav a, .bottom-nav button {
+    display: flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px; border-radius: 14px;
+    border: none; background: transparent;
+    color: var(--text-secondary); font-size: 22px;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.2s;
+}
+.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
+    background: rgba(59,130,246,0.15);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+body { padding-bottom: 78px; }
+
+/* ==== 10. Круг смены темы ==== */
+.theme-circle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    background: var(--bg);
+    transform: scale(0);
+    opacity: 0.95;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
+}
+.theme-circle.expand { transform: scale(1); opacity: 0; }
+
+/* ==== 2. Ripple при тапе ==== */
+.ripple-host { position: relative !important; overflow: hidden !important; }
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(59,130,246,0.35);
+    transform: scale(0);
+    animation: rippleAnim 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 0;
+}
+@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+</style>
+<style id="search-clean-fix">
+/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
+.search-result-icon {
+    display: none !important;
+}
+
+/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
+.search-results {
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/Edge */
+}
+.search-results::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
+body::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+}
+body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+</style>
+<style id="nav-back-hide-index">
+/* На главной кнопка «Назад» не нужна */
+body.is-index .nav-back-btn { display: none !important; }
+</style>
+<style id="bottom-nav-autohide">
+/* Автоскрытие нижней панели при скролле вниз */
+.bottom-nav {
+    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
+}
+.bottom-nav.nav-hidden {
+    transform: translate(-50%, 120%);
+    opacity: 0;
+    pointer-events: none;
+}
+/* На главной панель всегда видна */
+body.is-index .bottom-nav.nav-hidden {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+}
+</style>
+<style id="fav-nav-yellow">
+/* Избранное в нижней панели — жёлтое выделение, когда активно */
+.bottom-nav a[href="favorites.html"].active,
+.bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(250, 204, 21, 0.18) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover,
+.bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(250, 204, 21, 0.28) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(234, 179, 8, 0.18) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(234, 179, 8, 0.28) !important;
+    color: #92400e !important;
+}
+/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
+
+</style>
+<style id="nav-order-fix">
+/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
+.bottom-nav { display: flex; align-items: center; }
+.bottom-nav .nav-back-btn { order: 1; }
+.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+.bottom-nav a[href="favorites.html"] { order: 4; }
+
+/* Звезда активна — жёлтая */
+.bottom-nav a[href="favorites.html"].active {
+    background: rgba(250, 204, 21, 0.20) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(250, 204, 21, 0.30) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active {
+    background: rgba(234, 179, 8, 0.20) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(234, 179, 8, 0.30) !important;
+    color: #92400e !important;
+}
+</style>
+<style id="unified-buttons">
+/* ==== Единый стиль кнопок ==== */
+
+/* База для всех кнопок */
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.show-solution-btn,
+.btn-reset,
+.model-tab,
+.clear-all-btn,
+.search-clear,
+.back-link,
+.fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.2;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s,
+                box-shadow 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    white-space: nowrap;
+}
+
+/* Hover / active — общий отклик */
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-danger:hover,
+.show-solution-btn:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover,
+.back-link:hover,
+.fullscreen-btn:hover {
+    transform: translateY(-1px);
+}
+.btn-primary:active,
+.btn-secondary:active,
+.btn-danger:active,
+.show-solution-btn:active,
+.btn-reset:active,
+.model-tab:active,
+.clear-all-btn:active,
+.back-link:active,
+.fullscreen-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ==== PRIMARY (синий акцент) ==== */
+.btn-primary,
+.show-solution-btn,
+.back-link {
+    background: var(--accent, #3b82f6);
+    color: #fff;
+    border-color: var(--accent, #3b82f6);
+}
+.btn-primary:hover,
+.show-solution-btn:hover,
+.back-link:hover {
+    background: var(--accent-hover, #60a5fa);
+    border-color: var(--accent-hover, #60a5fa);
+    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
+}
+:root.light-mode .btn-primary,
+:root.light-mode .show-solution-btn,
+:root.light-mode .back-link {
+    background: var(--accent, #2563eb);
+    border-color: var(--accent, #2563eb);
+}
+:root.light-mode .btn-primary:hover,
+:root.light-mode .show-solution-btn:hover,
+:root.light-mode .back-link:hover {
+    background: var(--accent-hover, #3b82f6);
+    border-color: var(--accent-hover, #3b82f6);
+}
+
+/* ==== SECONDARY (нейтральный) ==== */
+.btn-secondary,
+.btn-reset,
+.model-tab,
+.clear-all-btn {
+    background: var(--menu-item-hover, #233e50);
+    color: var(--text, #fff);
+    border-color: var(--border, rgba(59,130,246,0.15));
+}
+.btn-secondary:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover {
+    background: var(--group-header-bg, #1a3a5a);
+    border-color: var(--accent, #3b82f6);
+    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
+}
+:root.light-mode .btn-secondary,
+:root.light-mode .btn-reset,
+:root.light-mode .model-tab,
+:root.light-mode .clear-all-btn {
+    background: var(--menu-item-hover, #f0f4fa);
+    color: var(--text, #1a2a3f);
+}
+
+/* Активный таб — как primary */
+.model-tab.active {
+    background: var(--accent, #3b82f6) !important;
+    color: #fff !important;
+    border-color: var(--accent, #3b82f6) !important;
+    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
+}
+.model-tab.active:hover {
+    background: var(--accent-hover, #60a5fa) !important;
+    border-color: var(--accent-hover, #60a5fa) !important;
+}
+
+/* ==== DANGER (красный) ==== */
+.btn-danger,
+.clear-all-btn.danger,
+.clear-all-btn:hover {
+    background: #ef4444 !important;
+    color: #fff !important;
+    border-color: #ef4444 !important;
+}
+.btn-danger:hover,
+.clear-all-btn.danger:hover,
+.clear-all-btn:hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
+}
+
+/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
+.search-clear {
+    background: transparent;
+    border: none;
+    padding: 6px 10px;
+    min-height: auto;
+    color: var(--text-secondary, #8ba5b8);
+    border-radius: 50%;
+}
+.search-clear:hover {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent, #3b82f6);
+    transform: none;
+}
+
+/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
+.fullscreen-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 20px;
+}
+.fullscreen-btn:hover {
+    background: var(--accent, #3b82f6);
+    border-color: var(--accent, #3b82f6);
+}
+
+/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
+.remove-fav {
+    border-radius: 50%;
+    min-height: 32px;
+    min-width: 32px;
+    padding: 4px 8px;
+}
+.remove-fav:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+}
+
+/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--accent, #3b82f6);
+    padding: 0;
+    min-height: auto;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.btn-link:hover {
+    color: var(--accent-hover, #60a5fa);
+    transform: none;
+    box-shadow: none;
+}
+</style>
+<style id="page-fade-in">
+/* ==== Плавное появление страницы (fade-in) ==== */
+
+/* Мягкий вход всей страницы */
+body {
+    animation: pageFade 0.3s ease-out;
+}
+@keyframes pageFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Контент чуть «подъезжает» снизу */
+.container,
+.main-content {
+    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@keyframes pageFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Если в системе включено «уменьшить движение» — анимации отключаем */
+@media (prefers-reduced-motion: reduce) {
+    body,
+    .container,
+    .main-content {
+        animation: none !important;
+    }
+}
+</style>
+<style id="share-btn-right">
+/* Прижимаем кнопку «Поделиться» к правому краю панели */
+.bottom-nav button[title="Поделиться"] {
+    order: 99 !important;
+    margin-left: auto !important;
+}
+</style>
+<style id="no-tap-highlight">
+/* Убираем системный голубой/серый прямоугольник при тапе */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+}
+a, button, div, span, label, input, textarea, select {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+}
+</style>
+<style id="no-tap-highlight-accordion">
+/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
+.section-title,
+.group-header,
+.menu-item,
+.submenu-item,
+.model-tab,
+.search-result-item {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+/* Лёгкий отклик при нажатии (вместо системного квадратика) */
+.section-title:active,
+.group-header:active {
+    transform: scale(0.99);
+    transition: transform 0.1s;
+}
+</style>
 </head>
 <body>
 <div class="container">
-    <a href="index.html" class="back-btn">← На главную</a>
+    <div class="back-link-wrapper"><a href="index.html" class="back-btn">← На главную</a></div>
 
     <div class="about-card">
         <img class="logo" src="logo.png" alt="Логотип" onerror="this.style.display='none'">
-        <h1>Физика<br>в кармане</h1>
+        <h1>Физика в кармане</h1>
         <div class="version">Версия 1.0 (build 1)</div>
 
         <div class="info-section">
             <div class="info-row">
                 <span class="info-label">Автор</span>
-                <span class="info-value">Михаил Валентинович Куклин,<br>преподаватель математики АКТТ, г. Арзамас</span>
+                <span class="info-value">Михаил Валентинович Куклин,<br>преподаватель математики и физики АКТТ, г. Арзамас</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Последнее обновление</span>
-                <span class="info-value">3 сентября 2026 г.</span>
+                <span class="info-value">20 октября 2026 г.</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Разделов / тем / формул</span>
-                <span class="info-value">13 / 87 /400+</span>
+                <span class="info-label">Разделов / тем / задач</span>
+                <span class="info-value">3 / 23 / 300+</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Размер</span>
@@ -241,7 +852,7 @@
         </div>
 
         <div class="description">
-            Приложение создано <strong>действующим преподавателем математики</strong> Арзамасского коммерческо-технического техникума специально для своих студентов. Проверено на занятиях — работает как удобное цифровое учебное пособие.
+            Приложение создано <strong>действующим преподавателем математики и физики</strong> Арзамасского коммерческо-технического техникума специально для своих студентов. Проверено на занятиях — работает как удобное цифровое учебное пособие.
         </div>
 
         <button class="share-btn" onclick="shareApp()">📤 Поделиться приложением</button>
@@ -277,12 +888,12 @@
             window.Android.shareAppFromJs();
         } else if (navigator.share) {
             navigator.share({
-                title: 'Математический справочник',
-                text: 'Отличное приложение с формулами, 3D-моделями и тестами!',
+                title: 'Физика в кармане',
+                text: 'Отличное приложение с формулами, 3D-моделями и задачами',
                 url: 'https://www.rustore.ru/catalog/app/com.example.mathhelper'
             }).catch(function() {});
         } else {
-            var text = 'Математический справочник — формулы, 3D-модели, тесты. Скачивайте бесплатно: https://www.rustore.ru/catalog/app/com.example.mathhelper';
+            var text = 'Физика в кармане — формулы, 3D-модели, задачи. Скачивайте бесплатно: https://www.rustore.ru/catalog/app/com.example.mathhelper';
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text);
                 alert('Ссылка скопирована! Отправьте её другу.');
@@ -294,5 +905,188 @@
 </script>
 <script src="favorites.js"></script>
 <script src="theme.js"></script>
-</body>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+    </nav>
+<script>
+/* ==== 5. Скелетоны для формул MathJax ==== */
+(function(){
+    function addSkeletons(){
+        document.querySelectorAll('.formula-block').forEach(function(el){
+            if (el.querySelector('mjx-container')) return;
+            if (el.dataset.sk) return;
+            el.dataset.sk = '1';
+            var s = document.createElement('span');
+            s.className = 'skeleton';
+            s.style.width = (60 + Math.random()*80) + 'px';
+            el.appendChild(s);
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+    else addSkeletons();
+    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+})();
+
+/* ==== 6. Чипы категорий в результатах поиска ==== */
+(function(){
+    function classify(cat){
+        var c = (cat||'').toLowerCase();
+        if (c.indexOf('механик') >= 0) return 'cat-mech';
+        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+        if (c.indexOf('электр') >= 0) return 'cat-elec';
+        return 'cat-other';
+    }
+    function decorate(){
+        document.querySelectorAll('.search-result-category').forEach(function(el){
+            if (el.dataset.chip) return;
+            el.dataset.chip = '1';
+            el.classList.add(classify(el.textContent));
+        });
+    }
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            decorate();
+        };
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+    else decorate();
+})();
+
+/* ==== 10. Анимация смены темы «как на iPhone» ==== */
+(function(){
+    function animateThemeChange(x, y){
+        var circle = document.createElement('div');
+        circle.className = 'theme-circle';
+        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+        circle.style.width = circle.style.height = (maxR*2) + 'px';
+        circle.style.left = (x - maxR) + 'px';
+        circle.style.top  = (y - maxR) + 'px';
+        document.body.appendChild(circle);
+        requestAnimationFrame(function(){ circle.classList.add('expand'); });
+        setTimeout(function(){ circle.remove(); }, 700);
+    }
+    document.addEventListener('click', function(e){
+        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+        if (!t) return;
+        var r = t.getBoundingClientRect();
+        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+    }, true);
+})();
+
+/* ==== 2. Ripple при тапе ==== */
+(function(){
+    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+    function bind(el){
+        if (el.dataset.rippleBound) return;
+        el.dataset.rippleBound = '1';
+        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+        el.addEventListener('pointerdown', function(e){
+            var rect = el.getBoundingClientRect();
+            var size = Math.max(rect.width, rect.height);
+            var r = document.createElement('span');
+            r.className = 'ripple';
+            r.style.width = r.style.height = size + 'px';
+            r.style.left = (e.clientX - rect.left - size/2) + 'px';
+            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+            el.appendChild(r);
+            setTimeout(function(){ r.remove(); }, 650);
+        });
+    }
+    function bindAll(){
+        document.querySelectorAll(sel).forEach(bind);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+    else bindAll();
+    /* Перепривязка после поиска */
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            setTimeout(bindAll, 30);
+        };
+    }
+})();
+</script>
+<script src="search-overlay.js"></script>
+<!-- bottom-nav-autohide-script -->
+<script>
+/* Автоскрытие нижней панели при скролле */
+(function(){
+    var nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    var lastY = window.scrollY;
+    var threshold = 8;
+    var ticking = false;
+    function onScroll(){
+        var y = window.scrollY;
+        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+        if (y > lastY && y > 80) {
+            nav.classList.add('nav-hidden');
+        } else {
+            nav.classList.remove('nav-hidden');
+        }
+        lastY = y;
+        ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+    }, { passive: true });
+})();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>`r`n</body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

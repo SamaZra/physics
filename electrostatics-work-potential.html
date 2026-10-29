@@ -1,0 +1,1925 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Работа электрического поля. Потенциал. Разность потенциалов</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle{background:#3b82f6;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-toggle:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle.off{background:#666;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+<style id="titles-center-fix">
+/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
+.section-title {
+    justify-content: center !important;
+    text-align: center !important;
+    position: relative !important;
+    padding-left: 16px !important;
+    padding-right: 28px !important;
+}
+.section-title::after {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin-left: 0 !important;
+}
+.section.collapsed .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+/* Названия файлов / страниц — по центру */
+h1, .page-title, .file-title, .title {
+    text-align: center !important;
+}
+</style>
+<style id="section-gradient-fix">
+/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
+/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+
+.section { position: relative; }
+
+/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
+
+/* Закрыт: градиента нет */
+.section.collapsed > .section-title {
+    background-image: none;
+    transition: background-image 0.35s ease;
+}
+
+/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
+.section.collapsed > .section-title:hover {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Открыт: тот же градиент постоянно */
+.section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Светлая тема — цвет из --special-border (#d97706) */
+:root.light-mode .section.collapsed > .section-title:hover,
+:root.light-mode .section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(217, 119, 6, 0.18) 0%,
+        rgba(217, 119, 6, 0.06) 45%,
+        rgba(217, 119, 6, 0.00) 100%);
+}
+
+/* ---------- СТРЕЛКА ---------- */
+
+/* Закрыт: светящаяся синяя */
+.section.collapsed > .section-title::after {
+    color: var(--accent, #3b82f6) !important;
+    text-shadow:
+        0 0 6px rgba(59, 130, 246, 0.85),
+        0 0 14px rgba(59, 130, 246, 0.55);
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
+    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+}
+
+/* Открыт: свечение убираем, стрелка обычная */
+.section:not(.collapsed) > .section-title::after {
+    color: var(--text-secondary, #8ba5b8) !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
+.section.collapsed > .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+.section:not(.collapsed) > .section-title::after {
+    transform: translateY(-50%) rotate(0deg) !important;
+}
+
+/* Светлая тема: синий чуть темнее, свечение мягче */
+:root.light-mode .section.collapsed > .section-title::after {
+    color: var(--accent, #2563eb) !important;
+    text-shadow:
+        0 0 6px rgba(37, 99, 235, 0.6),
+        0 0 12px rgba(37, 99, 235, 0.35);
+    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
+}
+</style>
+<style id="modern-visual-fix">
+/* ==== 7. Плавный скролл + отступ у заголовков ==== */
+html { scroll-behavior: smooth; }
+.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+
+/* ==== 8. Радиальный градиент на фоне ==== */
+body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
+        var(--bg) !important;
+}
+:root.light-mode body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
+        var(--bg) !important;
+}
+
+/* ==== 3. «Стеклянная» шапка ==== */
+@media (prefers-reduced-motion: no-preference) {
+    .header {
+        background: rgba(30, 53, 69, 0.72) !important;
+        backdrop-filter: blur(14px) saturate(140%);
+        -webkit-backdrop-filter: blur(14px) saturate(140%);
+        border-bottom: 1px solid var(--border);
+    }
+    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
+}
+
+/* ==== 5. Скелетоны для формул ==== */
+.skeleton {
+    display: inline-block;
+    min-width: 60px;
+    height: 1.1em;
+    vertical-align: middle;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmerSk 1.2s infinite linear;
+}
+@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+/* ==== 6. Чипы категорий в поиске ==== */
+.search-result-category {
+    display: inline-block;
+    padding: 2px 10px;
+    margin-top: 4px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #fff;
+    background: var(--accent, #3b82f6);
+}
+.search-result-category.cat-mech  { background: #3b82f6; }
+.search-result-category.cat-thermo{ background: #f59e0b; }
+.search-result-category.cat-elec  { background: #eab308; }
+.search-result-category.cat-other { background: #64748b; }
+
+/* ==== 4. Нижняя навигация ==== */
+.bottom-nav {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 22px;
+    background: rgba(30, 53, 69, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
+    z-index: 900;
+    transition: background 0.3s, border 0.3s;
+}
+:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+.bottom-nav a, .bottom-nav button {
+    display: flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px; border-radius: 14px;
+    border: none; background: transparent;
+    color: var(--text-secondary); font-size: 22px;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.2s;
+}
+.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
+    background: rgba(59,130,246,0.15);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+body { padding-bottom: 78px; }
+
+/* ==== 10. Круг смены темы ==== */
+.theme-circle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    background: var(--bg);
+    transform: scale(0);
+    opacity: 0.95;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
+}
+.theme-circle.expand { transform: scale(1); opacity: 0; }
+
+/* ==== 2. Ripple при тапе ==== */
+.ripple-host { position: relative !important; overflow: hidden !important; }
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(59,130,246,0.35);
+    transform: scale(0);
+    animation: rippleAnim 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 0;
+}
+@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+</style>
+<style id="search-clean-fix">
+/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
+.search-result-icon {
+    display: none !important;
+}
+
+/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
+.search-results {
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/Edge */
+}
+.search-results::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
+body::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+}
+body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+</style>
+<style id="nav-back-hide-index">
+/* На главной кнопка «Назад» не нужна */
+body.is-index .nav-back-btn { display: none !important; }
+</style>
+<style id="bottom-nav-autohide">
+/* Автоскрытие нижней панели при скролле вниз */
+.bottom-nav {
+    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
+}
+.bottom-nav.nav-hidden {
+    transform: translate(-50%, 120%);
+    opacity: 0;
+    pointer-events: none;
+}
+/* На главной панель всегда видна */
+body.is-index .bottom-nav.nav-hidden {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+}
+</style>
+<style id="fav-nav-yellow">
+/* Избранное в нижней панели — жёлтое выделение, когда активно */
+.bottom-nav a[href="favorites.html"].active,
+.bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(250, 204, 21, 0.18) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover,
+.bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(250, 204, 21, 0.28) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(234, 179, 8, 0.18) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(234, 179, 8, 0.28) !important;
+    color: #92400e !important;
+}
+/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
+
+</style>
+<style id="nav-order-fix">
+/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
+.bottom-nav { display: flex; align-items: center; }
+.bottom-nav .nav-back-btn { order: 1; }
+.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+.bottom-nav a[href="favorites.html"] { order: 4; }
+
+/* Звезда активна — жёлтая */
+.bottom-nav a[href="favorites.html"].active {
+    background: rgba(250, 204, 21, 0.20) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(250, 204, 21, 0.30) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active {
+    background: rgba(234, 179, 8, 0.20) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(234, 179, 8, 0.30) !important;
+    color: #92400e !important;
+}
+</style>
+<style id="unified-buttons">
+/* ==== Единый стиль кнопок ==== */
+
+/* База для всех кнопок */
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.show-solution-btn,
+.btn-reset,
+.model-tab,
+.clear-all-btn,
+.search-clear,
+.back-link,
+.fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.2;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s,
+                box-shadow 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    white-space: nowrap;
+}
+
+/* Hover / active — общий отклик */
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-danger:hover,
+.show-solution-btn:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover,
+.back-link:hover,
+.fullscreen-btn:hover {
+    transform: translateY(-1px);
+}
+.btn-primary:active,
+.btn-secondary:active,
+.btn-danger:active,
+.show-solution-btn:active,
+.btn-reset:active,
+.model-tab:active,
+.clear-all-btn:active,
+.back-link:active,
+.fullscreen-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ==== PRIMARY (синий акцент) ==== */
+.btn-primary,
+.show-solution-btn,
+.back-link {
+    background: var(--accent, #3b82f6);
+    color: #fff;
+    border-color: var(--accent, #3b82f6);
+}
+.btn-primary:hover,
+.show-solution-btn:hover,
+.back-link:hover {
+    background: var(--accent-hover, #60a5fa);
+    border-color: var(--accent-hover, #60a5fa);
+    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
+}
+:root.light-mode .btn-primary,
+:root.light-mode .show-solution-btn,
+:root.light-mode .back-link {
+    background: var(--accent, #2563eb);
+    border-color: var(--accent, #2563eb);
+}
+:root.light-mode .btn-primary:hover,
+:root.light-mode .show-solution-btn:hover,
+:root.light-mode .back-link:hover {
+    background: var(--accent-hover, #3b82f6);
+    border-color: var(--accent-hover, #3b82f6);
+}
+
+/* ==== SECONDARY (нейтральный) ==== */
+.btn-secondary,
+.btn-reset,
+.model-tab,
+.clear-all-btn {
+    background: var(--menu-item-hover, #233e50);
+    color: var(--text, #fff);
+    border-color: var(--border, rgba(59,130,246,0.15));
+}
+.btn-secondary:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover {
+    background: var(--group-header-bg, #1a3a5a);
+    border-color: var(--accent, #3b82f6);
+    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
+}
+:root.light-mode .btn-secondary,
+:root.light-mode .btn-reset,
+:root.light-mode .model-tab,
+:root.light-mode .clear-all-btn {
+    background: var(--menu-item-hover, #f0f4fa);
+    color: var(--text, #1a2a3f);
+}
+
+/* Активный таб — как primary */
+.model-tab.active {
+    background: var(--accent, #3b82f6) !important;
+    color: #fff !important;
+    border-color: var(--accent, #3b82f6) !important;
+    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
+}
+.model-tab.active:hover {
+    background: var(--accent-hover, #60a5fa) !important;
+    border-color: var(--accent-hover, #60a5fa) !important;
+}
+
+/* ==== DANGER (красный) ==== */
+.btn-danger,
+.clear-all-btn.danger,
+.clear-all-btn:hover {
+    background: #ef4444 !important;
+    color: #fff !important;
+    border-color: #ef4444 !important;
+}
+.btn-danger:hover,
+.clear-all-btn.danger:hover,
+.clear-all-btn:hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
+}
+
+/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
+.search-clear {
+    background: transparent;
+    border: none;
+    padding: 6px 10px;
+    min-height: auto;
+    color: var(--text-secondary, #8ba5b8);
+    border-radius: 50%;
+}
+.search-clear:hover {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent, #3b82f6);
+    transform: none;
+}
+
+/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
+.fullscreen-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 20px;
+}
+.fullscreen-btn:hover {
+    background: var(--accent, #3b82f6);
+    border-color: var(--accent, #3b82f6);
+}
+
+/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
+.remove-fav {
+    border-radius: 50%;
+    min-height: 32px;
+    min-width: 32px;
+    padding: 4px 8px;
+}
+.remove-fav:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+}
+
+/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--accent, #3b82f6);
+    padding: 0;
+    min-height: auto;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.btn-link:hover {
+    color: var(--accent-hover, #60a5fa);
+    transform: none;
+    box-shadow: none;
+}
+</style>
+<style id="page-fade-in">
+/* ==== Плавное появление страницы (fade-in) ==== */
+
+/* Мягкий вход всей страницы */
+body {
+    animation: pageFade 0.3s ease-out;
+}
+@keyframes pageFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Контент чуть «подъезжает» снизу */
+.container,
+.main-content {
+    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@keyframes pageFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Если в системе включено «уменьшить движение» — анимации отключаем */
+@media (prefers-reduced-motion: reduce) {
+    body,
+    .container,
+    .main-content {
+        animation: none !important;
+    }
+}
+</style>
+<style id="share-btn-right">
+/* Прижимаем кнопку «Поделиться» к правому краю панели */
+.bottom-nav button[title="Поделиться"] {
+    order: 99 !important;
+    margin-left: auto !important;
+}
+</style>
+<style id="no-tap-highlight">
+/* Убираем системный голубой/серый прямоугольник при тапе */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+}
+a, button, div, span, label, input, textarea, select {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+}
+</style>
+<style id="no-tap-highlight-accordion">
+/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
+.section-title,
+.group-header,
+.menu-item,
+.submenu-item,
+.model-tab,
+.search-result-item {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+/* Лёгкий отклик при нажатии (вместо системного квадратика) */
+.section-title:active,
+.group-header:active {
+    transform: scale(0.99);
+    transition: transform 0.1s;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Работа электрического поля. Потенциал.<br>Разность потенциалов</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Работа электрического поля</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Работа электрического поля</strong> по перемещению заряда $q$ из точки 1 в точку 2 равна:</p>
+                <div class="formula-block">
+                    <span class="f">$A = qEd$</span>
+                    <span class="f-label">— работа поля (для однородного поля)</span>
+                </div>
+                <p>где $E$ — напряжённость поля, $d$ — проекция перемещения на силовую линию (расстояние между пластинами).</p>
+                <p><strong>Важно:</strong> работа поля не зависит от формы траектории, а зависит только от начального и конечного положения заряда. Это свойство консервативных сил.</p>
+                <p>Если заряд перемещается под углом к силовым линиям, работа вычисляется по формуле:</p>
+                <div class="formula-block">
+                    <span class="f">$A = q E \Delta d \cos\alpha$</span>
+                </div>
+                <p>где $\alpha$ — угол между направлением силы и направлением перемещения.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Потенциал и разность потенциалов</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Потенциал</strong> $\varphi$ — энергетическая характеристика электрического поля. Он равен потенциальной энергии единичного положительного заряда, помещённого в данную точку поля:</p>
+                <div class="formula-block">
+                    <span class="f">$\varphi = \dfrac{W_p}{q}$</span>
+                    <span class="f-label">— потенциал (В)</span>
+                </div>
+                <p><strong>Потенциал поля точечного заряда:</strong></p>
+                <div class="formula-block">
+                    <span class="f">$\varphi = k \dfrac{Q}{r}$</span>
+                </div>
+                <p><strong>Разность потенциалов</strong> (напряжение) $U$ — это работа поля по перемещению единичного положительного заряда из одной точки в другую:</p>
+                <div class="formula-block">
+                    <span class="f">$U = \varphi_1 - \varphi_2 = \dfrac{A}{q}$</span>
+                    <span class="f-label">— разность потенциалов (В)</span>
+                </div>
+                <p><strong>Связь напряжения и напряжённости</strong> для однородного поля (например, между пластинами конденсатора):</p>
+                <div class="formula-block">
+                    <span class="f">$U = E \cdot d$</span>
+                </div>
+                <p>где $d$ — расстояние между пластинами.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Эквипотенциальные поверхности</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Эквипотенциальные поверхности</strong> — поверхности, все точки которых имеют одинаковый потенциал.</p>
+                <ul>
+                    <li>Эквипотенциальные поверхности всегда <strong>перпендикулярны</strong> силовым линиям поля.</li>
+                    <li>Для точечного заряда эквипотенциальные поверхности — концентрические сферы.</li>
+                    <li>Работа по перемещению заряда вдоль эквипотенциальной поверхности <strong>равна нулю</strong>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="work" onclick="switchModel('work')">🔋 Работа поля</div>
+                <div class="model-tab" data-model="equipotential" onclick="switchModel('equipotential')">〰️ Эквипотенциали</div>
+                <div class="model-tab" data-model="capacitor" onclick="switchModel('capacitor')">🔌 Конденсатор</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: РАБОТА ПОЛЯ -->
+            <div id="model-work" class="model-content">
+                <div class="model-container" id="container-work">
+                    <canvas id="canvas-work" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-work">⛶</button>
+                    <div class="info-display">
+                        <div>Работа $A$ = <span class="val" id="work-A">0</span> Дж</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Заряд $q$ (мкКл)</label>
+                        <input type="range" id="work-q-slider" min="1" max="10" step="1" value="2">
+                        <span class="control-value" id="work-q-value">2</span>
+                    </div>
+                    <button class="btn-toggle" id="work-move-btn" style="background:#22c55e;">▶ Переместить</button>
+                    <button class="btn-reset" id="work-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Заряд движется между пластинами</span>
+                </div>
+                <div class="def-card">
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>Перед вами конденсатор: верхняя пластина заряжена положительно («+»), нижняя — отрицательно («−»). Жёлтый шарик — это пробный положительный заряд \(q\). Электрическое поле стремится «толкнуть» его вниз, к минусу.</p>
+                    
+                    <p style="margin-top:12px;"><strong>1. Нажмите «▶ Переместить»</strong><br>Вы увидите, как заряд начинает движение вниз, а за ним тянется зелёный след. Это траектория движения. Обратите внимание на формулу \(A = q \cdot U\): электрическое поле совершает работу по перемещению заряда.</p>
+                    
+                    <p style="margin-top:12px;"><strong>2. Подвигайте ползунок «Заряд q»</strong><br>Чем больше вы делаете заряд (от 1 до 10 мкКл), тем крупнее становится шарик. Физически это значит, что поле действует на него с бóльшей силой. Соответственно, и работа \(A\) (цифра в углу) возрастает. Сравните: перенос слона и перенос пушинки на одно и то же расстояние потребует разных усилий.</p>
+                    
+                    <p style="margin-top:12px;"><strong>3. Подвигайте ползунок «Напряжение U»</strong><br>Этот ползунок меняет разность потенциалов между пластинами. Чем выше напряжение, тем сильнее поле и тем быстрее шарик разгоняется. Обратите внимание, что при увеличении напряжения формула работы \(A = q \cdot U\) даёт большее значение.</p>
+                    
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> Работа электрического поля прямо пропорциональна величине заряда и напряжению (разности потенциалов). Если вы увеличите любой из этих параметров в 2 раза, работа тоже вырастет в 2 раза.
+                    </p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: ЭКВИПОТЕНЦИАЛИ -->
+            <div id="model-equipotential" class="model-content" style="display:none;">
+                <div class="model-container" id="container-equipotential">
+                    <canvas id="canvas-equipotential" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-equipotential">⛶</button>
+                    <div class="info-display">
+                        <div>Потенциал: <span class="val" id="eq-pot">5</span> В</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Радиус $r$ (м)</label>
+                        <input type="range" id="eq-slider" min="1" max="5" step="0.5" value="3">
+                        <span class="control-value" id="eq-value">3.0</span>
+                    </div>
+                    <button class="btn-reset" id="eq-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Меняйте радиус эквипотенциальной поверхности</span>
+                </div>
+                <div class="def-card">
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>В центре находится точечный положительный заряд \(Q\). Жёлтые стрелки — это линии напряжённости \(E\), они показывают, куда будет двигаться положительный заряд. Синяя сфера (и синее кольцо) — это <strong>эквипотенциальная поверхность</strong>.</p>
+                    
+                    <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Радиус r»</strong><br>Вы меняете расстояние от заряда. Наблюдайте за цифрой в правом верхнем углу. По формуле \(\varphi = k \frac{Q}{r}\) потенциал обратно пропорционален радиусу:</p>
+                    <ul>
+                        <li><strong>Увеличиваете радиус</strong> (отдаляетесь от заряда) — сфера растёт, но потенциал на ней падает.</li>
+                        <li><strong>Уменьшаете радиус</strong> (приближаетесь к заряду) — потенциал стремительно растёт (стремится к бесконечности у самого заряда).</li>
+                    </ul>
+                    
+                    <p style="margin-top:12px;"><strong>2. Обратите внимание на геометрию</strong><br>Сфера всегда идеально круглая, а стрелки (силовые линии) всегда перпендикулярны ей. Это фундаментальное свойство электрического поля: силовые линии всегда пересекают эквипотенциальную поверхность под углом 90°.</p>
+                    
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> Работа поля при перемещении заряда вдоль эквипотенциальной поверхности равна нулю (\(A = 0\)). Всё потому, что сила поля направлена перпендикулярно движению, а \(\cos 90° = 0\). Перемещение по сфере не меняет потенциальную энергию.
+                    </p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 3: КОНДЕНСАТОР -->
+            <div id="model-capacitor" class="model-content" style="display:none;">
+                <div class="model-container" id="container-capacitor">
+                    <canvas id="canvas-capacitor" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-capacitor">⛶</button>
+                    <div class="info-display">
+                        <div>Напряжение: <span class="val" id="cap-U">10</span> В</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>$U$ (В)</label>
+                        <input type="range" id="cap-U-slider" min="2" max="20" step="1" value="10">
+                        <span class="control-value" id="cap-U-value">10</span>
+                    </div>
+                    <button class="btn-reset" id="cap-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Меняйте напряжение — меняется напряжённость поля</span>
+                </div>
+                <div class="def-card">
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>На экране — плоский конденсатор. Верхняя пластина положительная, нижняя отрицательная. Жёлтые линии — это силовые линии электрического поля. Поскольку пластины плоские и параллельные, поле между ними <strong>однородное</strong> (во всех точках напряжённость \(E\) одинакова).</p>
+                    
+                    <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Напряжение U»</strong><br>Вы меняете разность потенциалов между пластинами. Как это связано с напряжённостью? Формулой \(E = \frac{U}{d}\), где \(d\) — фиксированное расстояние между пластинами. Наблюдайте за линиями:</p>
+                    <ul>
+                        <li><strong>Увеличиваете напряжение</strong> — линии становятся гуще (их становится больше). Это физический смысл: густота линий напрямую показывает силу поля (напряжённость).</li>
+                        <li><strong>Уменьшаете напряжение</strong> — линии редеют, поле становится слабее.</li>
+                    </ul>
+                    
+                    <p style="margin-top:12px;"><strong>2. Связь работы и потенциала</strong><br>Вспомните, что работа поля по переносу заряда \(A = q \cdot U\). Конденсатор — это как раз то место, где мы можем создавать заданное напряжение. Если вы возьмёте одну из предыдущих моделей (например, шарик) и поместите его в этот конденсатор, то при большем напряжении поле совершит бóльшую работу и шарик разгонится сильнее.</p>
+                    
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> Чем сильнее сближены пластины (меньше \(d\)) или чем больше напряжение \(U\), тем сильнее электрическое поле внутри конденсатора. Именно поэтому в технике стремятся делать конденсаторы с тонкими диэлектриками, чтобы накапливать большой заряд.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Работа поля</div>
+                <div class="task-condition"><strong>Условие:</strong> Заряд $q = 2 \cdot 10^{-6}$ Кл перемещается между точками с разностью потенциалов $U = 100$ В. Найдите работу поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 2 \cdot 10^{-6}$ Кл, $U = 100$ В</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> Формула: $A = qU$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$A = 2 \cdot 10^{-6} \cdot 100 = 2 \cdot 10^{-4} \text{ Дж} = 0{,}2 \text{ мДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Работа равна 0,2 мДж — небольшая, но измеримая.</div>
+                    <div class="answer">✅ Ответ: $A = 0{,}2$ мДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Разность потенциалов</div>
+                <div class="task-condition"><strong>Условие:</strong> При перемещении заряда $q = 4 \cdot 10^{-6}$ Кл поле совершило работу $A = 0{,}08$ Дж. Найдите разность потенциалов.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 4 \cdot 10^{-6}$ Кл, $A = 0{,}08$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> Из $A = qU$ выразим $U = \dfrac{A}{q}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = \dfrac{0{,}08}{4 \cdot 10^{-6}} = 2 \cdot 10^4 \text{ В} = 20 \text{ кВ}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Разность потенциалов 20 кВ — высокое напряжение.</div>
+                    <div class="answer">✅ Ответ: $U = 20$ кВ</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Напряжённость однородного поля</div>
+                <div class="task-condition"><strong>Условие:</strong> Между пластинами конденсатора, расстояние между которыми $d = 2$ мм, напряжение $U = 100$ В. Найдите напряжённость поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $d = 2 \cdot 10^{-3}$ м, $U = 100$ В</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> $E = \dfrac{U}{d}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = \dfrac{100}{2 \cdot 10^{-3}} = 5 \cdot 10^4 \text{ В/м} = 50 \text{ кВ/м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Напряжённость поля 50 кВ/м — близка к пробою воздуха (30 кВ/см), но в конденсаторе с диэлектриком допустимо.</div>
+                    <div class="answer">✅ Ответ: $E = 50$ кВ/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Работа при перемещении под углом</div>
+                <div class="task-condition"><strong>Условие:</strong> Заряд $q = 1$ мкКл перемещается в однородном поле $E = 1000$ В/м на расстояние $d = 0{,}1$ м под углом $\alpha = 60°$ к силовым линиям. Найдите работу поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 10^{-6}$ Кл, $E = 1000$ В/м, $d = 0{,}1$ м, $\alpha = 60°$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> $A = qEd\cos\alpha$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$A = 10^{-6} \cdot 1000 \cdot 0{,}1 \cdot \cos 60° = 10^{-4} \cdot 0{,}5 = 5 \cdot 10^{-5} \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При движении под углом 60° работа вдвое меньше, чем при движении вдоль поля.</div>
+                    <div class="answer">✅ Ответ: $A = 50$ мкДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Потенциал поля точечного заряда</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите потенциал поля, созданного зарядом $Q = 2 \cdot 10^{-8}$ Кл на расстоянии $r = 0{,}1$ м.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $Q = 2 \cdot 10^{-8}$ Кл, $r = 0{,}1$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\varphi$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> $\varphi = k \dfrac{Q}{r}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\varphi = 9 \cdot 10^9 \dfrac{2 \cdot 10^{-8}}{0{,}1} = 1800 \text{ В}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Потенциал 1800 В — довольно высокий, так как заряд близко.</div>
+                    <div class="answer">✅ Ответ: $\varphi = 1800$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Работа при перемещении заряда в поле точечного заряда</div>
+                <div class="task-condition"><strong>Условие:</strong> Заряд $q = 1$ нКл перемещается из точки с потенциалом $\varphi_1 = 100$ В в точку с потенциалом $\varphi_2 = 20$ В. Найдите работу поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 10^{-9}$ Кл, $\varphi_1 = 100$ В, $\varphi_2 = 20$ В</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> $A = q(\varphi_1 - \varphi_2)$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$A = 10^{-9} \cdot (100 - 20) = 8 \cdot 10^{-8} \text{ Дж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Работа совершается полем — заряд движется в сторону меньшего потенциала.</div>
+                    <div class="answer">✅ Ответ: $A = 80$ нДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Потенциал в центре квадрата</div>
+                <div class="task-condition"><strong>Условие:</strong> В вершинах квадрата со стороной $a = 0{,}2$ м находятся одинаковые заряды $q = 10^{-9}$ Кл. Найдите потенциал в центре квадрата.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 10^{-9}$ Кл, $a = 0{,}2$ м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\varphi_{центр}$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> Расстояние от вершины до центра: $r = \dfrac{a\sqrt{2}}{2} \approx 0{,}141$ м.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Потенциал от одного заряда: $\varphi_1 = 9 \cdot 10^9 \dfrac{10^{-9}}{0{,}141} \approx 63{,}8$ В.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Потенциалы складываются алгебраически: $\varphi_{центр} = 4 \cdot 63{,}8 \approx 255$ В.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Потенциал — скалярная величина, поэтому он складывается без учёта направлений.</div>
+                    <div class="answer">✅ Ответ: $\varphi_{центр} \approx 255$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Напряжение между точками</div>
+                <div class="task-condition"><strong>Условие:</strong> Заряд $q = 5$ мкКл перемещается между точками поля. При этом поле совершает работу $A = 0{,}1$ Дж. Найдите напряжение между точками.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 5 \cdot 10^{-6}$ Кл, $A = 0{,}1$ Дж</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> $U = \dfrac{A}{q}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = \dfrac{0{,}1}{5 \cdot 10^{-6}} = 2 \cdot 10^4 \text{ В} = 20 \text{ кВ}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Напряжение 20 кВ — довольно высокое.</div>
+                    <div class="answer">✅ Ответ: $U = 20$ кВ</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Работа при перемещении вдоль эквипотенциали</div>
+                <div class="task-condition"><strong>Условие:</strong> Заряд перемещается по эквипотенциальной поверхности. Чему равна работа поля?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> перемещение вдоль эквипотенциали</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $A$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> На эквипотенциальной поверхности потенциал не меняется: $\Delta \varphi = 0$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $A = q \Delta \varphi = 0$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Работа равна нулю, так как сила перпендикулярна перемещению.</div>
+                    <div class="answer">✅ Ответ: $A = 0$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Скорость электрона</div>
+                <div class="task-condition"><strong>Условие:</strong> Электрон прошёл разность потенциалов $U = 100$ В. Какую скорость он приобрёл? Масса электрона $m = 9{,}1 \cdot 10^{-31}$ кг, заряд $e = 1{,}6 \cdot 10^{-19}$ Кл.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $U = 100$ В, $e = 1{,}6 \cdot 10^{-19}$ Кл, $m = 9{,}1 \cdot 10^{-31}$ кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$</div>
+                </div>
+                    <div class="step"><strong>Шаг 1.</strong> Работа поля $A = eU$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Изменение кинетической энергии: $eU = \dfrac{mv^2}{2}$.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$v = \sqrt{\dfrac{2eU}{m}} = \sqrt{\dfrac{2 \cdot 1{,}6 \cdot 10^{-19} \cdot 100}{9{,}1 \cdot 10^{-31}}} \approx 5{,}9 \cdot 10^6 \text{ м/с}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Электрон разгоняется до ~6 млн м/с (около 2% скорости света).</div>
+                    <div class="answer">✅ Ответ: $v \approx 5{,}9 \cdot 10^6$ м/с</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> Заряд $q = 3 \cdot 10^{-6}$ Кл перемещается между точками с разностью потенциалов $U = 50$ В. Найдите работу поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $A = qU$.</div>
+                    <div class="answer">✅ Ответ: $A = 1{,}5 \cdot 10^{-4}$ Дж $= 0{,}15$ мДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжение между пластинами конденсатора $U = 200$ В, расстояние $d = 4$ мм. Найдите напряжённость поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $E = U/d$. Не забудьте перевести мм в м.</div>
+                    <div class="answer">✅ Ответ: $E = 50$ кВ/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Найдите потенциал поля заряда $Q = 5 \cdot 10^{-8}$ Кл на расстоянии $r = 0{,}5$ м.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $\varphi = k Q / r$.</div>
+                    <div class="answer">✅ Ответ: $\varphi = 900$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> При перемещении заряда $q = 2$ мкКл поле совершает работу $A = 4 \cdot 10^{-4}$ Дж. Найдите разность потенциалов.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $U = A/q$.</div>
+                    <div class="answer">✅ Ответ: $U = 200$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Чему равна работа поля при перемещении заряда вдоль эквипотенциальной поверхности?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Потенциал не меняется, $\Delta \varphi = 0$.</div>
+                    <div class="answer">✅ Ответ: $A = 0$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> Электрон прошёл разность потенциалов $U = 200$ В. Найдите его кинетическую энергию в электрон-вольтах (эВ).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $1$ эВ — это энергия, которую приобретает электрон, пройдя $1$ В.</div>
+                    <div class="answer">✅ Ответ: $W = 200$ эВ</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжённость однородного поля $E = 2000$ В/м. Найдите разность потенциалов между точками, расстояние между которыми вдоль силовой линии $d = 0{,}05$ м.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $U = E \cdot d$.</div>
+                    <div class="answer">✅ Ответ: $U = 100$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> В центре квадрата со стороной $a = 0{,}1$ м находятся четыре заряда по $10^{-9}$ Кл в вершинах. Найдите потенциал в центре. (Подсказка: $r = a\sqrt{2}/2$.)</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $\varphi = 4kq/r$, где $r = 0{,}0707$ м.</div>
+                    <div class="answer">✅ Ответ: $\varphi \approx 509$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> Заряд $q = 10$ мкКл перемещается из точки с потенциалом $+200$ В в точку с потенциалом $+50$ В. Найдите работу поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $A = q(\varphi_1 - \varphi_2)$.</div>
+                    <div class="answer">✅ Ответ: $A = 1{,}5 \cdot 10^{-3}$ Дж $= 1{,}5$ мДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> Заряд $q = 2 \cdot 10^{-8}$ Кл перемещается в поле $E = 500$ В/м на расстояние $d = 0{,}2$ м под углом $30°$ к силовым линиям. Найдите работу.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $A = qEd\cos\alpha$, $\cos 30° \approx 0{,}866$.</div>
+                    <div class="answer">✅ Ответ: $A \approx 1{,}73 \cdot 10^{-6}$ Дж $= 1{,}73$ мкДж</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-work').style.display = model === 'work' ? 'block' : 'none';
+        document.getElementById('model-equipotential').style.display = model === 'equipotential' ? 'block' : 'none';
+        document.getElementById('model-capacitor').style.display = model === 'capacitor' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- ===== МОДЕЛЬ 1: РАБОТА ПОЛЯ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-work');
+        const canvas = document.getElementById('canvas-work');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Пластины (сверху +, снизу -)
+        const plateGeo = new THREE.BoxGeometry(8, 0.2, 4);
+        const topPlate = new THREE.Mesh(plateGeo, new THREE.MeshStandardMaterial({ color: 0xff4444 }));
+        topPlate.position.set(0, 4, 0); group.add(topPlate);
+        const bottomPlate = new THREE.Mesh(plateGeo, new THREE.MeshStandardMaterial({ color: 0x4444ff }));
+        bottomPlate.position.set(0, -4, 0); group.add(bottomPlate);
+
+        // Подписи пластин
+        function makeLabel(text, color, yPos) {
+            const div = document.createElement('div');
+            div.textContent = text; div.style.color = color; div.style.fontSize = '2rem'; div.style.fontWeight = 'bold';
+            const lbl = new CSS2DObject(div); lbl.position.set(-4.5, yPos, 0); return lbl;
+        }
+        group.add(makeLabel('+', '#ffcccc', 4));
+        group.add(makeLabel('−', '#ccccff', -4));
+
+        // Линии поля
+        const linesGroup = new THREE.Group();
+        group.add(linesGroup);
+        for (let x = -3; x <= 3; x += 1.5) {
+            for (let z = -1.5; z <= 1.5; z += 1.5) {
+                const pts = [new THREE.Vector3(x, 3.8, z), new THREE.Vector3(x, -3.8, z)];
+                const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                linesGroup.add(new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x8ba5b8, transparent: true, opacity: 0.2 })));
+            }
+        }
+
+        // Траектория движения
+        const pathMat = new THREE.LineBasicMaterial({ color: 0x44ff44, linewidth: 2 });
+        const pathPoints = [];
+        const pathLine = new THREE.Line(new THREE.BufferGeometry(), pathMat);
+        group.add(pathLine);
+
+        // Шарик заряда
+        const chargeMat = new THREE.MeshStandardMaterial({ color: 0xffcc00, emissive: 0x664400 });
+        const chargeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), chargeMat);
+        chargeMesh.position.set(0, 3.5, 0);
+        group.add(chargeMesh);
+
+        // Свечение (вспышка) при движении
+        const glowMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0 });
+        const glowMesh = new THREE.Mesh(new THREE.SphereGeometry(0.8, 32, 32), glowMat);
+        group.add(glowMesh);
+
+        const qSlider = document.getElementById('work-q-slider');
+        const qValue = document.getElementById('work-q-value');
+        const A_Display = document.getElementById('work-A');
+        
+        // Добавляем ползунок напряжения прямо в HTML панели (если его нет)
+        if (!document.getElementById('work-U-slider')) {
+            const controlGroup = document.querySelector('#model-work .controls-panel .control-group');
+            const uGroup = document.createElement('div');
+            uGroup.className = 'control-group';
+            uGroup.innerHTML = `
+                <label>Напряжение U (В)</label>
+                <input type="range" id="work-U-slider" min="10" max="200" step="10" value="100">
+                <span class="control-value" id="work-U-value">100</span>
+            `;
+            controlGroup.parentNode.insertBefore(uGroup, controlGroup.nextSibling);
+        }
+
+        const USlider = document.getElementById('work-U-slider');
+        const UValue = document.getElementById('work-U-value');
+
+        let isMoving = false;
+        let currentY = 3.5;
+        let q = 2;
+        let U = 100;
+
+        let currentSpeed = 0.05; // Переменная скорости
+
+        function updateInfo() {
+            q = parseFloat(qSlider.value);
+            U = parseFloat(USlider.value);
+            qValue.textContent = q;
+            UValue.textContent = U;
+            const A = (q * 1e-6) * U;
+            A_Display.textContent = A.toExponential(2);
+
+            // Меняем размер шарика в зависимости от заряда (q от 1 до 10)
+            const scale = 0.5 + (q / 10) * 0.8; // от 0.58 до 1.3
+            chargeMesh.scale.set(scale, scale, scale);
+            glowMesh.scale.set(scale, scale, scale);
+
+            // Меняем скорость полета в зависимости от напряжения (U от 10 до 200)
+            currentSpeed = 0.02 + (U / 200) * 0.08; // от 0.024 до 0.1
+        }
+
+        qSlider.addEventListener('input', updateInfo);
+        USlider.addEventListener('input', updateInfo);
+
+        document.getElementById('work-move-btn').addEventListener('click', () => {
+            if (!isMoving) {
+                isMoving = true;
+                currentY = 3.5;
+                pathPoints.length = 0;
+                pathPoints.push(new THREE.Vector3(0, currentY, 0));
+                pathLine.geometry.dispose();
+                pathLine.geometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+                glowMat.opacity = 0.8;
+            }
+        });
+
+        document.getElementById('work-reset').addEventListener('click', () => {
+            isMoving = false;
+            currentY = 3.5;
+            chargeMesh.position.set(0, currentY, 0);
+            chargeMesh.scale.set(1, 1, 1);
+            glowMesh.scale.set(1, 1, 1);
+            pathPoints.length = 0;
+            pathLine.geometry.dispose();
+            pathLine.geometry = new THREE.BufferGeometry().setFromPoints([]);
+            glowMat.opacity = 0;
+        });
+
+        document.getElementById('fs-work').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateInfo();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (isMoving) {
+                currentY -= currentSpeed;
+                if (currentY <= -3.5) {
+                    currentY = -3.5;
+                    isMoving = false;
+                    glowMat.opacity = 0; // Гасим свечение при остановке
+                }
+                chargeMesh.position.set(0, currentY, 0);
+                glowMesh.position.set(0, currentY, 0);
+                
+                // Пульсирующее свечение во время полета
+                if (isMoving) {
+                    glowMat.opacity = 0.4 + Math.sin(Date.now() * 0.01) * 0.3;
+                }
+
+                pathPoints.push(new THREE.Vector3(0, currentY, 0));
+                pathLine.geometry.dispose();
+                pathLine.geometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+            }
+
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script><!-- ===== МОДЕЛЬ 2: ЭКВИПОТЕНЦИАЛИ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-equipotential');
+        const canvas = document.getElementById('canvas-equipotential');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 5, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Центральный заряд
+        const charge = new THREE.Mesh(
+            new THREE.SphereGeometry(0.6, 32, 32),
+            new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111 })
+        );
+        group.add(charge);
+
+        // Группа для динамических объектов (сфера и кольца)
+        const dynamicGroup = new THREE.Group();
+        group.add(dynamicGroup);
+
+        // Силовые линии (стрелки наружу)
+        const arrows = [];
+        const N = 16;
+        function makeArrow(color) {
+            const g = new THREE.Group();
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1, 8), new THREE.MeshStandardMaterial({ color }));
+            shaft.position.y = 0.5;
+            const head = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 10), new THREE.MeshStandardMaterial({ color }));
+            head.position.y = 1.05;
+            g.add(shaft); g.add(head);
+            return g;
+        }
+        for (let i = 0; i < N; i++) {
+            const angle = (i / N) * Math.PI * 2;
+            const a = makeArrow(0xffcc00);
+            group.add(a);
+            arrows.push({ mesh: a, angle });
+        }
+
+        const slider = document.getElementById('eq-slider');
+        const valueDisplay = document.getElementById('eq-value');
+        const potDisplay = document.getElementById('eq-pot');
+
+        function update() {
+            const r = parseFloat(slider.value);
+            valueDisplay.textContent = r.toFixed(1);
+
+            // Потенциал = kQ / r (условно Q=1 нКл)
+            const phi = 9 * Math.pow(10, 9) * Math.pow(10, -9) / r;
+            potDisplay.textContent = phi.toFixed(1);
+
+            // ПОЛНАЯ ОЧИСТКА старых объектов перед созданием новых
+            while (dynamicGroup.children.length > 0) {
+                const c = dynamicGroup.children[0];
+                dynamicGroup.remove(c);
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) c.material.dispose();
+            }
+
+            // Новая эквипотенциальная сфера
+            const sphereGeo = new THREE.SphereGeometry(r, 32, 32);
+            const sphereMat = new THREE.MeshStandardMaterial({
+                color: 0x44aaff, transparent: true, opacity: 0.12, side: THREE.DoubleSide
+            });
+            const eqSphere = new THREE.Mesh(sphereGeo, sphereMat);
+            dynamicGroup.add(eqSphere);
+
+            // Новое жёлтое кольцо
+            const ringGeo = new THREE.TorusGeometry(r, 0.03, 16, 100);
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0x44aaff });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            dynamicGroup.add(ring);
+
+            // Обновляем стрелки (они должны быть перпендикулярны сфере)
+            arrows.forEach(item => {
+                const dist = 1.2 + r * 0.6;
+                const x = Math.cos(item.angle) * dist;
+                const z = Math.sin(item.angle) * dist;
+                item.mesh.position.set(x, 0, z);
+                const dir = new THREE.Vector3(x, 0, z).normalize();
+                item.mesh.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+                item.mesh.scale.set(1, 1.5, 1);
+            });
+        }
+
+        slider.addEventListener('input', update);
+        document.getElementById('eq-reset').addEventListener('click', () => {
+            slider.value = 3;
+            update();
+        });
+
+        document.getElementById('fs-equipotential').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script><!-- ===== МОДЕЛЬ 3: КОНДЕНСАТОР ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-capacitor');
+        const canvas = document.getElementById('canvas-capacitor');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 3, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Пластины
+        const plateGeo = new THREE.BoxGeometry(6, 0.2, 3);
+        const plateMatPos = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+        const plateMatNeg = new THREE.MeshStandardMaterial({ color: 0x4444ff });
+
+        const topPlate = new THREE.Mesh(plateGeo, plateMatPos);
+        topPlate.position.set(0, 3, 0);
+        group.add(topPlate);
+
+        const bottomPlate = new THREE.Mesh(plateGeo, plateMatNeg);
+        bottomPlate.position.set(0, -3, 0);
+        group.add(bottomPlate);
+
+        // Подписи пластин
+        function makeLabel(text, color, yPos) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = '2rem';
+            div.style.fontWeight = 'bold';
+            const lbl = new CSS2DObject(div);
+            lbl.position.set(-3.5, yPos, 0);
+            return lbl;
+        }
+        group.add(makeLabel('+', '#ffcccc', 3));
+        group.add(makeLabel('−', '#ccccff', -3));
+
+        let linesGroup = new THREE.Group();
+        group.add(linesGroup);
+
+        function buildLines(U) {
+            while (linesGroup.children.length) {
+                const c = linesGroup.children[0];
+                linesGroup.remove(c);
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) c.material.dispose();
+            }
+
+            const density = Math.floor(U / 2);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.6 });
+            const arrowMat = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+
+            for (let x = -2.5; x <= 2.5; x += 5 / density) {
+                for (let z = -1; z <= 1; z += 1) {
+                    const pts = [
+                        new THREE.Vector3(x, 2.8, z),
+                        new THREE.Vector3(x, -2.8, z)
+                    ];
+                    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                    linesGroup.add(new THREE.Line(geo, lineMat));
+
+                    const arrowPos = new THREE.Vector3(x, 0, z);
+                    const arrow = new THREE.Mesh(
+                        new THREE.ConeGeometry(0.1, 0.3, 8),
+                        arrowMat
+                    );
+                    arrow.position.copy(arrowPos);
+                    arrow.rotation.x = Math.PI;
+                    linesGroup.add(arrow);
+                }
+            }
+        }
+
+        const slider = document.getElementById('cap-U-slider');
+        const valueDisplay = document.getElementById('cap-U-value');
+        const voltDisplay = document.getElementById('cap-U');
+
+        function update() {
+            const val = parseFloat(slider.value);
+            valueDisplay.textContent = val;
+            voltDisplay.textContent = val;
+            buildLines(val);
+        }
+
+        slider.addEventListener('input', update);
+        document.getElementById('cap-reset').addEventListener('click', () => {
+            slider.value = 10;
+            update();
+        });
+
+        document.getElementById('fs-capacitor').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+    </nav>
+<script>
+/* ==== 5. Скелетоны для формул MathJax ==== */
+(function(){
+    function addSkeletons(){
+        document.querySelectorAll('.formula-block').forEach(function(el){
+            if (el.querySelector('mjx-container')) return;
+            if (el.dataset.sk) return;
+            el.dataset.sk = '1';
+            var s = document.createElement('span');
+            s.className = 'skeleton';
+            s.style.width = (60 + Math.random()*80) + 'px';
+            el.appendChild(s);
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+    else addSkeletons();
+    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+})();
+
+/* ==== 6. Чипы категорий в результатах поиска ==== */
+(function(){
+    function classify(cat){
+        var c = (cat||'').toLowerCase();
+        if (c.indexOf('механик') >= 0) return 'cat-mech';
+        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+        if (c.indexOf('электр') >= 0) return 'cat-elec';
+        return 'cat-other';
+    }
+    function decorate(){
+        document.querySelectorAll('.search-result-category').forEach(function(el){
+            if (el.dataset.chip) return;
+            el.dataset.chip = '1';
+            el.classList.add(classify(el.textContent));
+        });
+    }
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            decorate();
+        };
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+    else decorate();
+})();
+
+/* ==== 10. Анимация смены темы «как на iPhone» ==== */
+(function(){
+    function animateThemeChange(x, y){
+        var circle = document.createElement('div');
+        circle.className = 'theme-circle';
+        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+        circle.style.width = circle.style.height = (maxR*2) + 'px';
+        circle.style.left = (x - maxR) + 'px';
+        circle.style.top  = (y - maxR) + 'px';
+        document.body.appendChild(circle);
+        requestAnimationFrame(function(){ circle.classList.add('expand'); });
+        setTimeout(function(){ circle.remove(); }, 700);
+    }
+    document.addEventListener('click', function(e){
+        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+        if (!t) return;
+        var r = t.getBoundingClientRect();
+        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+    }, true);
+})();
+
+/* ==== 2. Ripple при тапе ==== */
+(function(){
+    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+    function bind(el){
+        if (el.dataset.rippleBound) return;
+        el.dataset.rippleBound = '1';
+        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+        el.addEventListener('pointerdown', function(e){
+            var rect = el.getBoundingClientRect();
+            var size = Math.max(rect.width, rect.height);
+            var r = document.createElement('span');
+            r.className = 'ripple';
+            r.style.width = r.style.height = size + 'px';
+            r.style.left = (e.clientX - rect.left - size/2) + 'px';
+            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+            el.appendChild(r);
+            setTimeout(function(){ r.remove(); }, 650);
+        });
+    }
+    function bindAll(){
+        document.querySelectorAll(sel).forEach(bind);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+    else bindAll();
+    /* Перепривязка после поиска */
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            setTimeout(bindAll, 30);
+        };
+    }
+})();
+</script>
+<script src="search-overlay.js"></script>
+<!-- bottom-nav-autohide-script -->
+<script>
+/* Автоскрытие нижней панели при скролле */
+(function(){
+    var nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    var lastY = window.scrollY;
+    var threshold = 8;
+    var ticking = false;
+    function onScroll(){
+        var y = window.scrollY;
+        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+        if (y > lastY && y > 80) {
+            nav.classList.add('nav-hidden');
+        } else {
+            nav.classList.remove('nav-hidden');
+        }
+        lastY = y;
+        ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+    }, { passive: true });
+})();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>`r`n</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

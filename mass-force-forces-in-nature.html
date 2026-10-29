@@ -510,6 +510,602 @@
     </script>
     <script src="es5/tex-chtml.js" async></script>
     <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+<style id="titles-center-fix">
+/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
+.section-title {
+    justify-content: center !important;
+    text-align: center !important;
+    position: relative !important;
+    padding-left: 16px !important;
+    padding-right: 28px !important;
+}
+.section-title::after {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin-left: 0 !important;
+}
+.section.collapsed .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+/* Названия файлов / страниц — по центру */
+h1, .page-title, .file-title, .title {
+    text-align: center !important;
+}
+</style>
+<style id="section-gradient-fix">
+/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
+/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+
+.section { position: relative; }
+
+/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
+
+/* Закрыт: градиента нет */
+.section.collapsed > .section-title {
+    background-image: none;
+    transition: background-image 0.35s ease;
+}
+
+/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
+.section.collapsed > .section-title:hover {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Открыт: тот же градиент постоянно */
+.section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Светлая тема — цвет из --special-border (#d97706) */
+:root.light-mode .section.collapsed > .section-title:hover,
+:root.light-mode .section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(217, 119, 6, 0.18) 0%,
+        rgba(217, 119, 6, 0.06) 45%,
+        rgba(217, 119, 6, 0.00) 100%);
+}
+
+/* ---------- СТРЕЛКА ---------- */
+
+/* Закрыт: светящаяся синяя */
+.section.collapsed > .section-title::after {
+    color: var(--accent, #3b82f6) !important;
+    text-shadow:
+        0 0 6px rgba(59, 130, 246, 0.85),
+        0 0 14px rgba(59, 130, 246, 0.55);
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
+    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+}
+
+/* Открыт: свечение убираем, стрелка обычная */
+.section:not(.collapsed) > .section-title::after {
+    color: var(--text-secondary, #8ba5b8) !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
+.section.collapsed > .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+.section:not(.collapsed) > .section-title::after {
+    transform: translateY(-50%) rotate(0deg) !important;
+}
+
+/* Светлая тема: синий чуть темнее, свечение мягче */
+:root.light-mode .section.collapsed > .section-title::after {
+    color: var(--accent, #2563eb) !important;
+    text-shadow:
+        0 0 6px rgba(37, 99, 235, 0.6),
+        0 0 12px rgba(37, 99, 235, 0.35);
+    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
+}
+</style>
+<style id="modern-visual-fix">
+/* ==== 7. Плавный скролл + отступ у заголовков ==== */
+html { scroll-behavior: smooth; }
+.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+
+/* ==== 8. Радиальный градиент на фоне ==== */
+body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
+        var(--bg) !important;
+}
+:root.light-mode body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
+        var(--bg) !important;
+}
+
+/* ==== 3. «Стеклянная» шапка ==== */
+@media (prefers-reduced-motion: no-preference) {
+    .header {
+        background: rgba(30, 53, 69, 0.72) !important;
+        backdrop-filter: blur(14px) saturate(140%);
+        -webkit-backdrop-filter: blur(14px) saturate(140%);
+        border-bottom: 1px solid var(--border);
+    }
+    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
+}
+
+/* ==== 5. Скелетоны для формул ==== */
+.skeleton {
+    display: inline-block;
+    min-width: 60px;
+    height: 1.1em;
+    vertical-align: middle;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmerSk 1.2s infinite linear;
+}
+@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+/* ==== 6. Чипы категорий в поиске ==== */
+.search-result-category {
+    display: inline-block;
+    padding: 2px 10px;
+    margin-top: 4px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #fff;
+    background: var(--accent, #3b82f6);
+}
+.search-result-category.cat-mech  { background: #3b82f6; }
+.search-result-category.cat-thermo{ background: #f59e0b; }
+.search-result-category.cat-elec  { background: #eab308; }
+.search-result-category.cat-other { background: #64748b; }
+
+/* ==== 4. Нижняя навигация ==== */
+.bottom-nav {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 22px;
+    background: rgba(30, 53, 69, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
+    z-index: 900;
+    transition: background 0.3s, border 0.3s;
+}
+:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+.bottom-nav a, .bottom-nav button {
+    display: flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px; border-radius: 14px;
+    border: none; background: transparent;
+    color: var(--text-secondary); font-size: 22px;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.2s;
+}
+.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
+    background: rgba(59,130,246,0.15);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+body { padding-bottom: 78px; }
+
+/* ==== 10. Круг смены темы ==== */
+.theme-circle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    background: var(--bg);
+    transform: scale(0);
+    opacity: 0.95;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
+}
+.theme-circle.expand { transform: scale(1); opacity: 0; }
+
+/* ==== 2. Ripple при тапе ==== */
+.ripple-host { position: relative !important; overflow: hidden !important; }
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(59,130,246,0.35);
+    transform: scale(0);
+    animation: rippleAnim 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 0;
+}
+@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+</style>
+<style id="search-clean-fix">
+/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
+.search-result-icon {
+    display: none !important;
+}
+
+/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
+.search-results {
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/Edge */
+}
+.search-results::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
+body::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+}
+body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+</style>
+<style id="nav-back-hide-index">
+/* На главной кнопка «Назад» не нужна */
+body.is-index .nav-back-btn { display: none !important; }
+</style>
+<style id="bottom-nav-autohide">
+/* Автоскрытие нижней панели при скролле вниз */
+.bottom-nav {
+    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
+}
+.bottom-nav.nav-hidden {
+    transform: translate(-50%, 120%);
+    opacity: 0;
+    pointer-events: none;
+}
+/* На главной панель всегда видна */
+body.is-index .bottom-nav.nav-hidden {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+}
+</style>
+<style id="fav-nav-yellow">
+/* Избранное в нижней панели — жёлтое выделение, когда активно */
+.bottom-nav a[href="favorites.html"].active,
+.bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(250, 204, 21, 0.18) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover,
+.bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(250, 204, 21, 0.28) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(234, 179, 8, 0.18) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(234, 179, 8, 0.28) !important;
+    color: #92400e !important;
+}
+/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
+
+</style>
+<style id="nav-order-fix">
+/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
+.bottom-nav { display: flex; align-items: center; }
+.bottom-nav .nav-back-btn { order: 1; }
+.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+.bottom-nav a[href="favorites.html"] { order: 4; }
+
+/* Звезда активна — жёлтая */
+.bottom-nav a[href="favorites.html"].active {
+    background: rgba(250, 204, 21, 0.20) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(250, 204, 21, 0.30) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active {
+    background: rgba(234, 179, 8, 0.20) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(234, 179, 8, 0.30) !important;
+    color: #92400e !important;
+}
+</style>
+<style id="unified-buttons">
+/* ==== Единый стиль кнопок ==== */
+
+/* База для всех кнопок */
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.show-solution-btn,
+.btn-reset,
+.model-tab,
+.clear-all-btn,
+.search-clear,
+.back-link,
+.fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.2;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s,
+                box-shadow 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    white-space: nowrap;
+}
+
+/* Hover / active — общий отклик */
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-danger:hover,
+.show-solution-btn:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover,
+.back-link:hover,
+.fullscreen-btn:hover {
+    transform: translateY(-1px);
+}
+.btn-primary:active,
+.btn-secondary:active,
+.btn-danger:active,
+.show-solution-btn:active,
+.btn-reset:active,
+.model-tab:active,
+.clear-all-btn:active,
+.back-link:active,
+.fullscreen-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ==== PRIMARY (синий акцент) ==== */
+.btn-primary,
+.show-solution-btn,
+.back-link {
+    background: var(--accent, #3b82f6);
+    color: #fff;
+    border-color: var(--accent, #3b82f6);
+}
+.btn-primary:hover,
+.show-solution-btn:hover,
+.back-link:hover {
+    background: var(--accent-hover, #60a5fa);
+    border-color: var(--accent-hover, #60a5fa);
+    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
+}
+:root.light-mode .btn-primary,
+:root.light-mode .show-solution-btn,
+:root.light-mode .back-link {
+    background: var(--accent, #2563eb);
+    border-color: var(--accent, #2563eb);
+}
+:root.light-mode .btn-primary:hover,
+:root.light-mode .show-solution-btn:hover,
+:root.light-mode .back-link:hover {
+    background: var(--accent-hover, #3b82f6);
+    border-color: var(--accent-hover, #3b82f6);
+}
+
+/* ==== SECONDARY (нейтральный) ==== */
+.btn-secondary,
+.btn-reset,
+.model-tab,
+.clear-all-btn {
+    background: var(--menu-item-hover, #233e50);
+    color: var(--text, #fff);
+    border-color: var(--border, rgba(59,130,246,0.15));
+}
+.btn-secondary:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover {
+    background: var(--group-header-bg, #1a3a5a);
+    border-color: var(--accent, #3b82f6);
+    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
+}
+:root.light-mode .btn-secondary,
+:root.light-mode .btn-reset,
+:root.light-mode .model-tab,
+:root.light-mode .clear-all-btn {
+    background: var(--menu-item-hover, #f0f4fa);
+    color: var(--text, #1a2a3f);
+}
+
+/* Активный таб — как primary */
+.model-tab.active {
+    background: var(--accent, #3b82f6) !important;
+    color: #fff !important;
+    border-color: var(--accent, #3b82f6) !important;
+    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
+}
+.model-tab.active:hover {
+    background: var(--accent-hover, #60a5fa) !important;
+    border-color: var(--accent-hover, #60a5fa) !important;
+}
+
+/* ==== DANGER (красный) ==== */
+.btn-danger,
+.clear-all-btn.danger,
+.clear-all-btn:hover {
+    background: #ef4444 !important;
+    color: #fff !important;
+    border-color: #ef4444 !important;
+}
+.btn-danger:hover,
+.clear-all-btn.danger:hover,
+.clear-all-btn:hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
+}
+
+/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
+.search-clear {
+    background: transparent;
+    border: none;
+    padding: 6px 10px;
+    min-height: auto;
+    color: var(--text-secondary, #8ba5b8);
+    border-radius: 50%;
+}
+.search-clear:hover {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent, #3b82f6);
+    transform: none;
+}
+
+/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
+.fullscreen-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 20px;
+}
+.fullscreen-btn:hover {
+    background: var(--accent, #3b82f6);
+    border-color: var(--accent, #3b82f6);
+}
+
+/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
+.remove-fav {
+    border-radius: 50%;
+    min-height: 32px;
+    min-width: 32px;
+    padding: 4px 8px;
+}
+.remove-fav:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+}
+
+/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--accent, #3b82f6);
+    padding: 0;
+    min-height: auto;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.btn-link:hover {
+    color: var(--accent-hover, #60a5fa);
+    transform: none;
+    box-shadow: none;
+}
+</style>
+<style id="page-fade-in">
+/* ==== Плавное появление страницы (fade-in) ==== */
+
+/* Мягкий вход всей страницы */
+body {
+    animation: pageFade 0.3s ease-out;
+}
+@keyframes pageFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Контент чуть «подъезжает» снизу */
+.container,
+.main-content {
+    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@keyframes pageFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Если в системе включено «уменьшить движение» — анимации отключаем */
+@media (prefers-reduced-motion: reduce) {
+    body,
+    .container,
+    .main-content {
+        animation: none !important;
+    }
+}
+</style>
+<style id="share-btn-right">
+/* Прижимаем кнопку «Поделиться» к правому краю панели */
+.bottom-nav button[title="Поделиться"] {
+    order: 99 !important;
+    margin-left: auto !important;
+}
+</style>
+<style id="no-tap-highlight">
+/* Убираем системный голубой/серый прямоугольник при тапе */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+}
+a, button, div, span, label, input, textarea, select {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+}
+</style>
+<style id="no-tap-highlight-accordion">
+/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
+.section-title,
+.group-header,
+.menu-item,
+.submenu-item,
+.model-tab,
+.search-result-item {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+/* Лёгкий отклик при нажатии (вместо системного квадратика) */
+.section-title:active,
+.group-header:active {
+    transform: scale(0.99);
+    transition: transform 0.1s;
+}
+</style>
 </head>
 <body>
 <div class="container">
@@ -676,13 +1272,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 1. Сила тяжести</div>
                 <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг находится на поверхности Земли. Определите силу тяжести, действующую на тело. ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $F_{тяж}$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint1')">💡 Подсказка</button>
                 <div id="hint1" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_{тяж}$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Используй формулу силы тяжести $F_{тяж} = mg$. Умножь массу на ускорение свободного падения.</div>
                         <div class="answer">✅ Ответ: $F_{тяж} = 49$ Н</div>
@@ -701,13 +1297,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 2. Масса по силе тяжести</div>
                 <div class="task-condition"><strong>Условие:</strong> На тело действует сила тяжести $F_{тяж} = 78.4$ Н. Определите массу тела. ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $F_{тяж} = 78.4$ Н, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint2')">💡 Подсказка</button>
                 <div id="hint2" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $F_{тяж} = 78.4$ Н, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Из формулы $F_{тяж} = mg$ вырази массу: $m = \frac{F_{тяж}}{g}$. Раздели силу тяжести на $g$.</div>
                         <div class="answer">✅ Ответ: $m = 8$ кг</div>
@@ -726,13 +1322,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 3. Второй закон Ньютона</div>
                 <div class="task-condition"><strong>Условие:</strong> На тело массой $m = 4$ кг действует сила $F = 20$ Н. Найдите ускорение тела.</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint3')">💡 Подсказка</button>
                 <div id="hint3" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Второй закон Ньютона: $F = ma$, откуда $a = \frac{F}{m}$. Раздели силу на массу.</div>
                         <div class="answer">✅ Ответ: $a = 5$ м/с²</div>
@@ -753,13 +1349,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 4. Ускорение тела с трением</div>
                 <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг тянут по горизонтальной поверхности с силой $F = 20$ Н. Коэффициент трения $\mu = 0.15$. Найдите ускорение тела. ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н, $\mu = 0.15$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint4')">💡 Подсказка</button>
                 <div id="hint4" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н, $\mu = 0.15$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Сначала найди силу трения $F_{тр} = \mu N = \mu mg$. Потом равнодействующую $F_{рез} = F - F_{тр}$. Ускорение $a = \frac{F_{рез}}{m}$.</div>
                         <div class="answer">✅ Ответ: $a = 3.53$ м/с²</div>
@@ -790,13 +1386,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 5. Сила упругости пружины</div>
                 <div class="task-condition"><strong>Условие:</strong> Пружина жёсткостью $k = 150$ Н/м растягивается под действием силы $F = 30$ Н. Найдите удлинение пружины.</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $k = 150$ Н/м, $F = 30$ Н</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint5')">💡 Подсказка</button>
                 <div id="hint5" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 150$ Н/м, $F = 30$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> По закону Гука $F_{упр} = k \cdot \Delta x$, значит $\Delta x = \frac{F}{k}$. Раздели силу на жёсткость.</div>
                         <div class="answer">✅ Ответ: $\Delta x = 0.2$ м = 20 см</div>
@@ -815,13 +1411,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 6. Равнодействующая сил</div>
                 <div class="task-condition"><strong>Условие:</strong> На тело действуют три силы: $F_1 = 8$ Н направлена вправо, $F_2 = 5$ Н направлена влево, $F_3 = 3$ Н направлена вправо. Найдите модуль и направление равнодействующей силы.</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $F_1 = 8$ Н (→), $F_2 = 5$ Н (←), $F_3 = 3$ Н (→)</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $R$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint6')">💡 Подсказка</button>
                 <div id="hint6" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $F_1 = 8$ Н (→), $F_2 = 5$ Н (←), $F_3 = 3$ Н (→)</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Сложи силы, направленные в одну сторону, и вычти силу, направленную в противоположную. Равнодействующая — геометрическая сумма всех сил.</div>
                         <div class="answer">✅ Ответ: $R = 6$ Н (вправо)</div>
@@ -843,13 +1439,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 7. Сила тяжести и масса</div>
                 <div class="task-condition"><strong>Условие:</strong> Два тела имеют массы $m_1 = 2$ кг и $m_2 = 5$ кг. Во сколько раз сила тяжести второго тела больше силы тяжести первого? ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 5$ кг, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\frac{F_{тяж2}}{F_{тяж1}}$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint7')">💡 Подсказка</button>
                 <div id="hint7" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 5$ кг, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\frac{F_{тяж2}}{F_{тяж1}}$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Сила тяжести $F_{тяж} = mg$. Отношение сил тяжести равно отношению масс: $\frac{F_{тяж2}}{F_{тяж1}} = \frac{m_2}{m_1}$.</div>
                         <div class="answer">✅ Ответ: в 2.5 раза</div>
@@ -872,13 +1468,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 8. Движение по наклонной плоскости</div>
                 <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг находится на наклонной плоскости с углом $\alpha = 30°$ к горизонту. Коэффициент трения $\mu = 0.2$. Найдите ускорение тела, если оно скользит вниз. ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $\alpha = 30°$, $\mu = 0.2$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint8')">💡 Подсказка</button>
                 <div id="hint8" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $\alpha = 30°$, $\mu = 0.2$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Проекция силы тяжести вдоль плоскости: $F_{\parallel} = mg \sin\alpha$. Сила трения: $F_{тр} = \mu mg \cos\alpha$. Ускорение: $a = \frac{F_{\parallel} - F_{тр}}{m}$.</div>
                         <div class="answer">✅ Ответ: $a \approx 3.20$ м/с²</div>
@@ -910,13 +1506,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 9. Два тела на пружине</div>
                 <div class="task-condition"><strong>Условие:</strong> Два груза массами $m_1 = 2$ кг и $m_2 = 3$ кг подвешены на пружине жёсткостью $k = 100$ Н/м последовательно. Найдите удлинение пружины. ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $k = 100$ Н/м, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint9')">💡 Подсказка</button>
                 <div id="hint9" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $k = 100$ Н/м, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Пружина растягивается под действием суммарного веса обоих грузов: $F = (m_1 + m_2)g$. Затем по закону Гука $\Delta x = \frac{F}{k}$.</div>
                         <div class="answer">✅ Ответ: $\Delta x = 0.49$ м = 49 см</div>
@@ -939,13 +1535,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 10. Равномерное движение по наклонной плоскости</div>
                 <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 3$ кг находится на наклонной плоскости с углом $\alpha = 25°$. Коэффициент трения $\mu = 0.3$. Какую силу $F$ нужно приложить параллельно плоскости, чтобы тело двигалось вверх с постоянной скоростью? ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $\alpha = 25°$, $\mu = 0.3$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint10')">💡 Подсказка</button>
                 <div id="hint10" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $\alpha = 25°$, $\mu = 0.3$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> При равномерном движении сила тяги компенсирует и составляющую тяжести, и трение: $F = mg \sin\alpha + \mu mg \cos\alpha$.</div>
                         <div class="answer">✅ Ответ: $F \approx 20.43$ Н</div>
@@ -976,13 +1572,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 11. Сравнение масс по силе и ускорению</div>
                 <div class="task-condition"><strong>Условие:</strong> На тело А действует сила $F = 15$ Н, при этом оно получает ускорение $a_A = 3$ м/с². На тело Б действует та же сила, но ускорение $a_Б = 5$ м/с². Найдите массы тел.</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $F = 15$ Н, $a_A = 3$ м/с², $a_Б = 5$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $m_A$, $m_Б$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint11')">💡 Подсказка</button>
                 <div id="hint11" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $F = 15$ Н, $a_A = 3$ м/с², $a_Б = 5$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m_A$, $m_Б$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> По второму закону Ньютона $m = \frac{F}{a}$. Найди массу каждого тела отдельно.</div>
                         <div class="answer">✅ Ответ: $m_A = 5$ кг, $m_Б = 3$ кг</div>
@@ -1005,13 +1601,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 12. Вес тела в лифте</div>
                 <div class="task-condition"><strong>Условие:</strong> На пружине жёсткостью $k = 80$ Н/м висит груз массой $m = 4$ кг. Пружину с грузом опускают в лифте, движущемся вниз с ускорением $a = 2$ м/с². Найдите удлинение пружины. ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $k = 80$ Н/м, $m = 4$ кг, $a = 2$ м/с², $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol12')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint12')">💡 Подсказка</button>
                 <div id="hint12" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $k = 80$ Н/м, $m = 4$ кг, $a = 2$ м/с², $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> При движении вниз с ускорением вес груза уменьшается: $P = m(g - a)$. Затем по закону Гука $\Delta x = \frac{P}{k}$.</div>
                         <div class="answer">✅ Ответ: $\Delta x = 0.39$ м = 39 см</div>
@@ -1034,13 +1630,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 13. Движение связанных тел</div>
                 <div class="task-condition"><strong>Условие:</strong> Два тела массами $m_1 = 2$ кг и $m_2 = 3$ кг связаны невесомой нерастяжимой нитью и лежат на гладкой горизонтальной поверхности. К телу $m_1$ приложена сила $F = 15$ Н. Найдите ускорение системы и силу натяжения нити.</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $F = 15$ Н</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$, $T$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol13')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint13')">💡 Подсказка</button>
                 <div id="hint13" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $F = 15$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $a$, $T$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Ускорение системы: $a = \frac{F}{m_1 + m_2}$. Сила натяжения нити: $T = m_2 \cdot a$.</div>
                         <div class="answer">✅ Ответ: $a = 3$ м/с², $T = 9$ Н</div>
@@ -1063,13 +1659,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 14. Сравнение сил трения</div>
                 <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 5$ кг движется по горизонтальной поверхности. Коэффициент трения $\mu = 0.25$. Найдите силу трения. Во сколько раз изменится сила трения, если на тело поставить ещё один груз массой $m_2 = 3$ кг? ($g = 9.8$ м/с²).</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $m_2 = 3$ кг, $\mu = 0.25$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $F_{тр1}$, $F_{тр2}$, отношение</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol14')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint14')">💡 Подсказка</button>
                 <div id="hint14" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $m_2 = 3$ кг, $\mu = 0.25$, $g = 9.8$ м/с²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $F_{тр1}$, $F_{тр2}$, отношение</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> $F_{тр} = \mu mg$. Во втором случае общая масса $m_{общ} = m + m_2$. Отношение сил равно отношению масс.</div>
                         <div class="answer">✅ Ответ: $F_{тр1} = 12.25$ Н, $F_{тр2} = 19.6$ Н, отношение $= 1.6$</div>
@@ -1096,13 +1692,13 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 15. Сила упругости и закон Гука</div>
                 <div class="task-condition"><strong>Условие:</strong> Пружина длиной $l_0 = 20$ см под действием силы $F = 12$ Н растягивается до длины $l = 28$ см. Найдите жёсткость пружины $k$.</div>
-                <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 20$ см $= 0.2$ м, $l = 28$ см $= 0.28$ м, $F = 12$ Н</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $k$</div>
-                </div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
                 <button class="hint-btn" onclick="toggleHint('hint15')">💡 Подсказка</button>
                 <div id="hint15" class="task-solution">
+                    <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 20$ см $= 0.2$ м, $l = 28$ см $= 0.28$ м, $F = 12$ Н</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $k$</div>
+                </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Сначала найди удлинение $\Delta x = l - l_0$. Затем по закону Гука $k = \frac{F}{\Delta x}$.</div>
                         <div class="answer">✅ Ответ: $k = 150$ Н/м</div>
@@ -1866,5 +2462,188 @@
 
 <script src="favorites.js"></script>
 <script src="theme.js"></script>
-</body>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+    </nav>
+<script>
+/* ==== 5. Скелетоны для формул MathJax ==== */
+(function(){
+    function addSkeletons(){
+        document.querySelectorAll('.formula-block').forEach(function(el){
+            if (el.querySelector('mjx-container')) return;
+            if (el.dataset.sk) return;
+            el.dataset.sk = '1';
+            var s = document.createElement('span');
+            s.className = 'skeleton';
+            s.style.width = (60 + Math.random()*80) + 'px';
+            el.appendChild(s);
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+    else addSkeletons();
+    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+})();
+
+/* ==== 6. Чипы категорий в результатах поиска ==== */
+(function(){
+    function classify(cat){
+        var c = (cat||'').toLowerCase();
+        if (c.indexOf('механик') >= 0) return 'cat-mech';
+        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+        if (c.indexOf('электр') >= 0) return 'cat-elec';
+        return 'cat-other';
+    }
+    function decorate(){
+        document.querySelectorAll('.search-result-category').forEach(function(el){
+            if (el.dataset.chip) return;
+            el.dataset.chip = '1';
+            el.classList.add(classify(el.textContent));
+        });
+    }
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            decorate();
+        };
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+    else decorate();
+})();
+
+/* ==== 10. Анимация смены темы «как на iPhone» ==== */
+(function(){
+    function animateThemeChange(x, y){
+        var circle = document.createElement('div');
+        circle.className = 'theme-circle';
+        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+        circle.style.width = circle.style.height = (maxR*2) + 'px';
+        circle.style.left = (x - maxR) + 'px';
+        circle.style.top  = (y - maxR) + 'px';
+        document.body.appendChild(circle);
+        requestAnimationFrame(function(){ circle.classList.add('expand'); });
+        setTimeout(function(){ circle.remove(); }, 700);
+    }
+    document.addEventListener('click', function(e){
+        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+        if (!t) return;
+        var r = t.getBoundingClientRect();
+        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+    }, true);
+})();
+
+/* ==== 2. Ripple при тапе ==== */
+(function(){
+    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+    function bind(el){
+        if (el.dataset.rippleBound) return;
+        el.dataset.rippleBound = '1';
+        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+        el.addEventListener('pointerdown', function(e){
+            var rect = el.getBoundingClientRect();
+            var size = Math.max(rect.width, rect.height);
+            var r = document.createElement('span');
+            r.className = 'ripple';
+            r.style.width = r.style.height = size + 'px';
+            r.style.left = (e.clientX - rect.left - size/2) + 'px';
+            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+            el.appendChild(r);
+            setTimeout(function(){ r.remove(); }, 650);
+        });
+    }
+    function bindAll(){
+        document.querySelectorAll(sel).forEach(bind);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+    else bindAll();
+    /* Перепривязка после поиска */
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            setTimeout(bindAll, 30);
+        };
+    }
+})();
+</script>
+<script src="search-overlay.js"></script>
+<!-- bottom-nav-autohide-script -->
+<script>
+/* Автоскрытие нижней панели при скролле */
+(function(){
+    var nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    var lastY = window.scrollY;
+    var threshold = 8;
+    var ticking = false;
+    function onScroll(){
+        var y = window.scrollY;
+        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+        if (y > lastY && y > 80) {
+            nav.classList.add('nav-hidden');
+        } else {
+            nav.classList.remove('nav-hidden');
+        }
+        lastY = y;
+        ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+    }, { passive: true });
+})();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>`r`n</body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

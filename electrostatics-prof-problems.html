@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электрическое поле — задачи с профессиональной направленностью</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+            --badge-welder: #ff6644;
+            --badge-electric: #ffcc00;
+            --badge-auto: #44aaff;
+            --badge-mech: #aa66ff;
+            --badge-it: #44ff88;
+            --self-border: #3b82f6;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+            --badge-welder: #dc2626;
+            --badge-electric: #ca8a04;
+            --badge-auto: #2563eb;
+            --badge-mech: #7c3aed;
+            --badge-it: #059669;
+            --self-border: #2563eb;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .intro-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:14px 16px;margin:12px 0;transition:background 0.3s;}
+        .intro-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .intro-card ul{color:var(--text);padding-left:20px;line-height:1.8;}
+        .intro-card .important{color:var(--special-border);font-weight:700;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:600000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .prof-header{display:flex;align-items:center;gap:10px;background:var(--info-bg);border-left:5px solid var(--special-border);border-radius:14px;padding:12px 16px;margin:18px 0 10px 0;}
+        .prof-header .prof-icon{font-size:1.8rem;}
+        .prof-header .prof-title{font-size:1.1rem;font-weight:700;color:var(--text);}
+        .prof-header .prof-sub{font-size:0.8rem;color:var(--text-secondary);margin-top:2px;}
+        .prof-header.welder{border-left-color:var(--badge-welder);}
+        .prof-header.electric{border-left-color:var(--badge-electric);}
+        .prof-header.auto{border-left-color:var(--badge-auto);}
+        .prof-header.mech{border-left-color:var(--badge-mech);}
+        .prof-header.it{border-left-color:var(--badge-it);}
+        .prof-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;margin-left:auto;}
+        .prof-badge.welder{background:var(--badge-welder);}
+        .prof-badge.electric{background:var(--badge-electric);}
+        .prof-badge.auto{background:var(--badge-auto);}
+        .prof-badge.mech{background:var(--badge-mech);}
+        .prof-badge.it{background:var(--badge-it);}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block.hard{border-left:5px solid #ff4444;background:linear-gradient(135deg, var(--task-bg) 0%, rgba(255,68,68,0.05) 100%);}
+        .task-block.self{border-left:5px solid var(--self-border);background:linear-gradient(135deg, var(--task-bg) 0%, rgba(59,130,246,0.06) 100%);}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .hard-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:#ff4444;margin-left:8px;vertical-align:middle;}
+        .self-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:var(--self-border);margin-left:8px;vertical-align:middle;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid var(--self-border);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:var(--self-border);}
+        .hint-box mjx-container{font-size:1rem !important;}
+
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        @media(max-width:700px){
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech  { background: #3b82f6; }
+        .search-result-category.cat-thermo{ background: #f59e0b; }
+        .search-result-category.cat-elec  { background: #eab308; }
+        .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index"> body.is-index .nav-back-btn { display: none !important; } </style>
+    <style id="bottom-nav-autohide">
+        .bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; }
+        body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+    </style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; }
+        .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+        .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+        .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right"> .bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; } </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; }
+        a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Электрическое поле — задачи с профессиональной направленностью</h1>
+
+    <div class="intro-card">
+        <p><strong>📌 О разделе.</strong> Задачи по теме «Электрическое поле», связанные с реальными профессиональными ситуациями.</p>
+        <p>По каждой специальности — <strong>5 задач</strong>:</p>
+        <ul>
+            <li>🔴 1 задача <strong>сложная</strong> — с подробным решением.</li>
+            <li>🟠 2 задачи <strong>обычные</strong> — с подробным решением.</li>
+            <li>🔵 2 задачи <strong>для самостоятельного решения</strong> — только условие и подсказка.</li>
+        </ul>
+    </div>
+
+    <!-- ===== СВАРЩИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔧 Задачи для сварщика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header welder">
+                <div class="prof-icon">🔧</div>
+                <div>
+                    <div class="prof-title">Сварочное производство</div>
+                    <div class="prof-sub">Электрическая дуга, статическое электричество</div>
+                </div>
+                <span class="prof-badge welder">Сварщик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сила взаимодействия двух зарядов</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При заточке инструмента на нём накопился заряд $q_1 = 2 \cdot 10^{-7}$ Кл. На расстоянии $r = 0{,}05$ м находится второй инструмент с зарядом $q_2 = 1 \cdot 10^{-7}$ Кл. Найдите силу их взаимодействия в воздухе.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('w1')">📖 Показать решение</button>
+                <div id="w1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q_1 = 2 \cdot 10^{-7}$ Кл, $q_2 = 1 \cdot 10^{-7}$ Кл, $r = 0{,}05$ м</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Закон Кулона: $F = k \dfrac{|q_1 q_2|}{r^2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = 9 \cdot 10^9 \dfrac{2 \cdot 10^{-7} \cdot 1 \cdot 10^{-7}}{(0{,}05)^2} = \dfrac{180 \cdot 10^{-5}}{0{,}0025} = 0{,}72 \text{ Н}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сила 0,72 Н достаточна, чтобы притянуть мелкую металлическую стружку.</div>
+                    <div class="answer">✅ Ответ: $F = 0{,}72$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Напряжённость поля</div>
+                <div class="task-condition"><strong>Ситуация:</strong> На заряд $q_0 = 5 \cdot 10^{-8}$ Кл в электрическом поле действует сила $F = 1{,}5 \cdot 10^{-4}$ Н. Найдите напряжённость поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('w2')">📖 Показать решение</button>
+                <div id="w2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q_0 = 5 \cdot 10^{-8}$ Кл, $F = 1{,}5 \cdot 10^{-4}$ Н</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $E = \dfrac{F}{q_0}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = \dfrac{1{,}5 \cdot 10^{-4}}{5 \cdot 10^{-8}} = 3000 \text{ В/м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Напряжённость 3 кВ/м — характерна для искры при заточке.</div>
+                    <div class="answer">✅ Ответ: $E = 3000$ В/м</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Заряд и напряжённость от нескольких источников <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Два точечных заряда $q_1 = 4$ нКл и $q_2 = -4$ нКл находятся на расстоянии $d = 0{,}2$ м друг от друга. Найдите напряжённость поля в точке, находящейся посередине между ними, и на расстоянии $0{,}1$ м от каждого (с разных сторон).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('w3')">📖 Показать решение</button>
+                <div id="w3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q_1 = 4 \cdot 10^{-9}$ Кл, $q_2 = -4 \cdot 10^{-9}$ Кл, $d = 0{,}2$ м</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $E$ в центре</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Расстояние от каждого заряда до центра: $r = 0{,}1$ м.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $E_1 = k \dfrac{|q_1|}{r^2} = 9 \cdot 10^9 \dfrac{4 \cdot 10^{-9}}{0{,}01} = 3600$ В/м.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $E_2 = 3600$ В/м (равен по модулю).</div>
+                    <div class="step"><strong>Шаг 4.</strong> В центре поля от разноимённых зарядов направлены в одну сторону, поэтому $E = E_1 + E_2 = 7200$ В/м.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Поля складываются, так как векторы направлены в одну сторону (к отрицательному заряду).</div>
+                    <div class="answer">✅ Ответ: $E = 7200$ В/м</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Сила взаимодействия в среде <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Два заряда по $q = 10$ нКл находятся на расстоянии $r = 0{,}1$ м в керосине ($\varepsilon = 2$). Найдите силу их взаимодействия.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Используйте формулу $F = \dfrac{k |q_1 q_2|}{\varepsilon r^2}$. Сначала найдите силу в вакууме, а затем разделите на $\varepsilon = 2$.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Работа по перемещению заряда <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Заряд $q = 5$ мкКл перемещается между точками с разностью потенциалов $U = 200$ В. Какую работу совершает поле?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Работа поля равна $A = q \cdot U$. Не забудьте перевести мкКл в Кл ($10^{-6}$).
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЭЛЕКТРИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚡ Задачи для электрика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header electric">
+                <div class="prof-icon">⚡</div>
+                <div>
+                    <div class="prof-title">Электротехника</div>
+                    <div class="prof-sub">Напряжённость поля, пробой изоляции</div>
+                </div>
+                <span class="prof-badge electric">Электрик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Напряжённость поля в конденсаторе</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Электрик проверяет конденсатор с напряжением $U = 500$ В и расстоянием между обкладками $d = 2$ мм. Найдите напряжённость поля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('e1')">📖 Показать решение</button>
+                <div id="e1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U = 500$ В, $d = 2 \cdot 10^{-3}$ м</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $E = \dfrac{U}{d}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = \dfrac{500}{0{,}002} = 2{,}5 \cdot 10^5 \text{ В/м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Поле 250 кВ/м близко к пределу пробоя воздуха (300 кВ/м).</div>
+                    <div class="answer">✅ Ответ: $E = 2{,}5 \cdot 10^5$ В/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Потенциал поля точечного заряда</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Наведённый заряд на изоляторе $Q = 10^{-8}$ Кл. Найдите потенциал поля на расстоянии $r = 0{,}1$ м от него.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('e2')">📖 Показать решение</button>
+                <div id="e2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $Q = 10^{-8}$ Кл, $r = 0{,}1$ м</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\varphi$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $\varphi = k \dfrac{Q}{r}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\varphi = 9 \cdot 10^9 \dfrac{10^{-8}}{0{,}1} = 900 \text{ В}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 900 В — опасное напряжение, требует заземления.</div>
+                    <div class="answer">✅ Ответ: $\varphi = 900$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Ёмкость и заряд батареи конденсаторов <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Батарея из трёх конденсаторов: $C_1 = 2$ мкФ, $C_2 = 4$ мкФ (параллельно), и к ним последовательно подключён $C_3 = 6$ мкФ. Общее напряжение $U = 120$ В. Найдите: а) общую ёмкость; б) заряд каждого; в) напряжение на $C_3$.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('e3')">📖 Показать решение</button>
+                <div id="e3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $C_1 = 2$ мкФ, $C_2 = 4$ мкФ, $C_3 = 6$ мкФ, $U = 120$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $C_{общ}$, $q$, $U_3$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $C_{12} = C_1 + C_2 = 6$ мкФ (параллельно).</div>
+                    <div class="step"><strong>Шаг 2.</strong> $C_{общ} = \dfrac{C_{12} \cdot C_3}{C_{12} + C_3} = \dfrac{6 \cdot 6}{6 + 6} = 3$ мкФ (последовательно).</div>
+                    <div class="step"><strong>Шаг 3.</strong> Общий заряд: $q = C_{общ} U = 3 \cdot 10^{-6} \cdot 120 = 3{,}6 \cdot 10^{-4}$ Кл.</div>
+                    <div class="step"><strong>Шаг 4.</strong> Напряжение на $C_3$: $U_3 = \dfrac{q}{C_3} = \dfrac{3{,}6 \cdot 10^{-4}}{6 \cdot 10^{-6}} = 60$ В.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Напряжение делится обратно пропорционально ёмкости (на $C_3$ приходится 60 В, на $C_{12}$ тоже 60 В).</div>
+                    <div class="answer">✅ Ответ: $C_{общ} = 3$ мкФ; $q = 360$ мкКл; $U_3 = 60$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Энергия конденсатора <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Конденсатор ёмкостью $C = 10$ мкФ заряжен до напряжения $U = 300$ В. Найдите накопленную энергию.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Энергия конденсатора $W = \dfrac{C U^2}{2}$. Не забудьте перевести мкФ в Фарады.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Сила взаимодействия зарядов в диэлектрике <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Два заряда по $10$ нКл находятся в трансформаторном масле ($\varepsilon = 2{,}2$) на расстоянии $5$ мм. Найдите силу взаимодействия.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Примените закон Кулона с учётом диэлектрической проницаемости: $F = \dfrac{k |q_1 q_2|}{\varepsilon r^2}$.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== АВТОМЕХАНИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🚗 Задачи для автомеханика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header auto">
+                <div class="prof-icon">🚗</div>
+                <div>
+                    <div class="prof-title">Автосервис</div>
+                    <div class="prof-sub">Электризация, искры, ёмкость</div>
+                </div>
+                <span class="prof-badge auto">Автомеханик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Электризация кузова</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При движении автомобиля кузов приобрёл заряд $q = 5 \cdot 10^{-6}$ Кл. Найдите напряжённость поля на расстоянии $r = 1$ м от кузова (считая кузов точечным зарядом).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('a1')">📖 Показать решение</button>
+                <div id="a1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 5 \cdot 10^{-6}$ Кл, $r = 1$ м</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $E$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $E = k \dfrac{|q|}{r^2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = 9 \cdot 10^9 \dfrac{5 \cdot 10^{-6}}{1^2} = 45000 \text{ В/м} = 45 \text{ кВ/м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Поле 45 кВ/м может вызвать искру при выходе из машины.</div>
+                    <div class="answer">✅ Ответ: $E = 45$ кВ/м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Ёмкость кузова</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Кузов автомобиля можно рассматривать как конденсатор с ёмкостью $C = 500$ пФ. Найдите его заряд при потенциале $U = 10$ кВ.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('a2')">📖 Показать решение</button>
+                <div id="a2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $C = 500 \cdot 10^{-12}$ Ф, $U = 10^4$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $q$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $q = C \cdot U$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$q = 500 \cdot 10^{-12} \cdot 10^4 = 5 \cdot 10^{-6} \text{ Кл} = 5 \text{ мкКл}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Заряд 5 мкКл достаточен для ощутимого удара током.</div>
+                    <div class="answer">✅ Ответ: $q = 5$ мкКл</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Энергия искры <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> При выходе из машины накопился заряд $q = 2$ мкКл при напряжении $U = 15$ кВ. Найдите: а) энергию искры; б) если искра длится 1 мкс, какова средняя мощность разряда.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('a3')">📖 Показать решение</button>
+                <div id="a3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 2 \cdot 10^{-6}$ Кл, $U = 1{,}5 \cdot 10^4$ В, $t = 10^{-6}$ с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $W$, $P$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Энергия: $W = \dfrac{q U}{2} = \dfrac{2 \cdot 10^{-6} \cdot 1{,}5 \cdot 10^4}{2} = 0{,}015$ Дж.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Мощность: $P = \dfrac{W}{t} = \dfrac{0{,}015}{10^{-6}} = 15000$ Вт = 15 кВт.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Искра имеет энергию 15 мДж, но огромную мощность (15 кВт) из-за малого времени.</div>
+                    <div class="answer">✅ Ответ: $W = 15$ мДж; $P = 15$ кВт</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Сила притяжения пылинки <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Заряженная пылинка $q = 10$ нКл находится на расстоянии $r = 5$ см от кузова с зарядом $Q = 1$ мкКл. Найдите силу притяжения.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Используйте закон Кулона $F = \dfrac{k |q Q|}{r^2}$. Переведите все величины в СИ (см → м, нКл → Кл).
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Пробой воздушного зазора <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Искра проскочила между кузовом и заземлённым предметом на расстоянии $d = 2$ мм. Найдите напряжение пробоя, если напряжённость пробоя воздуха $E = 3 \cdot 10^6$ В/м.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Напряжение пробоя $U = E \cdot d$. Переведите мм в метры.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== МАШИНОСТРОЕНИЕ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚙️ Задачи для машиностроения (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header mech">
+                <div class="prof-icon">⚙️</div>
+                <div>
+                    <div class="prof-title">Машиностроение</div>
+                    <div class="prof-sub">Электрическое поле, конденсаторы, оборудование</div>
+                </div>
+                <span class="prof-badge mech">Машиностроение</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Заряд в электрическом поле</div>
+                <div class="task-condition"><strong>Ситуация:</strong> В электростатическом фильтре на частицу с зарядом $q = 1{,}6 \cdot 10^{-19}$ Кл действует поле $E = 2 \cdot 10^4$ В/м. Найдите силу, действующую на частицу.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('m1')">📖 Показать решение</button>
+                <div id="m1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 1{,}6 \cdot 10^{-19}$ Кл, $E = 2 \cdot 10^4$ В/м</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $F = qE$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = 1{,}6 \cdot 10^{-19} \cdot 2 \cdot 10^4 = 3{,}2 \cdot 10^{-15} \text{ Н}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сила настолько мала, что пылинка движется равномерно.</div>
+                    <div class="answer">✅ Ответ: $F = 3{,}2 \cdot 10^{-15}$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Электроёмкость конденсатора</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Конденсатор накопил заряд $q = 2 \cdot 10^{-5}$ Кл при напряжении $U = 400$ В. Найдите его ёмкость.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('m2')">📖 Показать решение</button>
+                <div id="m2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 2 \cdot 10^{-5}$ Кл, $U = 400$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $C$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $C = \dfrac{q}{U}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$C = \dfrac{2 \cdot 10^{-5}}{400} = 5 \cdot 10^{-8} \text{ Ф} = 50 \text{ нФ}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 50 нФ — типичная ёмкость для фильтров.</div>
+                    <div class="answer">✅ Ответ: $C = 50$ нФ</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Энергия батареи конденсаторов <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Батарея из двух конденсаторов: $C_1 = 4$ мкФ и $C_2 = 6$ мкФ. Они соединены последовательно и подключены к $U = 100$ В. Найдите: а) общую ёмкость; б) энергию батареи; в) напряжение на каждом.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('m3')">📖 Показать решение</button>
+                <div id="m3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $C_1 = 4$ мкФ, $C_2 = 6$ мкФ, $U = 100$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $C_{общ}$, $W$, $U_1$, $U_2$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $C_{общ} = \dfrac{4 \cdot 6}{4 + 6} = 2{,}4$ мкФ.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $W = \dfrac{C_{общ} U^2}{2} = \dfrac{2{,}4 \cdot 10^{-6} \cdot 10^4}{2} = 0{,}012$ Дж = 12 мДж.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Заряд $q = C_{общ} U = 2{,}4 \cdot 10^{-4}$ Кл.</div>
+                    <div class="step"><strong>Шаг 4.</strong> $U_1 = q / C_1 = 60$ В; $U_2 = q / C_2 = 40$ В.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Энергия 12 мДж; напряжения 60 В и 40 В (в сумме 100 В).</div>
+                    <div class="answer">✅ Ответ: $C_{общ} = 2{,}4$ мкФ; $W = 12$ мДж; $U_1 = 60$ В, $U_2 = 40$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Напряжение в электрофильтре <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Электростатический фильтр имеет электроды на расстоянии $d = 5$ мм. Какое напряжение нужно подать, чтобы создать поле $E = 10^6$ В/м?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Используйте связь $U = E \cdot d$. Не забудьте перевести мм в метры.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Заряд шара в поле <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Проводящий шар радиусом $r = 5$ см имеет потенциал $\varphi = 1000$ В. Найдите его заряд.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Потенциал шара $\varphi = \dfrac{kq}{r}$, откуда $q = \dfrac{\varphi r}{k}$.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ИНФОРМАЦИОННЫЕ СИСТЕМЫ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">💻 Задачи для информационных систем (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header it">
+                <div class="prof-icon">💻</div>
+                <div>
+                    <div class="prof-title">Информационные системы</div>
+                    <div class="prof-sub">Электростатика в серверных, защита</div>
+                </div>
+                <span class="prof-badge it">ИС</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Электризация оборудования</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При работе серверного оборудования на корпусе накопился заряд $q = 10^{-6}$ Кл. Найдите потенциал на поверхности корпуса, если его ёмкость $C = 100$ пФ.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('i1')">📖 Показать решение</button>
+                <div id="i1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 10^{-6}$ Кл, $C = 100 \cdot 10^{-12}$ Ф</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $U = \dfrac{q}{C}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = \dfrac{10^{-6}}{100 \cdot 10^{-12}} = 10000 \text{ В} = 10 \text{ кВ}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 10 кВ — опасное напряжение, поэтому серверные заземляют.</div>
+                    <div class="answer">✅ Ответ: $U = 10$ кВ</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Сила притяжения пыли к кулеру</div>
+                <div class="task-condition"><strong>Ситуация:</strong> На лопастях кулера накопился заряд $Q = 5 \cdot 10^{-8}$ Кл. Пылинка с зарядом $q = 10^{-11}$ Кл находится на расстоянии $r = 2$ мм. Найдите силу.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('i2')">📖 Показать решение</button>
+                <div id="i2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $Q = 5 \cdot 10^{-8}$ Кл, $q = 10^{-11}$ Кл, $r = 0{,}002$ м</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $F = k \dfrac{|Q q|}{r^2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = 9 \cdot 10^9 \dfrac{5 \cdot 10^{-19}}{4 \cdot 10^{-6}} = 1{,}125 \cdot 10^{-3} \text{ Н}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Пыль притягивается с силой ~1 мН, что достаточно для оседания.</div>
+                    <div class="answer">✅ Ответ: $F = 1{,}125$ мН</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Электрическое поле и защита <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> В серверной на полу образовался заряд. Расстояние до оборудования $d = 0{,}5$ м. Напряжённость поля $E = 5000$ В/м. Найдите: а) потенциал на этом расстоянии; б) работу по перемещению заряда $q = 1$ мкКл на это расстояние.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('i3')">📖 Показать решение</button>
+                <div id="i3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $d = 0{,}5$ м, $E = 5000$ В/м, $q = 10^{-6}$ Кл</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\varphi$, $A$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $\varphi = E \cdot d = 5000 \cdot 0{,}5 = 2500$ В.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $A = q \cdot \varphi = 10^{-6} \cdot 2500 = 2{,}5 \cdot 10^{-3}$ Дж = 2,5 мДж.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Потенциал 2,5 кВ — серьёзная угроза для электроники.</div>
+                    <div class="answer">✅ Ответ: $\varphi = 2500$ В; $A = 2{,}5$ мДж</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Ёмкость конденсатора <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Для сглаживания пульсаций блока питания нужен конденсатор на 1000 мкФ и 16 В. Какой заряд он накопит?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Заряд конденсатора: $q = C \cdot U$. Переведите мкФ в Фарады ($1000$ мкФ $= 10^{-3}$ Ф).
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Энергия импульса <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> В блоке питания при разряде конденсатора ёмкостью $C = 100$ мкФ напряжение падает с 300 В до 0. Найдите энергию, выделившуюся в виде тепла.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Вся энергия конденсатора переходит в тепло: $W = \dfrac{C U^2}{2}$. Не забудьте про перевод единиц.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+</script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</nav>
+<script>
+    /* ==== 5. Скелетоны для формул MathJax ==== */
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
+
+    /* ==== 6. Чипы категорий в результатах поиска ==== */
+    (function(){
+        function classify(cat){
+            var c = (cat||'').toLowerCase();
+            if (c.indexOf('механик') >= 0) return 'cat-mech';
+            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+            if (c.indexOf('электр') >= 0) return 'cat-elec';
+            return 'cat-other';
+        }
+        function decorate(){
+            document.querySelectorAll('.search-result-category').forEach(function(el){
+                if (el.dataset.chip) return;
+                el.dataset.chip = '1';
+                el.classList.add(classify(el.textContent));
+            });
+        }
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                decorate();
+            };
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+        else decorate();
+    })();
+
+    /* ==== 10. Анимация смены темы «как на iPhone» ==== */
+    (function(){
+        function animateThemeChange(x, y){
+            var circle = document.createElement('div');
+            circle.className = 'theme-circle';
+            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+            circle.style.width = circle.style.height = (maxR*2) + 'px';
+            circle.style.left = (x - maxR) + 'px';
+            circle.style.top  = (y - maxR) + 'px';
+            document.body.appendChild(circle);
+            requestAnimationFrame(function(){ circle.classList.add('expand'); });
+            setTimeout(function(){ circle.remove(); }, 700);
+        }
+        document.addEventListener('click', function(e){
+            var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+            if (!t) return;
+            var r = t.getBoundingClientRect();
+            animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+        }, true);
+    })();
+
+    /* ==== 2. Ripple при тапе ==== */
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){
+            document.querySelectorAll(sel).forEach(bind);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+        /* Перепривязка после поиска */
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                setTimeout(bindAll, 30);
+            };
+        }
+    })();
+</script>
+<script src="search-overlay.js"></script>
+<!-- bottom-nav-autohide-script -->
+<script>
+    /* Автоскрытие нижней панели при скролле */
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 8;
+        var ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
+        }
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>
+</body>
+</html>

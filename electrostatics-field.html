@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -147,6 +147,627 @@
     </script>
     <script src="es5/tex-chtml.js" async></script>
     <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <style id="titles-center-fix">
+        /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
+        .section-title {
+            justify-content: center !important;
+            text-align: center !important;
+            position: relative !important;
+            padding-left: 16px !important;
+            padding-right: 28px !important;
+        }
+        .section-title::after {
+            position: absolute !important;
+            right: 8px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            margin-left: 0 !important;
+        }
+        .section.collapsed .section-title::after {
+            transform: translateY(-50%) rotate(-90deg) !important;
+        }
+        /* Названия файлов / страниц — по центру */
+        h1, .page-title, .file-title, .title {
+            text-align: center !important;
+        }
+    </style>
+    <style id="section-gradient-fix">
+        /* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
+        /* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+
+        .section { position: relative; }
+
+        /* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
+
+        /* Закрыт: градиента нет */
+        .section.collapsed > .section-title {
+            background-image: none;
+            transition: background-image 0.35s ease;
+        }
+
+        /* Закрыт + наведение: градиент от цвета полоски к бесцветному */
+        .section.collapsed > .section-title:hover {
+            background-image: linear-gradient(90deg,
+                rgba(245, 158, 11, 0.20) 0%,
+                rgba(245, 158, 11, 0.07) 45%,
+                rgba(245, 158, 11, 0.00) 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+
+        /* Открыт: тот же градиент постоянно */
+        .section:not(.collapsed) > .section-title {
+            background-image: linear-gradient(90deg,
+                rgba(245, 158, 11, 0.20) 0%,
+                rgba(245, 158, 11, 0.07) 45%,
+                rgba(245, 158, 11, 0.00) 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+
+        /* Светлая тема — цвет из --special-border (#d97706) */
+        :root.light-mode .section.collapsed > .section-title:hover,
+        :root.light-mode .section:not(.collapsed) > .section-title {
+            background-image: linear-gradient(90deg,
+                rgba(217, 119, 6, 0.18) 0%,
+                rgba(217, 119, 6, 0.06) 45%,
+                rgba(217, 119, 6, 0.00) 100%);
+        }
+
+        /* ---------- СТРЕЛКА ---------- */
+
+        /* Закрыт: светящаяся синяя */
+        .section.collapsed > .section-title::after {
+            color: var(--accent, #3b82f6) !important;
+            text-shadow:
+                0 0 6px rgba(59, 130, 246, 0.85),
+                0 0 14px rgba(59, 130, 246, 0.55);
+            filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
+            transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Открыт: свечение убираем, стрелка обычная */
+        .section:not(.collapsed) > .section-title::after {
+            color: var(--text-secondary, #8ba5b8) !important;
+            text-shadow: none !important;
+            filter: none !important;
+        }
+
+        /* Плавный поворот стрелки при раскрытии (сохраняем как было) */
+        .section.collapsed > .section-title::after {
+            transform: translateY(-50%) rotate(-90deg) !important;
+        }
+        .section:not(.collapsed) > .section-title::after {
+            transform: translateY(-50%) rotate(0deg) !important;
+        }
+
+        /* Светлая тема: синий чуть темнее, свечение мягче */
+        :root.light-mode .section.collapsed > .section-title::after {
+            color: var(--accent, #2563eb) !important;
+            text-shadow:
+                0 0 6px rgba(37, 99, 235, 0.6),
+                0 0 12px rgba(37, 99, 235, 0.35);
+            filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
+        }
+    </style>
+    <style id="modern-visual-fix">
+        /* ==== 7. Плавный скролл + отступ у заголовков ==== */
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+
+        /* ==== 8. Радиальный градиент на фоне ==== */
+        body {
+            background:
+                radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
+                radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
+                var(--bg) !important;
+        }
+        :root.light-mode body {
+            background:
+                radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
+                radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
+                var(--bg) !important;
+        }
+
+        /* ==== 3. «Стеклянная» шапка ==== */
+        @media (prefers-reduced-motion: no-preference) {
+            .header {
+                background: rgba(30, 53, 69, 0.72) !important;
+                backdrop-filter: blur(14px) saturate(140%);
+                -webkit-backdrop-filter: blur(14px) saturate(140%);
+                border-bottom: 1px solid var(--border);
+            }
+            :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
+        }
+
+        /* ==== 5. Скелетоны для формул ==== */
+        .skeleton {
+            display: inline-block;
+            min-width: 60px;
+            height: 1.1em;
+            vertical-align: middle;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
+            background-size: 200% 100%;
+            animation: shimmerSk 1.2s infinite linear;
+        }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+        /* ==== 6. Чипы категорий в поиске ==== */
+        .search-result-category {
+            display: inline-block;
+            padding: 2px 10px;
+            margin-top: 4px;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: #fff;
+            background: var(--accent, #3b82f6);
+        }
+        .search-result-category.cat-mech  { background: #3b82f6; }
+        .search-result-category.cat-thermo{ background: #f59e0b; }
+        .search-result-category.cat-elec  { background: #eab308; }
+        .search-result-category.cat-other { background: #64748b; }
+
+        /* ==== 4. Нижняя навигация ==== */
+        .bottom-nav {
+            position: fixed;
+            left: 50%;
+            bottom: 14px;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 22px;
+            background: rgba(30, 53, 69, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
+            z-index: 900;
+            transition: background 0.3s, border 0.3s;
+        }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button {
+            display: flex; align-items: center; justify-content: center;
+            width: 46px; height: 46px; border-radius: 14px;
+            border: none; background: transparent;
+            color: var(--text-secondary); font-size: 22px;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
+            background: rgba(59,130,246,0.15);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        body { padding-bottom: 78px; }
+
+        /* ==== 10. Круг смены темы ==== */
+        .theme-circle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            background: var(--bg);
+            transform: scale(0);
+            opacity: 0.95;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
+        }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+
+        /* ==== 2. Ripple при тапе ==== */
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(59,130,246,0.35);
+            transform: scale(0);
+            animation: rippleAnim 0.6s ease-out forwards;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        /* ==== Убираем эмодзи-иконки в результатах поиска ==== */
+        .search-result-icon {
+            display: none !important;
+        }
+
+        /* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
+        .search-results {
+            scrollbar-width: none;          /* Firefox */
+            -ms-overflow-style: none;       /* IE/Edge */
+        }
+        .search-results::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+            display: none !important;
+        }
+
+        /* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
+        body::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+        }
+        body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+    </style>
+    <style id="nav-back-hide-index">
+        /* На главной кнопка «Назад» не нужна */
+        body.is-index .nav-back-btn { display: none !important; }
+    </style>
+    <style id="bottom-nav-autohide">
+        /* Автоскрытие нижней панели при скролле вниз */
+        .bottom-nav {
+            transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
+        }
+        .bottom-nav.nav-hidden {
+            transform: translate(-50%, 120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        /* На главной панель всегда видна */
+        body.is-index .bottom-nav.nav-hidden {
+            transform: translate(-50%, 0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+    <style id="fav-nav-yellow">
+        /* Избранное в нижней панели — жёлтое выделение, когда активно */
+        .bottom-nav a[href="favorites.html"].active,
+        .bottom-nav a[href="favorites.html"].fav-active {
+            background: rgba(250, 204, 21, 0.18) !important;
+            color: #facc15 !important;
+        }
+        .bottom-nav a[href="favorites.html"].active:hover,
+        .bottom-nav a[href="favorites.html"].fav-active:hover {
+            background: rgba(250, 204, 21, 0.28) !important;
+            color: #fde047 !important;
+        }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active,
+        :root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
+            background: rgba(234, 179, 8, 0.18) !important;
+            color: #b45309 !important;
+        }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
+        :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
+            background: rgba(234, 179, 8, 0.28) !important;
+            color: #92400e !important;
+        }
+        /* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
+
+    </style>
+    <style id="nav-order-fix">
+        /* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; }
+        .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+        .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+        .bottom-nav a[href="favorites.html"] { order: 4; }
+
+        /* Звезда активна — жёлтая */
+        .bottom-nav a[href="favorites.html"].active {
+            background: rgba(250, 204, 21, 0.20) !important;
+            color: #facc15 !important;
+        }
+        .bottom-nav a[href="favorites.html"].active:hover {
+            background: rgba(250, 204, 21, 0.30) !important;
+            color: #fde047 !important;
+        }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active {
+            background: rgba(234, 179, 8, 0.20) !important;
+            color: #b45309 !important;
+        }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
+            background: rgba(234, 179, 8, 0.30) !important;
+            color: #92400e !important;
+        }
+    </style>
+    <style id="unified-buttons">
+        /* ==== Единый стиль кнопок ==== */
+
+        /* База для всех кнопок */
+        .btn-primary,
+        .btn-secondary,
+        .btn-danger,
+        .show-solution-btn,
+        .btn-reset,
+        .model-tab,
+        .clear-all-btn,
+        .search-clear,
+        .back-link,
+        .fullscreen-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 36px;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            line-height: 1.2;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s, border-color 0.2s,
+                        box-shadow 0.2s, transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        /* Hover / active — общий отклик */
+        .btn-primary:hover,
+        .btn-secondary:hover,
+        .btn-danger:hover,
+        .show-solution-btn:hover,
+        .btn-reset:hover,
+        .model-tab:hover,
+        .clear-all-btn:hover,
+        .back-link:hover,
+        .fullscreen-btn:hover {
+            transform: translateY(-1px);
+        }
+        .btn-primary:active,
+        .btn-secondary:active,
+        .btn-danger:active,
+        .show-solution-btn:active,
+        .btn-reset:active,
+        .model-tab:active,
+        .clear-all-btn:active,
+        .back-link:active,
+        .fullscreen-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* ==== PRIMARY (синий акцент) ==== */
+        .btn-primary,
+        .show-solution-btn,
+        .back-link {
+            background: var(--accent, #3b82f6);
+            color: #fff;
+            border-color: var(--accent, #3b82f6);
+        }
+        .btn-primary:hover,
+        .show-solution-btn:hover,
+        .back-link:hover {
+            background: var(--accent-hover, #60a5fa);
+            border-color: var(--accent-hover, #60a5fa);
+            box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
+        }
+        :root.light-mode .btn-primary,
+        :root.light-mode .show-solution-btn,
+        :root.light-mode .back-link {
+            background: var(--accent, #2563eb);
+            border-color: var(--accent, #2563eb);
+        }
+        :root.light-mode .btn-primary:hover,
+        :root.light-mode .show-solution-btn:hover,
+        :root.light-mode .back-link:hover {
+            background: var(--accent-hover, #3b82f6);
+            border-color: var(--accent-hover, #3b82f6);
+        }
+
+        /* ==== SECONDARY (нейтральный) ==== */
+        .btn-secondary,
+        .btn-reset,
+        .model-tab,
+        .clear-all-btn {
+            background: var(--menu-item-hover, #233e50);
+            color: var(--text, #fff);
+            border-color: var(--border, rgba(59,130,246,0.15));
+        }
+        .btn-secondary:hover,
+        .btn-reset:hover,
+        .model-tab:hover,
+        .clear-all-btn:hover {
+            background: var(--group-header-bg, #1a3a5a);
+            border-color: var(--accent, #3b82f6);
+            box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
+        }
+        :root.light-mode .btn-secondary,
+        :root.light-mode .btn-reset,
+        :root.light-mode .model-tab,
+        :root.light-mode .clear-all-btn {
+            background: var(--menu-item-hover, #f0f4fa);
+            color: var(--text, #1a2a3f);
+        }
+
+        /* Активный таб — как primary */
+        .model-tab.active {
+            background: var(--accent, #3b82f6) !important;
+            color: #fff !important;
+            border-color: var(--accent, #3b82f6) !important;
+            box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
+        }
+        .model-tab.active:hover {
+            background: var(--accent-hover, #60a5fa) !important;
+            border-color: var(--accent-hover, #60a5fa) !important;
+        }
+
+        /* ==== DANGER (красный) ==== */
+        .btn-danger,
+        .clear-all-btn.danger,
+        .clear-all-btn:hover {
+            background: #ef4444 !important;
+            color: #fff !important;
+            border-color: #ef4444 !important;
+        }
+        .btn-danger:hover,
+        .clear-all-btn.danger:hover,
+        .clear-all-btn:hover {
+            background: #dc2626 !important;
+            border-color: #dc2626 !important;
+            box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
+        }
+
+        /* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
+        .search-clear {
+            background: transparent;
+            border: none;
+            padding: 6px 10px;
+            min-height: auto;
+            color: var(--text-secondary, #8ba5b8);
+            border-radius: 50%;
+        }
+        .search-clear:hover {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent, #3b82f6);
+            transform: none;
+        }
+
+        /* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
+        .fullscreen-btn {
+            width: 44px;
+            min-width: 44px;
+            height: 44px;
+            padding: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.25);
+            font-size: 20px;
+        }
+        .fullscreen-btn:hover {
+            background: var(--accent, #3b82f6);
+            border-color: var(--accent, #3b82f6);
+        }
+
+        /* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
+        .remove-fav {
+            border-radius: 50%;
+            min-height: 32px;
+            min-width: 32px;
+            padding: 4px 8px;
+        }
+        .remove-fav:hover {
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #ef4444 !important;
+        }
+
+        /* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
+        .btn-link {
+            background: transparent;
+            border: none;
+            color: var(--accent, #3b82f6);
+            padding: 0;
+            min-height: auto;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .btn-link:hover {
+            color: var(--accent-hover, #60a5fa);
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
+    <style id="page-fade-in">
+        /* ==== Плавное появление страницы (fade-in) ==== */
+
+        /* Мягкий вход всей страницы */
+        body {
+            animation: pageFade 0.3s ease-out;
+        }
+        @keyframes pageFade {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        /* Контент чуть «подъезжает» снизу */
+        .container,
+        .main-content {
+            animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+        }
+        @keyframes pageFadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Если в системе включено «уменьшить движение» — анимации отключаем */
+        @media (prefers-reduced-motion: reduce) {
+            body,
+            .container,
+            .main-content {
+                animation: none !important;
+            }
+        }
+    </style>
+    <style id="share-btn-right">
+        /* Прижимаем кнопку «Поделиться» к правому краю панели */
+        .bottom-nav button[title="Поделиться"] {
+            order: 99 !important;
+            margin-left: auto !important;
+        }
+    </style>
+    <style id="no-tap-highlight">
+        /* Убираем системный голубой/серый прямоугольник при тапе */
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+        }
+        a, button, div, span, label, input, textarea, select {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+            outline: none !important;
+        }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        /* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
+        .section-title,
+        .group-header,
+        .menu-item,
+        .submenu-item,
+        .model-tab,
+        .search-result-item {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+            outline: none !important;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: pointer;
+        }
+
+        /* Лёгкий отклик при нажатии (вместо системного квадратика) */
+        .section-title:active,
+        .group-header:active {
+            transform: scale(0.99);
+            transition: transform 0.1s;
+        }
+    </style>
+    <style id="fix-3d-buttons">
+        /* Отключаем ripple и конфликтующие анимации для кнопок 3D-моделей */
+        .controls-panel button,
+        .btn-toggle,
+        .btn-reset {
+            position: relative !important;
+            overflow: visible !important;
+            z-index: 10 !important;
+            touch-action: manipulation !important; /* Убирает задержку 300мс на телефонах */
+        }
+
+        /* Убираем "волну" (ripple), которая накрывала кнопку и блокировала клик */
+        .controls-panel button::after,
+        .controls-panel button .ripple,
+        .btn-toggle .ripple,
+        .btn-reset .ripple {
+            display: none !important;
+        }
+
+        /* Возвращаем быструю анимацию нажатия */
+        .controls-panel button:active {
+            transform: scale(0.95) !important;
+            transition: transform 0.05s !important;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -249,11 +870,22 @@
                     <span class="control-label">⬤ Двигайте ползунок, чтобы приблизить пробный заряд</span>
                 </div>
                 <div class="def-card">
-                    <p><strong>Модель вектора напряжённости.</strong> В центре находится положительный заряд $Q$.</p>
-                    <p><span class="important">Жёлтые стрелки</span> — это векторы напряжённости $\vec{E}$ в разных точках поля.</p>
-                    <p>Если в точку, где находится стрелка, поместить положительный пробный заряд, он будет отталкиваться от центрального заряда — именно в направлении стрелки.</p>
-                    <p>Ползунок «Расстояние» меняет радиус, на котором мы рассматриваем поле. Чем ближе к заряду, тем больше длина стрелок — значит, поле сильнее.</p>
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>В центре экрана находится положительный точечный заряд \(Q\). Вокруг него расположены жёлтые стрелки — это векторы напряжённости электрического поля \(\vec{E}\).</p>
+                    
+                    <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Расстояние r»</strong><br>Вы меняете радиус, на котором мы «измеряем» поле. Обратите внимание на две вещи:</p>
+                    <ul>
+                        <li>Длина жёлтых стрелок (векторов) <strong>уменьшается</strong> при увеличении расстояния. Это наглядно показывает закон Кулона: напряжённость поля \(E = k \frac{Q}{r^2}\) падает обратно пропорционально <strong>квадрату</strong> расстояния.</li>
+                        <li>Цифра в правом верхнем углу показывает точное значение \(E\). Если вы отодвинете ползунок в 2 раза дальше, напряжённость упадёт в 4 раза.</li>
+                    </ul>
+                    
+                    <p style="margin-top:12px;"><strong>2. Обратите внимание на направление</strong><br>Все стрелки направлены строго <strong>от</strong> заряда (наружу), потому что заряд положительный. Если бы он был отрицательным, стрелки смотрели бы внутрь. В любой точке поля вектор \(\vec{E}\) показывает, куда будет толкать сила Кулона положительный пробный заряд.</p>
+                    
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> Напряжённость — это силовая характеристика поля. Она убывает с расстоянием очень быстро (в квадратичной зависимости). Именно поэтому заряженные предметы притягиваются или отталкиваются заметно только на близком расстоянии.
+                    </p>
                 </div>
+            </div>
 
             <!-- МОДЕЛЬ 2: ПОЛЯРИЗАЦИЯ ДИЭЛЕКТРИКА -->
             <div id="model-dielectric" class="model-content" style="display:none;">
@@ -270,9 +902,20 @@
                     <span class="control-label">⬤ Включите поле и посмотрите на ориентацию диполей</span>
                 </div>
                 <div class="def-card">
-                    <p><strong>Модель поляризации.</strong> Между пластинами конденсатора находится диэлектрик (молекулы-диполи).</p>
-                    <p>Когда поле <span class="important">выключено</span>, диполи ориентированы хаотично.</p>
-                    <p>Когда поле <span class="important">включено</span>, появляются силовые линии (сверху вниз), и диполи выстраиваются вдоль поля — положительные концы к нижней пластине.</p>
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>Перед вами конденсатор (верхняя пластина «+», нижняя «−»), внутри которого находится диэлектрик. Маленькие двухцветные шарики — это молекулы-диполи (например, молекулы воды).</p>
+                    
+                    <p style="margin-top:12px;"><strong>1. Нажмите «⚡ Включить внешнее поле»</strong><br>Обратите внимание, как меняется картина:</p>
+                    <ul>
+                        <li>Появляются жёлтые стрелки — силовые линии поля, направленные сверху вниз.</li>
+                        <li>Молекулы, которые до этого были разбросаны хаотично, начинают <strong>поворачиваться</strong> и выстраиваться вдоль поля. Положительные красные концы смотрят вниз (к минусу), а отрицательные синие — вверх (к плюсу).</li>
+                    </ul>
+                    
+                    <p style="margin-top:12px;"><strong>2. Почему это важно?</strong><br>Это явление называется <strong>поляризацией</strong>. В диэлектрике нет свободных электронов, поэтому они не могут течь как ток. Но связанные заряды внутри молекул могут смещаться. Из-за того, что все диполи повернулись, на поверхности диэлектрика появляются связанные заряды, которые создают собственное поле — направленное <strong>против</strong> внешнего. Поэтому общее поле внутри диэлектрика ослабевает.</p>
+                    
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> Диэлектрик не проводит ток, но он ослабляет электрическое поле благодаря поляризации. Степень ослабления зависит от вещества (диэлектрическая проницаемость \(\varepsilon\)). Например, у воды \(\varepsilon = 81\), поэтому поле внутри неё ослаблено в 81 раз.
+                    </p>
                 </div>
             </div>
 
@@ -295,9 +938,20 @@
                     <span class="control-label">⬤ Меняйте напряжение — густота линий будет меняться</span>
                 </div>
                 <div class="def-card">
-                    <p><strong>Модель однородного поля.</strong> Поле между двумя заряженными пластинами (конденсатор).</p>
-                    <p><span class="important">Линии</span> идут от положительной пластины к отрицательной.</p>
-                    <p>Чем больше напряжение, тем сильнее поле и тем гуще линии.</p>
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>Перед вами плоский конденсатор. Жёлтые линии — это силовые линии поля. Поскольку пластины параллельны, поле между ними <strong>однородное</strong> — во всех точках оно имеет одинаковую силу и направление (сверху вниз).</p>
+                    
+                    <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Напряжение U»</strong><br>Вы меняете разность потенциалов между пластинами. Наблюдайте за линиями:</p>
+                    <ul>
+                        <li>При увеличении напряжения линии становятся <strong>гуще</strong>. Это не просто так: густота линий — это графический способ показать силу поля (напряжённость \(E\)). Чем больше \(U\), тем больше \(E\) по формуле \(E = \frac{U}{d}\).</li>
+                        <li>При уменьшении напряжения линии редеют, показывая, что поле слабеет.</li>
+                    </ul>
+                    
+                    <p style="margin-top:12px;"><strong>2. Где это применяется?</strong><br>Внутри конденсатора поле однородное. Это удобно для опытов и для расчётов. Если поместить заряд между пластинами, на него будет действовать постоянная сила \(F = qE\), направленная к отрицательной пластине. Это позволяет, например, управлять движением электронов в старых телевизорах (ЭЛТ).</p>
+                    
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> Внутри конденсатора поле однородное, и его напряжённость можно легко изменить, меняя напряжение. Это базовый принцип работы многих электронных приборов.
+                    </p>
                 </div>
             </div>
 
@@ -316,9 +970,20 @@
                     <span class="control-label">⬤ Подайте напряжение и посмотрите, как смещаются электронные оболочки</span>
                 </div>
                 <div class="def-card">
-                    <p><strong>Строение диэлектрика.</strong> Атомы в узлах кристаллической решётки.</p>
-                    <p>В диэлектрике <span class="important">нет свободных электронов</span> — они все привязаны к своим ядрам.</p>
-                    <p>Когда вы подаёте напряжение (создаёте внешнее поле), электронные оболочки атомов немного смещаются в сторону положительного полюса, а ядра — в сторону отрицательного. Весь материал поляризуется, но ток не течёт.</p>
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>На экране показано внутреннее строение диэлектрика — кристаллическая решётка, где атомы закреплены на своих местах. Красный шарик — это положительное ядро, а синяя размытая сфера вокруг — электронное облако (отрицательные электроны).</p>
+                    
+                    <p style="margin-top:12px;"><strong>1. Нажмите «⚡ Подать напряжение»</strong><br>Сверху появляется «+», снизу «−». Что происходит с атомами?</p>
+                    <ul>
+                        <li>Ядро (красное) остаётся на месте, потому что оно тяжелое и крепко сидит в узле решётки.</li>
+                        <li>Электронное облако (синее) <strong>смещается вверх</strong>, к положительной пластине. Оно притягивается к плюсу.</li>
+                    </ul>
+                    
+                    <p style="margin-top:12px;"><strong>2. Почему это не ток?</strong><br>Хотя электроны сместились, они <strong>не оторвались</strong> от своих атомов и не побежали по всему кристаллу. Поэтому в диэлектрике при поляризации электрический ток не протекает. Это ключевое отличие диэлектрика от проводника.</p>
+                    
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> В диэлектриках нет свободных зарядов. При подаче напряжения происходит лишь упругое смещение связанных зарядов (электронов и ядер) друг относительно друга — это и есть поляризация. Она создаёт внутреннее поле, которое ослабляет внешнее.
+                    </p>
                 </div>
             </div>
 
@@ -333,12 +998,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 1. Напряжённость поля</div>
                 <div class="task-condition"><strong>Условие:</strong> На заряд $q_0 = 2 \cdot 10^{-8}$ Кл в поле действует сила $F = 4 \cdot 10^{-5}$ Н. Найдите напряжённость поля.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q_0 = 2 \cdot 10^{-8}$ Кл, $F = 4 \cdot 10^{-5}$ Н</div>
                     <div class="find"><strong>🔍 Найти:</strong> $E$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
-                <div id="sol1" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Формула: $E = \dfrac{F}{q_0}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = \dfrac{4 \cdot 10^{-5}}{2 \cdot 10^{-8}} = 2 \cdot 10^3 \text{ Н/Кл} = 2 \text{ кН/Кл}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Напряжённость 2 кН/Кл — средняя для школьных задач.</div>
@@ -349,12 +1014,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 2. Сила, действующая на заряд</div>
                 <div class="task-condition"><strong>Условие:</strong> Напряжённость поля $E = 5000$ В/м. Какая сила действует на заряд $q = 3 \cdot 10^{-6}$ Кл?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $E = 5000$ В/м, $q = 3 \cdot 10^{-6}$ Кл</div>
                     <div class="find"><strong>🔍 Найти:</strong> $F$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
-                <div id="sol2" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Из $E = \dfrac{F}{q}$ следует $F = E \cdot q$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = 5000 \cdot 3 \cdot 10^{-6} = 0{,}015 \text{ Н}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Сила небольшая, но достаточная для движения лёгких заряженных частиц.</div>
@@ -365,12 +1030,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 3. Напряжённость поля точечного заряда</div>
                 <div class="task-condition"><strong>Условие:</strong> Найдите напряжённость поля, созданного зарядом $Q = 4 \cdot 10^{-8}$ Кл на расстоянии $r = 0{,}2$ м.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q = 4 \cdot 10^{-8}$ Кл, $r = 0{,}2$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $E$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
-                <div id="sol3" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Формула: $E = k \dfrac{|Q|}{r^2}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = 9 \cdot 10^9 \dfrac{4 \cdot 10^{-8}}{0{,}04} = \dfrac{360}{0{,}04} = 9000 \text{ Н/Кл}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Поле точечного заряда быстро убывает с расстоянием.</div>
@@ -381,12 +1046,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 4. Поле в воде</div>
                 <div class="task-condition"><strong>Условие:</strong> Как изменится напряжённость электрического поля, если источник поля поместить в воду ($\varepsilon = 81$)?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $\varepsilon_{воды} = 81$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\dfrac{E_{вак}}{E_{воды}}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
-                <div id="sol4" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $E_{среда} = \dfrac{E_{вак}}{\varepsilon}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{E_{вак}}{E_{воды}} = 81$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Вода — сильный диэлектрик, она ослабляет поле в 81 раз.</div>
@@ -397,12 +1062,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 5. Сила в диэлектрике</div>
                 <div class="task-condition"><strong>Условие:</strong> Напряжённость поля в вакууме $E_0 = 200$ В/м. Какова напряжённость в диэлектрике с проницаемостью $\varepsilon = 4$?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $E_0 = 200$ В/м, $\varepsilon = 4$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $E$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
-                <div id="sol5" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $E = \dfrac{E_0}{\varepsilon}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E = \dfrac{200}{4} = 50 \text{ В/м}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Диэлектрик ослабляет поле, потому что его молекулы поляризуются и создают встречное поле.</div>
@@ -413,12 +1078,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 6. Принцип суперпозиции</div>
                 <div class="task-condition"><strong>Условие:</strong> Два заряда $q_1 = 2$ нКл и $q_2 = -2$ нКл находятся в точках A и B на расстоянии $d = 0{,}1$ м друг от друга. Найдите напряжённость в точке C, находящейся посередине между ними.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q_1 = 2 \cdot 10^{-9}$ Кл, $q_2 = -2 \cdot 10^{-9}$ Кл, $r_1 = r_2 = 0{,}05$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $E_C$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
-                <div id="sol6" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $E_1 = k \dfrac{|q_1|}{r_1^2} = 9 \cdot 10^9 \dfrac{2 \cdot 10^{-9}}{0{,}0025} = 7200$ Н/Кл.</div>
                     <div class="step"><strong>Шаг 2.</strong> $E_2 = k \dfrac{|q_2|}{r_2^2} = 7200$ Н/Кл.</div>
                     <div class="step"><strong>Шаг 3.</strong> В точке C поля направлены в одну сторону (от $+$ к $-$). $E_C = E_1 + E_2 = 14400$ Н/Кл.</div>
@@ -430,12 +1095,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 7. Заряд по напряжённости</div>
                 <div class="task-condition"><strong>Условие:</strong> Напряжённость поля точечного заряда на расстоянии $r = 0{,}3$ м равна $E = 4000$ В/м. Найдите заряд.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $r = 0{,}3$ м, $E = 4000$ В/м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
-                <div id="sol7" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Из $E = k \dfrac{|Q|}{r^2}$ выразим $Q = \dfrac{E r^2}{k}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = \dfrac{4000 \cdot 0{,}09}{9 \cdot 10^9} = \dfrac{360}{9 \cdot 10^9} = 4 \cdot 10^{-8} \text{ Кл} = 40 \text{ нКл}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Заряд 40 нКл — типичная величина для задач.</div>
@@ -446,12 +1111,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 8. Расстояние по полю</div>
                 <div class="task-condition"><strong>Условие:</strong> На каком расстоянии от заряда $Q = 10^{-7}$ Кл напряжённость поля равна $E = 9000$ Н/Кл?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $Q = 10^{-7}$ Кл, $E = 9000$ Н/Кл</div>
                     <div class="find"><strong>🔍 Найти:</strong> $r$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
-                <div id="sol8" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Из $E = k \dfrac{Q}{r^2}$ выразим $r = \sqrt{k \dfrac{Q}{E}}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$r = \sqrt{9 \cdot 10^9 \dfrac{10^{-7}}{9000}} = \sqrt{0{,}1} \approx 0{,}316 \text{ м}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Около 32 см от заряда.</div>
@@ -462,12 +1127,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 9. Работа в диэлектрике</div>
                 <div class="task-condition"><strong>Условие:</strong> В вакууме напряжённость поля $E_0 = 400$ В/м. В среде с $\varepsilon = 2$ на заряд $q = 5$ нКл действует сила $F$. Найдите эту силу.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $E_0 = 400$ В/м, $\varepsilon = 2$, $q = 5 \cdot 10^{-9}$ Кл</div>
                     <div class="find"><strong>🔍 Найти:</strong> $F$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
-                <div id="sol9" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Напряжённость в среде: $E = \dfrac{400}{2} = 200$ В/м.</div>
                     <div class="step"><strong>Шаг 2.</strong> $F = E \cdot q = 200 \cdot 5 \cdot 10^{-9} = 10^{-6}$ Н.</div>
                     <div class="step explanation"><strong>Пояснение:</strong> В диэлектрике сила в 2 раза меньше, чем в вакууме.</div>
@@ -478,12 +1143,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 10. Суперпозиция под углом</div>
                 <div class="task-condition"><strong>Условие:</strong> В вершинах квадрата со стороной $a = 0{,}1$ м находятся одинаковые заряды $q = 1$ нКл. Найдите напряжённость поля в центре квадрата.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q = 10^{-9}$ Кл, $a = 0{,}1$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $E_{центр}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
-                <div id="sol10" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Расстояние от вершины до центра: $r = \dfrac{a\sqrt{2}}{2} \approx 0{,}0707$ м.</div>
                     <div class="step"><strong>Шаг 2.</strong> Поля от противоположных зарядов направлены в противоположные стороны и компенсируют друг друга.</div>
                     <div class="step"><strong>Шаг 3.</strong> Суммарная напряжённость в центре квадрата равна нулю.</div>
@@ -1299,8 +1964,164 @@
         animate();
     })();
 </script>
-</script>
+
 <script src="favorites.js"></script>
 <script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</nav>
+<script>
+    /* ==== 5. Скелетоны для формул MathJax ==== */
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
+
+    /* ==== 6. Чипы категорий в результатах поиска ==== */
+    (function(){
+        function classify(cat){
+            var c = (cat||'').toLowerCase();
+            if (c.indexOf('механик') >= 0) return 'cat-mech';
+            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+            if (c.indexOf('электр') >= 0) return 'cat-elec';
+            return 'cat-other';
+        }
+        function decorate(){
+            document.querySelectorAll('.search-result-category').forEach(function(el){
+                if (el.dataset.chip) return;
+                el.dataset.chip = '1';
+                el.classList.add(classify(el.textContent));
+            });
+        }
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                decorate();
+            };
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+        else decorate();
+    })();
+
+    /* ==== 10. Анимация смены темы «как на iPhone» ==== */
+    (function(){
+        function animateThemeChange(x, y){
+            var circle = document.createElement('div');
+            circle.className = 'theme-circle';
+            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+            circle.style.width = circle.style.height = (maxR*2) + 'px';
+            circle.style.left = (x - maxR) + 'px';
+            circle.style.top  = (y - maxR) + 'px';
+            document.body.appendChild(circle);
+            requestAnimationFrame(function(){ circle.classList.add('expand'); });
+            setTimeout(function(){ circle.remove(); }, 700);
+        }
+        document.addEventListener('click', function(e){
+            var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+            if (!t) return;
+            var r = t.getBoundingClientRect();
+            animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+        }, true);
+    })();
+
+    /* ==== 2. Ripple при тапе ==== */
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){
+            document.querySelectorAll(sel).forEach(bind);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+        /* Перепривязка после поиска */
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                setTimeout(bindAll, 30);
+            };
+        }
+    })();
+</script>
+<script src="search-overlay.js"></script>
+<!-- bottom-nav-autohide-script -->
+<script>
+    /* Автоскрытие нижней панели при скролле */
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 8;
+        var ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
+        }
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>
 </body>
 </html>
+

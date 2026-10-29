@@ -1,4 +1,4 @@
-// ===== Кнопка смены темы =====
+﻿// ===== Кнопка смены темы =====
 // Работает и в браузере, и в Android WebView.
 // Тема хранится в localStorage под ключом 'mathTheme'.
 // После переключения вызываются функции перерисовки, если они есть на странице.
@@ -54,10 +54,22 @@
 
     function getSavedTheme() {
         try {
-            return localStorage.getItem('mathTheme') || 'dark';
-        } catch (e) {
-            return 'dark';
-        }
+            var manual = localStorage.getItem('mathThemeManual');
+            if (manual === 'true') {
+                // Пользователь выбрал вручную — уважаем
+                return localStorage.getItem('mathTheme') || 'dark';
+            }
+        } catch (e) {}
+        // Иначе — тема из системы
+        try {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                return 'light';
+            }
+        } catch (e) {}
+        return 'dark';
+    }
+    function isManualTheme() {
+        try { return localStorage.getItem('mathThemeManual') === 'true'; } catch (e) { return false; }
     }
 
     // ===== 3. Перерисовка всех возможных визуализаций =====
@@ -90,7 +102,7 @@
         applyTheme(newTheme);
 
         try {
-            localStorage.setItem('mathTheme', newTheme);
+            localStorage.setItem('mathTheme', newTheme); localStorage.setItem('mathThemeManual', 'true');
         } catch (e) {}
 
         // Перерисовываем всё, что может зависеть от темы
@@ -127,8 +139,25 @@
     } else {
         insertButton();
     }
+    // ==== Авто-тема по системе (если пользователь не выбрал вручную) ====
+    (function () {
+        if (!window.matchMedia) return;
+        var mq = window.matchMedia('(prefers-color-scheme: light)');
+        function applySystemTheme() {
+            if (isManualTheme()) return;
+            applyTheme(mq.matches ? 'light' : 'dark');
+        }
+        // Начальное применение
+        applySystemTheme();
+        // Реакция на смену системной темы
+        if (mq.addEventListener) {
+            mq.addEventListener('change', applySystemTheme);
+        } else if (mq.addListener) {
+            mq.addListener(applySystemTheme);
+        }
+    })();
 
-    // Экспортируем функции
+
     window.toggleTheme = toggleTheme;
     window.applyTheme = applyTheme;
 

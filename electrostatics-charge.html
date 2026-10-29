@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -147,6 +147,627 @@
     </script>
     <script src="es5/tex-chtml.js" async></script>
     <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+<style id="titles-center-fix">
+/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
+.section-title {
+    justify-content: center !important;
+    text-align: center !important;
+    position: relative !important;
+    padding-left: 16px !important;
+    padding-right: 28px !important;
+}
+.section-title::after {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin-left: 0 !important;
+}
+.section.collapsed .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+/* Названия файлов / страниц — по центру */
+h1, .page-title, .file-title, .title {
+    text-align: center !important;
+}
+</style>
+<style id="section-gradient-fix">
+/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
+/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+
+.section { position: relative; }
+
+/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
+
+/* Закрыт: градиента нет */
+.section.collapsed > .section-title {
+    background-image: none;
+    transition: background-image 0.35s ease;
+}
+
+/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
+.section.collapsed > .section-title:hover {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Открыт: тот же градиент постоянно */
+.section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(245, 158, 11, 0.20) 0%,
+        rgba(245, 158, 11, 0.07) 45%,
+        rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+/* Светлая тема — цвет из --special-border (#d97706) */
+:root.light-mode .section.collapsed > .section-title:hover,
+:root.light-mode .section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg,
+        rgba(217, 119, 6, 0.18) 0%,
+        rgba(217, 119, 6, 0.06) 45%,
+        rgba(217, 119, 6, 0.00) 100%);
+}
+
+/* ---------- СТРЕЛКА ---------- */
+
+/* Закрыт: светящаяся синяя */
+.section.collapsed > .section-title::after {
+    color: var(--accent, #3b82f6) !important;
+    text-shadow:
+        0 0 6px rgba(59, 130, 246, 0.85),
+        0 0 14px rgba(59, 130, 246, 0.55);
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
+    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+}
+
+/* Открыт: свечение убираем, стрелка обычная */
+.section:not(.collapsed) > .section-title::after {
+    color: var(--text-secondary, #8ba5b8) !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
+.section.collapsed > .section-title::after {
+    transform: translateY(-50%) rotate(-90deg) !important;
+}
+.section:not(.collapsed) > .section-title::after {
+    transform: translateY(-50%) rotate(0deg) !important;
+}
+
+/* Светлая тема: синий чуть темнее, свечение мягче */
+:root.light-mode .section.collapsed > .section-title::after {
+    color: var(--accent, #2563eb) !important;
+    text-shadow:
+        0 0 6px rgba(37, 99, 235, 0.6),
+        0 0 12px rgba(37, 99, 235, 0.35);
+    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
+}
+</style>
+<style id="modern-visual-fix">
+/* ==== 7. Плавный скролл + отступ у заголовков ==== */
+html { scroll-behavior: smooth; }
+.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+
+/* ==== 8. Радиальный градиент на фоне ==== */
+body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
+        var(--bg) !important;
+}
+:root.light-mode body {
+    background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
+        var(--bg) !important;
+}
+
+/* ==== 3. «Стеклянная» шапка ==== */
+@media (prefers-reduced-motion: no-preference) {
+    .header {
+        background: rgba(30, 53, 69, 0.72) !important;
+        backdrop-filter: blur(14px) saturate(140%);
+        -webkit-backdrop-filter: blur(14px) saturate(140%);
+        border-bottom: 1px solid var(--border);
+    }
+    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
+}
+
+/* ==== 5. Скелетоны для формул ==== */
+.skeleton {
+    display: inline-block;
+    min-width: 60px;
+    height: 1.1em;
+    vertical-align: middle;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmerSk 1.2s infinite linear;
+}
+@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+/* ==== 6. Чипы категорий в поиске ==== */
+.search-result-category {
+    display: inline-block;
+    padding: 2px 10px;
+    margin-top: 4px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #fff;
+    background: var(--accent, #3b82f6);
+}
+.search-result-category.cat-mech  { background: #3b82f6; }
+.search-result-category.cat-thermo{ background: #f59e0b; }
+.search-result-category.cat-elec  { background: #eab308; }
+.search-result-category.cat-other { background: #64748b; }
+
+/* ==== 4. Нижняя навигация ==== */
+.bottom-nav {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 22px;
+    background: rgba(30, 53, 69, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
+    z-index: 900;
+    transition: background 0.3s, border 0.3s;
+}
+:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+.bottom-nav a, .bottom-nav button {
+    display: flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px; border-radius: 14px;
+    border: none; background: transparent;
+    color: var(--text-secondary); font-size: 22px;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.2s;
+}
+.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
+    background: rgba(59,130,246,0.15);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+body { padding-bottom: 78px; }
+
+/* ==== 10. Круг смены темы ==== */
+.theme-circle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    background: var(--bg);
+    transform: scale(0);
+    opacity: 0.95;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
+}
+.theme-circle.expand { transform: scale(1); opacity: 0; }
+
+/* ==== 2. Ripple при тапе ==== */
+.ripple-host { position: relative !important; overflow: hidden !important; }
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(59,130,246,0.35);
+    transform: scale(0);
+    animation: rippleAnim 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 0;
+}
+@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+</style>
+<style id="search-clean-fix">
+/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
+.search-result-icon {
+    display: none !important;
+}
+
+/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
+.search-results {
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/Edge */
+}
+.search-results::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
+body::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+}
+body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+</style>
+<style id="nav-back-hide-index">
+/* На главной кнопка «Назад» не нужна */
+body.is-index .nav-back-btn { display: none !important; }
+</style>
+<style id="bottom-nav-autohide">
+/* Автоскрытие нижней панели при скролле вниз */
+.bottom-nav {
+    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
+}
+.bottom-nav.nav-hidden {
+    transform: translate(-50%, 120%);
+    opacity: 0;
+    pointer-events: none;
+}
+/* На главной панель всегда видна */
+body.is-index .bottom-nav.nav-hidden {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+}
+</style>
+<style id="fav-nav-yellow">
+/* Избранное в нижней панели — жёлтое выделение, когда активно */
+.bottom-nav a[href="favorites.html"].active,
+.bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(250, 204, 21, 0.18) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover,
+.bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(250, 204, 21, 0.28) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
+    background: rgba(234, 179, 8, 0.18) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
+:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
+    background: rgba(234, 179, 8, 0.28) !important;
+    color: #92400e !important;
+}
+/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
+
+</style>
+<style id="nav-order-fix">
+/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
+.bottom-nav { display: flex; align-items: center; }
+.bottom-nav .nav-back-btn { order: 1; }
+.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+.bottom-nav a[href="favorites.html"] { order: 4; }
+
+/* Звезда активна — жёлтая */
+.bottom-nav a[href="favorites.html"].active {
+    background: rgba(250, 204, 21, 0.20) !important;
+    color: #facc15 !important;
+}
+.bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(250, 204, 21, 0.30) !important;
+    color: #fde047 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active {
+    background: rgba(234, 179, 8, 0.20) !important;
+    color: #b45309 !important;
+}
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
+    background: rgba(234, 179, 8, 0.30) !important;
+    color: #92400e !important;
+}
+</style>
+<style id="unified-buttons">
+/* ==== Единый стиль кнопок ==== */
+
+/* База для всех кнопок */
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.show-solution-btn,
+.btn-reset,
+.model-tab,
+.clear-all-btn,
+.search-clear,
+.back-link,
+.fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.2;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s,
+                box-shadow 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    white-space: nowrap;
+}
+
+/* Hover / active — общий отклик */
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-danger:hover,
+.show-solution-btn:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover,
+.back-link:hover,
+.fullscreen-btn:hover {
+    transform: translateY(-1px);
+}
+.btn-primary:active,
+.btn-secondary:active,
+.btn-danger:active,
+.show-solution-btn:active,
+.btn-reset:active,
+.model-tab:active,
+.clear-all-btn:active,
+.back-link:active,
+.fullscreen-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ==== PRIMARY (синий акцент) ==== */
+.btn-primary,
+.show-solution-btn,
+.back-link {
+    background: var(--accent, #3b82f6);
+    color: #fff;
+    border-color: var(--accent, #3b82f6);
+}
+.btn-primary:hover,
+.show-solution-btn:hover,
+.back-link:hover {
+    background: var(--accent-hover, #60a5fa);
+    border-color: var(--accent-hover, #60a5fa);
+    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
+}
+:root.light-mode .btn-primary,
+:root.light-mode .show-solution-btn,
+:root.light-mode .back-link {
+    background: var(--accent, #2563eb);
+    border-color: var(--accent, #2563eb);
+}
+:root.light-mode .btn-primary:hover,
+:root.light-mode .show-solution-btn:hover,
+:root.light-mode .back-link:hover {
+    background: var(--accent-hover, #3b82f6);
+    border-color: var(--accent-hover, #3b82f6);
+}
+
+/* ==== SECONDARY (нейтральный) ==== */
+.btn-secondary,
+.btn-reset,
+.model-tab,
+.clear-all-btn {
+    background: var(--menu-item-hover, #233e50);
+    color: var(--text, #fff);
+    border-color: var(--border, rgba(59,130,246,0.15));
+}
+.btn-secondary:hover,
+.btn-reset:hover,
+.model-tab:hover,
+.clear-all-btn:hover {
+    background: var(--group-header-bg, #1a3a5a);
+    border-color: var(--accent, #3b82f6);
+    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
+}
+:root.light-mode .btn-secondary,
+:root.light-mode .btn-reset,
+:root.light-mode .model-tab,
+:root.light-mode .clear-all-btn {
+    background: var(--menu-item-hover, #f0f4fa);
+    color: var(--text, #1a2a3f);
+}
+
+/* Активный таб — как primary */
+.model-tab.active {
+    background: var(--accent, #3b82f6) !important;
+    color: #fff !important;
+    border-color: var(--accent, #3b82f6) !important;
+    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
+}
+.model-tab.active:hover {
+    background: var(--accent-hover, #60a5fa) !important;
+    border-color: var(--accent-hover, #60a5fa) !important;
+}
+
+/* ==== DANGER (красный) ==== */
+.btn-danger,
+.clear-all-btn.danger,
+.clear-all-btn:hover {
+    background: #ef4444 !important;
+    color: #fff !important;
+    border-color: #ef4444 !important;
+}
+.btn-danger:hover,
+.clear-all-btn.danger:hover,
+.clear-all-btn:hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
+}
+
+/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
+.search-clear {
+    background: transparent;
+    border: none;
+    padding: 6px 10px;
+    min-height: auto;
+    color: var(--text-secondary, #8ba5b8);
+    border-radius: 50%;
+}
+.search-clear:hover {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent, #3b82f6);
+    transform: none;
+}
+
+/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
+.fullscreen-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 20px;
+}
+.fullscreen-btn:hover {
+    background: var(--accent, #3b82f6);
+    border-color: var(--accent, #3b82f6);
+}
+
+/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
+.remove-fav {
+    border-radius: 50%;
+    min-height: 32px;
+    min-width: 32px;
+    padding: 4px 8px;
+}
+.remove-fav:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+}
+
+/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--accent, #3b82f6);
+    padding: 0;
+    min-height: auto;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.btn-link:hover {
+    color: var(--accent-hover, #60a5fa);
+    transform: none;
+    box-shadow: none;
+}
+</style>
+<style id="page-fade-in">
+/* ==== Плавное появление страницы (fade-in) ==== */
+
+/* Мягкий вход всей страницы */
+body {
+    animation: pageFade 0.3s ease-out;
+}
+@keyframes pageFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Контент чуть «подъезжает» снизу */
+.container,
+.main-content {
+    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@keyframes pageFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Если в системе включено «уменьшить движение» — анимации отключаем */
+@media (prefers-reduced-motion: reduce) {
+    body,
+    .container,
+    .main-content {
+        animation: none !important;
+    }
+}
+</style>
+<style id="share-btn-right">
+/* Прижимаем кнопку «Поделиться» к правому краю панели */
+.bottom-nav button[title="Поделиться"] {
+    order: 99 !important;
+    margin-left: auto !important;
+}
+</style>
+<style id="no-tap-highlight">
+/* Убираем системный голубой/серый прямоугольник при тапе */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+}
+a, button, div, span, label, input, textarea, select {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+}
+</style>
+<style id="no-tap-highlight-accordion">
+/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
+.section-title,
+.group-header,
+.menu-item,
+.submenu-item,
+.model-tab,
+.search-result-item {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    outline: none !important;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+/* Лёгкий отклик при нажатии (вместо системного квадратика) */
+.section-title:active,
+.group-header:active {
+    transform: scale(0.99);
+    transition: transform 0.1s;
+}
+</style>
+<style id="fix-3d-buttons">
+    /* Отключаем ripple и конфликтующие анимации для кнопок 3D-моделей */
+    .controls-panel button,
+    .btn-toggle,
+    .btn-reset {
+        position: relative !important;
+        overflow: visible !important;
+        z-index: 10 !important;
+        touch-action: manipulation !important; /* Убирает задержку 300мс на телефонах */
+    }
+    
+    /* Убираем "волну" (ripple), которая накрывала кнопку и блокировала клик */
+    .controls-panel button::after,
+    .controls-panel button .ripple,
+    .btn-toggle .ripple,
+    .btn-reset .ripple {
+        display: none !important;
+    }
+
+    /* Возвращаем быструю анимацию нажатия */
+    .controls-panel button:active {
+        transform: scale(0.95) !important;
+        transition: transform 0.05s !important;
+    }
+</style>
 </head>
 <body>
 <div class="container">
@@ -260,7 +881,6 @@
                 </div>
                 <div class="controls-panel">
                     <button class="btn-toggle" id="chg-btn" style="background:#f59e0b;">🧤 Натереть тела</button>
-                    <button class="btn-reset" id="chg-reset">⟳ Сброс</button>
                     <span class="control-label">⬤ Нажмите кнопку, чтобы перенести электроны</span>
                 </div>
                 <div class="def-card">
@@ -284,7 +904,7 @@
                 <div class="controls-panel">
                     <div class="control-group">
                         <label>Расстояние $r$ (м)</label>
-                        <input type="range" id="int-dist-slider" min="1" max="10" step="0.5" value="3">
+                        <input type="range" id="int-dist-slider" min="1" max="8" step="0.5" value="3">
                         <span class="control-value" id="int-dist-value">3.0</span>
                     </div>
                     <button class="btn-toggle" id="int-type-btn">⚡ Отталкивание (+ +)</button>
@@ -295,8 +915,7 @@
                 <div class="def-card">
                     <p><strong>Модель закона Кулона.</strong> Два заряда на расстоянии $r$.</p>
                     <p><span class="important">Одноимённые</span> заряды отталкиваются, <span class="important">разноимённые</span> притягиваются.</p>
-                    <p>Слева от сцены находится график зависимости силы от расстояния. Двигайте ползунок и смотрите, как точка на графике скользит по кривой.</p>
-                </div>
+                   </div>
             </div>
 
         </div>
@@ -310,12 +929,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 1. Сила Кулона</div>
                 <div class="task-condition"><strong>Условие:</strong> Два точечных заряда $q_1 = 2 \cdot 10^{-6}$ Кл и $q_2 = 3 \cdot 10^{-6}$ Кл находятся на расстоянии $r = 0{,}3$ м в вакууме. Найдите силу взаимодействия.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q_1 = 2 \cdot 10^{-6}$ Кл, $q_2 = 3 \cdot 10^{-6}$ Кл, $r = 0{,}3$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $F$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
-                <div id="sol1" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Формула: $F = k \dfrac{|q_1 q_2|}{r^2}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = 9 \cdot 10^9 \dfrac{2 \cdot 10^{-6} \cdot 3 \cdot 10^{-6}}{(0{,}3)^2} = \dfrac{54 \cdot 10^{-3}}{0{,}09} = 0{,}6 \text{ Н}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Сила 0,6 Н — довольно заметная для таких маленьких зарядов.</div>
@@ -326,12 +945,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 2. Расстояние между зарядами</div>
                 <div class="task-condition"><strong>Условие:</strong> Два заряда по $q = 1 \cdot 10^{-7}$ Кл взаимодействуют с силой $F = 0{,}9$ Н. Найдите расстояние между ними.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q_1 = q_2 = 10^{-7}$ Кл, $F = 0{,}9$ Н</div>
                     <div class="find"><strong>🔍 Найти:</strong> $r$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
-                <div id="sol2" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Из $F = k \dfrac{q^2}{r^2}$ выразим $r = \sqrt{k \dfrac{q^2}{F}}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$r = \sqrt{9 \cdot 10^9 \dfrac{10^{-14}}{0{,}9}} = \sqrt{0{,}1} \approx 0{,}316 \text{ м}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Заряды находятся на расстоянии около 32 см.</div>
@@ -342,12 +961,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 3. Сила в воде</div>
                 <div class="task-condition"><strong>Условие:</strong> Во сколько раз уменьшится сила взаимодействия двух зарядов, если их из воздуха перенести в воду? $\varepsilon_{воды} = 81$.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $\varepsilon_{возд} \approx 1$, $\varepsilon_{воды} = 81$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\dfrac{F_{возд}}{F_{воды}}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
-                <div id="sol3" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $F_{среда} = \dfrac{F_{вак}}{\varepsilon}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{F_{возд}}{F_{воды}} = \dfrac{81}{1} = 81$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> В воде сила ослабевает в 81 раз из-за поляризации молекул воды.</div>
@@ -358,12 +977,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 4. Заряд электрона</div>
                 <div class="task-condition"><strong>Условие:</strong> Сколько электронов содержит заряд $q = -1{,}6 \cdot 10^{-15}$ Кл? Заряд электрона $e = -1{,}6 \cdot 10^{-19}$ Кл.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q = -1{,}6 \cdot 10^{-15}$ Кл, $e = -1{,}6 \cdot 10^{-19}$ Кл</div>
                     <div class="find"><strong>🔍 Найти:</strong> $N$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
-                <div id="sol4" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $N = \dfrac{q}{e}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$N = \dfrac{1{,}6 \cdot 10^{-15}}{1{,}6 \cdot 10^{-19}} = 10^4 = 10000$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Заряд — это избыток или недостаток 10 000 электронов.</div>
@@ -374,12 +993,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 5. Закон сохранения заряда</div>
                 <div class="task-condition"><strong>Условие:</strong> Два одинаковых металлических шарика с зарядами $q_1 = +4$ мкКл и $q_2 = -2$ мкКл привели в соприкосновение и развели. Какие заряды будут на шариках?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q_1 = 4$ мкКл, $q_2 = -2$ мкКл</div>
                     <div class="find"><strong>🔍 Найти:</strong> $q_1'$, $q_2'$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
-                <div id="sol5" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Суммарный заряд: $Q = q_1 + q_2 = 4 - 2 = 2$ мкКл.</div>
                     <div class="step"><strong>Шаг 2.</strong> Так как шарики одинаковые, заряд поделится поровну: $q' = \dfrac{Q}{2} = 1$ мкКл.</div>
                     <div class="step explanation"><strong>Пояснение:</strong> Заряд сохранился (2 мкКл), но перераспределился.</div>
@@ -390,12 +1009,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 6. Сила взаимодействия в керосине</div>
                 <div class="task-condition"><strong>Условие:</strong> Два заряда $q_1 = 5$ нКл и $q_2 = 10$ нКл находятся в керосине ($\varepsilon = 2$) на расстоянии $r = 0{,}5$ м. Найдите силу.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q_1 = 5 \cdot 10^{-9}$ Кл, $q_2 = 10 \cdot 10^{-9}$ Кл, $r = 0{,}5$ м, $\varepsilon = 2$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $F$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
-                <div id="sol6" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $F = \dfrac{k |q_1 q_2|}{\varepsilon r^2}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$F = \dfrac{9 \cdot 10^9 \cdot 5 \cdot 10^{-9} \cdot 10 \cdot 10^{-9}}{2 \cdot 0{,}25} = \dfrac{450 \cdot 10^{-9}}{0{,}5} = 9 \cdot 10^{-7} \text{ Н}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Сила очень мала (900 нН), так как заряды крошечные.</div>
@@ -406,12 +1025,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 7. Сравнение сил</div>
                 <div class="task-condition"><strong>Условие:</strong> Как изменится сила Кулона, если один из зарядов увеличить в 3 раза, а расстояние уменьшить в 2 раза?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q_1' = 3q_1$, $r' = r/2$</div>
                     <div class="find"><strong>🔍 Найти:</strong> $\dfrac{F'}{F}$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
-                <div id="sol7" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $F \sim \dfrac{q_1}{r^2}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{F'}{F} = 3 \cdot \left(\dfrac{r}{r/2}\right)^2 = 3 \cdot 4 = 12$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Сила вырастет в 12 раз.</div>
@@ -422,12 +1041,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 8. Найти заряд</div>
                 <div class="task-condition"><strong>Условие:</strong> Два одинаковых заряда на расстоянии $r = 0{,}1$ м взаимодействуют с силой $F = 3{,}6$ Н. Найдите величину каждого заряда.</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $r = 0{,}1$ м, $F = 3{,}6$ Н</div>
                     <div class="find"><strong>🔍 Найти:</strong> $q$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
-                <div id="sol8" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $F = k \dfrac{q^2}{r^2} \Rightarrow q = \sqrt{\dfrac{F r^2}{k}}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$q = \sqrt{\dfrac{3{,}6 \cdot 0{,}01}{9 \cdot 10^9}} = \sqrt{4 \cdot 10^{-12}} = 2 \cdot 10^{-6} \text{ Кл} = 2 \text{ мкКл}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Заряд 2 мкКл — типичный для электростатических опытов.</div>
@@ -438,12 +1057,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 9. Равновесие трёх зарядов</div>
                 <div class="task-condition"><strong>Условие:</strong> Два заряда $q_1 = 1$ мкКл и $q_2 = 4$ мкКл находятся на расстоянии $d = 3$ м. На каком расстоянии от $q_1$ нужно поместить третий заряд, чтобы он находился в равновесии?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q_1 = 1$ мкКл, $q_2 = 4$ мкКл, $d = 3$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $x$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
-                <div id="sol9" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> Условие равновесия: $k \dfrac{q_1 q}{x^2} = k \dfrac{q_2 q}{(d-x)^2}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> $\dfrac{1}{x^2} = \dfrac{4}{(3-x)^2} \Rightarrow \dfrac{1}{x} = \dfrac{2}{3-x}$.</div>
                     <div class="step"><strong>Шаг 3.</strong> $3 - x = 2x \Rightarrow 3x = 3 \Rightarrow x = 1$ м.</div>
@@ -455,12 +1074,12 @@
             <div class="task-block">
                 <div class="task-title">📘 Задача 10. Электризация</div>
                 <div class="task-condition"><strong>Условие:</strong> При трении стеклянной палочки о шёлк палочка приобрела заряд $q = +3{,}2 \cdot 10^{-8}$ Кл. Сколько электронов перешло с палочки на шёлк?</div>
-                <div class="task-given-find">
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $q = 3{,}2 \cdot 10^{-8}$ Кл, $e = 1{,}6 \cdot 10^{-19}$ Кл</div>
                     <div class="find"><strong>🔍 Найти:</strong> $N$</div>
                 </div>
-                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
-                <div id="sol10" class="task-solution">
                     <div class="step"><strong>Шаг 1.</strong> $N = \dfrac{|q|}{e}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$N = \dfrac{3{,}2 \cdot 10^{-8}}{1{,}6 \cdot 10^{-19}} = 2 \cdot 10^{11}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Палочка потеряла 200 миллиардов электронов — это и есть её положительный заряд.</div>
@@ -600,201 +1219,154 @@
     }
 </script>
 
-<!-- ===== МОДЕЛЬ 1: СТРОЕНИЕ АТОМА ===== -->
+<!-- ===== МОДЕЛЬ 2: ЭЛЕКТРИЗАЦИЯ (ПОЛНЫЙ КОД) ===== -->
 <script type="module">
     import * as THREE from 'three';
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
     (function() {
-        const container = document.getElementById('container-atom');
-        const canvas = document.getElementById('canvas-atom');
+        const container = document.getElementById('container-charging');
+        const canvas = document.getElementById('canvas-charging');
         if (!container || !canvas) return;
 
         const scene = new THREE.Scene();
         scene.background = null;
         const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-        camera.position.set(0, 5, 12);
+        camera.position.set(0, 0, 16);
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const labelRenderer = new CSS2DRenderer();
-        labelRenderer.domElement.style.position = 'absolute';
-        labelRenderer.domElement.style.top = '0px';
-        labelRenderer.domElement.style.left = '0px';
-        labelRenderer.domElement.style.pointerEvents = 'none';
-        container.appendChild(labelRenderer.domElement);
-
         function updateSize() {
             const rect = container.getBoundingClientRect();
             let w = rect.width, h = rect.height;
-            if (w < 10) w = 800;
-            if (h < 10) h = 450;
+            if (w < 10) w = 800; if (h < 10) h = 450;
             canvas.width = w; canvas.height = h;
             renderer.setSize(w, h);
-            labelRenderer.setSize(w, h);
             camera.aspect = w / h;
             camera.updateProjectionMatrix();
         }
         new ResizeObserver(() => updateSize()).observe(container);
         setTimeout(updateSize, 100);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
         key.position.set(0, 5, 10);
         scene.add(key);
 
         const group = new THREE.Group();
         scene.add(group);
 
-        // ===== СОЗДАНИЕ ЯДРА (СФЕРА С 3 ПРОТОНАМИ) =====
-        const nucleusShellMat = new THREE.MeshStandardMaterial({
-            color: 0xff4444,
-            emissive: 0x441111,
-            transparent: true,
-            opacity: 0.25
-        });
-        const nucleusShell = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), nucleusShellMat);
-        group.add(nucleusShell);
+        // Два тела
+        const bodyGeo = new THREE.BoxGeometry(2.5, 5.5, 1.5);
+        const bodyMat1 = new THREE.MeshStandardMaterial({ color: 0x44aa44, transparent: true, opacity: 0.15 });
+        const bodyMat2 = new THREE.MeshStandardMaterial({ color: 0xaa4444, transparent: true, opacity: 0.15 });
 
-        const protonMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111 });
-        const protonGeo = new THREE.SphereGeometry(0.35, 16, 16);
+        const body1 = new THREE.Mesh(bodyGeo, bodyMat1);
+        body1.position.set(-2.0, 0, 0);
+        group.add(body1);
 
-        const protonPositions = [
-            new THREE.Vector3(0, 0.4, 0),
-            new THREE.Vector3(-0.35, -0.2, 0),
-            new THREE.Vector3(0.35, -0.2, 0)
-        ];
+        const body2 = new THREE.Mesh(bodyGeo, bodyMat2);
+        body2.position.set(2.0, 0, 0);
+        group.add(body2);
 
-        protonPositions.forEach((pos) => {
-            const p = new THREE.Mesh(protonGeo, protonMat);
-            p.position.copy(pos);
-            group.add(p);
-
-            const div = document.createElement('div');
-            div.textContent = '+';
-            div.style.color = '#ffffff';
-            div.style.fontSize = '0.9rem';
-            div.style.fontWeight = 'bold';
-            div.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
-            const lbl = new CSS2DObject(div);
-            p.add(lbl);
-        });
-
-        const nucleusLabelDiv = document.createElement('div');
-        nucleusLabelDiv.textContent = 'Ядро (+3)';
-        nucleusLabelDiv.style.color = '#ffcccc';
-        nucleusLabelDiv.style.fontSize = '0.85rem';
-        nucleusLabelDiv.style.fontWeight = 'bold';
-        nucleusLabelDiv.style.marginTop = '-10px';
-        const nucleusLabel = new CSS2DObject(nucleusLabelDiv);
-        nucleusLabel.position.set(0, 1.5, 0);
-        group.add(nucleusLabel);
-
-        // ===== ОРБИТЫ И ЭЛЕКТРОНЫ =====
-        const ORBIT_CONFIGS = [
-            { radius: 2.2, rotX: 0, rotY: 0 },
-            { radius: 2.7, rotX: Math.PI / 2, rotY: 0 },
-            { radius: 3.2, rotX: Math.PI / 3, rotY: Math.PI / 4 },
-            { radius: 3.7, rotX: -Math.PI / 4, rotY: Math.PI / 2 },
-            { radius: 4.2, rotX: Math.PI / 6, rotY: -Math.PI / 4 }
-        ];
-
-        const orbitGroup = new THREE.Group();
-        group.add(orbitGroup);
-
-        const electrons = [];
+        // Атомы
+        const atoms = [];
+        const nucleusGeo = new THREE.SphereGeometry(0.35, 16, 16);
+        const electronGeo = new THREE.SphereGeometry(0.22, 16, 16);
+        const nucleusMat = new THREE.MeshStandardMaterial({ color: 0xff4444 });
         const electronMat = new THREE.MeshStandardMaterial({ color: 0x4444ff, emissive: 0x111144 });
-        const electronGeo = new THREE.SphereGeometry(0.25, 16, 16);
 
-        let activeElectrons = 3;
+        // Создаем атомы для обоих тел
+        for (let i = 0; i < 10; i++) {
+            // Левое тело
+            const atom1 = new THREE.Group();
+            atom1.add(new THREE.Mesh(nucleusGeo, nucleusMat));
+            const e1 = new THREE.Mesh(electronGeo, electronMat); e1.position.set(0.5, 0, 0); atom1.add(e1);
+            const e2 = new THREE.Mesh(electronGeo, electronMat); e2.position.set(-0.5, 0, 0); atom1.add(e2);
+            atom1.position.set(-2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
+            group.add(atom1);
+            atoms.push({ mesh: atom1, body: 1, electrons: [e1, e2] });
 
-        function updateAtom() {
-            while(orbitGroup.children.length > 0) {
-                const c = orbitGroup.children[0];
-                orbitGroup.remove(c);
-                if (c.geometry) c.geometry.dispose();
-                if (c.material) c.material.dispose();
-            }
-
-            while(electrons.length > 0) {
-                const e = electrons.pop();
-                group.remove(e.mesh);
-            }
-
-            for (let i = 0; i < activeElectrons; i++) {
-                const conf = ORBIT_CONFIGS[i];
-
-                const points = [];
-                for (let j = 0; j <= 64; j++) {
-                    const angle = (j / 64) * Math.PI * 2;
-                    points.push(new THREE.Vector3(Math.cos(angle) * conf.radius, Math.sin(angle) * conf.radius, 0));
-                }
-                const geo = new THREE.BufferGeometry().setFromPoints(points);
-                const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x8ba5b8, transparent: true, opacity: 0.3 }));
-                line.rotation.x = conf.rotX;
-                line.rotation.y = conf.rotY;
-                orbitGroup.add(line);
-
-                const e = new THREE.Mesh(electronGeo, electronMat);
-                group.add(e);
-
-                const div = document.createElement('div');
-                div.textContent = '−';
-                div.style.color = '#ffffff';
-                div.style.fontSize = '0.9rem';
-                div.style.fontWeight = 'bold';
-                div.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
-                const lbl = new CSS2DObject(div);
-                e.add(lbl);
-
-                electrons.push({
-                    mesh: e,
-                    radius: conf.radius,
-                    rotX: conf.rotX,
-                    rotY: conf.rotY,
-                    phase: i * (Math.PI * 2 / 3),
-                    speed: 1.5 + i * 0.2
-                });
-            }
-
-            const chargeDisplay = document.getElementById('atom-charge');
-            if (activeElectrons === 3) {
-                chargeDisplay.textContent = 'Нейтральный (3p, 3e)';
-                chargeDisplay.style.color = '';
-            } else if (activeElectrons > 3) {
-                chargeDisplay.textContent = `Отрицательный ион (3p, ${activeElectrons}e)`;
-                chargeDisplay.style.color = '#4444ff';
-            } else {
-                chargeDisplay.textContent = `Положительный ион (3p, ${activeElectrons}e)`;
-                chargeDisplay.style.color = '#ff4444';
-            }
-
-            document.getElementById('atom-remove-btn').disabled = (activeElectrons <= 1);
-            document.getElementById('atom-add-btn').disabled = (activeElectrons >= 5);
+            // Правое тело
+            const atom2 = new THREE.Group();
+            atom2.add(new THREE.Mesh(nucleusGeo, nucleusMat));
+            const e3 = new THREE.Mesh(electronGeo, electronMat); e3.position.set(0.5, 0, 0); atom2.add(e3);
+            const e4 = new THREE.Mesh(electronGeo, electronMat); e4.position.set(-0.5, 0, 0); atom2.add(e4);
+            // Скрытый дополнительный электрон для правого тела
+            const e5 = new THREE.Mesh(electronGeo, electronMat); e5.position.set(0, 0.6, 0); atom2.add(e5);
+            e5.visible = false;
+            
+            atom2.position.set(2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
+            group.add(atom2);
+            atoms.push({ mesh: atom2, body: 2, electrons: [e3, e4, e5] });
         }
 
-        document.getElementById('atom-remove-btn').addEventListener('click', () => {
-            if (activeElectrons > 1) {
-                activeElectrons--;
-                updateAtom();
+        const chgBtn = document.getElementById('chg-btn');
+        const q1Display = document.getElementById('chg-q1');
+        const q2Display = document.getElementById('chg-q2');
+
+        let isCharged = false;
+        let flyingElectrons = [];
+
+        chgBtn.addEventListener('click', () => {
+            isCharged = !isCharged;
+
+            if (isCharged) {
+                chgBtn.textContent = '✨ Разрядить (вернуть)';
+                chgBtn.style.background = '#666';
+                q1Display.textContent = '+5';
+                q1Display.style.color = '#ff4444';
+                q2Display.textContent = '-5';
+                q2Display.style.color = '#4444ff';
+
+                let count = 0;
+                atoms.forEach(a => {
+                    if (a.body === 1 && count < 5) {
+                        const e = a.electrons[0];
+                        if (e.visible) {
+                            e.visible = false; 
+                            
+                            const flyer = new THREE.Mesh(electronGeo, electronMat);
+                            const startPos = new THREE.Vector3().setFromMatrixPosition(e.matrixWorld);
+                            const endPos = new THREE.Vector3(
+                                a.mesh.position.x + 4.0, 
+                                a.mesh.position.y, 
+                                a.mesh.position.z
+                            );
+                            flyer.position.copy(startPos);
+                            group.add(flyer);
+                            
+                            flyingElectrons.push({
+                                mesh: flyer,
+                                start: startPos,
+                                end: endPos,
+                                progress: 0,
+                                speed: 0.02 + Math.random() * 0.01
+                            });
+                            count++;
+                        }
+                    }
+                });
+            } else {
+                chgBtn.textContent = '🧤 Натереть тела';
+                chgBtn.style.background = '#f59e0b';
+                q1Display.textContent = '0';
+                q1Display.style.color = '';
+                q2Display.textContent = '0';
+                q2Display.style.color = '';
+
+                flyingElectrons.forEach(f => group.remove(f.mesh));
+                flyingElectrons = [];
+
+                atoms.forEach(a => {
+                    if (a.body === 1) a.electrons[0].visible = true;
+                    if (a.body === 2 && a.electrons[2]) a.electrons[2].visible = false;
+                });
             }
         });
 
-        document.getElementById('atom-add-btn').addEventListener('click', () => {
-            if (activeElectrons < 5) {
-                activeElectrons++;
-                updateAtom();
-            }
-        });
-
-        document.getElementById('atom-reset').addEventListener('click', () => {
-            activeElectrons = 3;
-            updateAtom();
-        });
-
-        document.getElementById('fs-atom').addEventListener('click', async () => {
+        document.getElementById('fs-charging').addEventListener('click', async () => {
             if (!document.fullscreenElement) { await container.requestFullscreen(); }
             else { await container.exitFullscreen(); }
             updateSize();
@@ -805,29 +1377,34 @@
         controls.target.set(0, 0, 0);
         controls.update();
 
-        let time = 0;
-
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
-            time += 0.02;
 
-            electrons.forEach(e => {
-                const angle = time * e.speed + e.phase;
-                const x = Math.cos(angle) * e.radius;
-                const y = Math.sin(angle) * e.radius;
-                const z = 0;
-
-                const vec = new THREE.Vector3(x, y, z);
-                vec.applyEuler(new THREE.Euler(e.rotX, e.rotY, 0));
-                e.mesh.position.copy(vec);
-            });
+            for (let i = flyingElectrons.length - 1; i >= 0; i--) {
+                const f = flyingElectrons[i];
+                f.progress += f.speed;
+                
+                if (f.progress >= 1) {
+                    group.remove(f.mesh);
+                    flyingElectrons.splice(i, 1);
+                    
+                    const targetAtom = atoms.find(a => a.body === 2 && !a.electrons[2].visible);
+                    if (targetAtom) {
+                        targetAtom.electrons[2].visible = true;
+                    }
+                } else {
+                    const x = f.start.x + (f.end.x - f.start.x) * f.progress;
+                    const y = f.start.y + (f.end.y - f.start.y) * f.progress + Math.sin(f.progress * Math.PI) * 1.5;
+                    const z = f.start.z + (f.end.z - f.start.z) * f.progress;
+                    f.mesh.position.set(x, y, z);
+                    f.mesh.rotation.x += 0.1;
+                    f.mesh.rotation.y += 0.1;
+                }
+            }
 
             renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
         }
-
-        updateAtom();
         animate();
     })();
 </script>
@@ -853,8 +1430,7 @@
         function updateSize() {
             const rect = container.getBoundingClientRect();
             let w = rect.width, h = rect.height;
-            if (w < 10) w = 800;
-            if (h < 10) h = 450;
+            if (w < 10) w = 800; if (h < 10) h = 450;
             canvas.width = w; canvas.height = h;
             renderer.setSize(w, h);
             camera.aspect = w / h;
@@ -863,15 +1439,14 @@
         new ResizeObserver(() => updateSize()).observe(container);
         setTimeout(updateSize, 100);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
         key.position.set(0, 5, 10);
         scene.add(key);
 
         const group = new THREE.Group();
         scene.add(group);
 
-        // Два тела
         const bodyGeo = new THREE.BoxGeometry(2.5, 5.5, 1.5);
         const bodyMat1 = new THREE.MeshStandardMaterial({ color: 0x44aa44, transparent: true, opacity: 0.15 });
         const bodyMat2 = new THREE.MeshStandardMaterial({ color: 0xaa4444, transparent: true, opacity: 0.15 });
@@ -884,77 +1459,31 @@
         body2.position.set(2.0, 0, 0);
         group.add(body2);
 
-        // Атомы (Ядро + Электроны)
         const atoms = [];
         const nucleusGeo = new THREE.SphereGeometry(0.35, 16, 16);
         const electronGeo = new THREE.SphereGeometry(0.22, 16, 16);
         const nucleusMat = new THREE.MeshStandardMaterial({ color: 0xff4444 });
-        const electronMat = new THREE.MeshStandardMaterial({ color: 0x4444ff });
+        const electronMat = new THREE.MeshStandardMaterial({ color: 0x4444ff, emissive: 0x111144 });
 
-        // ===== ТРАЕКТОРИИ (ПУНКТИРНЫЕ ЛИНИИ) =====
-        const trajGroup = new THREE.Group();
-        group.add(trajGroup);
-        trajGroup.visible = false;
-
-        for (let i = 0; i < 5; i++) {
-            const yOffset = -2 + i * 1.0;
-            const pts = [
-                new THREE.Vector3(-1.5, yOffset, 0.8),
-                new THREE.Vector3(0, yOffset + 0.5, 1.2),
-                new THREE.Vector3(1.5, yOffset, 0.8)
-            ];
-            const curve = new THREE.CatmullRomCurve3(pts);
-            const curvePoints = curve.getPoints(30);
-
-            const geo = new THREE.BufferGeometry().setFromPoints(curvePoints);
-            const mat = new THREE.LineDashedMaterial({
-                color: 0xffcc00,
-                dashSize: 0.2,
-                gapSize: 0.1,
-                opacity: 0.8,
-                transparent: true
-            });
-            const line = new THREE.Line(geo, mat);
-            line.computeLineDistances();
-            trajGroup.add(line);
-        }
-
-        // Создаем атомы для первого тела
         for (let i = 0; i < 10; i++) {
-            const atom = new THREE.Group();
-            const n = new THREE.Mesh(nucleusGeo, nucleusMat);
-            atom.add(n);
+            const atom1 = new THREE.Group();
+            atom1.add(new THREE.Mesh(nucleusGeo, nucleusMat));
+            const e1 = new THREE.Mesh(electronGeo, electronMat); e1.position.set(0.5, 0, 0); atom1.add(e1);
+            const e2 = new THREE.Mesh(electronGeo, electronMat); e2.position.set(-0.5, 0, 0); atom1.add(e2);
+            atom1.position.set(-2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
+            group.add(atom1);
+            atoms.push({ mesh: atom1, body: 1, electrons: [e1, e2] });
 
-            const e1 = new THREE.Mesh(electronGeo, electronMat);
-            e1.position.set(0.5, 0, 0);
-            atom.add(e1);
-            const e2 = new THREE.Mesh(electronGeo, electronMat);
-            e2.position.set(-0.5, 0, 0);
-            atom.add(e2);
-
-            atom.position.set(-2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
-
-            group.add(atom);
-            atoms.push({ mesh: atom, body: 1, electrons: [e1, e2] });
-        }
-
-        // Создаем атомы для второго тела
-        for (let i = 0; i < 10; i++) {
-            const atom = new THREE.Group();
-            const n = new THREE.Mesh(nucleusGeo, nucleusMat);
-            atom.add(n);
-
-            const e1 = new THREE.Mesh(electronGeo, electronMat);
-            e1.position.set(0.5, 0, 0);
-            atom.add(e1);
-            const e2 = new THREE.Mesh(electronGeo, electronMat);
-            e2.position.set(-0.5, 0, 0);
-            atom.add(e2);
-
-            atom.position.set(2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
-
-            group.add(atom);
-            atoms.push({ mesh: atom, body: 2, electrons: [e1, e2] });
+            const atom2 = new THREE.Group();
+            atom2.add(new THREE.Mesh(nucleusGeo, nucleusMat));
+            const e3 = new THREE.Mesh(electronGeo, electronMat); e3.position.set(0.5, 0, 0); atom2.add(e3);
+            const e4 = new THREE.Mesh(electronGeo, electronMat); e4.position.set(-0.5, 0, 0); atom2.add(e4);
+            const e5 = new THREE.Mesh(electronGeo, electronMat); e5.position.set(0, 0.6, 0); atom2.add(e5);
+            e5.visible = false;
+            
+            atom2.position.set(2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
+            group.add(atom2);
+            atoms.push({ mesh: atom2, body: 2, electrons: [e3, e4, e5] });
         }
 
         const chgBtn = document.getElementById('chg-btn');
@@ -962,6 +1491,7 @@
         const q2Display = document.getElementById('chg-q2');
 
         let isCharged = false;
+        let flyingElectrons = [];
 
         chgBtn.addEventListener('click', () => {
             isCharged = !isCharged;
@@ -973,60 +1503,35 @@
                 q1Display.style.color = '#ff4444';
                 q2Display.textContent = '-5';
                 q2Display.style.color = '#4444ff';
-                trajGroup.visible = true;
 
-                let transferred = 0;
+                let count = 0;
                 atoms.forEach(a => {
-                    if (a.body === 1 && transferred < 5) {
-                        a.electrons[0].visible = false;
-
-                        const e = new THREE.Mesh(electronGeo, electronMat);
-                        e.position.set(a.mesh.position.x + 4.0, a.mesh.position.y, a.mesh.position.z);
-                        group.add(e);
-                        a.mesh.userData.transferredElectron = e;
-                        transferred++;
+                    if (a.body === 1 && count < 5) {
+                        const e = a.electrons[0];
+                        if (e.visible) {
+                            e.visible = false; 
+                            const flyer = new THREE.Mesh(electronGeo, electronMat);
+                            const startPos = new THREE.Vector3().setFromMatrixPosition(e.matrixWorld);
+                            const endPos = new THREE.Vector3(a.mesh.position.x + 4.0, a.mesh.position.y, a.mesh.position.z);
+                            flyer.position.copy(startPos);
+                            group.add(flyer);
+                            flyingElectrons.push({ mesh: flyer, start: startPos, end: endPos, progress: 0, speed: 0.02 + Math.random() * 0.01 });
+                            count++;
+                        }
                     }
                 });
             } else {
                 chgBtn.textContent = '🧤 Натереть тела';
                 chgBtn.style.background = '#f59e0b';
-                q1Display.textContent = '0';
-                q1Display.style.color = '';
-                q2Display.textContent = '0';
-                q2Display.style.color = '';
-                trajGroup.visible = false;
-
+                q1Display.textContent = '0'; q1Display.style.color = '';
+                q2Display.textContent = '0'; q2Display.style.color = '';
+                flyingElectrons.forEach(f => group.remove(f.mesh));
+                flyingElectrons = [];
                 atoms.forEach(a => {
-                    if (a.body === 1) {
-                        a.electrons[0].visible = true;
-                        if (a.mesh.userData.transferredElectron) {
-                            group.remove(a.mesh.userData.transferredElectron);
-                            a.mesh.userData.transferredElectron = null;
-                        }
-                    }
+                    if (a.body === 1) a.electrons[0].visible = true;
+                    if (a.body === 2 && a.electrons[2]) a.electrons[2].visible = false;
                 });
             }
-        });
-
-        document.getElementById('chg-reset').addEventListener('click', () => {
-            isCharged = false;
-            chgBtn.textContent = '🧤 Натереть тела';
-            chgBtn.style.background = '#f59e0b';
-            q1Display.textContent = '0';
-            q1Display.style.color = '';
-            q2Display.textContent = '0';
-            q2Display.style.color = '';
-            trajGroup.visible = false;
-
-            atoms.forEach(a => {
-                if (a.body === 1) {
-                    a.electrons[0].visible = true;
-                    if (a.mesh.userData.transferredElectron) {
-                        group.remove(a.mesh.userData.transferredElectron);
-                        a.mesh.userData.transferredElectron = null;
-                    }
-                }
-            });
         });
 
         document.getElementById('fs-charging').addEventListener('click', async () => {
@@ -1043,6 +1548,22 @@
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
+            for (let i = flyingElectrons.length - 1; i >= 0; i--) {
+                const f = flyingElectrons[i];
+                f.progress += f.speed;
+                if (f.progress >= 1) {
+                    group.remove(f.mesh);
+                    flyingElectrons.splice(i, 1);
+                    const targetAtom = atoms.find(a => a.body === 2 && !a.electrons[2].visible);
+                    if (targetAtom) targetAtom.electrons[2].visible = true;
+                } else {
+                    const x = f.start.x + (f.end.x - f.start.x) * f.progress;
+                    const y = f.start.y + (f.end.y - f.start.y) * f.progress + Math.sin(f.progress * Math.PI) * 1.5;
+                    const z = f.start.z + (f.end.z - f.start.z) * f.progress;
+                    f.mesh.position.set(x, y, z);
+                    f.mesh.rotation.x += 0.1; f.mesh.rotation.y += 0.1;
+                }
+            }
             renderer.render(scene, camera);
         }
         animate();
@@ -1050,6 +1571,7 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 3: ЗАКОН КУЛОНА ===== -->
+<!-- ===== МОДЕЛЬ 3: ЗАКОН КУЛОНА (ИСХОДНАЯ ВЕРСИЯ) ===== -->
 <script type="module">
     import * as THREE from 'three';
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -1064,7 +1586,7 @@
         scene.background = null;
 
         const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-        camera.position.set(0, 0, 22);
+        camera.position.set(0, 0, 24);
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -1090,24 +1612,41 @@
         new ResizeObserver(() => updateSize()).observe(container);
         setTimeout(updateSize, 100);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-        const key = new THREE.DirectionalLight(0xffffff, 0.7);
-        key.position.set(0, 5, 10);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6)); // Чуть меньше общего света
+        const key = new THREE.DirectionalLight(0xffffff, 1.5); // Яркий блик
+        key.position.set(5, 5, 10);
         scene.add(key);
+        // Добавляем цветной свет сзади для контраста
+        const rimLight = new THREE.DirectionalLight(0x88aaff, 1.0);
+        rimLight.position.set(-5, -5, -10);
+        scene.add(rimLight);
 
         const group = new THREE.Group();
         scene.add(group);
 
-        const BOUND_X = 6.0;
-        const RADIUS = 0.4;
+        const BOUND_X = 7.0;
+        const RADIUS = 0.9; // Увеличенный радиус
         const MIN_DIST = RADIUS * 2;
 
-        const sphereGeo = new THREE.SphereGeometry(RADIUS, 32, 32);
-        const matPos = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111, roughness: 0.3 });
-        const matNeg = new THREE.MeshStandardMaterial({ color: 0x4444ff, emissive: 0x111144, roughness: 0.3 });
+        const sphereGeo = new THREE.SphereGeometry(RADIUS, 64, 64); // Больше полигонов для гладкости
+        // Делаем заряды "стеклянными" и объемными (добавляем металличность, блеск и легкое свечение)
+        const matPos = new THREE.MeshStandardMaterial({ 
+            color: 0xff3333, 
+            emissive: 0x550000, 
+            roughness: 0.1, 
+            metalness: 0.6,
+            envMapIntensity: 1.5
+        });
+        const matNeg = new THREE.MeshStandardMaterial({ 
+            color: 0x3333ff, 
+            emissive: 0x000055, 
+            roughness: 0.1, 
+            metalness: 0.6,
+            envMapIntensity: 1.5
+        });
 
         const q1 = new THREE.Mesh(sphereGeo, matPos);
-        const q2 = new THREE.Mesh(sphereGeo, matNeg);
+        const q2 = new THREE.Mesh(sphereGeo, matPos);
         group.add(q1);
         group.add(q2);
 
@@ -1115,7 +1654,7 @@
             const div = document.createElement('div');
             div.textContent = text;
             div.style.color = color;
-            div.style.fontSize = '1.2rem';
+            div.style.fontSize = '2.5rem';
             div.style.fontWeight = 'bold';
             div.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
             return new CSS2DObject(div);
@@ -1161,55 +1700,9 @@
         let v1 = 0;
         let v2 = 0;
 
-        // График
-        const canvasGraph = document.createElement('canvas');
-        canvasGraph.width = 200;
-        canvasGraph.height = 150;
-        canvasGraph.style.position = 'absolute';
-        canvasGraph.style.left = '20px';
-        canvasGraph.style.bottom = '20px';
-        canvasGraph.style.background = 'rgba(0,0,0,0.3)';
-        canvasGraph.style.borderRadius = '12px';
-        canvasGraph.style.border = '1px solid var(--border)';
-        container.appendChild(canvasGraph);
-        const ctx = canvasGraph.getContext('2d');
+        
 
-        function drawGraph(currentR) {
-            ctx.clearRect(0, 0, 200, 150);
-            ctx.beginPath();
-            ctx.strokeStyle = '#8ba5b8';
-            ctx.lineWidth = 2;
-            ctx.moveTo(20, 10);
-            ctx.lineTo(20, 130);
-            ctx.lineTo(190, 130);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.strokeStyle = '#f59e0b';
-            ctx.lineWidth = 3;
-            for (let r = 1; r <= 10; r += 0.1) {
-                const F = 15 / (r * r);
-                const px = 20 + (r / 10) * 170;
-                const py = 130 - (F / 15) * 120;
-                if (r === 1) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
-            }
-            ctx.stroke();
-
-            // Текущая точка
-            const F = 15 / (currentR * currentR);
-            const px = 20 + (currentR / 10) * 170;
-            const py = 130 - (F / 15) * 120;
-            ctx.beginPath();
-            ctx.fillStyle = '#ff4444';
-            ctx.arc(px, py, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#8ba5b8';
-            ctx.font = '10px sans-serif';
-            ctx.fillText('F', 5, 15);
-            ctx.fillText('r', 190, 145);
-        }
+        
 
         function resetPositions() {
             const r = parseFloat(distSlider.value);
@@ -1245,7 +1738,7 @@
             arrow2.rotation.z = dir === -1 ? -Math.PI / 2 : Math.PI / 2;
             arrow2.scale.set(1, scale, 1);
 
-            drawGraph(displayR);
+            
         }
 
         distSlider.addEventListener('input', () => {
@@ -1263,14 +1756,12 @@
             isRepulsion = !isRepulsion;
             if (isRepulsion) {
                 typeBtn.textContent = '⚡ Отталкивание (+ +)';
-                matPos.color.setHex(0xff4444);
-                matNeg.color.setHex(0xff4444);
+                q1.material = matPos; q2.material = matPos;
                 lbl1.element.textContent = '+';
                 lbl2.element.textContent = '+';
             } else {
                 typeBtn.textContent = '🧲 Притяжение (+ -)';
-                matPos.color.setHex(0xff4444);
-                matNeg.color.setHex(0x4444ff);
+                q1.material = matPos; q2.material = matNeg;
                 lbl1.element.textContent = '+';
                 lbl2.element.textContent = '-';
             }
@@ -1293,12 +1784,11 @@
         });
 
         document.getElementById('int-reset').addEventListener('click', () => {
-            distSlider.value = 5;
-            distValue.textContent = '5.0';
+            distSlider.value = 6;
+            distValue.textContent = '6.0';
             isRepulsion = true;
             typeBtn.textContent = '⚡ Отталкивание (+ +)';
-            matPos.color.setHex(0xff4444);
-            matNeg.color.setHex(0xff4444);
+            q1.material = matPos; q2.material = matPos;
             lbl1.element.textContent = '+';
             lbl2.element.textContent = '+';
             resetPositions();
@@ -1379,8 +1869,718 @@
         }
         animate();
     })();
-</script>
-<script src="favorites.js"></script>
+</script><!-- MODELS_END --><script src="favorites.js"></script>
 <script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+    </nav>
+<script>
+/* ==== 5. Скелетоны для формул MathJax ==== */
+(function(){
+    function addSkeletons(){
+        document.querySelectorAll('.formula-block').forEach(function(el){
+            if (el.querySelector('mjx-container')) return;
+            if (el.dataset.sk) return;
+            el.dataset.sk = '1';
+            var s = document.createElement('span');
+            s.className = 'skeleton';
+            s.style.width = (60 + Math.random()*80) + 'px';
+            el.appendChild(s);
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+    else addSkeletons();
+    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+})();
+
+/* ==== 6. Чипы категорий в результатах поиска ==== */
+(function(){
+    function classify(cat){
+        var c = (cat||'').toLowerCase();
+        if (c.indexOf('механик') >= 0) return 'cat-mech';
+        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+        if (c.indexOf('электр') >= 0) return 'cat-elec';
+        return 'cat-other';
+    }
+    function decorate(){
+        document.querySelectorAll('.search-result-category').forEach(function(el){
+            if (el.dataset.chip) return;
+            el.dataset.chip = '1';
+            el.classList.add(classify(el.textContent));
+        });
+    }
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            decorate();
+        };
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+    else decorate();
+})();
+
+/* ==== 10. Анимация смены темы «как на iPhone» ==== */
+(function(){
+    function animateThemeChange(x, y){
+        var circle = document.createElement('div');
+        circle.className = 'theme-circle';
+        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+        circle.style.width = circle.style.height = (maxR*2) + 'px';
+        circle.style.left = (x - maxR) + 'px';
+        circle.style.top  = (y - maxR) + 'px';
+        document.body.appendChild(circle);
+        requestAnimationFrame(function(){ circle.classList.add('expand'); });
+        setTimeout(function(){ circle.remove(); }, 700);
+    }
+    document.addEventListener('click', function(e){
+        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+        if (!t) return;
+        var r = t.getBoundingClientRect();
+        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+    }, true);
+})();
+
+/* ==== 2. Ripple при тапе ==== */
+(function(){
+    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+    function bind(el){
+        if (el.dataset.rippleBound) return;
+        el.dataset.rippleBound = '1';
+        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+        el.addEventListener('pointerdown', function(e){
+            var rect = el.getBoundingClientRect();
+            var size = Math.max(rect.width, rect.height);
+            var r = document.createElement('span');
+            r.className = 'ripple';
+            r.style.width = r.style.height = size + 'px';
+            r.style.left = (e.clientX - rect.left - size/2) + 'px';
+            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+            el.appendChild(r);
+            setTimeout(function(){ r.remove(); }, 650);
+        });
+    }
+    function bindAll(){
+        document.querySelectorAll(sel).forEach(bind);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+    else bindAll();
+    /* Перепривязка после поиска */
+    var orig = window.performSearch;
+    if (typeof orig === 'function') {
+        window.performSearch = function(){
+            orig.apply(this, arguments);
+            setTimeout(bindAll, 30);
+        };
+    }
+})();
+</script>
+<script src="search-overlay.js"></script>
+<!-- bottom-nav-autohide-script -->
+<script>
+/* Автоскрытие нижней панели при скролле */
+(function(){
+    var nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    var lastY = window.scrollY;
+    var threshold = 8;
+    var ticking = false;
+    function onScroll(){
+        var y = window.scrollY;
+        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+        if (y > lastY && y > 80) {
+            nav.classList.add('nav-hidden');
+        } else {
+            nav.classList.remove('nav-hidden');
+        }
+        lastY = y;
+        ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+    }, { passive: true });
+})();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>`r`n<!-- ===== МОДЕЛЬ 2: ЭЛЕКТРИЗАЦИЯ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-charging');
+        const canvas = document.getElementById('canvas-charging');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 16);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800; if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const bodyGeo = new THREE.BoxGeometry(2.5, 5.5, 1.5);
+        const bodyMat1 = new THREE.MeshStandardMaterial({ color: 0x44aa44, transparent: true, opacity: 0.15 });
+        const bodyMat2 = new THREE.MeshStandardMaterial({ color: 0xaa4444, transparent: true, opacity: 0.15 });
+
+        const body1 = new THREE.Mesh(bodyGeo, bodyMat1);
+        body1.position.set(-2.0, 0, 0); group.add(body1);
+
+        const body2 = new THREE.Mesh(bodyGeo, bodyMat2);
+        body2.position.set(2.0, 0, 0); group.add(body2);
+
+        const atoms = [];
+        const nucleusGeo = new THREE.SphereGeometry(0.35, 16, 16);
+        const electronGeo = new THREE.SphereGeometry(0.22, 16, 16);
+        const nucleusMat = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+        const electronMat = new THREE.MeshStandardMaterial({ color: 0x4444ff, emissive: 0x111144 });
+
+        for (let i = 0; i < 10; i++) {
+            const atom1 = new THREE.Group();
+            atom1.add(new THREE.Mesh(nucleusGeo, nucleusMat));
+            const e1 = new THREE.Mesh(electronGeo, electronMat); e1.position.set(0.5, 0, 0); atom1.add(e1);
+            const e2 = new THREE.Mesh(electronGeo, electronMat); e2.position.set(-0.5, 0, 0); atom1.add(e2);
+            atom1.position.set(-2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
+            group.add(atom1);
+            atoms.push({ mesh: atom1, body: 1, electrons: [e1, e2] });
+
+            const atom2 = new THREE.Group();
+            atom2.add(new THREE.Mesh(nucleusGeo, nucleusMat));
+            const e3 = new THREE.Mesh(electronGeo, electronMat); e3.position.set(0.5, 0, 0); atom2.add(e3);
+            const e4 = new THREE.Mesh(electronGeo, electronMat); e4.position.set(-0.5, 0, 0); atom2.add(e4);
+            const e5 = new THREE.Mesh(electronGeo, electronMat); e5.position.set(0, 0.6, 0); atom2.add(e5);
+            e5.visible = false;
+            atom2.position.set(2.0 + (Math.random() - 0.5) * 2.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 1.0);
+            group.add(atom2);
+            atoms.push({ mesh: atom2, body: 2, electrons: [e3, e4, e5] });
+        }
+
+        const chgBtn = document.getElementById('chg-btn');
+        const q1Display = document.getElementById('chg-q1');
+        const q2Display = document.getElementById('chg-q2');
+
+        let isCharged = false;
+        let flyingElectrons = [];
+
+        chgBtn.addEventListener('click', () => {
+            isCharged = !isCharged;
+            if (isCharged) {
+                chgBtn.textContent = '✨ Разрядить (вернуть)';
+                chgBtn.style.background = '#666';
+                q1Display.textContent = '+5'; q1Display.style.color = '#ff4444';
+                q2Display.textContent = '-5'; q2Display.style.color = '#4444ff';
+                let count = 0;
+                atoms.forEach(a => {
+                    if (a.body === 1 && count < 5) {
+                        const e = a.electrons[0];
+                        if (e.visible) {
+                            e.visible = false; 
+                            const flyer = new THREE.Mesh(electronGeo, electronMat);
+                            const startPos = new THREE.Vector3().setFromMatrixPosition(e.matrixWorld);
+                            const endPos = new THREE.Vector3(a.mesh.position.x + 4.0, a.mesh.position.y, a.mesh.position.z);
+                            flyer.position.copy(startPos);
+                            group.add(flyer);
+                            flyingElectrons.push({ mesh: flyer, start: startPos, end: endPos, progress: 0, speed: 0.02 + Math.random() * 0.01 });
+                            count++;
+                        }
+                    }
+                });
+            } else {
+                chgBtn.textContent = '🧤 Натереть тела';
+                chgBtn.style.background = '#f59e0b';
+                q1Display.textContent = '0'; q1Display.style.color = '';
+                q2Display.textContent = '0'; q2Display.style.color = '';
+                flyingElectrons.forEach(f => group.remove(f.mesh));
+                flyingElectrons = [];
+                atoms.forEach(a => {
+                    if (a.body === 1) a.electrons[0].visible = true;
+                    if (a.body === 2 && a.electrons[2]) a.electrons[2].visible = false;
+                });
+            }
+        });
+
+        document.getElementById('fs-charging').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen(); else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.target.set(0, 0, 0); controls.update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            for (let i = flyingElectrons.length - 1; i >= 0; i--) {
+                const f = flyingElectrons[i];
+                f.progress += f.speed;
+                if (f.progress >= 1) {
+                    group.remove(f.mesh);
+                    flyingElectrons.splice(i, 1);
+                    const targetAtom = atoms.find(a => a.body === 2 && !a.electrons[2].visible);
+                    if (targetAtom) targetAtom.electrons[2].visible = true;
+                } else {
+                    const x = f.start.x + (f.end.x - f.start.x) * f.progress;
+                    const y = f.start.y + (f.end.y - f.start.y) * f.progress + Math.sin(f.progress * Math.PI) * 1.5;
+                    const z = f.start.z + (f.end.z - f.start.z) * f.progress;
+                    f.mesh.position.set(x, y, z);
+                    f.mesh.rotation.x += 0.1; f.mesh.rotation.y += 0.1;
+                }
+            }
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 3: ЗАКОН КУЛОНА ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-interaction');
+        const canvas = document.getElementById('canvas-interaction');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 24); 
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800; if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h; camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const key = new THREE.DirectionalLight(0xffffff, 1.5);
+        key.position.set(5, 5, 10); scene.add(key);
+        const rimLight = new THREE.DirectionalLight(0x88aaff, 1.0);
+        rimLight.position.set(-5, -5, -10); scene.add(rimLight);
+
+        const group = new THREE.Group();
+        scene.add(group);
+        const BOUND_X = 7.0;
+        const RADIUS = 0.9;
+        const MIN_DIST = RADIUS * 2;
+
+        const sphereGeo = new THREE.SphereGeometry(RADIUS, 64, 64);
+        const matPos = new THREE.MeshStandardMaterial({ color: 0xff3333, emissive: 0x550000, roughness: 0.1, metalness: 0.6, envMapIntensity: 1.5 });
+        const matNeg = new THREE.MeshStandardMaterial({ color: 0x3333ff, emissive: 0x000055, roughness: 0.1, metalness: 0.6, envMapIntensity: 1.5 });
+
+        const q1 = new THREE.Mesh(sphereGeo, matPos);
+        const q2 = new THREE.Mesh(sphereGeo, matPos);
+        group.add(q1); group.add(q2);
+
+        function makeLabel(text, color) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color; div.style.fontSize = '2.5rem'; div.style.fontWeight = 'bold';
+            return new CSS2DObject(div);
+        }
+        let lbl1 = makeLabel('+', '#fff');
+        let lbl2 = makeLabel('+', '#fff');
+        q1.add(lbl1); q2.add(lbl2);
+
+        function makeArrow(color) {
+            const g = new THREE.Group();
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1, 8), new THREE.MeshStandardMaterial({ color }));
+            shaft.position.y = 0.5;
+            const head = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.6, 10), new THREE.MeshStandardMaterial({ color }));
+            head.position.y = 1.2;
+            g.add(shaft); g.add(head);
+            return g;
+        }
+        const arrow1 = makeArrow(0xffaa00);
+        const arrow2 = makeArrow(0xffaa00);
+        group.add(arrow1); group.add(arrow2);
+
+        const distSlider = document.getElementById('int-dist-slider');
+        const distValue = document.getElementById('int-dist-value');
+        const distDisplay = document.getElementById('int-dist');
+        const forceDisplay = document.getElementById('int-force');
+        const typeBtn = document.getElementById('int-type-btn');
+        const playBtn = document.getElementById('int-play-btn');
+
+        let isRepulsion = true;
+        let isPlaying = false;
+        let x1 = -3.0, x2 = 3.0, v1 = 0, v2 = 0;
+
+        function resetPositions() {
+            const r = parseFloat(distSlider.value);
+            const startDist = r * 0.6;
+            x1 = -startDist; x2 = startDist;
+            v1 = 0; v2 = 0; isPlaying = false;
+            playBtn.textContent = '▶ Пуск'; playBtn.style.background = '#22c55e';
+            updateVisuals();
+        }
+
+        function updateVisuals() {
+            q1.position.set(x1, 0, 0); q2.position.set(x2, 0, 0);
+            const currentR = Math.abs(x2 - x1);
+            const displayR = currentR * 1.5;
+            distDisplay.textContent = displayR.toFixed(1);
+            forceDisplay.textContent = (15 / (displayR * displayR)).toFixed(2);
+
+            const F = 15 / (displayR * displayR);
+            const scale = Math.min(F * 2.0, 3.0);
+            const dir = isRepulsion ? -1 : 1;
+
+            arrow1.position.set(x1 + dir * (RADIUS + 0.2), 0, 0);
+            arrow1.rotation.z = dir === -1 ? Math.PI / 2 : -Math.PI / 2;
+            arrow1.scale.set(1, scale, 1);
+
+            arrow2.position.set(x2 + dir * -(RADIUS + 0.2), 0, 0);
+            arrow2.rotation.z = dir === -1 ? -Math.PI / 2 : Math.PI / 2;
+            arrow2.scale.set(1, scale, 1);
+        }
+
+        distSlider.addEventListener('input', () => {
+            const r = parseFloat(distSlider.value);
+            distValue.textContent = r.toFixed(1);
+            if (!isPlaying) { x1 = -r*0.6; x2 = r*0.6; updateVisuals(); }
+        });
+
+        typeBtn.addEventListener('click', () => {
+            isRepulsion = !isRepulsion;
+            if (isRepulsion) {
+                typeBtn.textContent = '⚡ Отталкивание (+ +)';
+                q1.material = matPos; q2.material = matPos;
+                lbl1.element.textContent = '+'; lbl2.element.textContent = '+';
+            } else {
+                typeBtn.textContent = '🧲 Притяжение (+ -)';
+                q1.material = matPos; q2.material = matNeg;
+                lbl1.element.textContent = '+'; lbl2.element.textContent = '-';
+            }
+            v1 = 0; v2 = 0; isPlaying = false; playBtn.textContent = '▶ Пуск'; playBtn.style.background = '#22c55e';
+            updateVisuals();
+        });
+
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            playBtn.textContent = isPlaying ? '⏸ Пауза' : '▶ Пуск';
+            playBtn.style.background = isPlaying ? '#f59e0b' : '#22c55e';
+        });
+
+        document.getElementById('int-reset').addEventListener('click', () => {
+            distSlider.value = 6; distValue.textContent = '6.0';
+            isRepulsion = true; typeBtn.textContent = '⚡ Отталкивание (+ +)';
+            q1.material = matPos; q2.material = matPos;
+            lbl1.element.textContent = '+'; lbl2.element.textContent = '+';
+            resetPositions();
+        });
+
+        document.getElementById('fs-interaction').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen(); else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.enableRotate = false; controls.target.set(0, 0, 0); controls.update();
+        resetPositions();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            if (isPlaying) {
+                const currentR = Math.abs(x2 - x1);
+                let accel = 3.0 / (currentR * currentR);
+                if (accel > 2.5) accel = 2.5;
+                if (isRepulsion) {
+                    v1 -= accel * 0.05; v2 += accel * 0.05; v1 *= 0.98; v2 *= 0.98;
+                    if (x1 < -BOUND_X + RADIUS) { x1 = -BOUND_X + RADIUS; v1 = Math.abs(v1) * 0.3; }
+                    if (x2 > BOUND_X - RADIUS) { x2 = BOUND_X - RADIUS; v2 = -Math.abs(v2) * 0.3; }
+                    if (Math.abs(v1) < 0.02 && Math.abs(v2) < 0.02) { isPlaying = false; playBtn.textContent = '▶ Пуск'; playBtn.style.background = '#22c55e'; }
+                } else {
+                    if (currentR > MIN_DIST) { v1 += accel * 0.05; v2 -= accel * 0.05; v1 *= 0.98; v2 *= 0.98; }
+                    else { x1 = -MIN_DIST/2; x2 = MIN_DIST/2; v1 = 0; v2 = 0; isPlaying = false; playBtn.textContent = '▶ Пуск'; playBtn.style.background = '#22c55e'; }
+                }
+                x1 += v1; x2 += v2;
+                if (!isRepulsion && x2 - x1 < MIN_DIST) x2 = x1 + MIN_DIST;
+                updateVisuals();
+            }
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+<!-- ===== МОДЕЛЬ 1: СТРОЕНИЕ АТОМА (ВОССТАНОВЛЕНА) ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+    (function() {
+        const container = document.getElementById('container-atom');
+        const canvas = document.getElementById('canvas-atom');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(3, 5, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800; if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const key = new THREE.DirectionalLight(0xffffff, 1.2);
+        key.position.set(5, 5, 10); scene.add(key);
+        const rim = new THREE.DirectionalLight(0x88aaff, 0.8);
+        rim.position.set(-5, -5, -10); scene.add(rim);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const nucleusGroup = new THREE.Group();
+        group.add(nucleusGroup);
+
+        const protonMat = new THREE.MeshStandardMaterial({ color: 0xff3333, roughness: 0.1, metalness: 0.6 });
+        const nucleonGeo = new THREE.SphereGeometry(0.35, 32, 32);
+
+        [
+            { x: 0, y: 0.3, z: 0 },
+            { x: -0.3, y: -0.2, z: 0 },
+            { x: 0.3, y: -0.2, z: 0 }
+        ].forEach(n => {
+            const mesh = new THREE.Mesh(nucleonGeo, protonMat);
+            mesh.position.set(n.x, n.y, n.z);
+            nucleusGroup.add(mesh);
+        });
+
+        const shellMat = new THREE.MeshStandardMaterial({
+            color: 0xff3388, emissive: 0x440011, transparent: true, opacity: 0.45, roughness: 0.0, metalness: 0.8, side: THREE.DoubleSide
+        });
+        const shell = new THREE.Mesh(new THREE.SphereGeometry(0.8, 32, 32), shellMat);
+        nucleusGroup.add(shell);
+
+        const nLabelDiv = document.createElement('div');
+        nLabelDiv.textContent = 'Ядро (+3)';
+        nLabelDiv.style.color = '#ffcccc'; nLabelDiv.style.fontSize = '0.9rem'; nLabelDiv.style.fontWeight = 'bold';
+        nLabelDiv.style.textShadow = '0 2px 4px rgba(0,0,0,0.8)';
+        const nucleusLabel = new CSS2DObject(nLabelDiv);
+        nucleusLabel.position.set(0, 0.9, 0);
+        nucleusGroup.add(nucleusLabel);
+
+        const ORBIT_CONFIGS = [
+            { radius: 2.2, rotX: Math.PI / 6, rotY: Math.PI / 4, rotZ: 0 },
+            { radius: 2.7, rotX: -Math.PI / 4, rotY: Math.PI / 3, rotZ: Math.PI / 6 },
+            { radius: 3.2, rotX: Math.PI / 2, rotY: 0, rotZ: Math.PI / 4 },
+            { radius: 3.7, rotX: Math.PI / 3, rotY: -Math.PI / 2, rotZ: Math.PI / 3 },
+            { radius: 4.2, rotX: -Math.PI / 6, rotY: Math.PI / 2, rotZ: -Math.PI / 4 }
+        ];
+
+        const orbitGroup = new THREE.Group();
+        group.add(orbitGroup);
+        const electrons = [];
+        const electronMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, emissive: 0x112244, roughness: 0.2, metalness: 0.6 });
+        const electronGeo = new THREE.SphereGeometry(0.25, 32, 32);
+        let activeElectrons = 3;
+
+        function updateAtom() {
+            while(orbitGroup.children.length > 0) {
+                const c = orbitGroup.children[0]; 
+                orbitGroup.remove(c);
+                if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose();
+            }
+            while(electrons.length > 0) {
+                const e = electrons.pop(); group.remove(e.mesh);
+                if (e.mesh.children.length > 0) e.mesh.remove(e.mesh.children[0]); 
+            }
+
+            for (let i = 0; i < activeElectrons; i++) {
+                const conf = ORBIT_CONFIGS[i];
+                const points = [];
+                for (let j = 0; j <= 64; j++) {
+                    const angle = (j / 64) * Math.PI * 2;
+                    points.push(new THREE.Vector3(Math.cos(angle) * conf.radius, Math.sin(angle) * conf.radius, 0));
+                }
+                const geo = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.4 }));
+                line.rotation.set(conf.rotX, conf.rotY, conf.rotZ);
+                orbitGroup.add(line);
+
+                const e = new THREE.Mesh(electronGeo, electronMat);
+                group.add(e);
+                
+                const div = document.createElement('div');
+                div.textContent = '−';
+                div.style.color = '#fff'; div.style.fontSize = '1rem'; div.style.fontWeight = 'bold';
+                div.style.textShadow = '0 2px 4px rgba(0,0,0,0.8)';
+                e.add(new CSS2DObject(div));
+
+                electrons.push({ mesh: e, radius: conf.radius, rotX: conf.rotX, rotY: conf.rotY, rotZ: conf.rotZ, phase: i * (Math.PI * 2 / 3), speed: 1.5 + i * 0.2 });
+            }
+
+            const chargeDisplay = document.getElementById('atom-charge');
+            if (activeElectrons === 3) { chargeDisplay.textContent = 'Нейтральный (3p, 3e)'; chargeDisplay.style.color = ''; }
+            else if (activeElectrons > 3) { chargeDisplay.textContent = `Отрицательный ион (3p, ${activeElectrons}e)`; chargeDisplay.style.color = '#3b82f6'; }
+            else { chargeDisplay.textContent = `Положительный ион (3p, ${activeElectrons}e)`; chargeDisplay.style.color = '#ff4444'; }
+            document.getElementById('atom-remove-btn').disabled = (activeElectrons <= 1);
+            document.getElementById('atom-add-btn').disabled = (activeElectrons >= 5);
+        }
+
+        document.getElementById('atom-remove-btn').addEventListener('click', () => { if (activeElectrons > 1) { activeElectrons--; updateAtom(); } });
+        document.getElementById('atom-add-btn').addEventListener('click', () => { if (activeElectrons < 5) { activeElectrons++; updateAtom(); } });
+        document.getElementById('atom-reset').addEventListener('click', () => { activeElectrons = 3; updateAtom(); });
+        document.getElementById('fs-atom').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen(); else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.target.set(0, 0, 0); controls.update();
+        let time = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            time += 0.02;
+            nucleusGroup.rotation.y += 0.005;
+            electrons.forEach(e => {
+                const angle = time * e.speed + e.phase;
+                const vec = new THREE.Vector3(Math.cos(angle) * e.radius, Math.sin(angle) * e.radius, 0);
+                vec.applyEuler(new THREE.Euler(e.rotX, e.rotY, e.rotZ));
+                e.mesh.position.copy(vec);
+            });
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        updateAtom();
+        animate();
+    })();
+</script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
