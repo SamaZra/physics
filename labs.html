@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Лабораторные работы</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c; --card-bg: #1e3545; --text: #ffffff; --text-secondary: #8ba5b8;
+            --accent: #3b82f6; --accent-hover: #60a5fa; --border: rgba(59, 130, 246, 0.15);
+            --icon-color: #8ba5b8; --header-bg: linear-gradient(135deg, #1e3545, #162a38);
+            --menu-card-bg: #1e3545; --menu-item-bg: #1e3545; --menu-item-hover: #233e50;
+            --card-shadow: rgba(0,0,0,0.2); --special-border: #f59e0b;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa; --card-bg: #ffffff; --text: #1a2a3f; --text-secondary: #5a7a94;
+            --accent: #2563eb; --accent-hover: #3b82f6; --border: #d0d8e0;
+            --icon-color: #1a2d3c; --header-bg: linear-gradient(135deg, #ffffff, #f8fafc);
+            --menu-card-bg: white; --menu-item-bg: white; --menu-item-hover: #f0f4fa;
+            --card-shadow: rgba(0,0,0,0.08); --special-border: #d97706;
+        }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); transition: background 0.3s; padding-bottom: 78px; }
+        .container { max-width: 720px; margin: 0 auto; padding: 20px 16px; }
+        
+        .header { text-align: center; margin-bottom: 24px; padding: 30px 20px; background: var(--header-bg); border-radius: 32px; box-shadow: 0 8px 24px var(--card-shadow); border: 1px solid var(--border); }
+        .header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+        .subtitle { color: var(--text-secondary); font-size: 0.85rem; }
+
+        .menu-card { background: var(--menu-card-bg); border-radius: 32px; overflow: hidden; box-shadow: 0 20px 40px -12px var(--card-shadow); border: 1px solid var(--border); }
+        
+        .menu-item { 
+            display: flex; flex-direction: column; 
+            padding: 18px 22px; 
+            border-bottom: 1px solid var(--border); 
+            border-left: 1.5px solid transparent; 
+            border-right: 1.5px solid transparent; 
+            text-decoration: none; transition: all 0.25s ease; 
+            background: var(--menu-item-bg); color: var(--text); 
+        }
+        .menu-item:hover { 
+            border-color: var(--accent); 
+            box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.35); 
+            transform: translateX(4px); 
+        }
+        
+        .item-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; line-height: 1.4; color: var(--text); }
+        .item-desc { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; line-height: 1.4; }
+
+        .back-link-wrapper { display: flex; justify-content: center; margin: 20px 0; }
+        .back-link { display: inline-block; padding: 10px 20px; background: var(--accent); color: white; text-decoration: none; font-weight: bold; border-radius: 20px; font-size: 0.95rem; transition: background 0.2s; }
+        .back-link:hover { background: var(--accent-hover); }
+
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s, transform 0.3s; max-width: 340px; width: auto; flex: 0 0 auto; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px !important; height: 46px !important; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; padding: 0 !important; transform: none !important; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: none !important; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+    </style>
+<style id="titles-center-fix">
+.section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+.section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+.section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+h1, .page-title, .file-title, .title { text-align: center !important; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Лабораторные работы</h1>
+    </div>
+
+    <div class="menu-card">
+        <!-- Лабораторная 1 -->
+        <a href="lab-humidity.html" class="menu-item">
+            <div class="item-title">Определение влажности воздуха</div>
+            <div class="item-desc">Лабораторная работа №1</div>
+        </a>
+
+        <!-- Лабораторная 2 -->
+        <div class="menu-item" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="item-title">Определение удельного сопротивления проводника</div>
+            <div class="item-desc">Лабораторная работа №2 (В разработке)</div>
+        </div>
+
+        <!-- Лабораторная 3 -->
+        <div class="menu-item" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="item-title">Определение ЭДС и внутреннего сопротивления источника тока</div>
+            <div class="item-desc">Лабораторная работа №3 (В разработке)</div>
+        </div>
+
+        <!-- Лабораторная 4 -->
+        <div class="menu-item" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="item-title">Определение ускорения свободного падения при помощи математического маятника</div>
+            <div class="item-desc">Лабораторная работа №4 (В разработке)</div>
+        </div>
+
+        <!-- Лабораторная 5 -->
+        <div class="menu-item" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="item-title">Измерение показателя преломления стекла</div>
+            <div class="item-desc">Лабораторная работа №5 (В разработке)</div>
+        </div>
+
+        <!-- Лабораторная 6 -->
+        <div class="menu-item" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="item-title">Определение длины световой волны при помощи дифракционной решетки</div>
+            <div class="item-desc">Лабораторная работа №6 (В разработке)</div>
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="index.html" class="back-link">← На главную</a>
+    </div>
+</div>
+
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/></svg></a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+</nav>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<script src="search-overlay.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY, threshold = 5, ticking = false;
+        window.addEventListener('scroll', function(){
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    var y = window.scrollY;
+                    if (Math.abs(y - lastY) >= threshold) {
+                        if (y > lastY && y > 50) nav.classList.add('nav-hidden');
+                        else nav.classList.remove('nav-hidden');
+                        lastY = y;
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    });
+</script>
+</body>
+</html>

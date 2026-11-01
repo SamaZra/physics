@@ -3,1049 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Конвертер величин</title>
+    <title>Физический конвертер</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         :root {
-            --bg: #1a2d3c;
-            --card-bg: #1e3545;
-            --text: #ffffff;
-            --text-secondary: #8ba5b8;
-            --accent: #1abc9c;
-            --accent-strong: #16a085;
-            --border: rgba(46, 204, 113, 0.1);
-            --btn-bg: #2c5a77;
-            --display-bg: #0f2a38;
-            --func-bg: #2c5a77;
-            --example-bg: #162a38;
-            --menu-item-hover: #233e50;
-            --icon-color: #8ba5b8;
-            --history-bg: rgba(15, 42, 56, 0.5);
+            --bg: #1a2d3c; --card-bg: #1e3545; --text: #ffffff; --text-secondary: #8ba5b8;
+            --accent: #1abc9c; --accent-strong: #16a085; --border: rgba(46, 204, 113, 0.1);
+            --btn-bg: #2c5a77; --display-bg: #0f2a38; --func-bg: #2c5a77; --example-bg: #162a38;
+            --menu-item-hover: #233e50; --icon-color: #8ba5b8; --history-bg: rgba(15, 42, 56, 0.5);
         }
-
         :root.light-mode {
             --bg: linear-gradient(145deg, #f5f7fc 0%, #eef2f8 100%);
-            --card-bg: white;
-            --text: #1a2a3f;
-            --text-secondary: #5a7a94;
-            --accent: #1abc9c;
-            --accent-strong: #16a085;
-            --border: #e2e8f0;
-            --btn-bg: #e2e8f0;
-            --display-bg: #f1f5f9;
-            --func-bg: #eef2ff;
-            --example-bg: #e8f0fe;
-            --menu-item-hover: #f8fafd;
-            --icon-color: #1a2d3c;
+            --card-bg: white; --text: #1a2a3f; --text-secondary: #5a7a94; --accent: #1abc9c;
+            --accent-strong: #16a085; --border: #e2e8f0; --btn-bg: #e2e8f0; --display-bg: #f1f5f9;
+            --func-bg: #eef2ff; --example-bg: #e8f0fe; --menu-item-hover: #f8fafd; --icon-color: #1a2d3c;
             --history-bg: #eef2f8;
         }
-
         body {
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-            overflow: hidden;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            transition: background 0.3s; overflow: hidden; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         }
-
-        .container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            padding: 16px;
-            position: relative;
-        }
-
+        .container { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 16px; position: relative; }
         .converter-card {
-            background: var(--card-bg);
-            border-radius: 32px;
-            padding: 16px;
-            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
+            background: var(--card-bg); border-radius: 32px; padding: 16px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.2); border: 1px solid var(--border);
+            flex: 1; display: flex; flex-direction: column; min-height: 0;
         }
-
         .history {
-            background: var(--history-bg);
-            border-radius: 16px;
-            padding: 8px 12px;
-            margin-bottom: 12px;
-            margin-top: 50px;
-            max-height: 80px;
-            overflow-y: auto;
-            font-size: 0.7rem;
-            color: var(--text-secondary);
+            background: var(--history-bg); border-radius: 16px; padding: 8px 12px;
+            margin-bottom: 12px; margin-top: 50px; max-height: 80px; overflow-y: auto;
+            font-size: 0.7rem; color: var(--text-secondary);
         }
-
-        .history-item {
-            padding: 3px 0;
-            border-bottom: 1px solid var(--border);
-            font-family: monospace;
-            cursor: pointer;
-        }
-
-        .history-item:hover {
-            color: var(--accent);
-            padding-left: 6px;
-        }
-
-        .clear-history {
-            float: right;
-            font-size: 0.65rem;
-            cursor: pointer;
-            background: var(--btn-bg);
-            padding: 1px 6px;
-            border-radius: 12px;
-            margin-bottom: 4px;
-        }
-
-        .clear-history:hover {
-            background: var(--accent);
-            color: white;
-        }
-
+        .history-item { padding: 3px 0; border-bottom: 1px solid var(--border); font-family: monospace; cursor: pointer; }
+        .history-item:hover { color: var(--accent); padding-left: 6px; }
+        .clear-history { float: right; font-size: 0.65rem; cursor: pointer; background: var(--btn-bg); padding: 1px 6px; border-radius: 12px; margin-bottom: 4px; }
+        .clear-history:hover { background: var(--accent); color: white; }
         .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            flex: 1;
-            align-content: start;
-            margin-bottom: 16px;
-            overflow-y: auto;
-            padding: 4px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; flex: 1;
+            align-content: start; margin-bottom: 16px; overflow-y: auto; padding: 4px;
         }
-
         .cat-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 12px;
-            border-radius: 24px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            background: var(--btn-bg);
-            color: var(--text);
-            border: none;
-            font-family: inherit;
-            gap: 12px;
-            text-align: center;
-            min-height: 100px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px 12px; border-radius: 24px; text-decoration: none; transition: all 0.2s ease;
+            cursor: pointer; background: var(--btn-bg); color: var(--text); border: none;
+            font-family: inherit; gap: 12px; text-align: center; min-height: 100px;
         }
+        .cat-card:hover { background: var(--menu-item-hover); transform: translateY(-2px); }
+        .cat-card:active { transform: scale(0.97); }
+        .cat-icon { font-size: 28px; font-weight: 500; color: var(--icon-color); transition: all 0.2s ease; font-family: 'Segoe UI', 'Inter', monospace; line-height: 1; }
+        .cat-card:hover .cat-icon { color: var(--accent); transform: scale(1.05); }
+        .cat-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; line-height: 1.3; }
 
-        .cat-card:hover {
-            background: var(--menu-item-hover);
-            transform: translateY(-2px);
+        .back-link-wrapper { text-align: center; margin-top: auto; padding-top: 12px; flex-shrink: 0; }
+        .back-link {
+            display: inline-block; width: auto; min-width: 180px; padding: 14px 28px;
+            background: var(--accent); color: white; text-decoration: none; border-radius: 44px;
+            font-weight: 700; font-size: 1rem; text-align: center; cursor: pointer; border: none; transition: 0.1s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
+        .back-link:hover { background: var(--accent-strong); }
+        .back-link:active { transform: scale(0.97); }
 
-        .cat-card:active {
-            transform: scale(0.97);
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px);
+            align-items: center; justify-content: center; z-index: 1001; padding: 16px;
         }
-
-        .cat-icon {
-            font-size: 28px;
-            font-weight: 500;
-            color: var(--icon-color);
-            transition: all 0.2s ease;
-            font-family: 'Segoe UI', 'Inter', monospace;
-            line-height: 1;
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--card-bg); width: 100%; max-width: 460px; border-radius: 44px;
+            overflow-y: auto; max-height: 85vh; box-shadow: 0 30px 45px rgba(0, 0, 0, 0.3); border: 1px solid var(--border);
         }
-
-        .cat-card:hover .cat-icon {
-            color: var(--accent);
-            transform: scale(1.05);
+        .modal-header { padding: 18px 20px 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: baseline; }
+        .modal-header h3 { font-size: 22px; font-weight: 700; color: var(--text); }
+        .close-modal { font-size: 32px; cursor: pointer; color: var(--text-secondary); padding: 0 8px; line-height: 1; }
+        .close-modal:hover { color: var(--accent); }
+        .converter-body { padding: 20px; display: flex; flex-direction: column; gap: 18px; }
+        .input-group, .output-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label, .output-group label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+        .converter-input, .converter-output {
+            background: var(--display-bg); border: 1px solid var(--border); border-radius: 28px;
+            padding: 14px 18px; font-size: 17px; font-weight: 500; color: var(--text); outline: none; width: 100%; font-family: monospace;
         }
-
-        .cat-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.2px;
-            line-height: 1.3;
+        .converter-input:focus { border-color: var(--accent); }
+        .converter-output { background: var(--func-bg); cursor: default; word-break: break-word; }
+        .unit-select-row { display: flex; gap: 12px; align-items: center; width: 100%; flex-wrap: nowrap; }
+        .select-unit {
+            flex: 1; background: var(--btn-bg); border-radius: 40px; padding: 12px 8px;
+            border: 1px solid var(--border); font-size: 13px; font-weight: 500; color: var(--text);
+            cursor: pointer; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
         }
-
+        .swap-icon {
+            background: var(--card-bg); border-radius: 48px; padding: 6px 12px; font-size: 20px;
+            cursor: pointer; color: var(--accent); border: 1px solid var(--border); flex-shrink: 0; user-select: none;
+        }
+        .swap-icon:hover { background: var(--accent); color: white; }
+        .info-note {
+            font-size: 11px; color: var(--text-secondary); text-align: center;
+            background: var(--example-bg); padding: 8px 12px; border-radius: 20px;
+        }
         @media (max-width: 520px) {
             .categories-grid { gap: 10px; }
             .cat-card { padding: 16px 8px; min-height: 85px; }
             .cat-icon { font-size: 24px; }
             .cat-title { font-size: 12px; }
         }
-
         @media (max-width: 420px) {
             .categories-grid { gap: 8px; }
             .cat-card { padding: 14px 6px; min-height: 75px; }
             .cat-icon { font-size: 22px; }
             .cat-title { font-size: 11px; }
         }
-
-        .back-link-wrapper {
-            text-align: center;
-            margin-top: auto;
-            padding-top: 12px;
-            flex-shrink: 0;
-        }
-
-        .back-link {
-            display: inline-block;
-            width: auto;
-            min-width: 180px;
-            padding: 14px 28px;
-            background: var(--accent);
-            color: white;
-            text-decoration: none;
-            border-radius: 44px;
-            font-weight: 700;
-            font-size: 1rem;
-            text-align: center;
-            cursor: pointer;
-            border: none;
-            transition: 0.1s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-
-        .back-link:hover {
-            background: var(--accent-strong);
-        }
-
-        .back-link:active {
-            transform: scale(0.97);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(6px);
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            padding: 16px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 460px;
-            border-radius: 44px;
-            overflow-y: auto;
-            max-height: 85vh;
-            box-shadow: 0 30px 45px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border);
-        }
-
-        .modal-header {
-            padding: 18px 20px 10px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-        }
-
-        .modal-header h3 {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .close-modal {
-            font-size: 32px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            padding: 0 8px;
-            line-height: 1;
-        }
-
-        .close-modal:hover {
-            color: var(--accent);
-        }
-
-        .converter-body {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .input-group, .output-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .input-group label, .output-group label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .converter-input, .converter-output {
-            background: var(--display-bg);
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            padding: 14px 18px;
-            font-size: 17px;
-            font-weight: 500;
-            color: var(--text);
-            outline: none;
-            width: 100%;
-            font-family: monospace;
-        }
-
-        .converter-input:focus {
-            border-color: var(--accent);
-        }
-
-        .converter-output {
-            background: var(--func-bg);
-            cursor: default;
-            word-break: break-word;
-        }
-
-        .unit-select-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            width: 100%;
-            flex-wrap: nowrap;
-        }
-
-        .select-unit {
-            flex: 1;
-            background: var(--btn-bg);
-            border-radius: 40px;
-            padding: 12px 8px;
-            border: 1px solid var(--border);
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text);
-            cursor: pointer;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            min-width: 0;
-        }
-
-        .swap-icon {
-            background: var(--card-bg);
-            border-radius: 48px;
-            padding: 6px 12px;
-            font-size: 20px;
-            cursor: pointer;
-            color: var(--accent);
-            border: 1px solid var(--border);
-            flex-shrink: 0;
-            user-select: none;
-        }
-
-        .swap-icon:hover {
-            background: var(--accent);
-            color: white;
-        }
-
-        .info-note {
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-align: center;
-            background: var(--example-bg);
-            padding: 8px 12px;
-            border-radius: 20px;
-        }
-
-        .extra-fields {
-            background: var(--example-bg);
-            border-radius: 24px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            border-left: 3px solid var(--accent);
-        }
-
-        .extra-field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .extra-field label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .extra-input {
-            background: var(--display-bg);
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            padding: 12px 16px;
-            font-size: 15px;
-            color: var(--text);
-            outline: none;
-            width: 100%;
-        }
-
-        .extra-input:focus {
-            border-color: var(--accent);
-        }
-
-        .mode-switch {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-            width: 100%;
-        }
-
-        .mode-switch-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 40px;
-            background: var(--btn-bg);
-            border: none;
-            color: var(--text);
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.1s;
-            font-size: 14px;
-            text-align: center;
-            white-space: nowrap;
-        }
-
-        .mode-switch-btn.active {
-            background: var(--accent);
-            color: white;
-        }
-
         @media (max-width: 480px) {
             .select-unit { font-size: 11px; padding: 10px 6px; }
-            .mode-switch-btn { font-size: 12px; padding: 10px; white-space: normal; }
             .converter-body { padding: 16px; }
             .unit-select-row { gap: 8px; }
             .swap-icon { padding: 4px 8px; font-size: 18px; }
         }
     </style>
-<style id="titles-center-fix">
-/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
-.section-title {
-    justify-content: center !important;
-    text-align: center !important;
-    position: relative !important;
-    padding-left: 16px !important;
-    padding-right: 28px !important;
-}
-.section-title::after {
-    position: absolute !important;
-    right: 8px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    margin-left: 0 !important;
-}
-.section.collapsed .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-/* Названия файлов / страниц — по центру */
-h1, .page-title, .file-title, .title {
-    text-align: center !important;
-}
-</style>
-<style id="section-gradient-fix">
-/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
-/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
-
-.section { position: relative; }
-
-/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
-
-/* Закрыт: градиента нет */
-.section.collapsed > .section-title {
-    background-image: none;
-    transition: background-image 0.35s ease;
-}
-
-/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
-.section.collapsed > .section-title:hover {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Открыт: тот же градиент постоянно */
-.section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Светлая тема — цвет из --special-border (#d97706) */
-:root.light-mode .section.collapsed > .section-title:hover,
-:root.light-mode .section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(217, 119, 6, 0.18) 0%,
-        rgba(217, 119, 6, 0.06) 45%,
-        rgba(217, 119, 6, 0.00) 100%);
-}
-
-/* ---------- СТРЕЛКА ---------- */
-
-/* Закрыт: светящаяся синяя */
-.section.collapsed > .section-title::after {
-    color: var(--accent, #3b82f6) !important;
-    text-shadow:
-        0 0 6px rgba(59, 130, 246, 0.85),
-        0 0 14px rgba(59, 130, 246, 0.55);
-    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
-    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
-}
-
-/* Открыт: свечение убираем, стрелка обычная */
-.section:not(.collapsed) > .section-title::after {
-    color: var(--text-secondary, #8ba5b8) !important;
-    text-shadow: none !important;
-    filter: none !important;
-}
-
-/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
-.section.collapsed > .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-.section:not(.collapsed) > .section-title::after {
-    transform: translateY(-50%) rotate(0deg) !important;
-}
-
-/* Светлая тема: синий чуть темнее, свечение мягче */
-:root.light-mode .section.collapsed > .section-title::after {
-    color: var(--accent, #2563eb) !important;
-    text-shadow:
-        0 0 6px rgba(37, 99, 235, 0.6),
-        0 0 12px rgba(37, 99, 235, 0.35);
-    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
-}
-</style>
-<style id="modern-visual-fix">
-/* ==== 7. Плавный скролл + отступ у заголовков ==== */
-html { scroll-behavior: smooth; }
-.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
-
-/* ==== 8. Радиальный градиент на фоне ==== */
-body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
-        var(--bg) !important;
-}
-:root.light-mode body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
-        var(--bg) !important;
-}
-
-/* ==== 3. «Стеклянная» шапка ==== */
-@media (prefers-reduced-motion: no-preference) {
-    .header {
-        background: rgba(30, 53, 69, 0.72) !important;
-        backdrop-filter: blur(14px) saturate(140%);
-        -webkit-backdrop-filter: blur(14px) saturate(140%);
-        border-bottom: 1px solid var(--border);
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; }
+    </style>
+<style id="fix-nav-bounce">
+    /* Отключаем сдвиги и пружины у кнопок нижней панели */
+    .bottom-nav a, .bottom-nav button {
+        transform: none !important;
+        transition: background 0.2s ease, color 0.2s ease !important;
     }
-    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
-}
-
-/* ==== 5. Скелетоны для формул ==== */
-.skeleton {
-    display: inline-block;
-    min-width: 60px;
-    height: 1.1em;
-    vertical-align: middle;
-    border-radius: 6px;
-    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
-    background-size: 200% 100%;
-    animation: shimmerSk 1.2s infinite linear;
-}
-@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
-
-/* ==== 6. Чипы категорий в поиске ==== */
-.search-result-category {
-    display: inline-block;
-    padding: 2px 10px;
-    margin-top: 4px;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    color: #fff;
-    background: var(--accent, #3b82f6);
-}
-.search-result-category.cat-mech  { background: #3b82f6; }
-.search-result-category.cat-thermo{ background: #f59e0b; }
-.search-result-category.cat-elec  { background: #eab308; }
-.search-result-category.cat-other { background: #64748b; }
-
-/* ==== 4. Нижняя навигация ==== */
-.bottom-nav {
-    position: fixed;
-    left: 50%;
-    bottom: 14px;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 22px;
-    background: rgba(30, 53, 69, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
-    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
-    z-index: 900;
-    transition: background 0.3s, border 0.3s;
-}
-:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
-.bottom-nav a, .bottom-nav button {
-    display: flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px; border-radius: 14px;
-    border: none; background: transparent;
-    color: var(--text-secondary); font-size: 22px;
-    cursor: pointer; text-decoration: none;
-    transition: all 0.2s;
-}
-.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
-    background: rgba(59,130,246,0.15);
-    color: var(--accent);
-    transform: translateY(-2px);
-}
-body { padding-bottom: 78px; }
-
-/* ==== 10. Круг смены темы ==== */
-.theme-circle {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    background: var(--bg);
-    transform: scale(0);
-    opacity: 0.95;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
-}
-.theme-circle.expand { transform: scale(1); opacity: 0; }
-
-/* ==== 2. Ripple при тапе ==== */
-.ripple-host { position: relative !important; overflow: hidden !important; }
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(59,130,246,0.35);
-    transform: scale(0);
-    animation: rippleAnim 0.6s ease-out forwards;
-    pointer-events: none;
-    z-index: 0;
-}
-@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
-:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
-</style>
-<style id="search-clean-fix">
-/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
-.search-result-icon {
-    display: none !important;
-}
-
-/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
-.search-results {
-    scrollbar-width: none;          /* Firefox */
-    -ms-overflow-style: none;       /* IE/Edge */
-}
-.search-results::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-}
-
-/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
-body::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-}
-body {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-</style>
-<style id="nav-back-hide-index">
-/* На главной кнопка «Назад» не нужна */
-body.is-index .nav-back-btn { display: none !important; }
-</style>
-<style id="bottom-nav-autohide">
-/* Автоскрытие нижней панели при скролле вниз */
-.bottom-nav {
-    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
-}
-.bottom-nav.nav-hidden {
-    transform: translate(-50%, 120%);
-    opacity: 0;
-    pointer-events: none;
-}
-/* На главной панель всегда видна */
-body.is-index .bottom-nav.nav-hidden {
-    transform: translate(-50%, 0);
-    opacity: 1;
-    pointer-events: auto;
-}
-</style>
-<style id="fav-nav-yellow">
-/* Избранное в нижней панели — жёлтое выделение, когда активно */
-.bottom-nav a[href="favorites.html"].active,
-.bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(250, 204, 21, 0.18) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover,
-.bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(250, 204, 21, 0.28) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(234, 179, 8, 0.18) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(234, 179, 8, 0.28) !important;
-    color: #92400e !important;
-}
-/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
-
-</style>
-<style id="nav-order-fix">
-/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
-.bottom-nav { display: flex; align-items: center; }
-.bottom-nav .nav-back-btn { order: 1; }
-.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
-.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
-.bottom-nav a[href="favorites.html"] { order: 4; }
-
-/* Звезда активна — жёлтая */
-.bottom-nav a[href="favorites.html"].active {
-    background: rgba(250, 204, 21, 0.20) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(250, 204, 21, 0.30) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active {
-    background: rgba(234, 179, 8, 0.20) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(234, 179, 8, 0.30) !important;
-    color: #92400e !important;
-}
-</style>
-<style id="unified-buttons">
-/* ==== Единый стиль кнопок ==== */
-
-/* База для всех кнопок */
-.btn-primary,
-.btn-secondary,
-.btn-danger,
-.show-solution-btn,
-.btn-reset,
-.model-tab,
-.clear-all-btn,
-.search-clear,
-.back-link,
-.fullscreen-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 8px 18px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: inherit;
-    line-height: 1.2;
-    border: 1px solid transparent;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s, border-color 0.2s,
-                box-shadow 0.2s, transform 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    white-space: nowrap;
-}
-
-/* Hover / active — общий отклик */
-.btn-primary:hover,
-.btn-secondary:hover,
-.btn-danger:hover,
-.show-solution-btn:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover,
-.back-link:hover,
-.fullscreen-btn:hover {
-    transform: translateY(-1px);
-}
-.btn-primary:active,
-.btn-secondary:active,
-.btn-danger:active,
-.show-solution-btn:active,
-.btn-reset:active,
-.model-tab:active,
-.clear-all-btn:active,
-.back-link:active,
-.fullscreen-btn:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* ==== PRIMARY (синий акцент) ==== */
-.btn-primary,
-.show-solution-btn,
-.back-link {
-    background: var(--accent, #3b82f6);
-    color: #fff;
-    border-color: var(--accent, #3b82f6);
-}
-.btn-primary:hover,
-.show-solution-btn:hover,
-.back-link:hover {
-    background: var(--accent-hover, #60a5fa);
-    border-color: var(--accent-hover, #60a5fa);
-    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
-}
-:root.light-mode .btn-primary,
-:root.light-mode .show-solution-btn,
-:root.light-mode .back-link {
-    background: var(--accent, #2563eb);
-    border-color: var(--accent, #2563eb);
-}
-:root.light-mode .btn-primary:hover,
-:root.light-mode .show-solution-btn:hover,
-:root.light-mode .back-link:hover {
-    background: var(--accent-hover, #3b82f6);
-    border-color: var(--accent-hover, #3b82f6);
-}
-
-/* ==== SECONDARY (нейтральный) ==== */
-.btn-secondary,
-.btn-reset,
-.model-tab,
-.clear-all-btn {
-    background: var(--menu-item-hover, #233e50);
-    color: var(--text, #fff);
-    border-color: var(--border, rgba(59,130,246,0.15));
-}
-.btn-secondary:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover {
-    background: var(--group-header-bg, #1a3a5a);
-    border-color: var(--accent, #3b82f6);
-    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
-}
-:root.light-mode .btn-secondary,
-:root.light-mode .btn-reset,
-:root.light-mode .model-tab,
-:root.light-mode .clear-all-btn {
-    background: var(--menu-item-hover, #f0f4fa);
-    color: var(--text, #1a2a3f);
-}
-
-/* Активный таб — как primary */
-.model-tab.active {
-    background: var(--accent, #3b82f6) !important;
-    color: #fff !important;
-    border-color: var(--accent, #3b82f6) !important;
-    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
-}
-.model-tab.active:hover {
-    background: var(--accent-hover, #60a5fa) !important;
-    border-color: var(--accent-hover, #60a5fa) !important;
-}
-
-/* ==== DANGER (красный) ==== */
-.btn-danger,
-.clear-all-btn.danger,
-.clear-all-btn:hover {
-    background: #ef4444 !important;
-    color: #fff !important;
-    border-color: #ef4444 !important;
-}
-.btn-danger:hover,
-.clear-all-btn.danger:hover,
-.clear-all-btn:hover {
-    background: #dc2626 !important;
-    border-color: #dc2626 !important;
-    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
-}
-
-/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
-.search-clear {
-    background: transparent;
-    border: none;
-    padding: 6px 10px;
-    min-height: auto;
-    color: var(--text-secondary, #8ba5b8);
-    border-radius: 50%;
-}
-.search-clear:hover {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--accent, #3b82f6);
-    transform: none;
-}
-
-/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
-.fullscreen-btn {
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.25);
-    font-size: 20px;
-}
-.fullscreen-btn:hover {
-    background: var(--accent, #3b82f6);
-    border-color: var(--accent, #3b82f6);
-}
-
-/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
-.remove-fav {
-    border-radius: 50%;
-    min-height: 32px;
-    min-width: 32px;
-    padding: 4px 8px;
-}
-.remove-fav:hover {
-    background: rgba(239, 68, 68, 0.15) !important;
-    color: #ef4444 !important;
-}
-
-/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
-.btn-link {
-    background: transparent;
-    border: none;
-    color: var(--accent, #3b82f6);
-    padding: 0;
-    min-height: auto;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-.btn-link:hover {
-    color: var(--accent-hover, #60a5fa);
-    transform: none;
-    box-shadow: none;
-}
-</style>
-<style id="page-fade-in">
-/* ==== Плавное появление страницы (fade-in) ==== */
-
-/* Мягкий вход всей страницы */
-body {
-    animation: pageFade 0.3s ease-out;
-}
-@keyframes pageFade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Контент чуть «подъезжает» снизу */
-.container,
-.main-content {
-    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-}
-@keyframes pageFadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Если в системе включено «уменьшить движение» — анимации отключаем */
-@media (prefers-reduced-motion: reduce) {
-    body,
-    .container,
-    .main-content {
-        animation: none !important;
+    .bottom-nav a:active, .bottom-nav button:active, 
+    .bottom-nav a:focus, .bottom-nav button:focus {
+        transform: none !important;
+        outline: none !important;
+        box-shadow: none !important;
     }
-}
-</style>
-<style id="share-btn-right">
-/* Прижимаем кнопку «Поделиться» к правому краю панели */
-.bottom-nav button[title="Поделиться"] {
-    order: 99 !important;
-    margin-left: auto !important;
-}
-</style>
-<style id="no-tap-highlight">
-/* Убираем системный голубой/серый прямоугольник при тапе */
-* {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-}
-a, button, div, span, label, input, textarea, select {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-}
-</style>
-<style id="no-tap-highlight-accordion">
-/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
-.section-title,
-.group-header,
-.menu-item,
-.submenu-item,
-.model-tab,
-.search-result-item {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-    user-select: none;
-    -webkit-user-select: none;
-    cursor: pointer;
-}
-
-/* Лёгкий отклик при нажатии (вместо системного квадратика) */
-.section-title:active,
-.group-header:active {
-    transform: scale(0.99);
-    transition: transform 0.1s;
-}
 </style>
 </head>
 <body>
@@ -1079,7 +171,6 @@ a, button, div, span, label, input, textarea, select {
                 <div class="swap-icon" id="swapUnitsBtn">⇄</div>
                 <select id="toUnit" class="select-unit"></select>
             </div>
-            <div id="extraFieldsContainer"></div>
             <div class="output-group">
                 <label>Результат</label>
                 <input type="text" id="outputValue" class="converter-output" readonly placeholder="—">
@@ -1091,111 +182,146 @@ a, button, div, span, label, input, textarea, select {
 
 <script>
     const baseConverters = {
-        currency: { name: "Валюта", units: ["RUB", "USD", "EUR", "CNY", "GBP"], rates: { USD: 1, RUB: 88.5, EUR: 0.92, CNY: 7.25, GBP: 0.79 }, convert: (v, f, t, d) => { const base = v / d.rates[f]; return base * d.rates[t]; } },
-        length: { name: "Длина", units: ["Метры", "Километры", "Сантиметры", "Миллиметры", "Мили", "Футы", "Дюймы"], toMeter: { "Метры": 1, "Километры": 1000, "Сантиметры": 0.01, "Миллиметры": 0.001, "Мили": 1609.344, "Футы": 0.3048, "Дюймы": 0.0254 }, convert: (v, f, t, d) => (v * d.toMeter[f]) / d.toMeter[t] },
-        mass: { name: "Масса", units: ["Килограммы", "Граммы", "Тонны", "Фунты", "Унции"], toKg: { "Килограммы": 1, "Граммы": 0.001, "Тонны": 1000, "Фунты": 0.453592, "Унции": 0.0283495 }, convert: (v, f, t, d) => (v * d.toKg[f]) / d.toKg[t] },
-        area: { name: "Площадь", units: ["м²", "км²", "см²", "Гектары", "Акры", "Футы²"], toSqM: { "м²": 1, "км²": 1e6, "см²": 0.0001, "Гектары": 10000, "Акры": 4046.86, "Футы²": 0.092903 }, convert: (v, f, t, d) => v * d.toSqM[f] / d.toSqM[t] },
-        time: { name: "Время", units: ["Секунды", "Минуты", "Часы", "Дни", "Недели"], toSec: { "Секунды": 1, "Минуты": 60, "Часы": 3600, "Дни": 86400, "Недели": 604800 }, convert: (v, f, t, d) => v * d.toSec[f] / d.toSec[t] },
-        finance: { name: "Финансы", units: ["Проценты %", "Десятичная дробь", "НДС 20%", "Сумма с НДС"], convert: (v, f, t) => { if (f === "Проценты %" && t === "Десятичная дробь") return v / 100; if (f === "Десятичная дробь" && t === "Проценты %") return v * 100; if (f === "НДС 20%" && t === "Сумма с НДС") return v * 1.2; if (f === "Сумма с НДС" && t === "НДС 20%") return v / 1.2; return v; } },
-        data: { name: "Данные", units: ["Байты", "КБ", "МБ", "ГБ", "ТБ"], toBytes: { "Байты": 1, "КБ": 1024, "МБ": 1048576, "ГБ": 1073741824, "ТБ": 1099511627776 }, convert: (v, f, t, d) => v * d.toBytes[f] / d.toBytes[t] },
-        date: { name: "Дата", units: ["Дни", "Недели", "Месяцы (прибл.)", "Годы (прибл.)"], convert: (v, f, t) => { const factors = { "Дни": 1, "Недели": 7, "Месяцы (прибл.)": 30.44, "Годы (прибл.)": 365.25 }; return (v * factors[f]) / factors[t]; } },
-        volume: { name: "Объем", units: ["Литры", "см³", "мм³", "дм³", "м³"], toLiter: { "Литры": 1, "см³": 0.001, "мм³": 0.000001, "дм³": 1, "м³": 1000 }, convert: (v, f, t, d) => (v * d.toLiter[f]) / d.toLiter[t] },
-        numeralSystem: { name: "Система счисления", units: ["Десятичная", "Двоичная", "Восьмеричная", "Шестнадцатеричная"], convert: (v, f, t) => { try { let num; if (f === "Десятичная") num = parseFloat(v); else if (f === "Двоичная") num = parseInt(v, 2); else if (f === "Восьмеричная") num = parseInt(v, 8); else num = parseInt(v, 16); if (isNaN(num)) return "Ошибка"; if (t === "Десятичная") return num; if (t === "Двоичная") return num.toString(2); if (t === "Восьмеричная") return num.toString(8); return num.toString(16).toUpperCase(); } catch(e) { return "неверно"; } } },
-        speed: { name: "Скорость", units: ["км/ч", "м/с", "миль/ч", "узлы"], toKmph: { "км/ч": 1, "м/с": 3.6, "миль/ч": 1.60934, "узлы": 1.852 }, convert: (v, f, t, d) => v * d.toKmph[f] / d.toKmph[t] },
-        temperature: { name: "Температура", units: ["Цельсий", "Фаренгейт", "Кельвин"], convert: (v, f, t) => { let c; if (f === "Цельсий") c = v; else if (f === "Фаренгейт") c = (v - 32) * 5/9; else c = v - 273.15; if (t === "Цельсий") return c; if (t === "Фаренгейт") return c * 9/5 + 32; return c + 273.15; } },
-        bmi: { name: "ИМТ", units: ["ИМТ"], hasExtra: true, getExtraFields: () => [{ name: "weight", label: "Вес (кг)", type: "number", placeholder: "70" }, { name: "height", label: "Рост (см)", type: "number", placeholder: "170" }], convertWithExtra: (_, __, ___, extra) => { let w = parseFloat(extra.weight), h = parseFloat(extra.height); if (isNaN(w) || isNaN(h) || h <= 0) return "Введите вес и рост"; let bmi = w / ((h/100)**2); return bmi.toFixed(2); } }
-    };
-
-    let discountMode = "discount";
-    const discountConverter = {
-        name: "Скидка / Наценка",
-        units: ["Базовая цена", "Конечная цена"],
-        hasExtra: true,
-        getExtraFields: () => [{ name: "percent", label: discountMode === "discount" ? "Скидка (%)" : "Наценка (%)", type: "number", placeholder: discountMode === "discount" ? "10" : "20" }],
-        getModeSwitch: () => {
-            const div = document.createElement('div');
-            div.className = 'mode-switch';
-            const discountBtn = document.createElement('button');
-            discountBtn.textContent = 'Скидка (-%)';
-            discountBtn.className = `mode-switch-btn ${discountMode === 'discount' ? 'active' : ''}`;
-            const markupBtn = document.createElement('button');
-            markupBtn.textContent = 'Наценка (+%)';
-            markupBtn.className = `mode-switch-btn ${discountMode === 'markup' ? 'active' : ''}`;
-            discountBtn.onclick = () => { discountMode = 'discount'; openConverter('discount'); };
-            markupBtn.onclick = () => { discountMode = 'markup'; openConverter('discount'); };
-            div.appendChild(discountBtn);
-            div.appendChild(markupBtn);
-            return div;
+        length: {
+            name: "Длина",
+            units: ["Метры (м)", "Километры (км)", "Сантиметры (см)", "Миллиметры (мм)", "Мили", "Футы", "Дюймы"],
+            toMeter: { "Метры (м)": 1, "Километры (км)": 1000, "Сантиметры (см)": 0.01, "Миллиметры (мм)": 0.001, "Мили": 1609.344, "Футы": 0.3048, "Дюймы": 0.0254 },
+            convert: (v, f, t, d) => (v * d.toMeter[f]) / d.toMeter[t]
         },
-        convertWithExtra: (value, fromUnit, toUnit, extra) => {
-            let percent = parseFloat(extra.percent);
-            if (isNaN(percent)) percent = 0;
-            if (fromUnit === "Базовая цена" && toUnit === "Конечная цена") {
-                if (discountMode === "discount") return (value * (1 - percent / 100)).toFixed(2);
-                else return (value * (1 + percent / 100)).toFixed(2);
+        mass: {
+            name: "Масса",
+            units: ["Килограммы (кг)", "Граммы (г)", "Миллиграммы (мг)", "Тонны (т)", "Фунты", "Унции"],
+            toKg: { "Килограммы (кг)": 1, "Граммы (г)": 0.001, "Миллиграммы (мг)": 0.000001, "Тонны (т)": 1000, "Фунты": 0.453592, "Унции": 0.0283495 },
+            convert: (v, f, t, d) => (v * d.toKg[f]) / d.toKg[t]
+        },
+        time: {
+            name: "Время",
+            units: ["Секунды (с)", "Миллисекунды (мс)", "Минуты", "Часы", "Дни"],
+            toSec: { "Секунды (с)": 1, "Миллисекунды (мс)": 0.001, "Минуты": 60, "Часы": 3600, "Дни": 86400 },
+            convert: (v, f, t, d) => (v * d.toSec[f]) / d.toSec[t]
+        },
+        area: {
+            name: "Площадь",
+            units: ["м²", "км²", "см²", "мм²", "Гектары (га)", "Акры"],
+            toSqM: { "м²": 1, "км²": 1e6, "см²": 0.0001, "мм²": 0.000001, "Гектары (га)": 10000, "Акры": 4046.86 },
+            convert: (v, f, t, d) => (v * d.toSqM[f]) / d.toSqM[t]
+        },
+        volume: {
+            name: "Объем",
+            units: ["м³", "Литры (л)", "Миллилитры (мл)", "см³", "мм³"],
+            toCubicM: { "м³": 1, "Литры (л)": 0.001, "Миллилитры (мл)": 0.000001, "см³": 0.000001, "мм³": 0.000000001 },
+            convert: (v, f, t, d) => (v * d.toCubicM[f]) / d.toCubicM[t]
+        },
+        speed: {
+            name: "Скорость",
+            units: ["м/с", "км/ч", "миль/ч", "узлы"],
+            toMps: { "м/с": 1, "км/ч": 1/3.6, "миль/ч": 0.44704, "узлы": 0.514444 },
+            convert: (v, f, t, d) => (v * d.toMps[f]) / d.toMps[t]
+        },
+        temperature: {
+            name: "Температура",
+            units: ["Цельсий (°C)", "Фаренгейт (°F)", "Кельвин (К)"],
+            convert: (v, f, t) => {
+                let c;
+                if (f === "Цельсий (°C)") c = v;
+                else if (f === "Фаренгейт (°F)") c = (v - 32) * 5/9;
+                else c = v - 273.15;
+                if (t === "Цельсий (°C)") return c;
+                if (t === "Фаренгейт (°F)") return c * 9/5 + 32;
+                return c + 273.15;
             }
-            if (fromUnit === "Конечная цена" && toUnit === "Базовая цена") {
-                if (discountMode === "discount") return (value / (1 - percent / 100)).toFixed(2);
-                else return (value / (1 + percent / 100)).toFixed(2);
+        },
+        pressure: {
+            name: "Давление",
+            units: ["Паскали (Па)", "Килопаскали (кПа)", "Мегапаскали (МПа)", "Бары", "Атмосферы (атм)", "мм рт. ст."],
+            toPa: { "Паскали (Па)": 1, "Килопаскали (кПа)": 1000, "Мегапаскали (МПа)": 1000000, "Бары": 100000, "Атмосферы (атм)": 101325, "мм рт. ст.": 133.322 },
+            convert: (v, f, t, d) => (v * d.toPa[f]) / d.toPa[t]
+        },
+        energy: {
+            name: "Энергия",
+            units: ["Джоули (Дж)", "Килоджоули (кДж)", "Калории (кал)", "Килокалории (ккал)", "Электрон-вольты (эВ)", "кВт·ч"],
+            toJ: { "Джоули (Дж)": 1, "Килоджоули (кДж)": 1000, "Калории (кал)": 4.184, "Килокалории (ккал)": 4184, "Электрон-вольты (эВ)": 1.602e-19, "кВт·ч": 3600000 },
+            convert: (v, f, t, d) => (v * d.toJ[f]) / d.toJ[t]
+        },
+        power: {
+            name: "Мощность",
+            units: ["Ватты (Вт)", "Киловатты (кВт)", "Мегаватты (МВт)", "Лошадиные силы (л.с.)"],
+            toW: { "Ватты (Вт)": 1, "Киловатты (кВт)": 1000, "Мегаватты (МВт)": 1000000, "Лошадиные силы (л.с.)": 735.5 },
+            convert: (v, f, t, d) => (v * d.toW[f]) / d.toW[t]
+        },
+        force: {
+            name: "Сила",
+            units: ["Ньютоны (Н)", "Килоньютоны (кН)", "Дин", "Килограмм-сила (кгс)"],
+            toN: { "Ньютоны (Н)": 1, "Килоньютоны (кН)": 1000, "Дин": 0.00001, "Килограмм-сила (кгс)": 9.80665 },
+            convert: (v, f, t, d) => (v * d.toN[f]) / d.toN[t]
+        },
+        data: {
+            name: "Данные",
+            units: ["Байты", "Килобайты (КБ)", "Мегабайты (МБ)", "Гигабайты (ГБ)", "Терабайты (ТБ)"],
+            toBytes: { "Байты": 1, "Килобайты (КБ)": 1024, "Мегабайты (МБ)": 1048576, "Гигабайты (ГБ)": 1073741824, "Терабайты (ТБ)": 1099511627776 },
+            convert: (v, f, t, d) => (v * d.toBytes[f]) / d.toBytes[t]
+        },
+        numeralSystem: {
+            name: "Система счисления",
+            units: ["Десятичная", "Двоичная", "Восьмеричная", "Шестнадцатеричная"],
+            convert: (v, f, t) => {
+                try {
+                    let num;
+                    if (f === "Десятичная") num = parseFloat(v);
+                    else if (f === "Двоичная") num = parseInt(v, 2);
+                    else if (f === "Восьмеричная") num = parseInt(v, 8);
+                    else num = parseInt(v, 16);
+                    if (isNaN(num)) return "Ошибка";
+                    if (t === "Десятичная") return num;
+                    if (t === "Двоичная") return num.toString(2);
+                    if (t === "Восьмеричная") return num.toString(8);
+                    return num.toString(16).toUpperCase();
+                } catch(e) { return "неверно"; }
             }
-            return value;
         }
     };
 
     const categoriesList = [
-        { id: "currency", label: "Валюта", icon: "₽" },
         { id: "length", label: "Длина", icon: "ℓ" },
         { id: "mass", label: "Масса", icon: "kg" },
-        { id: "area", label: "Площадь", icon: "m²" },
         { id: "time", label: "Время", icon: "⏱" },
-        { id: "finance", label: "Финансы", icon: "%" },
-        { id: "data", label: "Данные", icon: "MB" },
-        { id: "date", label: "Дата", icon: "📅" },
-        { id: "discount", label: "Скидка", icon: "−%" },
+        { id: "area", label: "Площадь", icon: "m²" },
         { id: "volume", label: "Объем", icon: "ℓ" },
-        { id: "numeralSystem", label: "Счисления", icon: "01" },
         { id: "speed", label: "Скорость", icon: "km/h" },
         { id: "temperature", label: "Температура", icon: "°C" },
-        { id: "bmi", label: "ИМТ", icon: "⚖" }
+        { id: "pressure", label: "Давление", icon: "Pa" },
+        { id: "energy", label: "Энергия", icon: "J" },
+        { id: "power", label: "Мощность", icon: "W" },
+        { id: "force", label: "Сила", icon: "N" },
+        { id: "data", label: "Данные", icon: "MB" },
+        { id: "numeralSystem", label: "Счисления", icon: "01" }
     ];
 
-    let currentCategory = null, currentConverter = null, extraValues = {};
+    let currentCategory = null, currentConverter = null;
     let history = [];
 
     function loadHistory() {
         const saved = localStorage.getItem('converter_history');
-        if (saved) {
-            try { history = JSON.parse(saved); } catch(e) { history = []; }
-        }
+        if (saved) { try { history = JSON.parse(saved); } catch(e) { history = []; } }
         updateHistoryDisplay();
     }
 
-    function saveHistory() {
-        localStorage.setItem('converter_history', JSON.stringify(history.slice(-20)));
-    }
+    function saveHistory() { localStorage.setItem('converter_history', JSON.stringify(history.slice(-20))); }
 
     function addToHistory(fromVal, fromUnit, toVal, toUnit) {
-        if (fromVal === '' || fromVal === null || fromVal === undefined) return;
-        if (toVal === '' || toVal === null || toVal === undefined) return;
-        if (toVal === 'Ошибка' || toVal === 'неверно' || toVal === 'ошибка') return;
-        if (toVal === 'Введите вес и рост') return;
+        if (!fromVal || !toVal || toVal === 'Ошибка' || toVal === 'неверно') return;
         const fromStr = `${fromVal} ${fromUnit}`.trim();
         const toStr = `${toVal} ${toUnit}`.trim();
-        // Не дублируем последнюю запись
         if (history.length > 0 && history[0].from === fromStr && history[0].to === toStr) return;
         history.unshift({ from: fromStr, to: toStr });
         if (history.length > 20) history.pop();
-        saveHistory();
-        updateHistoryDisplay();
+        saveHistory(); updateHistoryDisplay();
     }
 
     function updateHistoryDisplay() {
         const historyList = document.getElementById('historyList');
         if (!historyList) return;
-        if (history.length === 0) {
-            historyList.innerHTML = '—';
-            return;
-        }
+        if (history.length === 0) { historyList.innerHTML = '—'; return; }
         let html = '';
         for (let i = 0; i < Math.min(history.length, 8); i++) {
             html += `<div class="history-item" onclick="restoreFromHistory(${i})">${history[i].from} = ${history[i].to}</div>`;
@@ -1210,21 +336,14 @@ a, button, div, span, label, input, textarea, select {
                 document.getElementById('inputValue').value = match[1];
                 const fromSelect = document.getElementById('fromUnit');
                 for (let i = 0; i < fromSelect.options.length; i++) {
-                    if (fromSelect.options[i].text === match[2]) {
-                        fromSelect.selectedIndex = i;
-                        break;
-                    }
+                    if (fromSelect.options[i].text === match[2]) { fromSelect.selectedIndex = i; break; }
                 }
                 updateConversion();
             }
         }
     }
 
-    function clearHistory() {
-        history = [];
-        saveHistory();
-        updateHistoryDisplay();
-    }
+    function clearHistory() { history = []; saveHistory(); updateHistoryDisplay(); }
 
     function roundNumber(num) {
         if (typeof num !== 'number') return num;
@@ -1241,80 +360,31 @@ a, button, div, span, label, input, textarea, select {
     const closeBtn = document.getElementById('closeModalBtn');
     const swapBtn = document.getElementById('swapUnitsBtn');
     const infoNote = document.getElementById('infoNote');
-    const extraContainer = document.getElementById('extraFieldsContainer');
 
     categoriesList.forEach(cat => {
         const card = document.createElement('div');
         card.className = 'cat-card';
-        card.innerHTML = `
-            <div class="cat-icon">${cat.icon}</div>
-            <div class="cat-title">${cat.label}</div>
-        `;
+        card.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-title">${cat.label}</div>`;
         card.onclick = () => openConverter(cat.id);
         grid.appendChild(card);
     });
 
-    function renderExtraFields(converter, categoryId) {
-        extraContainer.innerHTML = '';
-        extraValues = {};
-        if (categoryId === 'discount' && discountConverter.getModeSwitch) {
-            extraContainer.appendChild(discountConverter.getModeSwitch());
-        }
-        if (converter.hasExtra && converter.getExtraFields) {
-            const fields = converter.getExtraFields();
-            const div = document.createElement('div');
-            div.className = 'extra-fields';
-            fields.forEach(f => {
-                const fd = document.createElement('div');
-                fd.className = 'extra-field';
-                const lbl = document.createElement('label');
-                lbl.textContent = f.label;
-                const inp = document.createElement('input');
-                inp.type = f.type || 'text';
-                inp.className = 'extra-input';
-                inp.placeholder = f.placeholder || '';
-                inp.oninput = (e) => {
-                    extraValues[f.name] = e.target.value;
-                    updateConversion();
-                };
-                fd.appendChild(lbl);
-                fd.appendChild(inp);
-                div.appendChild(fd);
-                extraValues[f.name] = '';
-            });
-            extraContainer.appendChild(div);
-        }
-    }
-
     function openConverter(categoryId) {
         currentCategory = categoryId;
-        if (categoryId === 'discount') currentConverter = discountConverter;
-        else currentConverter = baseConverters[categoryId];
+        currentConverter = baseConverters[categoryId];
         if (!currentConverter) return;
         modalTitle.textContent = currentConverter.name;
 
-        let units = currentConverter.units ? [...currentConverter.units] : (categoryId === 'bmi' ? ["ИМТ"] : []);
-        if (categoryId === 'discount') units = ["Базовая цена", "Конечная цена"];
+        let units = [...currentConverter.units];
+        fromSelect.innerHTML = ''; toSelect.innerHTML = '';
+        units.forEach(u => { fromSelect.add(new Option(u, u)); toSelect.add(new Option(u, u)); });
 
-        fromSelect.innerHTML = '';
-        toSelect.innerHTML = '';
-        units.forEach(u => {
-            fromSelect.add(new Option(u, u));
-            toSelect.add(new Option(u, u));
-        });
-
-        if (categoryId === 'temperature') { fromSelect.value = "Цельсий"; toSelect.value = "Фаренгейт"; infoNote.innerText = "°C → °F: ×9/5+32"; }
-        else if (categoryId === 'volume') { fromSelect.value = "Литры"; toSelect.value = "м³"; infoNote.innerText = "1 л = 0.001 м³"; }
-        else if (categoryId === 'finance') { fromSelect.value = "Проценты %"; toSelect.value = "Десятичная дробь"; infoNote.innerText = "1% = 0.01"; }
+        if (categoryId === 'temperature') { fromSelect.value = "Цельсий (°C)"; toSelect.value = "Фаренгейт (°F)"; infoNote.innerText = "°C → °F: ×9/5+32"; }
+        else if (categoryId === 'volume') { fromSelect.value = "Литры (л)"; toSelect.value = "м³"; infoNote.innerText = "1 л = 0.001 м³"; }
         else if (categoryId === 'numeralSystem') { fromSelect.value = "Десятичная"; toSelect.value = "Двоичная"; infoNote.innerText = "Перевод систем счисления"; }
-        else if (categoryId === 'discount') { fromSelect.value = "Базовая цена"; toSelect.value = "Конечная цена"; infoNote.innerText = discountMode === "discount" ? "Расчет цены со скидкой" : "Расчет цены с наценкой"; }
         else { if (units[0]) fromSelect.value = units[0]; if (units[1]) toSelect.value = units[1]; infoNote.innerText = "Автоматический пересчет"; }
 
         inputElem.value = "1";
-        if (categoryId === 'bmi') inputElem.style.display = 'none';
-        else inputElem.style.display = 'flex';
-
-        renderExtraFields(currentConverter, categoryId);
         updateConversion();
         modal.classList.add('active');
         localStorage.setItem('lastConverterCategory', categoryId);
@@ -1322,37 +392,11 @@ a, button, div, span, label, input, textarea, select {
 
     function updateConversion() {
         if (!currentConverter) return;
-
-        if (currentCategory === 'bmi') {
-            if (currentConverter.convertWithExtra) {
-                let res = currentConverter.convertWithExtra(0, null, null, extraValues);
-                outputElem.value = res;
-                // В историю пишем только когда результат реальный
-                if (res && res !== 'Введите вес и рост' && !isNaN(parseFloat(res))) {
-                    let weight = extraValues.weight || '0';
-                    let height = extraValues.height || '0';
-                    addToHistory(`${weight}кг/${height}см`, '', res, 'ИМТ');
-                }
-            }
-            return;
-        }
-
-        if (currentCategory === 'discount') {
-            let val = parseFloat(inputElem.value);
-            if (isNaN(val)) { outputElem.value = "ошибка"; return; }
-            let from = fromSelect.value, to = toSelect.value;
-            let res = currentConverter.convertWithExtra(val, from, to, extraValues);
-            outputElem.value = res;
-            if (res !== 'ошибка' && res !== '') {
-                addToHistory(val, from, res, to);
-            }
-            return;
-        }
-
         let val = parseFloat(inputElem.value);
         if (isNaN(val)) { outputElem.value = "ошибка"; return; }
         let from = fromSelect.value, to = toSelect.value;
         let res = currentConverter.convert(val, from, to, currentConverter);
+
         if (typeof res === 'number') {
             res = roundNumber(res);
             outputElem.value = res;
@@ -1364,8 +408,7 @@ a, button, div, span, label, input, textarea, select {
 
     function swapUnits() {
         let f = fromSelect.value, t = toSelect.value;
-        fromSelect.value = t;
-        toSelect.value = f;
+        fromSelect.value = t; toSelect.value = f;
         updateConversion();
     }
 
@@ -1384,194 +427,10 @@ a, button, div, span, label, input, textarea, select {
     loadHistory();
 
     const lastCategory = localStorage.getItem('lastConverterCategory');
-    if (lastCategory) {
-        setTimeout(() => openConverter(lastCategory), 100);
-    }
+    if (lastCategory) { setTimeout(() => openConverter(lastCategory), 100); }
 </script>
 
 <script src="favorites.js"></script>
 <script src="theme.js"></script>
-<nav class="bottom-nav" aria-label="Быстрая навигация">
-    <a href="index.html" title="Главная" aria-label="Главная">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 10.5 12 3l9 7.5"/>
-            <path d="M5 9.5V21h14V9.5"/>
-            <path d="M9.5 21v-6h5v6"/>
-        </svg>
-    </a>
-    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="7"/>
-            <path d="m20 20-3.5-3.5"/>
-        </svg>
-    </button>
-    <a href="favorites.html" title="Избранное" aria-label="Избранное">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
-        </svg>
-    </a>
-    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-    </button>
-    </nav>
-<script>
-/* ==== 5. Скелетоны для формул MathJax ==== */
-(function(){
-    function addSkeletons(){
-        document.querySelectorAll('.formula-block').forEach(function(el){
-            if (el.querySelector('mjx-container')) return;
-            if (el.dataset.sk) return;
-            el.dataset.sk = '1';
-            var s = document.createElement('span');
-            s.className = 'skeleton';
-            s.style.width = (60 + Math.random()*80) + 'px';
-            el.appendChild(s);
-        });
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
-    else addSkeletons();
-    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
-})();
-
-/* ==== 6. Чипы категорий в результатах поиска ==== */
-(function(){
-    function classify(cat){
-        var c = (cat||'').toLowerCase();
-        if (c.indexOf('механик') >= 0) return 'cat-mech';
-        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
-        if (c.indexOf('электр') >= 0) return 'cat-elec';
-        return 'cat-other';
-    }
-    function decorate(){
-        document.querySelectorAll('.search-result-category').forEach(function(el){
-            if (el.dataset.chip) return;
-            el.dataset.chip = '1';
-            el.classList.add(classify(el.textContent));
-        });
-    }
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            decorate();
-        };
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
-    else decorate();
-})();
-
-/* ==== 10. Анимация смены темы «как на iPhone» ==== */
-(function(){
-    function animateThemeChange(x, y){
-        var circle = document.createElement('div');
-        circle.className = 'theme-circle';
-        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
-        circle.style.width = circle.style.height = (maxR*2) + 'px';
-        circle.style.left = (x - maxR) + 'px';
-        circle.style.top  = (y - maxR) + 'px';
-        document.body.appendChild(circle);
-        requestAnimationFrame(function(){ circle.classList.add('expand'); });
-        setTimeout(function(){ circle.remove(); }, 700);
-    }
-    document.addEventListener('click', function(e){
-        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
-        if (!t) return;
-        var r = t.getBoundingClientRect();
-        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
-    }, true);
-})();
-
-/* ==== 2. Ripple при тапе ==== */
-(function(){
-    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
-    function bind(el){
-        if (el.dataset.rippleBound) return;
-        el.dataset.rippleBound = '1';
-        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
-        el.addEventListener('pointerdown', function(e){
-            var rect = el.getBoundingClientRect();
-            var size = Math.max(rect.width, rect.height);
-            var r = document.createElement('span');
-            r.className = 'ripple';
-            r.style.width = r.style.height = size + 'px';
-            r.style.left = (e.clientX - rect.left - size/2) + 'px';
-            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
-            el.appendChild(r);
-            setTimeout(function(){ r.remove(); }, 650);
-        });
-    }
-    function bindAll(){
-        document.querySelectorAll(sel).forEach(bind);
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
-    else bindAll();
-    /* Перепривязка после поиска */
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            setTimeout(bindAll, 30);
-        };
-    }
-})();
-</script>
-<script src="search-overlay.js"></script>
-<!-- bottom-nav-autohide-script -->
-<script>
-/* Автоскрытие нижней панели при скролле */
-(function(){
-    var nav = document.querySelector('.bottom-nav');
-    if (!nav) return;
-    var lastY = window.scrollY;
-    var threshold = 8;
-    var ticking = false;
-    function onScroll(){
-        var y = window.scrollY;
-        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
-        if (y > lastY && y > 80) {
-            nav.classList.add('nav-hidden');
-        } else {
-            nav.classList.remove('nav-hidden');
-        }
-        lastY = y;
-        ticking = false;
-    }
-    window.addEventListener('scroll', function(){
-        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
-    }, { passive: true });
-})();
-</script>
-<script src="page-search.js"></script>
-<script src="physics-data.js"></script>`r`n</body>
+</body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,0 +1,1210 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электродвижущая сила. Закон Ома для полной цепи</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c; --card-bg: #1e3545; --text: #ffffff; --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1); --special-border: #f59e0b; --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff; --formula-bg: #1e3545; --info-bg: #1e3545;
+            --input-bg: #2a4a5a; --task-bg: #1e3545; --task-border: #f59e0b;
+            --slider-track: #2a4a5a; --slider-thumb: #f59e0b; --given-color: #60a5fa;
+            --find-color: #facc15; --card-shadow: rgba(0,0,0,0.2); --accent: #3b82f6;
+            --accent-hover: #60a5fa; --menu-item-hover: #233e50; --group-header-bg: #1a3a5a;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa; --card-bg: #ffffff; --text: #1a2a3f; --text-secondary: #5a7a94;
+            --border: #d0d8e0; --canvas-bg: #eef2f8; --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc; --info-bg: #e8f0fe; --special-border: #d97706;
+            --input-bg: #e8f0fe; --task-bg: #f5f8fc; --task-border: #d97706;
+            --slider-track: #d0d8e0; --slider-thumb: #d97706; --given-color: #3b82f6;
+            --find-color: #eab308; --card-shadow: rgba(0,0,0,0.08); --accent: #2563eb;
+            --accent-hover: #3b82f6; --menu-item-hover: #f0f4fa; --group-header-bg: #e8edf5;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;padding-bottom:78px;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.3rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s; justify-content: center; position: relative;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary); position: absolute; right: 8px; top: 50%; transform: translateY(-50%);}
+        .section.collapsed .section-title::after{transform:translateY(-50%) rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:130px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s, transform 0.3s; max-width: 340px; width: auto; flex: 0 0 auto; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px !important; height: 46px !important; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; padding: 0 !important; transform: none !important; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: none !important; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+    </style>
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Электродвижущая сила.<br>Закон Ома для полной цепи</h1>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Электродвижущая сила (ЭДС)</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>Чтобы ток в цепи протекал длительное время, на свободные заряды должны действовать силы, не являющиеся силами электростатического поля (кулоновскими). Их называют <strong>сторонними силами</strong>.</p>
+                <p><strong>Электродвижущая сила (ЭДС)</strong> $\mathcal{E}$ — это скалярная физическая величина, равная работе сторонних сил по перемещению единичного положительного заряда вдоль замкнутой цепи:</p>
+                <div class="formula-block">
+                    <span class="f">$\mathcal{E} = \dfrac{A_{\text{стор}}}{q}$</span>
+                    <span class="f-label">— электродвижущая сила (Вольт, В)</span>
+                </div>
+                <p><strong>Источник тока</strong> (гальванический элемент, аккумулятор, генератор) — это устройство, в котором действуют сторонние силы.</p>
+                <p><strong>Внутреннее сопротивление</strong> $r$ — это сопротивление самого источника тока. Оно всегда присутствует (даже у идеальной батарейки), потому что электролит или обмотка генератора тоже оказывают сопротивление току.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Закон Ома для полной цепи</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>Закон Ома для полной (замкнутой) цепи связывает силу тока $I$ в цепи, ЭДС источника $\mathcal{E}$ и полное сопротивление цепи (внешнее $R$ + внутреннее $r$):</p>
+                <div class="formula-block">
+                    <span class="f">$I = \dfrac{\mathcal{E}}{R + r}$</span>
+                    <span class="f-label">— закон Ома для полной цепи</span>
+                </div>
+                <p>где $R$ — сопротивление внешней цепи (нагрузки), $r$ — внутреннее сопротивление источника.</p>
+                <p><strong>Как это понять физически:</strong> ЭДС — это «толчок», который создает источник. Полное сопротивление цепи ($R+r$) мешает току. Поэтому чем больше ЭДС и чем меньше общее сопротивление, тем больше ток.</p>
+                <p><strong>Напряжение на внешнем участке</strong> $U$ (то, что показывает вольтметр на клеммах источника):</p>
+                <div class="formula-block">
+                    <span class="f">$U = I \cdot R = \mathcal{E} - I \cdot r$</span>
+                </div>
+                <p class="important">⚠️ Важно: напряжение на клеммах источника всегда <strong>меньше</strong> его ЭДС, если по цепи течёт ток (из-за падения напряжения внутри источника на сопротивлении $r$). Только при разомкнутой цепи ($I = 0$) напряжение на клеммах равно ЭДС!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 КПД источника тока</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Коэффициент полезного действия (КПД)</strong> источника тока показывает, какая часть работы сторонних сил переходит в полезную мощность (мощность, выделяемую во внешней цепи).</p>
+                <div class="formula-block">
+                    <span class="f">$\eta = \dfrac{P_{\text{полезн}}}{P_{\text{полн}}} = \dfrac{U}{\mathcal{E}} = \dfrac{R}{R + r}$</span>
+                    <span class="f-label">— КПД источника тока</span>
+                </div>
+                <p><strong>Полезная мощность</strong> $P_{\text{полезн}} = U \cdot I = I^2 R$ — мощность, выделяемая на нагрузке.</p>
+                <p><strong>Полная мощность</strong> $P_{\text{полн}} = \mathcal{E} \cdot I$ — мощность, развиваемая источником.</p>
+                <p><strong>Потери мощности</strong> внутри источника: $P_{\text{потерь}} = I^2 r$.</p>
+                <p>КПД всегда меньше 100%, потому что часть энергии теряется на нагрев самого источника.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивная 3D-модель</div>
+        <div class="section-content">
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="circuit" onclick="switchModel('circuit')">🔌 Полная цепь</div>
+                <div class="model-tab" data-model="efficiency" onclick="switchModel('efficiency')">📊 КПД источника</div>
+            </div>
+
+            <div id="model-circuit" class="model-content">
+                <div class="model-container" id="container-circuit">
+                    <canvas id="canvas-circuit" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-circuit">⛶</button>
+                    <div class="info-display">
+                        <div>$\mathcal{E}$ = <span class="val" id="c-EMF">12</span> В</div>
+                        <div>$r$ = <span class="val" id="c-r-int">1.0</span> Ом</div>
+                        <div>$R$ = <span class="val" id="c-r-ext">10</span> Ом</div>
+                        <div>$I$ = <span class="val" id="c-I">1.09</span> А</div>
+                        <div>$U$ = <span class="val" id="c-U">10.91</span> В</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>ЭДС $\mathcal{E}$ (В)</label>
+                        <input type="range" id="c-slider-EMF" min="5" max="24" step="1" value="12">
+                        <span class="control-value" id="c-val-EMF">12</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Внутреннее $r$ (Ом)</label>
+                        <input type="range" id="c-slider-r-int" min="0.5" max="5" step="0.1" value="1">
+                        <span class="control-value" id="c-val-r-int">1.0</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Внешнее $R$ (Ом)</label>
+                        <input type="range" id="c-slider-R" min="1" max="50" step="1" value="10">
+                        <span class="control-value" id="c-val-R">10</span>
+                    </div>
+                    <button class="btn-reset" id="c-reset">⟳ Сброс</button>
+                </div>
+                <div class="def-card">
+                    <p><strong>Как пользоваться моделью?</strong></p>
+                    <p><strong>1. ЭДС (\(\mathcal{E}\))</strong> — «сила» источника. Чем больше ЭДС, тем больше ток \(I = \frac{\mathcal{E}}{R+r}\) и напряжение \(U\) на нагрузке.</p>
+                    <p><strong>2. Внутреннее сопротивление (\(r\))</strong> — потери внутри источника. Если \(r\) растёт (например, батарейка садится), ток падает, а напряжение на клеммах \(U = \mathcal{E} - I \cdot r\) уменьшается.</p>
+                    <p><strong>3. Внешнее сопротивление (\(R\))</strong> — нагрузка. Если \(R\) очень большое (разомкнутая цепь), ток почти нулевой, а напряжение \(U \approx \mathcal{E}\). Если \(R\) маленькое, ток большой, но напряжение \(U\) падает.</p>
+                    <p style="margin-top:8px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;"><strong>💡 Вывод:</strong> Свет (и нагрев) лампочки зависит от напряжения. При большой нагрузке (малом \(R\)) лампа горит ярко, но батарейка быстро «садится» (растёт \(r\)). Внутреннее сопротивление всегда крадёт часть ЭДС.</p>
+                </div>
+            </div>
+
+            <div id="model-efficiency" class="model-content" style="display:none;">
+                <div class="model-container" id="container-efficiency">
+                    <canvas id="canvas-efficiency" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-efficiency">⛶</button>
+                    <div class="info-display">
+                        <div>$P_{полн}$ = <span class="val" id="e-Pfull">12.0</span> Вт</div>
+                        <div>$P_{полезн}$ = <span class="val" id="e-Puse">11.0</span> Вт</div>
+                        <div>КПД $\eta$ = <span class="val" id="e-eta">91.7</span> %</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Внутреннее $r$ (Ом)</label>
+                        <input type="range" id="e-slider-r-int" min="0.5" max="10" step="0.5" value="1">
+                        <span class="control-value" id="e-val-r-int">1.0</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Внешнее $R$ (Ом)</label>
+                        <input type="range" id="e-slider-R" min="1" max="50" step="1" value="10">
+                        <span class="control-value" id="e-val-R">10</span>
+                    </div>
+                    <button class="btn-reset" id="e-reset">⟳ Сброс</button>
+                </div>
+                <div class="def-card">
+                    <p><strong>Что показывает эта модель?</strong> КПД (коэффициент полезного действия) источника — это доля энергии, которая доходит до внешней цепи (нагрузки).</p>
+                    <p><strong>1. Формула КПД</strong><br>\(\eta = \frac{R}{R + r}\). КПД зависит только от соотношения внешнего \(R\) и внутреннего \(r\) сопротивлений.</p>
+                    <p><strong>2. Что происходит при изменении \(R\)?</strong><br>Если вы увеличиваете внешнее сопротивление \(R\), КПД растёт (приближается к 100%). Но при этом сила тока падает, и полезная мощность (Вт) тоже снижается.</p>
+                    <p><strong>3. Что происходит при изменении \(r\)?</strong><br>Если внутреннее сопротивление \(r\) растёт (батарейка разряжается), КПД падает, потому что всё большая часть энергии тратится на нагрев самой батарейки.</p>
+                    <p style="margin-top:8px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;"><strong>💡 Вывод:</strong> Максимальный КПД — у разомкнутой цепи (когда ток равен нулю), но тогда и полезной мощности нет. На практике стараются подобрать нагрузку так, чтобы \(R\) было значительно больше \(r\) (например, в 10 раз), тогда КПД будет около 90%.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Закон Ома для полной цепи</div>
+                <div class="task-condition">Источник тока с ЭДС 12 В и внутренним сопротивлением 1 Ом замкнут на резистор 5 Ом. Найдите силу тока в цепи.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $\mathcal{E} = 12$ В, $r = 1$ Ом, $R = 5$ Ом</div>
+                        <div class="find">🔍 Найти: $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>Все величины уже даны в СИ (Вольты, Омы), переводить не нужно.</div>
+                    <div class="step"><strong>Шаг 2. Формула.</strong><br>Закон Ома для полной цепи: $I = \dfrac{\mathcal{E}}{R + r}$.</div>
+                    <div class="step"><strong>Шаг 3. Подстановка и вычисление.</strong><br><span class="formula">$I = \dfrac{12}{5 + 1} = \dfrac{12}{6} = 2 \text{ А}$</span></div>
+                    <div class="answer">✅ Ответ: $I = 2$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Напряжение на клеммах</div>
+                <div class="task-condition">ЭДС источника 9 В, внутреннее сопротивление 0,5 Ом. В цепи течёт ток 2000 мА. Найдите напряжение на клеммах источника.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $\mathcal{E} = 9$ В, $r = 0{,}5$ Ом, $I = 2000$ мА</div>
+                        <div class="find">🔍 Найти: $U$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>Ток $I = 2000$ мА. Так как 1 А = 1000 мА, то $I = 2000 / 1000 = 2$ А.</div>
+                    <div class="step"><strong>Шаг 2. Формула.</strong><br>Напряжение на клеммах: $U = \mathcal{E} - I \cdot r$.</div>
+                    <div class="step"><strong>Шаг 3. Подстановка и вычисление.</strong><br><span class="formula">$U = 9 - 2 \cdot 0{,}5 = 9 - 1 = 8 \text{ В}$</span></div>
+                    <div class="answer">✅ Ответ: $U = 8$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. ЭДС через напряжение и ток</div>
+                <div class="task-condition">Напряжение на клеммах источника 10 В, сила тока 2000 мА, внутреннее сопротивление 1 Ом. Найдите ЭДС.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $U = 10$ В, $I = 2000$ мА, $r = 1$ Ом</div>
+                        <div class="find">🔍 Найти: $\mathcal{E}$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>Ток $I = 2000$ мА = $2$ А.</div>
+                    <div class="step"><strong>Шаг 2. Формула.</strong><br>Из $U = \mathcal{E} - I \cdot r$ выражаем: $\mathcal{E} = U + I \cdot r$.</div>
+                    <div class="step"><strong>Шаг 3. Подстановка и вычисление.</strong><br><span class="formula">$\mathcal{E} = 10 + 2 \cdot 1 = 12 \text{ В}$</span></div>
+                    <div class="answer">✅ Ответ: $\mathcal{E} = 12$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Короткое замыкание</div>
+                <div class="task-condition">Чему равен ток короткого замыкания для источника с ЭДС 12 В и внутренним сопротивлением 400 мОм?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $\mathcal{E} = 12$ В, $r = 400$ мОм</div>
+                        <div class="find">🔍 Найти: $I_{кз}$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>Сопротивление $r = 400$ мОм. Так как 1 Ом = 1000 мОм, то $r = 400 / 1000 = 0{,}4$ Ом.</div>
+                    <div class="step"><strong>Шаг 2. Формула.</strong><br>При коротком замыкании внешнее сопротивление $R = 0$, поэтому $I_{кз} = \dfrac{\mathcal{E}}{r}$.</div>
+                    <div class="step"><strong>Шаг 3. Подстановка и вычисление.</strong><br><span class="formula">$I_{кз} = \dfrac{12}{0{,}4} = 30 \text{ А}$</span></div>
+                    <div class="answer">✅ Ответ: $I_{кз} = 30$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Внешнее сопротивление</div>
+                <div class="task-condition">Источник с ЭДС 6 В и внутренним сопротивлением 1 Ом даёт ток 1500 мА. Найдите внешнее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $\mathcal{E} = 6$ В, $r = 1$ Ом, $I = 1500$ мА</div>
+                        <div class="find">🔍 Найти: $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>Ток $I = 1500$ мА = $1{,}5$ А.</div>
+                    <div class="step"><strong>Шаг 2. Формула.</strong><br>Из $I = \dfrac{\mathcal{E}}{R + r}$ выражаем $R = \dfrac{\mathcal{E}}{I} - r$.</div>
+                    <div class="step"><strong>Шаг 3. Подстановка и вычисление.</strong><br><span class="formula">$R = \dfrac{6}{1{,}5} - 1 = 4 - 1 = 3 \text{ Ом}$</span></div>
+                    <div class="answer">✅ Ответ: $R = 3$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. КПД источника</div>
+                <div class="task-condition">ЭДС источника 20 В, внутреннее сопротивление 2 Ом, внешнее сопротивление 18000 мОм. Найдите КПД источника.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $\mathcal{E} = 20$ В, $r = 2$ Ом, $R = 18000$ мОм</div>
+                        <div class="find">🔍 Найти: $\eta$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>Сопротивление $R = 18000$ мОм = $18$ Ом.</div>
+                    <div class="step"><strong>Шаг 2. Формула.</strong><br>КПД источника: $\eta = \dfrac{R}{R + r}$.</div>
+                    <div class="step"><strong>Шаг 3. Подстановка и вычисление.</strong><br><span class="formula">$\eta = \dfrac{18}{18 + 2} = \dfrac{18}{20} = 0{,}9$</span><br>В процентах: $0{,}9 \cdot 100\% = 90\%$.</div>
+                    <div class="answer">✅ Ответ: $\eta = 90\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Полезная мощность</div>
+                <div class="task-condition">При токе 2000 мА и напряжении на нагрузке 10 В. Найдите полезную мощность.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $I = 2000$ мА, $U = 10$ В</div>
+                        <div class="find">🔍 Найти: $P_{\text{полезн}}$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>Ток $I = 2000$ мА = $2$ А.</div>
+                    <div class="step"><strong>Шаг 2. Формула.</strong><br>Полезная мощность: $P_{\text{полезн}} = U \cdot I$.</div>
+                    <div class="step"><strong>Шаг 3. Подстановка и вычисление.</strong><br><span class="formula">$P_{\text{полезн}} = 10 \cdot 2 = 20 \text{ Вт}$</span></div>
+                    <div class="answer">✅ Ответ: $P_{\text{полезн}} = 20$ Вт</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Полная мощность</div>
+                <div class="task-condition">ЭДС источника 12 В, ток в цепи 2000 мА. Найдите полную мощность, развиваемую источником.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $\mathcal{E} = 12$ В, $I = 2000$ мА</div>
+                        <div class="find">🔍 Найти: $P_{\text{полн}}$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>Ток $I = 2000$ мА = $2$ А.</div>
+                    <div class="step"><strong>Шаг 2. Формула.</strong><br>Полная мощность: $P_{\text{полн}} = \mathcal{E} \cdot I$.</div>
+                    <div class="step"><strong>Шаг 3. Подстановка и вычисление.</strong><br><span class="formula">$P_{\text{полн}} = 12 \cdot 2 = 24 \text{ Вт}$</span></div>
+                    <div class="answer">✅ Ответ: $P_{\text{полн}} = 24$ Вт</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Потери мощности</div>
+                <div class="task-condition">Ток в цепи 3000 мА, внутреннее сопротивление источника 500 мОм. Найдите мощность потерь внутри источника.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $I = 3000$ мА, $r = 500$ мОм</div>
+                        <div class="find">🔍 Найти: $P_{\text{потерь}}$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>Ток $I = 3000$ мА = $3$ А.<br>Сопротивление $r = 500$ мОм = $0{,}5$ Ом.</div>
+                    <div class="step"><strong>Шаг 2. Формула.</strong><br>Мощность потерь: $P_{\text{потерь}} = I^2 r$.</div>
+                    <div class="step"><strong>Шаг 3. Подстановка и вычисление.</strong><br><span class="formula">$P_{\text{потерь}} = 3^2 \cdot 0{,}5 = 9 \cdot 0{,}5 = 4{,}5 \text{ Вт}$</span></div>
+                    <div class="answer">✅ Ответ: $P_{\text{потерь}} = 4{,}5$ Вт</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. ЭДС по графику</div>
+                <div class="task-condition">При силе тока 1000 мА напряжение на клеммах источника 5,5 В, а при 2000 мА — 5 В. Найдите ЭДС и внутреннее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $I_1 = 1000$ мА, $U_1 = 5{,}5$ В; $I_2 = 2000$ мА, $U_2 = 5$ В</div>
+                        <div class="find">🔍 Найти: $\mathcal{E}$, $r$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1. Перевод в систему СИ.</strong><br>$I_1 = 1000$ мА = $1$ А.<br>$I_2 = 2000$ мА = $2$ А.</div>
+                    <div class="step"><strong>Шаг 2. Система уравнений.</strong><br>Используем формулу $U = \mathcal{E} - I \cdot r$:<br><span class="formula">$5{,}5 = \mathcal{E} - 1 \cdot r$</span><span class="formula">$5 = \mathcal{E} - 2 \cdot r$</span></div>
+                    <div class="step"><strong>Шаг 3. Решение системы.</strong><br>Вычитаем из первого уравнения второе:<br>$5{,}5 - 5 = (\mathcal{E} - r) - (\mathcal{E} - 2r)$<br>$0{,}5 = r$<br>Значит, $r = 0{,}5$ Ом.</div>
+                    <div class="step"><strong>Шаг 4. Находим ЭДС.</strong><br>Подставляем $r$ в первое уравнение:<br>$\mathcal{E} = 5{,}5 + 1 \cdot 0{,}5 = 6$ В.</div>
+                    <div class="answer">✅ Ответ: $\mathcal{E} = 6$ В, $r = 0{,}5$ Ом</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения</div>
+        <div class="section-content">
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1</div>
+                <div class="task-condition">Источник с $\mathcal{E} = 24$ В, $r = 2$ Ом и нагрузкой $R = 10$ Ом. Найдите ток.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self1')">💡 Подсказка</button>
+                <div id="self1" class="task-solution">
+                    <div class="step"><div class="explanation">\(I = \frac{\mathcal{E}}{R + r}\).</div><div class="answer">✅ Ответ: \(I = 2\) А</div></div>
+                </div>
+            </div>
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2</div>
+                <div class="task-condition">При $\mathcal{E} = 10$ В, $I = 2$ А и $r = 1$ Ом. Найдите напряжение на клеммах.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self2')">💡 Подсказка</button>
+                <div id="self2" class="task-solution">
+                    <div class="step"><div class="explanation">\(U = \mathcal{E} - I \cdot r\).</div><div class="answer">✅ Ответ: \(U = 8\) В</div></div>
+                </div>
+            </div>
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3</div>
+                <div class="task-condition">Ток короткого замыкания \(I_{кз} = 20\) А, \(\mathcal{E} = 10\) В. Найдите внутреннее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self3')">💡 Подсказка</button>
+                <div id="self3" class="task-solution">
+                    <div class="step"><div class="explanation">\(r = \frac{\mathcal{E}}{I_{кз}}\).</div><div class="answer">✅ Ответ: \(r = 0{,}5\) Ом</div></div>
+                </div>
+            </div>
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4</div>
+                <div class="task-condition">Источник \(\mathcal{E} = 12\) В, \(R = 5\) Ом, \(r = 1\) Ом. Найдите напряжение на нагрузке.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self4')">💡 Подсказка</button>
+                <div id="self4" class="task-solution">
+                    <div class="step"><div class="explanation">Сначала \(I = \frac{\mathcal{E}}{R+r}\), потом \(U = I \cdot R\).</div><div class="answer">✅ Ответ: \(U = 10\) В</div></div>
+                </div>
+            </div>
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5</div>
+                <div class="task-condition">При \(U = 9\) В, \(I = 1{,}5\) А, \(r = 1\) Ом. Найдите ЭДС.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self5')">💡 Подсказка</button>
+                <div id="self5" class="task-solution">
+                    <div class="step"><div class="explanation">\(\mathcal{E} = U + I \cdot r\).</div><div class="answer">✅ Ответ: \(\mathcal{E} = 10{,}5\) В</div></div>
+                </div>
+            </div>
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6</div>
+                <div class="task-condition">КПД источника при \(R = 9\) Ом и \(r = 1\) Ом. Найдите КПД.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self6')">💡 Подсказка</button>
+                <div id="self6" class="task-solution">
+                    <div class="step"><div class="explanation">\(\eta = \frac{R}{R+r}\).</div><div class="answer">✅ Ответ: \(\eta = 90\%\)</div></div>
+                </div>
+            </div>
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7</div>
+                <div class="task-condition">\(\mathcal{E} = 15\) В, \(I = 3\) А. Найдите полную мощность источника.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self7')">💡 Подсказка</button>
+                <div id="self7" class="task-solution">
+                    <div class="step"><div class="explanation">\(P_{полн} = \mathcal{E} \cdot I\).</div><div class="answer">✅ Ответ: \(P_{полн} = 45\) Вт</div></div>
+                </div>
+            </div>
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8</div>
+                <div class="task-condition">При \(I = 4\) А и \(r = 0{,}5\) Ом. Найдите мощность потерь внутри источника.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self8')">💡 Подсказка</button>
+                <div id="self8" class="task-solution">
+                    <div class="step"><div class="explanation">\(P_{потерь} = I^2 \cdot r\).</div><div class="answer">✅ Ответ: \(P_{потерь} = 8\) Вт</div></div>
+                </div>
+            </div>
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9</div>
+                <div class="task-condition">\(\mathcal{E} = 20\) В, \(R = 8\) Ом, \(r = 2\) Ом. Найдите полезную мощность.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self9')">💡 Подсказка</button>
+                <div id="self9" class="task-solution">
+                    <div class="step"><div class="explanation">Сначала \(I = \frac{\mathcal{E}}{R+r}\), потом \(P_{полезн} = I^2 \cdot R\).</div><div class="answer">✅ Ответ: \(P_{полезн} = 16\) Вт</div></div>
+                </div>
+            </div>
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10</div>
+                <div class="task-condition">При \(I_1 = 1\) А \(U_1 = 4\) В; при \(I_2 = 3\) А \(U_2 = 2\) В. Найдите \(r\) и \(\mathcal{E}\).</div>
+                <button class="show-solution-btn" onclick="toggleHint('self10')">💡 Подсказка</button>
+                <div id="self10" class="task-solution">
+                    <div class="step"><div class="explanation">Решите систему \(U = \mathcal{E} - I \cdot r\).</div><div class="answer">✅ Ответ: \(r = 1\) Ом, \(\mathcal{E} = 5\) В</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/></svg></a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+</nav>
+
+<script>
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open'); btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open'); btn.textContent='📕 Скрыть решение';
+        }
+    }
+    function toggleHint(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open'); btn.textContent='💡 Подсказка';
+        }else{
+            el.classList.add('open'); btn.textContent='📕 Скрыть подсказку';
+        }
+    }
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-circuit').style.display = model === 'circuit' ? 'block' : 'none';
+        document.getElementById('model-efficiency').style.display = model === 'efficiency' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- МОДЕЛЬ 1: ПОЛНАЯ ЦЕПЬ (ИСПРАВЛЕННАЯ) -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-circuit');
+        const canvas = document.getElementById('canvas-circuit');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 15);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800; if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(updateSize).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
+        key.position.set(5, 10, 7);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Функция для создания текста БЕЗ ФОНА
+        function makeLabel(text, color, scale) {
+            scale = scale || 1;
+            const c = document.createElement('canvas');
+            const ctx = c.getContext('2d');
+            c.width = 512; c.height = 256;
+            ctx.font = 'bold 72px Segoe UI, Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = color || '#fff';
+            ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.lineWidth = 10;
+            ctx.strokeText(text, 256, 128); ctx.fillText(text, 256, 128);
+            const tex = new THREE.CanvasTexture(c);
+            tex.minFilter = THREE.LinearFilter;
+            const sp = new THREE.Sprite(new THREE.SpriteMaterial({map: tex, transparent: true, depthTest: false}));
+            sp.scale.set(2.4 * scale, 1.2 * scale, 1);
+            sp.renderOrder = 999;
+            return sp;
+        }
+
+        // Провода
+        const wireMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 2 });
+        const wirePoints = [
+            new THREE.Vector3(-5, -3, 0),
+            new THREE.Vector3(5, -3, 0),
+            new THREE.Vector3(5, 3, 0),
+            new THREE.Vector3(-5, 3, 0),
+            new THREE.Vector3(-5, -3, 0)
+        ];
+        const wireGeo = new THREE.BufferGeometry().setFromPoints(wirePoints);
+        group.add(new THREE.Line(wireGeo, wireMat));
+
+        // --- Батарейка ---
+        const batGroup = new THREE.Group();
+        batGroup.position.set(-3.5, -3, 0);
+        const batBody = new THREE.Mesh(
+            new THREE.BoxGeometry(2, 0.9, 0.5),
+            new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x112244 })
+        );
+        batGroup.add(batBody);
+        const batPlus = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.6, 0.55),
+            new THREE.MeshStandardMaterial({ color: 0xff5555, emissive: 0x330000 })
+        );
+        batPlus.position.set(1.1, 0, 0);
+        batGroup.add(batPlus);
+        const batMinus = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.6, 0.55),
+            new THREE.MeshStandardMaterial({ color: 0x5555ff, emissive: 0x000033 })
+        );
+        batMinus.position.set(-1.1, 0, 0);
+        batGroup.add(batMinus);
+        group.add(batGroup);
+
+        // Свечение для нагрева батарейки
+        const batGlowMat = new THREE.SpriteMaterial({
+            map: createGlowTexture(),
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity: 0
+        });
+        const batGlow = new THREE.Sprite(batGlowMat);
+        batGlow.position.set(-3.5, -3, 0);
+        batGlow.scale.set(4, 4, 1);
+        group.add(batGlow);
+
+        function createGlowTexture() {
+            const size = 256;
+            const c = document.createElement('canvas');
+            c.width = c.height = size;
+            const ctx = c.getContext('2d');
+            const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            grad.addColorStop(0, 'rgba(255, 100, 0, 0.9)');
+            grad.addColorStop(0.4, 'rgba(255, 50, 0, 0.5)');
+            grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(c);
+        }
+
+        const labelPlus = makeLabel('+', '#ff7777', 0.75);
+        labelPlus.position.set(-2.0, -2.2, 0);
+        group.add(labelPlus);
+
+        const labelMinus = makeLabel('−', '#7777ff', 0.75);
+        labelMinus.position.set(-5.0, -2.2, 0);
+        group.add(labelMinus);
+
+        // --- Лампочка ---
+        const lampGroup = new THREE.Group();
+        lampGroup.position.set(-3.5, 3, 0);
+        const lampBase = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.35, 0.4, 0.4, 16),
+            new THREE.MeshStandardMaterial({ color: 0x8ba5b8 })
+        );
+        lampGroup.add(lampBase);
+        const lampBulb = new THREE.Mesh(
+            new THREE.SphereGeometry(0.55, 16, 16),
+            new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0x000000, transparent: true, opacity: 0.85 })
+        );
+        lampBulb.position.set(0, 0.7, 0);
+        lampGroup.add(lampBulb);
+        const lampLight = new THREE.PointLight(0xffdd44, 0, 15);
+        lampLight.position.set(0, 0.7, 0);
+        lampGroup.add(lampLight);
+        group.add(lampGroup);
+
+        const glowTex = createGlowTexture();
+        const lampGlowMat = new THREE.SpriteMaterial({
+            map: glowTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0
+        });
+        const lampGlowSprite = new THREE.Sprite(lampGlowMat);
+        lampGlowSprite.position.set(0, 0.7, 0.01);
+        lampGroup.add(lampGlowSprite);
+
+        // --- Внутреннее сопротивление r ---
+        const rGroup = new THREE.Group();
+        rGroup.position.set(-1, -3, 0);
+        const rBody = new THREE.Mesh(
+            new THREE.BoxGeometry(1.2, 0.6, 0.5),
+            new THREE.MeshStandardMaterial({ color: 0xff8888, emissive: 0x330000 })
+        );
+        rGroup.add(rBody);
+        group.add(rGroup);
+
+        const labelr = makeLabel('r', '#ff8888', 0.8);
+        labelr.position.set(-1, -1.8, 0);
+        group.add(labelr);
+
+        // --- Внешнее сопротивление R ---
+        const RGroup = new THREE.Group();
+        RGroup.position.set(3.5, 3, 0);
+        const RBody = new THREE.Mesh(
+            new THREE.BoxGeometry(1.6, 0.6, 0.5),
+            new THREE.MeshStandardMaterial({ color: 0xcc8844, emissive: 0x221100 })
+        );
+        RGroup.add(RBody);
+        group.add(RGroup);
+
+        const labelR = makeLabel('R', '#facc15', 0.8);
+        labelR.position.set(3.5, 4, 0);
+        group.add(labelR);
+
+        // --- Электроны ---
+        const electrons = [];
+        const N = 30;
+        const eGeo = new THREE.SphereGeometry(0.1, 8, 8);
+        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+
+        const perimeter = [];
+        const corners = [
+            new THREE.Vector3(-5, -3, 0),
+            new THREE.Vector3(5, -3, 0),
+            new THREE.Vector3(5, 3, 0),
+            new THREE.Vector3(-5, 3, 0),
+            new THREE.Vector3(-5, -3, 0)
+        ];
+        let totalLen = 0;
+        for (let i = 0; i < corners.length - 1; i++) {
+            const a = corners[i], b = corners[i + 1];
+            const segLen = a.distanceTo(b);
+            perimeter.push({ a, b, segLen, start: totalLen });
+            totalLen += segLen;
+        }
+
+        function pointOnPerimeter(t) {
+            const d = ((t % 1) + 1) % 1 * totalLen;
+            for (const seg of perimeter) {
+                if (d <= seg.start + seg.segLen) {
+                    const local = (d - seg.start) / seg.segLen;
+                    return new THREE.Vector3().lerpVectors(seg.a, seg.b, local);
+                }
+            }
+            return corners[0].clone();
+        }
+
+        for (let i = 0; i < N; i++) {
+            const e = new THREE.Mesh(eGeo, eMat);
+            e.position.copy(pointOnPerimeter(i / N));
+            group.add(e);
+            electrons.push({ mesh: e, t: i / N });
+        }
+
+        // --- Ползунки и данные ---
+        const EMF_slider = document.getElementById('c-slider-EMF');
+        const r_slider   = document.getElementById('c-slider-r-int');
+        const R_slider   = document.getElementById('c-slider-R');
+
+        const EMF_val = document.getElementById('c-val-EMF');
+        const r_val   = document.getElementById('c-val-r-int');
+        const R_val   = document.getElementById('c-val-R');
+
+        const EMF_disp = document.getElementById('c-EMF');
+        const r_disp   = document.getElementById('c-r-int');
+        const R_disp   = document.getElementById('c-r-ext');
+        const I_disp   = document.getElementById('c-I');
+        const U_disp   = document.getElementById('c-U');
+
+        function recalc() {
+            const EMF = parseFloat(EMF_slider.value);
+            const r = parseFloat(r_slider.value);
+            const R = parseFloat(R_slider.value);
+
+            EMF_val.textContent = EMF;
+            r_val.textContent = r.toFixed(1);
+            R_val.textContent = R;
+
+            EMF_disp.textContent = EMF;
+            r_disp.textContent = r.toFixed(1);
+            R_disp.textContent = R;
+
+            const I = EMF / (R + r);
+            const U = I * R;
+
+            I_disp.textContent = I.toFixed(2);
+            U_disp.textContent = U.toFixed(2);
+
+            // --- ЛОГИКА ЯРКОСТИ ЛАМПОЧКИ ---
+            // Считаем полезную мощность P = I^2 * R (именно она идет в лампочку)
+            const P_useful = I * I * R;
+            // Максимально возможная мощность при данных параметрах (для нормировки)
+            // Для визуализации берем условный максимум
+            const maxP = 15;
+            const intensity = Math.min(P_useful / maxP, 1.5);
+
+            lampBulb.material.emissive.setRGB(1, 0.85, 0.3);
+            lampBulb.material.emissiveIntensity = intensity * 4;
+            lampBulb.material.color.setRGB(0.33 + Math.min(intensity,1)*0.67, 0.33 + Math.min(intensity,1)*0.55, 0.33 + Math.min(intensity,1)*0.1);
+
+            lampLight.intensity = intensity * 8;
+            lampGlowMat.opacity = Math.min(intensity / 1.5, 1);
+            const s = 1.5 + intensity * 2.5;
+            lampGlowSprite.scale.set(s, s, 1);
+
+            // --- ЛОГИКА НАГРЕВА БАТАРЕЙКИ (ВНУТРЕННЕГО СОПРОТИВЛЕНИЯ) ---
+            // Мощность потерь внутри источника P_loss = I^2 * r
+            const P_loss = I * I * r;
+            const heat = Math.min(P_loss / 15, 1.5); // Нормируем нагрев
+
+            rBody.material.emissive.setRGB(heat * 0.8, heat * 0.2, 0); // Оранжевый нагрев резистора r
+            rBody.material.color.setRGB(0.8, 0.4 - heat * 0.4, 0.4 - heat * 0.4);
+
+            // Свечение вокруг самой батарейки
+            batGlowMat.opacity = Math.min(heat, 1) * 0.8;
+            const batScale = 4 + heat * 2;
+            batGlow.scale.set(batScale, batScale, 1);
+        }
+
+        EMF_slider.addEventListener('input', recalc);
+        r_slider.addEventListener('input', recalc);
+        R_slider.addEventListener('input', recalc);
+
+        document.getElementById('c-reset').addEventListener('click', () => {
+            EMF_slider.value = 12;
+            r_slider.value = 1;
+            R_slider.value = 10;
+            recalc();
+        });
+
+        document.getElementById('fs-circuit').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen();
+            else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        recalc();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const EMF = parseFloat(EMF_slider.value);
+            const r = parseFloat(r_slider.value);
+            const R = parseFloat(R_slider.value);
+            const I = EMF / (R + r);
+
+            const speed = 0.0003 + I * 0.0001;
+            electrons.forEach(e => {
+                e.t = (e.t + speed) % 1;
+                e.mesh.position.copy(pointOnPerimeter(e.t));
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- МОДЕЛЬ 2: КПД (Поток энергии) -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-efficiency');
+        const canvas = document.getElementById('canvas-efficiency');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 4, 14); // Отодвинули камеру чуть дальше, чтобы все влезло
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800; if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(updateSize).observe(container);
+        setTimeout(updateSize, 100);
+
+        // Свет
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const key = new THREE.DirectionalLight(0xffffff, 0.9);
+        key.position.set(5, 10, 7);
+        scene.add(key);
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        backLight.position.set(-5, 5, -5);
+        scene.add(backLight);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Функция для создания текста БЕЗ ФОНА
+        function makeLabel(text, color, scale) {
+            scale = scale || 1;
+            const c = document.createElement('canvas');
+            const ctx = c.getContext('2d');
+            c.width = 512; c.height = 256;
+            ctx.font = 'bold 64px Segoe UI, Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = color || '#fff';
+            ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.lineWidth = 10;
+            ctx.strokeText(text, 256, 128); ctx.fillText(text, 256, 128);
+            const tex = new THREE.CanvasTexture(c);
+            tex.minFilter = THREE.LinearFilter;
+            const sp = new THREE.Sprite(new THREE.SpriteMaterial({map: tex, transparent: true, depthTest: false}));
+            sp.scale.set(2.4 * scale, 1.2 * scale, 1);
+            sp.renderOrder = 999;
+            return sp;
+        }
+
+        // --- 1. ИСТОЧНИК ТОКА (ВЕРТИКАЛЬНАЯ БАТАРЕЙКА) ---
+        const batGroup = new THREE.Group();
+        batGroup.position.set(0, -2.5, 0);
+
+        // Корпус батарейки (вертикальный)
+        const batBody = new THREE.Mesh(
+            new THREE.CylinderGeometry(1.2, 1.2, 3, 32),
+            new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x112244, roughness: 0.3, metalness: 0.2 })
+        );
+        batGroup.add(batBody);
+
+        // Плюсовая клемма (сверху, красная)
+        const terminalPlus = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16),
+            new THREE.MeshStandardMaterial({ color: 0xff5555, emissive: 0x330000 })
+        );
+        terminalPlus.position.set(0, 1.7, 0);
+        batGroup.add(terminalPlus);
+
+        // Минусовая клемма (снизу, синяя)
+        const terminalMinus = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16),
+            new THREE.MeshStandardMaterial({ color: 0x5555ff, emissive: 0x000033 })
+        );
+        terminalMinus.position.set(0, -1.7, 0);
+        batGroup.add(terminalMinus);
+
+        group.add(batGroup);
+
+        // Подпись источника
+        const labelEMF = makeLabel('Источник (ЭДС)', '#ffffff', 1.1);
+        labelEMF.position.set(0, -5.0, 0);
+        group.add(labelEMF);
+
+        // --- 2. ТРУБЫ ДЛЯ ЭНЕРГИИ ---
+        // Полезная мощность (идет вправо-вверх)
+        const usefulPipeGeo = new THREE.CylinderGeometry(0.4, 0.4, 6, 16);
+        const usefulPipeMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x112244, transparent: true, opacity: 0.85 });
+        const usefulPipe = new THREE.Mesh(usefulPipeGeo, usefulPipeMat);
+        usefulPipe.position.set(2.1, 0.6, 0); // Смещена вправо
+        usefulPipe.rotation.z = -Math.PI / 3.5; // Наклон
+        group.add(usefulPipe);
+
+        // Потери мощности (идет влево-вверх)
+        const lossPipeGeo = new THREE.CylinderGeometry(0.4, 0.4, 6, 16);
+        const lossPipeMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111, transparent: true, opacity: 0.85 });
+        const lossPipe = new THREE.Mesh(lossPipeGeo, lossPipeMat);
+        lossPipe.position.set(-2.1, 0.6, 0); // Смещена влево
+        lossPipe.rotation.z = Math.PI / 3.5; // Наклон
+        group.add(lossPipe);
+
+        // Подписи к трубам
+        const labelUseful = makeLabel('P полезн (R)', '#60a5fa', 0.9);
+        labelUseful.position.set(5.5, 3.5, 0);
+        group.add(labelUseful);
+
+        const labelLoss = makeLabel('P потерь (r)', '#f87171', 0.9);
+        labelLoss.position.set(-5.5, 3.5, 0);
+        group.add(labelLoss);
+
+        // --- 3. ЧАСТИЦЫ ЭНЕРГИИ (Летят по трубам) ---
+        const particles = [];
+        const particleGeo = new THREE.SphereGeometry(0.18, 8, 8);
+
+        for (let i = 0; i < 20; i++) {
+            // Частицы полезной энергии
+            const pUseful = new THREE.Mesh(particleGeo, new THREE.MeshBasicMaterial({ color: 0x60a5fa }));
+            pUseful.visible = false;
+            group.add(pUseful);
+            particles.push({ mesh: pUseful, type: 'useful', t: Math.random() });
+
+            // Частицы потерь
+            const pLoss = new THREE.Mesh(particleGeo, new THREE.MeshBasicMaterial({ color: 0xf87171 }));
+            pLoss.visible = false;
+            group.add(pLoss);
+            particles.push({ mesh: pLoss, type: 'loss', t: Math.random() });
+        }
+
+        // --- 4. НАГРЕВ БАТАРЕЙКИ (Мягкое оранжевое свечение) ---
+        const batGlowMat = new THREE.SpriteMaterial({
+            map: createGlowTexture(),
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity: 0
+        });
+        const batGlow = new THREE.Sprite(batGlowMat);
+        batGlow.position.set(0, -2.5, 0);
+        batGlow.scale.set(7, 7, 1);
+        group.add(batGlow);
+
+        function createGlowTexture() {
+            const size = 256;
+            const c = document.createElement('canvas');
+            c.width = c.height = size;
+            const ctx = c.getContext('2d');
+            const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            grad.addColorStop(0, 'rgba(255, 100, 0, 0.9)'); // Оранжевый центр
+            grad.addColorStop(0.4, 'rgba(255, 50, 0, 0.5)');
+            grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(c);
+        }
+
+        // --- 5. ПОЛЗУНКИ И ДАННЫЕ ---
+        const r_slider = document.getElementById('e-slider-r-int');
+        const R_slider = document.getElementById('e-slider-R');
+        const r_val = document.getElementById('e-val-r-int');
+        const R_val = document.getElementById('e-val-R');
+
+        const Pfull_disp = document.getElementById('e-Pfull');
+        const Puse_disp = document.getElementById('e-Puse');
+        const eta_disp = document.getElementById('e-eta');
+
+        const EMF = 12;
+
+        function recalc() {
+            const r = parseFloat(r_slider.value);
+            const R = parseFloat(R_slider.value);
+
+            r_val.textContent = r.toFixed(1);
+            R_val.textContent = R;
+
+            const I = EMF / (R + r);
+            const Pfull = EMF * I;
+            const Puse = I * I * R;
+            const eta = (R / (R + r)) * 100;
+
+            Pfull_disp.textContent = Pfull.toFixed(1);
+            Puse_disp.textContent = Puse.toFixed(1);
+            eta_disp.textContent = eta.toFixed(1);
+
+            // Визуализация:
+            const ratioUseful = Puse / Pfull;
+            const ratioLoss = 1 - ratioUseful;
+
+            // 1. Меняем толщину труб
+            usefulPipe.scale.set(Math.max(ratioUseful, 0.05), 1, Math.max(ratioUseful, 0.05));
+            usefulPipeMat.opacity = Math.max(ratioUseful * 1.2, 0.1);
+
+            lossPipe.scale.set(Math.max(ratioLoss, 0.05), 1, Math.max(ratioLoss, 0.05));
+            lossPipeMat.opacity = Math.max(ratioLoss * 1.2, 0.1);
+
+            // 2. Нагрев батарейки (если потери большие)
+            const heat = Math.min(ratioLoss * 1.5, 1);
+            batGlowMat.opacity = heat * 0.8;
+            // Делаем свечение корпуса оранжевым, а не белым
+            batBody.material.emissive.setRGB(heat * 0.8, heat * 0.2, 0);
+        }
+
+        r_slider.addEventListener('input', recalc);
+        R_slider.addEventListener('input', recalc);
+
+        document.getElementById('e-reset').addEventListener('click', () => {
+            r_slider.value = 1;
+            R_slider.value = 10;
+            recalc();
+        });
+
+        document.getElementById('fs-efficiency').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen();
+            else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        recalc();
+
+        // --- 6. АНИМАЦИЯ ---
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            time += 0.016;
+
+            const r = parseFloat(r_slider.value);
+            const R = parseFloat(R_slider.value);
+            const I = EMF / (R + r);
+            const ratioUseful = (I * I * R) / (EMF * I);
+            const ratioLoss = 1 - ratioUseful;
+
+            // Двигаем частицы по трубам
+            particles.forEach(p => {
+                p.t += 0.01 + I * 0.005;
+                if (p.t > 1) p.t = 0;
+
+                if (p.type === 'useful') {
+                    // Старт из центра клеммы (0, -0.8), летит вправо-вверх
+                    p.mesh.position.x = p.t * 5.0;
+                    p.mesh.position.y = -0.8 + p.t * 3.5;
+                    p.mesh.position.z = (Math.random() - 0.5) * 0.5;
+                    p.mesh.visible = (p.t > 0.1 && p.t < 0.9) && (ratioUseful > 0.05);
+                } else {
+                    // Старт из центра клеммы (0, -0.8), летит влево-вверх
+                    p.mesh.position.x = -p.t * 5.0;
+                    p.mesh.position.y = -0.8 + p.t * 3.5;
+                    p.mesh.position.z = (Math.random() - 0.5) * 0.5;
+                    p.mesh.visible = (p.t > 0.1 && p.t < 0.9) && (ratioLoss > 0.05);
+                }
+            });
+
+            // Легкая пульсация свечения батарейки при нагреве
+            if (batGlowMat.opacity > 0.1) {
+                batGlow.scale.setScalar(7 + Math.sin(time * 10) * 0.5);
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<script src="search-overlay.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY, threshold = 5, ticking = false;
+        window.addEventListener('scroll', function(){
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    var y = window.scrollY;
+                    if (Math.abs(y - lastY) >= threshold) {
+                        if (y > lastY && y > 50) nav.classList.add('nav-hidden');
+                        else nav.classList.remove('nav-hidden');
+                        lastY = y;
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    });
+</script>
+</body>
+</html>

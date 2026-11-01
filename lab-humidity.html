@@ -1,0 +1,505 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Лабораторная работа: Измерение влажности воздуха</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c; --card-bg: #1e3545; --text: #ffffff; --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1); --special-border: #f59e0b; --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff; --formula-bg: #1e3545; --info-bg: #1e3545;
+            --input-bg: #2a4a5a; --card-shadow: rgba(0,0,0,0.2); --accent: #3b82f6;
+            --accent-hover: #60a5fa; --menu-item-hover: #233e50; --group-header-bg: #1a3a5a;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa; --card-bg: #ffffff; --text: #1a2a3f; --text-secondary: #5a7a94;
+            --border: #d0d8e0; --canvas-bg: #eef2f8; --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc; --info-bg: #e8f0fe; --special-border: #d97706;
+            --input-bg: #e8f0fe; --card-shadow: rgba(0,0,0,0.08); --accent: #2563eb;
+            --accent-hover: #3b82f6; --menu-item-hover: #f0f4fa; --group-header-bg: #e8edf5;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;padding-bottom:78px;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.3rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s; justify-content: center; position: relative;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary); position: absolute; right: 8px; top: 50%; transform: translateY(-50%);}
+        .section.collapsed .section-title::after{transform:translateY(-50%) rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul, .def-card ol{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card li { margin-bottom: 6px; }
+
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:350px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;justify-content:center;}
+        .btn-toggle{background:#3b82f6;color:white;border:none;padding:10px 24px;border-radius:20px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:44px;box-shadow:0 4px 10px rgba(59,130,246,0.3);}
+        .btn-toggle:hover{transform:scale(1.05);opacity:0.9;}
+
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:10px 14px;border-radius:12px;color:var(--text);font-size:0.8rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:4px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);font-size:1.1rem;}
+
+        .table-responsive{overflow-x:auto; margin: 12px 0;}
+        table{width:100%;border-collapse:collapse;font-size:0.9rem;background:var(--card-bg);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px var(--card-shadow);}
+        th,td{padding:10px;text-align:center;border:1px solid var(--border);color:var(--text);}
+        th{background:var(--menu-item-hover);font-weight:600;}
+        td{background:var(--info-bg);}
+
+        .psychro-table { font-size: 0.75rem; }
+        .psychro-table th, .psychro-table td { padding: 6px 4px; }
+        .psychro-table td.highlight { background: rgba(59,130,246,0.3); font-weight: bold; color: var(--accent); border: 2px solid var(--accent); }
+
+        .notebook-example {
+            background: var(--formula-bg);
+            border: 2px dashed var(--special-border);
+            border-radius: 14px;
+            padding: 16px;
+            margin: 16px 0;
+            font-family: 'Times New Roman', serif;
+            color: var(--text);
+            line-height: 1.8;
+        }
+        .notebook-example p { margin-bottom: 8px; }
+        .notebook-example .blank {
+            display: inline-block;
+            min-width: 50px;
+            border-bottom: 2px solid var(--text-secondary);
+            text-align: center;
+            font-weight: bold;
+            color: var(--special-border);
+        }
+
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s, transform 0.3s; max-width: 340px; width: auto; flex: 0 0 auto; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        
+        
+        .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+    </style>
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+<style id="titles-center-fix">
+.section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+.section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+.section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+h1, .page-title, .file-title, .title { text-align: center !important; }
+</style>
+<style id="section-gradient-fix">
+.section { position: relative; }
+.section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+.section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+.section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+:root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+.section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+.section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+.section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+.section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+:root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+</style>
+
+
+
+
+
+<style id="nav-clean-final">
+    /* Жестко фиксируем кнопки на месте, чтобы они не прыгали */
+    .bottom-nav a, .bottom-nav button { 
+        display: flex; align-items: center; justify-content: center;
+        width: 46px !important; height: 46px !important; 
+        border-radius: 14px; border: none; background: transparent; 
+        color: var(--text-secondary); font-size: 22px; cursor: pointer; 
+        text-decoration: none; padding: 0 !important;
+        transform: none !important; /* Убирает пружину */
+        transition: background 0.2s ease, color 0.2s ease !important;
+    }
+    .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { 
+        background: rgba(59,130,246,0.15); color: var(--accent); 
+        transform: none !important; /* Убирает сдвиг влево/вверх */
+    }
+    
+    /* Настройки самой панели */
+    .bottom-nav {
+        position: fixed; left: 50%; bottom: 14px; 
+        transform: translateX(-50%);
+        display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px;
+        background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border);
+        box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900;
+        max-width: 340px; width: auto; flex: 0 0 auto;
+        transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s !important; 
+    }
+    :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+    
+    /* Состояние для скрытия */
+    .bottom-nav.nav-hidden { 
+        transform: translate(-50%, 150%) !important; 
+        opacity: 0 !important; 
+        pointer-events: none !important; 
+    }
+    
+    /* Стили для иконок (размер) */
+    .bottom-nav a svg, .bottom-nav button svg { 
+        width: 22px !important; height: 22px !important; flex: 0 0 22px !important; 
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Лабораторная работа № 1<br>«Измерение влажности воздуха»</h1>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🎯 Цель работы и оборудование</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Цель работы:</strong> освоить прием определения относительной влажности воздуха, основанный на использовании психрометра.</p>
+                <p><strong>Приборы и материалы:</strong> Психрометр (виртуальная модель), психрометрическая таблица.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Теоретическая часть</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>В атмосфере Земли всегда содержатся водяные пары. Их содержание в воздухе характеризуется абсолютной и относительной влажностью.</p>
+                <p><strong>Абсолютная влажность</strong> $\rho_a$ — это плотность водяных паров, находящихся в воздухе при данной температуре.</p>
+                <div class="formula-block">
+                    <span class="f">$\rho_a = \frac{m_{\text{водяного пара}}}{V_{\text{воздуха}}} \quad [\frac{кг}{м^3}]$</span>
+                </div>
+                <p><strong>Относительная влажность</strong> $\varphi$ показывает, сколько процентов составляет абсолютная влажность от плотности насыщенного водяного пара при данной температуре:</p>
+                <div class="formula-block">
+                    <span class="f">$\varphi = \frac{\rho_a}{\rho_0} \cdot 100\%$</span>
+                </div>
+                <p>Для жилых помещений нормальной влажностью считается относительная влажность, равная <strong>40–60%</strong>.</p>
+                <p><strong>Психрометр</strong> состоит из двух термометров: сухого и увлажненного. На шарике увлажненного термометра закреплен фитиль, конец которого опущен в чашечку с водой. Вода, испаряясь с фитиля, забирает от термометра тепло, поэтому показания увлажненного термометра ниже, чем у сухого. По показанию сухого и разности показаний сухого и увлажненного термометров с помощью психрометрической таблицы находится относительная влажность воздуха.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔬 Практическая часть (Ход работы)</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Задание 1.</strong> Ознакомьтесь с устройством психрометра на 3D-модели ниже. Вращайте модель пальцем или мышкой.</p>
+
+                <div class="model-container" id="container-psychro">
+                    <canvas id="canvas-psychro" class="model-canvas"></canvas>
+                    <div class="info-display">
+                        <div>Сухой термометр: <span class="val" id="t-dry">—</span> °C</div>
+                        <div>Влажный термометр: <span class="val" id="t-wet">—</span> °C</div>
+                    </div>
+                </div>
+
+                <p><strong>Задание 2.</strong> Нажмите кнопку «Получить показания». Каждый студент получает свои уникальные значения температур.</p>
+                <div class="controls-panel">
+                    <button class="btn-toggle" id="btn-generate">🎲 Получить показания приборов</button>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:8px;">* На экране появятся только показания сухого и влажного термометров. Все остальные расчеты вы выполняете самостоятельно.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Как оформить в тетради</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Внимание!</strong> Перепишите этот текст в тетрадь и заполните пустые места своими значениями, которые вы получили на экране.</p>
+
+                <div class="notebook-example">
+                    <p><strong>Ход работы:</strong></p>
+                    <p>1. Рассмотрели устройство психрометра.</p>
+                    <p>2. Показания сухого термометра: $t_{сухого}$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> °C.</p>
+                    <p>3. Показания влажного термометра: $t_{влажного}$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> °C.</p>
+                    <p>4. Разность показаний термометров:</p>
+                    <p>$\Delta t = t_{сухого} - t_{влажного}$</p>
+                    <p>$\Delta t$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> °C − <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> °C = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> °C.</p>
+                    <p>5. По психрометрической таблице определяем влажность воздуха $\varphi$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> %.</p>
+                </div>
+
+                <p style="margin-top:16px;"><strong>Задание 3.</strong> Начертите в тетради таблицу результатов измерений. Запишите туда показания приборов с экрана, а разность температур и влажность посчитайте и впишите сами.</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>№ опыта</th>
+                            <th>$t_{сухого}$, °C</th>
+                            <th>$t_{влажного}$, °C</th>
+                            <th>$\Delta t$, °C</th>
+                            <th>$\varphi$, %</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr><td>1</td><td></td><td></td><td></td><td></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📋 Психрометрическая таблица</div>
+        <div class="section-content">
+            <div class="def-card" style="padding:6px;">
+                <p style="font-size:0.8rem; margin-bottom:8px;">Найдите строку с вашей температурой сухого термометра и столбец с вашей разностью температур (Δt). На пересечении будет ваша относительная влажность.</p>
+                <div class="table-responsive">
+                    <table class="psychro-table" id="psychro-table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Вывод и контрольные вопросы</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Задание 4. Сделайте вывод.</strong> В тетради напишите:</p>
+                <ul>
+                    <li>В ходе лабораторной работы определили относительную влажность воздуха в кабинете. Она равна <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> %.</li>
+                    <li>Сравните полученный результат с нормой (40–60%). Это нормальная, повышенная или пониженная влажность?</li>
+                </ul>
+            </div>
+            <div class="def-card" style="margin-top:16px;">
+                <p><strong>Контрольные вопросы (ответьте письменно в тетради):</strong></p>
+                <ol>
+                    <li>Почему показания «влажного» термометра меньше показаний «сухого»?</li>
+                    <li>Могут ли температуры «сухого» и «влажного» термометров оказаться одинаковыми? При каком условии?</li>
+                    <li>При каком условии разность показаний термометров будет наибольшей?</li>
+                    <li>Может ли температура «влажного» термометра оказаться выше температуры «сухого»? Почему?</li>
+                    <li>Каким может быть предельное значение относительной влажности воздуха?</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="labs.html" class="back-link">← Назад к списку работ</a>
+    </div>
+</div>
+
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/></svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+</nav>
+
+<script>
+    const psychroData = {
+        20: [100, 91, 83, 74, 66, 59, 51, 44, 37, 30, 24, 18],
+        21: [100, 91, 83, 75, 67, 60, 52, 46, 39, 32, 26, 20],
+        22: [100, 92, 83, 76, 68, 61, 54, 47, 40, 34, 28, 22],
+        23: [100, 92, 84, 77, 69, 62, 55, 48, 42, 36, 30, 24],
+        24: [100, 92, 84, 77, 70, 63, 56, 49, 43, 37, 31, 26],
+        25: [100, 92, 84, 77, 70, 63, 57, 50, 44, 38, 33, 27],
+        26: [100, 92, 85, 78, 71, 64, 58, 51, 45, 40, 34, 29],
+        27: [100, 92, 85, 78, 71, 65, 59, 52, 46, 41, 36, 31],
+        28: [100, 92, 85, 78, 72, 65, 59, 53, 48, 42, 37, 32],
+        29: [100, 93, 85, 78, 72, 66, 60, 54, 49, 43, 38, 33],
+        30: [100, 93, 86, 79, 72, 66, 60, 55, 49, 44, 39, 34]
+    };
+
+    function renderPsychroTable() {
+        const table = document.getElementById('psychro-table');
+        let html = '<thead><tr><th rowspan="2" style="vertical-align:middle;">t сухого, °C</th><th colspan="12">Разность показаний сухого и влажного термометров (Δt)</th></tr><tr>';
+        for (let i = 0; i <= 11; i++) html += `<th>${i}</th>`;
+        html += '</tr></thead><tbody>';
+
+        for (let t in psychroData) {
+            html += `<tr><td><strong>${t}</strong></td>`;
+            psychroData[t].forEach((val, i) => {
+                html += `<td id="cell-${t}-${i}">${val}</td>`;
+            });
+            html += '</tr>';
+        }
+        html += '</tbody>';
+        table.innerHTML = html;
+    }
+    renderPsychroTable();
+
+    document.getElementById('btn-generate').addEventListener('click', () => {
+        // Генерируем случайные показания
+        const tDry = Math.floor(Math.random() * (30 - 20 + 1)) + 20;
+        const diff = Math.floor(Math.random() * (8 - 2 + 1)) + 2;
+        const tWet = tDry - diff;
+
+        // Выводим ТОЛЬКО показания в окошко на экране
+        document.getElementById('t-dry').textContent = tDry;
+        document.getElementById('t-wet').textContent = tWet;
+        
+        // Никакой прокрутки и подсветки таблицы больше нет.
+    });
+</script>
+
+<!-- 3D МОДЕЛЬ ПСИХРОМЕТРА -->
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-psychro');
+        const canvas = document.getElementById('canvas-psychro');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(0, 0, 18);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 300; if (h < 10) h = 350;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(updateSize).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
+        key.position.set(5, 10, 7);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Корпус (задняя панель)
+        const bodyGeo = new THREE.BoxGeometry(7, 11, 0.5);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.position.set(0, 0, -0.5);
+        group.add(body);
+
+        // Функция создания термометра
+        function createThermometer(x, labelText) {
+            const g = new THREE.Group();
+            g.position.set(x, 0, 0);
+            
+            // Стеклянная трубка
+            const glassGeo = new THREE.CylinderGeometry(0.4, 0.4, 8, 16);
+            const glassMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, transparent: true, opacity: 0.5, roughness: 0.1 });
+            const glass = new THREE.Mesh(glassGeo, glassMat);
+            g.add(glass);
+            
+            // Резервуар с жидкостью
+            const bulbGeo = new THREE.SphereGeometry(0.6, 16, 16);
+            const bulbMat = new THREE.MeshStandardMaterial({ color: 0xff3333 });
+            const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+            bulb.position.y = -4;
+            g.add(bulb);
+            
+            // Шкала с цифрами
+            const scaleGroup = new THREE.Group();
+            for (let i = -3; i <= 3; i++) {
+                const lineGeo = new THREE.BoxGeometry(0.8, 0.05, 0.1);
+                const lineMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const line = new THREE.Mesh(lineGeo, lineMat);
+                line.position.set(0, i * 1.2, 0.4);
+                if (i % 2 === 0) line.scale.x = 1.5;
+                scaleGroup.add(line);
+            }
+            g.add(scaleGroup);
+            return g;
+        }
+
+        const dryThermometer = createThermometer(-2, 'dry');
+        group.add(dryThermometer);
+        const wetThermometer = createThermometer(2, 'wet');
+        group.add(wetThermometer);
+
+        // Марля и чашечка
+        const fabricGeo = new THREE.CylinderGeometry(0.45, 0.45, 2, 16);
+        const fabricMat = new THREE.MeshStandardMaterial({ color: 0x88ccff, roughness: 1 });
+        const fabric = new THREE.Mesh(fabricGeo, fabricMat);
+        fabric.position.set(2, -3.2, 0);
+        group.add(fabric);
+
+        const cupGeo = new THREE.CylinderGeometry(1.2, 0.8, 1.5, 16);
+        const cupMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, transparent: true, opacity: 0.8 });
+        const cup = new THREE.Mesh(cupGeo, cupMat);
+        cup.position.set(2, -4.5, 0);
+        group.add(cup);
+
+        const waterGeo = new THREE.CylinderGeometry(1.1, 0.8, 1, 16);
+        const waterMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, transparent: true, opacity: 0.7 });
+        const water = new THREE.Mesh(waterGeo, waterMat);
+        water.position.set(2, -4.5, 0);
+        group.add(water);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.enableZoom = false;
+        controls.update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+
+<script id="nav-autohide-script">
+document.addEventListener('DOMContentLoaded', function(){
+    var nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    var lastY = window.scrollY, threshold = 5, ticking = false;
+    window.addEventListener('scroll', function(){
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                var y = window.scrollY;
+                if (Math.abs(y - lastY) >= threshold) {
+                    if (y > lastY && y > 50) {
+                        nav.classList.add('nav-hidden');
+                    } else {
+                        nav.classList.remove('nav-hidden');
+                    }
+                    lastY = y;
+                }
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+});
+</script>
+<script src="search-overlay.js"></script>
+</body>
+</html>

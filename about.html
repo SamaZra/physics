@@ -798,6 +798,19 @@ a, button, div, span, label, input, textarea, select {
     transition: transform 0.1s;
 }
 </style>
+<style id="fix-nav-bounce">
+    /* Отключаем сдвиги и пружины у кнопок нижней панели */
+    .bottom-nav a, .bottom-nav button {
+        transform: none !important;
+        transition: background 0.2s ease, color 0.2s ease !important;
+    }
+    .bottom-nav a:active, .bottom-nav button:active, 
+    .bottom-nav a:focus, .bottom-nav button:focus {
+        transform: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+</style>
 </head>
 <body>
 <div class="container">
@@ -840,7 +853,7 @@ a, button, div, span, label, input, textarea, select {
             <div class="info-row">
                 <span class="info-label">В магазине</span>
                 <span class="info-value">
-                        <a href="https://www.rustore.ru/catalog/app/com.example.mathhelper" class="contact-link" target="_blank">RuStore</a>
+                        <a href="https://www.rustore.ru/catalog/app/com.example.physicsinpocket" class="contact-link" target="_blank">RuStore</a>
                     </span>
             </div>
             <div class="info-row">
@@ -1059,7 +1072,7 @@ a, button, div, span, label, input, textarea, select {
 })();
 </script>
 <script src="page-search.js"></script>
-<script src="physics-data.js"></script>`r`n</body>
+<script src="physics-data.js"></script></body>
 </html>
 
 

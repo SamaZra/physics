@@ -1,0 +1,844 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Работа и мощность электрического тока</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c; --card-bg: #1e3545; --text: #ffffff; --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1); --special-border: #f59e0b; --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff; --formula-bg: #1e3545; --info-bg: #1e3545;
+            --input-bg: #2a4a5a; --task-bg: #1e3545; --task-border: #f59e0b;
+            --slider-track: #2a4a5a; --slider-thumb: #f59e0b; --given-color: #60a5fa;
+            --find-color: #facc15; --card-shadow: rgba(0,0,0,0.2); --accent: #3b82f6;
+            --accent-hover: #60a5fa; --menu-item-hover: #233e50; --group-header-bg: #1a3a5a;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa; --card-bg: #ffffff; --text: #1a2a3f; --text-secondary: #5a7a94;
+            --border: #d0d8e0; --canvas-bg: #eef2f8; --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc; --info-bg: #e8f0fe; --special-border: #d97706;
+            --input-bg: #e8f0fe; --task-bg: #f5f8fc; --task-border: #d97706;
+            --slider-track: #d0d8e0; --slider-thumb: #d97706; --given-color: #3b82f6;
+            --find-color: #eab308; --card-shadow: rgba(0,0,0,0.08); --accent: #2563eb;
+            --accent-hover: #3b82f6; --menu-item-hover: #f0f4fa; --group-header-bg: #e8edf5;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;padding-bottom:78px;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.3rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s; justify-content: center; position: relative;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary); position: absolute; right: 8px; top: 50%; transform: translateY(-50%);}
+        .section.collapsed .section-title::after{transform:translateY(-50%) rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:130px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s, transform 0.3s; max-width: 340px; width: auto; flex: 0 0 auto; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px !important; height: 46px !important; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; padding: 0 !important; transform: none !important; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: none !important; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+    </style>
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Работа и мощность электрического тока.<br>Закон Джоуля – Ленца</h1>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Работа электрического тока</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Работа тока</strong> — это работа электрического поля по перемещению зарядов по проводнику. Она показывает, сколько энергии электрическое поле передало участку цепи.</p>
+                <div class="formula-block">
+                    <span class="f">$A = U \cdot I \cdot t$</span>
+                    <span class="f-label">— работа электрического тока (Дж)</span>
+                </div>
+                <p>где $U$ — напряжение (В), $I$ — сила тока (А), $t$ — время (с).</p>
+                <p>Используя закон Ома $I = U / R$, работу можно записать через другие величины:</p>
+                <div class="formula-block">
+                    <span class="f">$A = I^2 R t = \frac{U^2}{R} t$</span>
+                </div>
+                <p><strong>Единица измерения работы:</strong> 1 Дж (джоуль). На практике используют <strong>киловатт-час</strong>: $1 \text{ кВт}\cdot\text{ч} = 3{,}6 \cdot 10^6 \text{ Дж}$.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Мощность электрического тока</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Мощность</strong> — это работа тока, совершаемая за единицу времени. Она показывает, как быстро электрический прибор потребляет энергию.</p>
+                <div class="formula-block">
+                    <span class="f">$P = \frac{A}{t} = U \cdot I$</span>
+                    <span class="f-label">— мощность электрического тока (Вт)</span>
+                </div>
+                <p>Через закон Ома мощность можно выразить так:</p>
+                <div class="formula-block">
+                    <span class="f">$P = I^2 R = \frac{U^2}{R}$</span>
+                </div>
+                <p>Единица измерения мощности: <strong>ватт (Вт)</strong>. 1 Вт = 1 Дж/с.</p>
+                <p><strong>Полезно знать:</strong> мощность, указанная на бытовых приборах (например, «100 Вт»), — это мощность, потребляемая прибором при нормальном напряжении 220 В.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Закон Джоуля – Ленца</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Закон Джоуля – Ленца</strong> определяет количество теплоты, которое выделяется в проводнике при протекании тока. Это важно для понимания работы нагревательных приборов и потерь энергии в проводах.</p>
+                <div class="formula-block">
+                    <span class="f">$Q = I^2 R t$</span>
+                    <span class="f-label">— количество теплоты (Дж)</span>
+                </div>
+                <p>Если вся работа тока идёт на нагревание проводника (как в нагревательных приборах), то $Q = A$.</p>
+                <p><strong>Применение:</strong> на этом законе основана работа ламп накаливания, утюгов, обогревателей, а также расчёт потерь в линиях электропередач.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивная 3D-модель</div>
+        <div class="section-content">
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="power" onclick="switchModel('power')">⚡ Мощность и работа</div>
+                <div class="model-tab" data-model="joule" onclick="switchModel('joule')">🔥 Закон Джоуля – Ленца</div>
+            </div>
+
+            <div id="model-power" class="model-content">
+                <div class="model-container" id="container-power">
+                    <canvas id="canvas-power" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-power">⛶</button>
+                    <div class="info-display">
+                        <div>$U$ = <span class="val" id="p-U">220</span> В</div>
+                        <div>$I$ = <span class="val" id="p-I">0.45</span> А</div>
+                        <div>$P$ = <span class="val" id="p-P">100</span> Вт</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Напряжение $U$ (В)</label>
+                        <input type="range" id="p-slider-U" min="100" max="240" step="10" value="220">
+                        <span class="control-value" id="p-U-val">220</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Сопротивление $R$ (Ом)</label>
+                        <input type="range" id="p-slider-R" min="100" max="1000" step="10" value="484">
+                        <span class="control-value" id="p-R-val">484</span>
+                    </div>
+                    <button class="btn-reset" id="p-reset">⟳ Сброс</button>
+                </div>
+                <div class="def-card">
+                    <p><strong>О чем эта модель?</strong> Перед вами электрическая лампа. Меняя ползунки, вы подаёте на неё разное напряжение и меняете её сопротивление.</p>
+                    <p><strong>1. Как зависит яркость?</strong><br>Мощность вычисляется по формуле \(P = \frac{U^2}{R}\). Чем больше напряжение и меньше сопротивление, тем больше мощность. Светящийся ореол (гало) вокруг лампы визуально показывает эту мощность: чем мощнее ток, тем ярче и шире сияние.</p>
+                    <p><strong>2. Что происходит с током?</strong><br>По закону Ома \(I = \frac{U}{R}\). Если вы увеличиваете напряжение (ползунок \(U\)), ток растёт, лампа горит ярче. Если увеличиваете сопротивление (ползунок \(R\)), ток падает, и лампа тускнеет.</p>
+                    <p style="margin-top:8px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;"><strong>💡 Вывод:</strong> Для выделения большой мощности (яркий свет) нужно либо высокое напряжение, либо малое сопротивление. Именно поэтому мощные лампы имеют низкое сопротивление.</p>
+                </div>
+            </div>
+
+            <div id="model-joule" class="model-content" style="display:none;">
+                <div class="model-container" id="container-joule">
+                    <canvas id="canvas-joule" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-joule">⛶</button>
+                    <div class="info-display">
+                        <div>$I$ = <span class="val" id="j-I">2.0</span> А</div>
+                        <div>$R$ = <span class="val" id="j-R">10</span> Ом</div>
+                        <div>$Q$ = <span class="val" id="j-Q">0</span> Дж</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Сила тока $I$ (А)</label>
+                        <input type="range" id="j-slider-I" min="1" max="10" step="0.5" value="2">
+                        <span class="control-value" id="j-I-val">2.0</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Сопротивление $R$ (Ом)</label>
+                        <input type="range" id="j-slider-R" min="5" max="50" step="5" value="10">
+                        <span class="control-value" id="j-R-val">10</span>
+                    </div>
+                    <button class="btn-reset" id="j-reset">⟳ Сброс</button>
+                </div>
+                <div class="def-card">
+                    <p><strong>О чем эта модель?</strong> Перед вами кусок провода (проводник). Через него течёт ток. Вы можете менять силу тока (\(I\)) и сопротивление (\(R\)).</p>
+                    <p><strong>1. Как работает нагрев?</strong><br>Согласно закону Джоуля-Ленца, количество теплоты \(Q = I^2 R t\). Обратите внимание на квадрат тока: если вы увеличите ток в 2 раза, теплоты выделится в 4 раза больше! Поэтому с током нужно быть осторожным.</p>
+                    <p><strong>2. На что смотреть в модели?</strong><br>Когда вы двигаете ползунки, проводник начинает нагреваться. Цвет меняется от медного (холодный) до ярко-красного и белого (раскалённый). Счётчик в углу показывает накопленную теплоту \(Q\).</p>
+                    <p style="margin-top:8px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;"><strong>💡 Вывод:</strong> Именно по этой причине провода в квартирах делают толстыми (чтобы уменьшить сопротивление и не допустить возгорания). Если провод слишком тонкий (большое сопротивление \(R\)), при большом токе он расплавится.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Работа тока</div>
+                <div class="task-condition">Напряжение на участке цепи $U = 12$ В, сила тока $I = 2$ А. Найдите работу тока за $t = 10$ с.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $U = 12$ В, $I = 2$ А, $t = 10$ с</div>
+                        <div class="find">🔍 Найти: $A$</div>
+                    </div>
+                    <div class="step">Шаг 1. $A = U \cdot I \cdot t$.</div>
+                    <div class="step"><span class="formula">$A = 12 \cdot 2 \cdot 10 = 240 \text{ Дж}$</span></div>
+                    <div class="answer">✅ Ответ: $A = 240$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Мощность через работу</div>
+                <div class="task-condition">За $t = 5$ с ток совершил работу $A = 100$ Дж. Найдите мощность.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $A = 100$ Дж, $t = 5$ с</div>
+                        <div class="find">🔍 Найти: $P$</div>
+                    </div>
+                    <div class="step">Шаг 1. $P = A / t$.</div>
+                    <div class="step"><span class="formula">$P = 100 / 5 = 20 \text{ Вт}$</span></div>
+                    <div class="answer">✅ Ответ: $P = 20$ Вт</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Мощность через U и I</div>
+                <div class="task-condition">Напряжение в цепи $U = 220$ В, ток $I = 0{,}5$ А. Найдите мощность.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $U = 220$ В, $I = 0{,}5$ А</div>
+                        <div class="find">🔍 Найти: $P$</div>
+                    </div>
+                    <div class="step">Шаг 1. $P = U \cdot I$.</div>
+                    <div class="step"><span class="formula">$P = 220 \cdot 0{,}5 = 110 \text{ Вт}$</span></div>
+                    <div class="answer">✅ Ответ: $P = 110$ Вт</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Количество теплоты</div>
+                <div class="task-condition">Ток $I = 3$ А протекает через проводник сопротивлением $R = 10$ Ом в течение $t = 20$ с. Найдите количество теплоты.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $I = 3$ А, $R = 10$ Ом, $t = 20$ с</div>
+                        <div class="find">🔍 Найти: $Q$</div>
+                    </div>
+                    <div class="step">Шаг 1. Закон Джоуля-Ленца: $Q = I^2 R t$.</div>
+                    <div class="step"><span class="formula">$Q = 3^2 \cdot 10 \cdot 20 = 9 \cdot 200 = 1800 \text{ Дж}$</span></div>
+                    <div class="answer">✅ Ответ: $Q = 1800$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Напряжение из мощности</div>
+                <div class="task-condition">Мощность прибора $P = 500$ Вт, сила тока $I = 2{,}5$ А. Найдите напряжение.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $P = 500$ Вт, $I = 2{,}5$ А</div>
+                        <div class="find">🔍 Найти: $U$</div>
+                    </div>
+                    <div class="step">Шаг 1. Из $P = U \cdot I$ выражаем $U = P / I$.</div>
+                    <div class="step"><span class="formula">$U = 500 / 2{,}5 = 200 \text{ В}$</span></div>
+                    <div class="answer">✅ Ответ: $U = 200$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Работа через сопротивление</div>
+                <div class="task-condition">Ток $I = 4$ А проходит через резистор $R = 5$ Ом в течение $t = 15$ с. Найдите работу тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $I = 4$ А, $R = 5$ Ом, $t = 15$ с</div>
+                        <div class="find">🔍 Найти: $A$</div>
+                    </div>
+                    <div class="step">Шаг 1. $A = I^2 R t$.</div>
+                    <div class="step"><span class="formula">$A = 4^2 \cdot 5 \cdot 15 = 16 \cdot 75 = 1200 \text{ Дж}$</span></div>
+                    <div class="answer">✅ Ответ: $A = 1200$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Киловатт-часы</div>
+                <div class="task-condition">Прибор мощностью $P = 2$ кВт работал $t = 3$ часа. Найдите работу в киловатт-часах и джоулях.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $P = 2$ кВт, $t = 3$ ч</div>
+                        <div class="find">🔍 Найти: $A$ в кВт·ч и Дж</div>
+                    </div>
+                    <div class="step">Шаг 1. В кВт·ч: $A = P \cdot t = 2 \cdot 3 = 6 \text{ кВт}\cdot\text{ч}$.</div>
+                    <div class="step">Шаг 2. В Дж: $6 \cdot 3{,}6 \cdot 10^6 = 21{,}6 \cdot 10^6 \text{ Дж} = 21{,}6 \text{ МДж}$.</div>
+                    <div class="answer">✅ Ответ: $A = 6$ кВт·ч $= 21{,}6$ МДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Теплота через напряжение</div>
+                <div class="task-condition">В проводнике сопротивлением $R = 20$ Ом при напряжении $U = 100$ В за $t = 30$ с. Найдите количество теплоты.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $R = 20$ Ом, $U = 100$ В, $t = 30$ с</div>
+                        <div class="find">🔍 Найти: $Q$</div>
+                    </div>
+                    <div class="step">Шаг 1. $Q = \frac{U^2}{R} t$.</div>
+                    <div class="step"><span class="formula">$Q = \frac{100^2}{20} \cdot 30 = \frac{10000}{20} \cdot 30 = 500 \cdot 30 = 15000 \text{ Дж}$</span></div>
+                    <div class="answer">✅ Ответ: $Q = 15$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Сравнение мощности</div>
+                <div class="task-condition">Две лампы соединены параллельно. Сопротивление первой $R_1 = 100$ Ом, второй $R_2 = 200$ Ом. Какая лампа потребляет больше мощности и во сколько раз?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $R_1 = 100$ Ом, $R_2 = 200$ Ом, параллельное соединение</div>
+                        <div class="find">🔍 Найти: $P_1 / P_2$</div>
+                    </div>
+                    <div class="step">Шаг 1. При параллельном соединении $U_1 = U_2 = U$.</div>
+                    <div class="step">Шаг 2. $P_1 = U^2 / R_1$, $P_2 = U^2 / R_2$.</div>
+                    <div class="step">Шаг 3. $P_1 / P_2 = R_2 / R_1 = 200 / 100 = 2$.</div>
+                    <div class="step explanation">Меньшее сопротивление потребляет больше мощности.</div>
+                    <div class="answer">✅ Ответ: первая лампа в 2 раза мощнее</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Стоимость электроэнергии</div>
+                <div class="task-condition">Утюг мощностью $P = 1{,}5$ кВт работает $t = 2$ часа. Тариф $= 5$ руб. за 1 кВт·ч. Найдите стоимость.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given">📌 Дано: $P = 1{,}5$ кВт, $t = 2$ ч, тариф $= 5$ руб/кВт·ч</div>
+                        <div class="find">🔍 Найти: стоимость</div>
+                    </div>
+                    <div class="step">Шаг 1. Работа $A = P \cdot t = 1{,}5 \cdot 2 = 3$ кВт·ч.</div>
+                    <div class="step">Шаг 2. Стоимость $= 3 \cdot 5 = 15$ руб.</div>
+                    <div class="answer">✅ Ответ: 15 рублей</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения</div>
+        <div class="section-content">
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Работа тока</div>
+                <div class="task-condition">Напряжение $U = 24$ В, ток $I = 4$ А, время $t = 5$ с. Найдите работу.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self1')">💡 Подсказка и ответ</button>
+                <div id="self1" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong> \(A = U \cdot I \cdot t\).</div><div class="answer">✅ Ответ: \(A = 480\) Дж</div></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Мощность</div>
+                <div class="task-condition">Мощность $P = 300$ Вт, время $t = 20$ с. Найдите работу.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self2')">💡 Подсказка и ответ</button>
+                <div id="self2" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong> \(A = P \cdot t\).</div><div class="answer">✅ Ответ: \(A = 6000\) Дж = 6 кДж</div></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. Закон Джоуля-Ленца</div>
+                <div class="task-condition">Ток $I = 5$ А, сопротивление $R = 8$ Ом, время $t = 10$ с. Найдите количество теплоты.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self3')">💡 Подсказка и ответ</button>
+                <div id="self3" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong> \(Q = I^2 R t\).</div><div class="answer">✅ Ответ: \(Q = 2000\) Дж</div></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. Напряжение и мощность</div>
+                <div class="task-condition">При напряжении $U = 100$ В через прибор течёт ток $I = 2$ А. Найдите мощность.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self4')">💡 Подсказка и ответ</button>
+                <div id="self4" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong> \(P = U \cdot I\).</div><div class="answer">✅ Ответ: \(P = 200\) Вт</div></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Работа через сопротивление</div>
+                <div class="task-condition">Ток $I = 2$ А течёт через резистор $R = 15$ Ом в течение $t = 30$ с. Найдите работу.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self5')">💡 Подсказка и ответ</button>
+                <div id="self5" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong> \(A = I^2 R t\).</div><div class="answer">✅ Ответ: \(A = 1800\) Дж</div></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Теплота через напряжение</div>
+                <div class="task-condition">Проводник сопротивлением $R = 50$ Ом подключён к $U = 100$ В. Какое количество теплоты выделится за $t = 10$ с?</div>
+                <button class="show-solution-btn" onclick="toggleHint('self6')">💡 Подсказка и ответ</button>
+                <div id="self6" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong> \(Q = \frac{U^2}{R} t\).</div><div class="answer">✅ Ответ: \(Q = 2000\) Дж</div></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Киловатт-часы</div>
+                <div class="task-condition">Обогреватель мощностью $P = 1{,}5$ кВт проработал $t = 4$ часа. Найдите работу в киловатт-часах.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self7')">💡 Подсказка и ответ</button>
+                <div id="self7" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong> \(A = P \cdot t\) (в кВт·ч).</div><div class="answer">✅ Ответ: \(A = 6\) кВт·ч</div></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Стоимость энергии</div>
+                <div class="task-condition">Лампа мощностью $P = 100$ Вт работала $t = 10$ часов. Тариф $= 6$ руб. за 1 кВт·ч. Найдите стоимость.</div>
+                <button class="show-solution-btn" onclick="toggleHint('self8')">💡 Подсказка и ответ</button>
+                <div id="self8" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong> Сначала переведите Вт в кВт (100 Вт = 0,1 кВт), затем умножьте на часы и тариф.</div><div class="answer">✅ Ответ: 6 рублей</div></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. Сравнение мощности</div>
+                <div class="task-condition">Два резистора $R_1 = 10$ Ом и $R_2 = 20$ Ом соединены последовательно. Ток в цепи $I = 2$ А. Какая мощность выделяется на втором резисторе?</div>
+                <button class="show-solution-btn" onclick="toggleHint('self9')">💡 Подсказка и ответ</button>
+                <div id="self9" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong> При последовательном соединении ток одинаков: \(P_2 = I^2 R_2\).</div><div class="answer">✅ Ответ: \(P_2 = 80\) Вт</div></div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. КПД нагревателя</div>
+                <div class="task-condition">Электрический чайник мощностью $P = 2$ кВт нагревает $m = 2$ кг воды от $20^\circ$C до $100^\circ$C за $t = 7$ минут. Найдите КПД чайника ($c = 4200$ Дж/(кг·°C)).</div>
+                <button class="show-solution-btn" onclick="toggleHint('self10')">💡 Подсказка и ответ</button>
+                <div id="self10" class="task-solution">
+                    <div class="step"><div class="explanation"><strong>Подсказка:</strong><br>Полезная работа: \(Q_{пол} = c \cdot m \cdot (t_2 - t_1)\).<br>Затраченная работа: \(A_{затр} = P \cdot t\) (время в секундах).<br>КПД = \(\frac{Q_{пол}}{A_{затр}} \cdot 100\%\).</div><div class="answer">✅ Ответ: КПД \(\approx 80\%\)</div></div>
+                </div>
+            </div>
+        </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/></svg></a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+</nav>
+
+<script>
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open'); btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open'); btn.textContent='📕 Скрыть решение';
+        }
+    }
+    function toggleHint(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open'); btn.textContent='💡 Подсказка';
+        }else{
+            el.classList.add('open'); btn.textContent='📕 Скрыть подсказку';
+        }
+    }
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-power').style.display = model === 'power' ? 'block' : 'none';
+        document.getElementById('model-joule').style.display = model === 'joule' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+</script>
+
+<!-- МОДЕЛЬ 1: МОЩНОСТЬ -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-power');
+        const canvas = document.getElementById('canvas-power');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 3, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800; if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(updateSize).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
+        key.position.set(5, 10, 7);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const bulbGeo = new THREE.SphereGeometry(1.5, 32, 32);
+        const bulbMat = new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0x000000, transparent: true, opacity: 0.85 });
+        const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+        bulb.position.set(0, 2, 0);
+        group.add(bulb);
+
+        const baseGeo = new THREE.CylinderGeometry(0.6, 0.8, 1, 16);
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8 });
+        const base = new THREE.Mesh(baseGeo, baseMat);
+        base.position.set(0, 0.5, 0);
+        group.add(base);
+
+        const light = new THREE.PointLight(0xffdd44, 0, 15);
+        light.position.set(0, 2, 0);
+        group.add(light);
+
+        function makeGlowTexture() {
+            const size = 256;
+            const c = document.createElement('canvas');
+            c.width = c.height = size;
+            const ctx = c.getContext('2d');
+            const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            grad.addColorStop(0, 'rgba(255,240,180,1)');
+            grad.addColorStop(0.2, 'rgba(255,220,100,0.9)');
+            grad.addColorStop(0.5, 'rgba(255,180,40,0.6)');
+            grad.addColorStop(1, 'rgba(255,140,0,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(c);
+        }
+        const glowTex = makeGlowTexture();
+        const glowMat = new THREE.SpriteMaterial({
+            map: glowTex,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity: 0
+        });
+        const glowSprite = new THREE.Sprite(glowMat);
+        glowSprite.position.set(0, 2, 0.01);
+        group.add(glowSprite);
+
+        const USlider = document.getElementById('p-slider-U');
+        const RSlider = document.getElementById('p-slider-R');
+        const Uval = document.getElementById('p-U-val');
+        const Rval = document.getElementById('p-R-val');
+        const Udisp = document.getElementById('p-U');
+        const Idisp = document.getElementById('p-I');
+        const Pdisp = document.getElementById('p-P');
+
+        function update() {
+            const U = parseFloat(USlider.value);
+            const R = parseFloat(RSlider.value);
+            Uval.textContent = U;
+            Rval.textContent = R;
+            const I = U / R;
+            const P = U * I;
+            Udisp.textContent = U;
+            Idisp.textContent = I.toFixed(2);
+            Pdisp.textContent = P.toFixed(1);
+
+            const intensity = Math.min(P / 100, 2.0);
+            const colorVal = Math.min(intensity, 1);
+
+            bulbMat.emissive.setRGB(1, 0.85, 0.3);
+            bulbMat.emissiveIntensity = intensity * 4;
+            bulbMat.color.setRGB(0.4 + colorVal * 0.6, 0.4 + colorVal * 0.5, 0.4 + colorVal * 0.1);
+
+            light.intensity = intensity * 8;
+
+            const glowBase = 2.5;
+            const glowMax = 7.0;
+            const s = glowBase + (glowMax - glowBase) * Math.min(intensity / 2.0, 1);
+            glowSprite.scale.set(s, s, 1);
+            glowMat.opacity = Math.min(intensity / 2.0, 1) * 1.0;
+        }
+
+        USlider.addEventListener('input', update);
+        RSlider.addEventListener('input', update);
+        document.getElementById('p-reset').addEventListener('click', () => {
+            USlider.value = 220; RSlider.value = 484; update();
+        });
+        document.getElementById('fs-power').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen();
+            else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 1.5, 0);
+        controls.update();
+
+        update();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- МОДЕЛЬ 2: ДЖОУЛЬ-ЛЕНЦ -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-joule');
+        const canvas = document.getElementById('canvas-joule');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 5, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800; if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(updateSize).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
+        key.position.set(5, 10, 7);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const wireGeo = new THREE.CylinderGeometry(0.3, 0.3, 10, 16);
+        const wireMat = new THREE.MeshStandardMaterial({ color: 0xcc8844, emissive: 0x000000 });
+        const wire = new THREE.Mesh(wireGeo, wireMat);
+        wire.rotation.z = Math.PI / 2;
+        group.add(wire);
+
+        const glowGeo = new THREE.CylinderGeometry(0.6, 0.6, 10, 16);
+        const glowMat = new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0 });
+        const glow = new THREE.Mesh(glowGeo, glowMat);
+        glow.rotation.z = Math.PI / 2;
+        group.add(glow);
+
+        const ISlider = document.getElementById('j-slider-I');
+        const RSlider = document.getElementById('j-slider-R');
+        const Ival = document.getElementById('j-I-val');
+        const Rval = document.getElementById('j-R-val');
+        const Idisp = document.getElementById('j-I');
+        const Rdisp = document.getElementById('j-R');
+        const Qdisp = document.getElementById('j-Q');
+
+        let Q = 0;
+        let lastTime = performance.now();
+
+        function update() {
+            const I = parseFloat(ISlider.value);
+            const R = parseFloat(RSlider.value);
+            Ival.textContent = I.toFixed(1);
+            Rval.textContent = R;
+            Idisp.textContent = I.toFixed(1);
+            Rdisp.textContent = R;
+        }
+
+        ISlider.addEventListener('input', update);
+        RSlider.addEventListener('input', update);
+        document.getElementById('j-reset').addEventListener('click', () => {
+            ISlider.value = 2; RSlider.value = 10;
+            Q = 0; update();
+        });
+        document.getElementById('fs-joule').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen();
+            else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        update();
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            const dt = Math.min((time - lastTime) / 1000, 0.1);
+            lastTime = time;
+            controls.update();
+
+            const I = parseFloat(ISlider.value);
+            const R = parseFloat(RSlider.value);
+
+            Q += I * I * R * dt;
+            Qdisp.textContent = Q.toFixed(0);
+
+            const heat = Math.min(Q / 5000, 1);
+            wireMat.emissive.setRGB(heat, heat * 0.4, 0);
+            wireMat.color.setRGB(0.8 + heat * 0.2, 0.53 - heat * 0.53, 0.27 - heat * 0.27);
+            glowMat.opacity = heat * 0.6;
+
+            renderer.render(scene, camera);
+        }
+        requestAnimationFrame(animate);
+    })();
+</script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<script src="search-overlay.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY, threshold = 5, ticking = false;
+        window.addEventListener('scroll', function(){
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    var y = window.scrollY;
+                    if (Math.abs(y - lastY) >= threshold) {
+                        if (y > lastY && y > 50) nav.classList.add('nav-hidden');
+                        else nav.classList.remove('nav-hidden');
+                        lastY = y;
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    });
+</script>
+</body>
+</html>

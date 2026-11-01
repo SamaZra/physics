@@ -1,0 +1,1856 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электрический ток. Сила тока. Закон Ома. Сопротивление</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle{background:#3b82f6;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-toggle:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle.off{background:#666;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech  { background: #3b82f6; }
+        .search-result-category.cat-thermo{ background: #f59e0b; }
+        .search-result-category.cat-elec  { background: #eab308; }
+        .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index"> body.is-index .nav-back-btn { display: none !important; } </style>
+    <style id="bottom-nav-autohide">
+        .bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; }
+        body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+    </style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; }
+        .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+        .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+        .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right"> .bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; } </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; }
+        a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+<style id="fix-nav-bounce">
+    /* Отключаем сдвиги и пружины у кнопок нижней панели */
+    .bottom-nav a, .bottom-nav button {
+        transform: none !important;
+        transition: background 0.2s ease, color 0.2s ease !important;
+    }
+    .bottom-nav a:active, .bottom-nav button:active, 
+    .bottom-nav a:focus, .bottom-nav button:focus {
+        transform: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Электрический ток. Сила тока.<br>Закон Ома. Сопротивление</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Электрический ток и сила тока</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Электрический ток</strong> — направленное (упорядоченное) движение свободных заряженных частиц.</p>
+                <p>За направление тока принимают направление движения <strong>положительных</strong> зарядов (хотя в металлах движутся электроны — от минуса к плюсу).</p>
+                <p><strong>Сила тока</strong> $I$ — это скалярная величина, равная заряду, прошедшему через поперечное сечение проводника за единицу времени:</p>
+                <div class="formula-block">
+                    <span class="f">$I = \dfrac{\Delta q}{\Delta t}$</span>
+                    <span class="f-label">— сила тока (Ампер, А)</span>
+                </div>
+                <p>Если ток постоянный, то $I = \dfrac{q}{t}$. Для переменного тока используют мгновенное значение.</p>
+                <p><strong>Постоянный ток</strong> — ток, сила и направление которого не меняются со временем.</p>
+                <p><strong>Плотность тока</strong> $j$ — сила тока на единицу площади поперечного сечения:</p>
+                <div class="formula-block">
+                    <span class="f">$j = \dfrac{I}{S}$</span>
+                    <span class="f-label">— плотность тока (А/м²)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Закон Ома для участка цепи</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Закон Ома:</strong> сила тока на участке цепи прямо пропорциональна напряжению на этом участке и обратно пропорциональна его сопротивлению.</p>
+                <div class="formula-block">
+                    <span class="f">$I = \dfrac{U}{R}$</span>
+                    <span class="f-label">— закон Ома для участка цепи</span>
+                </div>
+                <p>где $U$ — напряжение (В), $R$ — сопротивление (Ом).</p>
+                <p>Из этой формулы следуют два важных следствия:</p>
+                <ul>
+                    <li>Напряжение: $U = I \cdot R$</li>
+                    <li>Сопротивление: $R = \dfrac{U}{I}$</li>
+                </ul>
+                <p><strong>Напряжение</strong> $U$ — это работа электрического поля по перемещению единичного положительного заряда ($U = A/q$).</p>
+                <p><strong>Сопротивление</strong> $R$ — это физическая величина, характеризующая противодействие проводника электрическому току.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2.5: ВАХ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Вольт-амперная характеристика (ВАХ)</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Вольт-амперная характеристика (ВАХ)</strong> — это график зависимости силы тока $I$ от напряжения $U$ для данного проводника.</p>
+                <p>Для проводника, подчиняющегося закону Ома (омического сопротивления), ВАХ — <strong>прямая линия</strong>, проходящая через начало координат:</p>
+                <div class="formula-block">
+                    <span class="f">$I = \dfrac{1}{R} \cdot U$</span>
+                    <span class="f-label">— уравнение прямой: тангенс угла наклона равен $1/R$</span>
+                </div>
+                <p><strong>Принцип:</strong> чем <strong>больше сопротивление</strong> $R$, тем <strong>меньше наклон</strong> прямой (тем меньше ток при том же напряжении). По любой точке графика (кроме начала координат) можно найти сопротивление:</p>
+                <div class="formula-block">
+                    <span class="f">$R = \dfrac{U}{I}$</span>
+                    <span class="f-label">— по любой точке графика</span>
+                </div>
+                <p><strong>Неомические элементы</strong> (лампа накаливания, полупроводниковый диод) имеют <strong>нелинейную ВАХ</strong> — их сопротивление зависит от напряжения/тока (например, у лампы при нагреве сопротивление растёт).</p>
+            </div>
+
+            <div class="controls-panel" style="margin-top:12px;">
+                <div class="control-group">
+                    <label>Сопротивление $R$ (Ом)</label>
+                    <input type="range" id="vah-slider-R" min="1" max="20" step="1" value="5">
+                    <span class="control-value" id="vah-value-R">5</span>
+                </div>
+                <span class="control-label">⬤ Меняйте $R$ — наклон прямой ВАХ будет меняться</span>
+            </div>
+            <div style="position:relative;background:var(--canvas-bg);border-radius:16px;padding:8px;margin:8px 0;">
+                <canvas id="vah-canvas" style="width:100%;height:280px;display:block;border-radius:12px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Сопротивление и его зависимость от температуры</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>Сопротивление проводника зависит от его <strong>длины</strong> $l$, <strong>площади поперечного сечения</strong> $S$ и <strong>материала</strong> (удельного сопротивления $\rho$):</p>
+                <div class="formula-block">
+                    <span class="f">$R = \rho \dfrac{l}{S}$</span>
+                    <span class="f-label">— сопротивление проводника</span>
+                </div>
+                <p>где $\rho$ — удельное сопротивление (Ом·м). Для металлов $\rho \sim 10^{-8} \dots 10^{-7}$ Ом·м.</p>
+                <p><strong>Зависимость от температуры:</strong> при нагревании металлов их сопротивление <strong>увеличивается</strong> (ионы колеблются сильнее и мешают электронам):</p>
+                <div class="formula-block">
+                    <span class="f">$R = R_0 (1 + \alpha \Delta T)$</span>
+                    <span class="f-label">— температурный коэффициент сопротивления $\alpha \approx \dfrac{1}{273}$ К⁻¹</span>
+                </div>
+                <p><strong>Сверхпроводимость:</strong> при охлаждении ниже критической температуры $T_c$ сопротивление некоторых металлов и сплавов резко падает до нуля. Это используется в мощных электромагнитах (МРТ, коллайдеры).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 4: ЕДИНИЦЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Единицы и кратные приставки</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Основные единицы СИ в теме:</strong></p>
+                <ul>
+                    <li>Сила тока $I$ — <strong>ампер (А)</strong>;</li>
+                    <li>Напряжение $U$ — <strong>вольт (В)</strong>;</li>
+                    <li>Сопротивление $R$ — <strong>ом (Ом)</strong>;</li>
+                    <li>Заряд $q$ — <strong>кулон (Кл)</strong>;</li>
+                    <li>Работа $A$ — <strong>джоуль (Дж)</strong>;</li>
+                    <li>Мощность $P$ — <strong>ватт (Вт)</strong>.</li>
+                </ul>
+                <p><strong>Кратные и дольные приставки</strong> (используются для удобства записи):</p>
+                <ul>
+                    <li>мк (микро) = $10^{-6}$: 1 мкА = $10^{-6}$ А;</li>
+                    <li>м (милли) = $10^{-3}$: 1 мА = $10^{-3}$ А;</li>
+                    <li>к (кило) = $10^{3}$: 1 кОм = $10^{3}$ Ом = 1000 Ом;</li>
+                    <li>М (мега) = $10^{6}$: 1 МОм = $10^{6}$ Ом;</li>
+                    <li>мВт = $10^{-3}$ Вт; кВт = $10^{3}$ Вт; кДж = $10^{3}$ Дж.</li>
+                </ul>
+                <p><strong>Примеры перевода:</strong></p>
+                <div class="formula-block">
+                    <span class="f">$5 \text{ мА} = 5 \cdot 10^{-3} \text{ А} = 0{,}005 \text{ А}$</span>
+                    <span class="f">$2{,}2 \text{ кОм} = 2{,}2 \cdot 10^{3} \text{ Ом} = 2200 \text{ Ом}$</span>
+                    <span class="f">$100 \text{ мкА} = 100 \cdot 10^{-6} \text{ А} = 10^{-4} \text{ А}$</span>
+                </div>
+                <p class="important">⚠️ При подстановке в формулы всегда переводите в <strong>основные единицы СИ</strong> (А, В, Ом, Кл, Дж, Вт).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="current" onclick="switchModel('current')">⚡ Электрический ток</div>
+                <div class="model-tab" data-model="resistance" onclick="switchModel('resistance')">🌡️ Нагрев и сопротивление</div>
+                <div class="model-tab" data-model="circuit" onclick="switchModel('circuit')">🔌 Электрическая цепь</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: ЭЛЕКТРИЧЕСКИЙ ТОК -->
+            <div id="model-current" class="model-content">
+                <div class="model-container" id="container-current">
+                    <canvas id="canvas-current" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-current">⛶</button>
+                    <div class="info-display">
+                        <div>Напряжение $U$ = <span class="val" id="cur-U">10</span> В</div>
+                        <div>Сила тока $I$ = <span class="val" id="cur-I">2.0</span> А</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Напряжение $U$ (В)</label>
+                        <input type="range" id="cur-slider" min="1" max="20" step="1" value="10">
+                        <span class="control-value" id="cur-value">10</span>
+                    </div>
+                    <button class="btn-reset" id="cur-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Меняйте напряжение — скорость электронов будет меняться</span>
+                </div>
+                <div class="def-card">
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>Перед вами проводник (труба), по которому движутся электроны (синие шарики). Это и есть электрический ток.</p>
+
+                    <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Напряжение U»</strong><br>Напряжение — это «толчок», который заставляет электроны двигаться. Чем больше напряжение, тем быстрее летят электроны.</p>
+                    <ul>
+                        <li>Обратите внимание на цифру «Сила тока I». По закону Ома \(I = \frac{U}{R}\), где сопротивление \(R\) фиксировано (условно 5 Ом).</li>
+                        <li>Если вы увеличите напряжение в 2 раза, сила тока тоже вырастет в 2 раза.</li>
+                    </ul>
+
+                    <p style="margin-top:12px;"><strong>2. Что такое сила тока?</strong><br>Сила тока — это количество зарядов, проходящих через сечение проводника за секунду. Чем быстрее движутся электроны, тем больше зарядов успевает пройти, тем выше сила тока.</p>
+
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> Напряжение создаёт электрическое поле, которое разгоняет электроны. Сила тока прямо пропорциональна напряжению (закон Ома). Если нет напряжения — нет и тока (электроны движутся хаотично).
+                    </p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: НАГРЕВ И СОПРОТИВЛЕНИЕ -->
+            <div id="model-resistance" class="model-content" style="display:none;">
+                <div class="model-container" id="container-resistance">
+                    <canvas id="canvas-resistance" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-resistance">⛶</button>
+                    <div class="info-display">
+                        <div>Температура $T$ = <span class="val" id="res-T">20</span> °C</div>
+                        <div>Сопротивление $R$ = <span class="val" id="res-R">10</span> Ом</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Температура $T$ (°C)</label>
+                        <input type="range" id="res-slider" min="0" max="300" step="10" value="20">
+                        <span class="control-value" id="res-value">20</span>
+                    </div>
+                    <button class="btn-reset" id="res-reset">⟳ Сброс</button>
+                    <span class="control-label">⬤ Нагревайте проводник и смотрите, как растёт сопротивление</span>
+                </div>
+                <div class="def-card">
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>Перед вами кристаллическая решётка металла (ионы) и свободные электроны, которые через неё движутся.</p>
+
+                    <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Температура T»</strong><br>При нагревании ионы начинают <strong>колебаться сильнее</strong> (это видно по их амплитуде).</p>
+                    <ul>
+                        <li>Чем сильнее колеблются ионы, тем чаще электроны сталкиваются с ними, тем труднее им пробираться сквозь решётку.</li>
+                        <li>Сопротивление растёт: \(R = R_0(1 + \alpha \Delta T)\). В правом верхнем углу видно, как увеличивается значение \(R\).</li>
+                    </ul>
+
+                    <p style="margin-top:12px;"><strong>2. Сверхпроводимость</strong><br>Если бы мы могли охладить металл до очень низких температур (около -273 °C), колебания ионов почти прекратились бы, и сопротивление упало бы до нуля. Это явление называется сверхпроводимостью.</p>
+
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> Сопротивление металла зависит от температуры. При нагревании оно растёт, потому что электронам труднее преодолевать усиливающиеся колебания ионов решётки. Это важно учитывать при работе с проводами под нагрузкой (они греются и их сопротивление меняется).
+                    </p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 3: ЭЛЕКТРИЧЕСКАЯ ЦЕПЬ -->
+            <div id="model-circuit" class="model-content" style="display:none;">
+                <div class="model-container" id="container-circuit">
+                    <canvas id="canvas-circuit" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-circuit">⛶</button>
+                    <div class="info-display">
+                        <div>ЭДС $\mathcal{E}$ = <span class="val" id="cir-E">12</span> В</div>
+                        <div>Сопротивление $R$ = <span class="val" id="cir-R">10</span> Ом</div>
+                        <div>Сила тока $I$ = <span class="val" id="cir-I">0.57</span> А</div>
+                        <div>Напряжение $U_R$ = <span class="val" id="cir-U">5.7</span> В</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>ЭДС $\mathcal{E}$ (В)</label>
+                        <input type="range" id="cir-slider-E" min="1" max="24" step="1" value="12">
+                        <span class="control-value" id="cir-value-E">12</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Сопротивление $R$ (Ом)</label>
+                        <input type="range" id="cir-slider-R" min="2" max="40" step="1" value="10">
+                        <span class="control-value" id="cir-value-R">10</span>
+                    </div>
+                    <button class="btn-toggle" id="cir-switch">🔌 Выключить</button>
+                    <button class="btn-reset" id="cir-reset">⟳ Сброс</button>
+                </div>
+                <div class="def-card">
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p>Перед вами электрическая цепь: источник тока (батарея), ключ, лампочка, резистор, амперметр (последовательно) и вольтметр (параллельно резистору).</p>
+
+                    <p style="margin-top:12px;"><strong>1. Включите ключ кнопкой «Выключить/Включить»</strong><br>При включении по проводам бегут электроны, лампочка загорается, приборы показывают значения.</p>
+                    <ul>
+                        <li>Амперметр показывает силу тока \(I\) в цепи.</li>
+                        <li>Вольтметр показывает напряжение \(U_R\) на резисторе.</li>
+                    </ul>
+
+                    <p style="margin-top:12px;"><strong>2. Меняйте ЭДС \(\mathcal{E}\) и сопротивление \(R\)</strong><br>По закону Ома для полной цепи: \(I = \dfrac{\mathcal{E}}{R + R_L + r}\), где \(R_L=10\) Ом (лампа), \(r=1\) Ом (внутреннее сопротивление источника). Напряжение на резисторе: \(U_R = I\cdot R\).</p>
+                    <ul>
+                        <li>Увеличили \(\mathcal{E}\) — ток и напряжение выросли, лампочка горит ярче.</li>
+                        <li>Увеличили \(R\) — ток упал, лампочка тускнеет.</li>
+                    </ul>
+
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод:</strong> Закон Ома связывает три величины: \(I = U/R\). В реальной цепи с источником и нагрузкой ток зависит от всех сопротивлений. Приборы позволяют измерить \(I\) и \(U\) и проверить закон на практике. Яркость лампочки наглядно показывает силу тока: чем больше ток — тем ярче свечение.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сила тока через заряд</div>
+                <div class="task-condition"><strong>Условие:</strong> Через поперечное сечение проводника за время $t = 10$ с прошёл заряд $q = 20$ Кл. Найдите силу тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $t = 10$ с, $q = 20$ Кл</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Определение силы тока: $I = \dfrac{q}{t}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{20}{10} = 2 \text{ А}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Каждую секунду через сечение проходит 2 кулона заряда.</div>
+                    <div class="answer">✅ Ответ: $I = 2$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Закон Ома для участка цепи</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжение на участке цепи $U = 12$ В, сопротивление $R = 4$ Ом. Найдите силу тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U = 12$ В, $R = 4$ Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Закон Ома: $I = \dfrac{U}{R}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{12}{4} = 3 \text{ А}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сила тока 3 А — довольно большая для обычной лампочки.</div>
+                    <div class="answer">✅ Ответ: $I = 3$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Напряжение через силу тока и сопротивление</div>
+                <div class="task-condition"><strong>Условие:</strong> Через резистор сопротивлением $R = 100$ Ом течёт ток $I = 0{,}5$ А. Найдите напряжение на резисторе.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R = 100$ Ом, $I = 0{,}5$ А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Из закона Ома $U = I \cdot R$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = 0{,}5 \cdot 100 = 50 \text{ В}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 50 В — опасное напряжение для человека (безопасно до 36 В).</div>
+                    <div class="answer">✅ Ответ: $U = 50$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Сопротивление через напряжение и ток</div>
+                <div class="task-condition"><strong>Условие:</strong> При напряжении $U = 24$ В через проводник течёт ток $I = 2$ А. Найдите сопротивление проводника.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U = 24$ В, $I = 2$ А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = \dfrac{U}{I}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = \dfrac{24}{2} = 12 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сопротивление 12 Ом — типичное для небольшого нагревательного элемента.</div>
+                    <div class="answer">✅ Ответ: $R = 12$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Сопротивление через длину и сечение</div>
+                <div class="task-condition"><strong>Условие:</strong> Медный провод (удельное сопротивление $\rho = 0{,}017$ Ом·мм²/м) имеет длину $l = 100$ м и площадь поперечного сечения $S = 2$ мм². Найдите его сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $\rho = 0{,}017$ Ом·мм²/м, $l = 100$ м, $S = 2$ мм²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = \rho \dfrac{l}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 0{,}017 \cdot \dfrac{100}{2} = 0{,}017 \cdot 50 = 0{,}85 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Меньше 1 Ома — хороший проводник.</div>
+                    <div class="answer">✅ Ответ: $R = 0{,}85$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Заряд через силу тока</div>
+                <div class="task-condition"><strong>Условие:</strong> Сила тока в цепи $I = 0{,}5$ А. Какой заряд пройдёт через поперечное сечение за $t = 2$ минуты?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $I = 0{,}5$ А, $t = 120$ с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $q$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $q = I \cdot t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$q = 0{,}5 \cdot 120 = 60 \text{ Кл}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 60 кулонов заряда за 2 минуты.</div>
+                    <div class="answer">✅ Ответ: $q = 60$ Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Плотность тока</div>
+                <div class="task-condition"><strong>Условие:</strong> Сила тока $I = 10$ А, площадь поперечного сечения провода $S = 2$ мм². Найдите плотность тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $I = 10$ А, $S = 2 \cdot 10^{-6}$ м²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $j$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $j = \dfrac{I}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$j = \dfrac{10}{2 \cdot 10^{-6}} = 5 \cdot 10^6 \text{ А/м}^2 = 5 \text{ А/мм}^2$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Плотность тока 5 А/мм² — допустима для медных проводов.</div>
+                    <div class="answer">✅ Ответ: $j = 5 \cdot 10^6$ А/м²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Температурная зависимость</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление провода при 0 °C равно $R_0 = 10$ Ом. Температурный коэффициент $\alpha = 0{,}004$ К⁻¹. Найдите сопротивление при нагреве до $T = 100$ °C.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R_0 = 10$ Ом, $\alpha = 0{,}004$ К⁻¹, $\Delta T = 100$ К</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = R_0 (1 + \alpha \Delta T)$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 10 \cdot (1 + 0{,}004 \cdot 100) = 10 \cdot 1{,}4 = 14 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сопротивление выросло на 40% при нагреве на 100 градусов.</div>
+                    <div class="answer">✅ Ответ: $R = 14$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Сравнение сопротивлений по ВАХ</div>
+                <div class="task-condition"><strong>Условие:</strong> На графике ВАХ две прямые. Первая проходит через точку $U = 8$ В, $I = 4$ А; вторая — через $U = 8$ В, $I = 1$ А. У какого проводника сопротивление больше и во сколько раз?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U = 8$ В; $I_1 = 4$ А; $I_2 = 1$ А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> сравнить $R_1$ и $R_2$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R_1 = \dfrac{U}{I_1} = \dfrac{8}{4} = 2$ Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $R_2 = \dfrac{U}{I_2} = \dfrac{8}{1} = 8$ Ом.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $\dfrac{R_2}{R_1} = \dfrac{8}{2} = 4$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Чем меньше ток при том же напряжении, тем больше сопротивление. Вторая прямая идёт положе — её сопротивление в 4 раза больше.</div>
+                    <div class="answer">✅ Ответ: $R_2 > R_1$ в 4 раза ($R_2 = 8$ Ом, $R_1 = 2$ Ом)</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Сопротивление через длину и сечение</div>
+                <div class="task-condition"><strong>Условие:</strong> Алюминиевый провод (удельное сопротивление $\rho = 0{,}028$ Ом·мм²/м) имеет длину $l = 50$ м и площадь поперечного сечения $S = 4$ мм². Найдите его сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $\rho = 0{,}028$ Ом·мм²/м, $l = 50$ м, $S = 4$ мм²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = \rho \dfrac{l}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 0{,}028 \cdot \dfrac{50}{4} = 0{,}028 \cdot 12{,}5 = 0{,}35 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Алюминий имеет большее удельное сопротивление, чем медь.</div>
+                    <div class="answer">✅ Ответ: $R = 0{,}35$ Ом</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ НА ВАХ (с мини-графиками) ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📊 Задачи на график ВАХ (5 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача ВАХ-1. Сопротивление по графику</div>
+                <div class="task-condition"><strong>Условие:</strong> На графике ВАХ прямая проходит через точку $U = 6$ В, $I = 2$ А. Найдите сопротивление проводника.</div>
+                <div style="margin:8px 0;text-align:center;">
+                    <canvas class="vah-mini" data-points="6,2" data-R="3" width="200" height="130" style="background:var(--canvas-bg);border-radius:10px;max-width:100%;"></canvas>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('vah1')">📖 Показать решение</button>
+                <div id="vah1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U = 6$ В, $I = 2$ А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> По закону Ома $R = \dfrac{U}{I}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = \dfrac{6}{2} = 3 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Наклон прямой ВАХ равен $1/R = 1/3$ А/В.</div>
+                    <div class="answer">✅ Ответ: $R = 3$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача ВАХ-2. Ток по графику</div>
+                <div class="task-condition"><strong>Условие:</strong> ВАХ проводника — прямая, проходящая через точку $U = 12$ В, $I = 4$ А. Найдите силу тока при напряжении $U = 18$ В.</div>
+                <div style="margin:8px 0;text-align:center;">
+                    <canvas class="vah-mini" data-points="12,4" data-R="3" data-extra="18,6" width="200" height="130" style="background:var(--canvas-bg);border-radius:10px;max-width:100%;"></canvas>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('vah2')">📖 Показать решение</button>
+                <div id="vah2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U_1 = 12$ В, $I_1 = 4$ А, $U_2 = 18$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I_2$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Сопротивление: $R = \dfrac{U_1}{I_1} = \dfrac{12}{4} = 3$ Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Ток при $U_2$: $I_2 = \dfrac{U_2}{R} = \dfrac{18}{3} = 6$ А.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Для омического проводника ток пропорционален напряжению — жёлтая точка (18;6) лежит на той же прямой.</div>
+                    <div class="answer">✅ Ответ: $I_2 = 6$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача ВАХ-3. Сравнение сопротивлений</div>
+                <div class="task-condition"><strong>Условие:</strong> На одном графике ВАХ две прямые. Первая проходит через точку $U = 10$ В, $I = 5$ А; вторая — через $U = 10$ В, $I = 2$ А. У какого проводника сопротивление больше и во сколько раз?</div>
+                <div style="margin:8px 0;text-align:center;">
+                    <canvas class="vah-mini" data-two="2,5" width="200" height="130" style="background:var(--canvas-bg);border-radius:10px;max-width:100%;"></canvas>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('vah3')">📖 Показать решение</button>
+                <div id="vah3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U = 10$ В; $I_1 = 5$ А; $I_2 = 2$ А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> сравнить $R_1$ и $R_2$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R_1 = \dfrac{10}{5} = 2$ Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $R_2 = \dfrac{10}{2} = 5$ Ом.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $\dfrac{R_2}{R_1} = \dfrac{5}{2} = 2{,}5$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Чем меньше ток при том же напряжении, тем больше сопротивление. Вторая прямая (жёлтая) идёт положе — сопротивление больше в 2,5 раза.</div>
+                    <div class="answer">✅ Ответ: $R_2 > R_1$ в 2,5 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача ВАХ-4. Напряжение по графику</div>
+                <div class="task-condition"><strong>Условие:</strong> ВАХ проводника — прямая с сопротивлением $R = 8$ Ом. Какое напряжение нужно, чтобы ток был $I = 1{,}5$ А?</div>
+                <div style="margin:8px 0;text-align:center;">
+                    <canvas class="vah-mini" data-points="12,1.5" data-R="8" width="200" height="130" style="background:var(--canvas-bg);border-radius:10px;max-width:100%;"></canvas>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('vah4')">📖 Показать решение</button>
+                <div id="vah4" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R = 8$ Ом, $I = 1{,}5$ А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $U = I \cdot R$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = 1{,}5 \cdot 8 = 12 \text{ В}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> По графику ВАХ при $U = 12$ В ток как раз $1{,}5$ А (синяя точка).</div>
+                    <div class="answer">✅ Ответ: $U = 12$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача ВАХ-5. Нелинейная ВАХ (лампа)</div>
+                <div class="task-condition"><strong>Условие:</strong> Для лампы накаливания при $U_1 = 6$ В ток $I_1 = 1$ А, а при $U_2 = 12$ В ток $I_2 = 1{,}5$ А. Найдите сопротивление лампы в каждом режиме. Почему они различаются?</div>
+                <div style="margin:8px 0;text-align:center;">
+                    <canvas class="vah-mini" data-nonlinear="6,1;12,1.5" width="200" height="130" style="background:var(--canvas-bg);border-radius:10px;max-width:100%;"></canvas>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('vah5')">📖 Показать решение</button>
+                <div id="vah5" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U_1 = 6$ В, $I_1 = 1$ А; $U_2 = 12$ В, $I_2 = 1{,}5$ А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R_1$, $R_2$, объяснить различие</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R_1 = \dfrac{6}{1} = 6$ Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $R_2 = \dfrac{12}{1{,}5} = 8$ Ом.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При увеличении тока лампа сильнее нагревается, вольфрамовая нить нагревается, её сопротивление растёт ($R_2 > R_1$). Поэтому ВАХ лампы — не прямая, а ломаная/кривая (на графике две точки соединены отрезком).</div>
+                    <div class="answer">✅ Ответ: $R_1 = 6$ Ом, $R_2 = 8$ Ом; различие из-за нагрева нити</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> Через проводник прошёл заряд $q = 10$ Кл за $t = 5$ с. Найдите силу тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $I = q / t$.</div>
+                    <div class="answer">✅ Ответ: $I = 2$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжение $U = 24$ В, сопротивление $R = 8$ Ом. Найдите силу тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $I = U / R$.</div>
+                    <div class="answer">✅ Ответ: $I = 3$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Сила тока $I = 0{,}5$ А, сопротивление $R = 60$ Ом. Найдите напряжение.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $U = I \cdot R$.</div>
+                    <div class="answer">✅ Ответ: $U = 30$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжение $U = 12$ В, сила тока $I = 2$ А. Найдите сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $R = U / I$.</div>
+                    <div class="answer">✅ Ответ: $R = 6$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Сила тока $I = 2$ А. Какой заряд пройдёт за $t = 30$ с?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $q = I \cdot t$.</div>
+                    <div class="answer">✅ Ответ: $q = 60$ Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> Медный провод ($\rho = 0{,}017$ Ом·мм²/м) длиной $l = 200$ м, сечением $S = 1$ мм². Найдите сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $R = \rho l / S$.</div>
+                    <div class="answer">✅ Ответ: $R = 3{,}4$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> Сила тока $I = 5$ А, площадь сечения $S = 1$ мм². Найдите плотность тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $j = I / S$ (не забудьте перевести мм² в м²).</div>
+                    <div class="answer">✅ Ответ: $j = 5 \cdot 10^6$ А/м²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление при 0 °C равно $R_0 = 20$ Ом. Нагрели до 50 °C ($\alpha = 0{,}004$ К⁻¹). Найдите сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $R = R_0(1 + \alpha \Delta T)$.</div>
+                    <div class="answer">✅ Ответ: $R = 24$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> Напряжение $U = 220$ В, сопротивление $R = 440$ Ом. Найдите силу тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $I = U / R$.</div>
+                    <div class="answer">✅ Ответ: $I = 0{,}5$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление нихромовой проволоки $R = 10$ Ом, сечение $S = 0{,}5$ мм², удельное сопротивление $\rho = 1{,}1$ Ом·мм²/м. Найдите длину проволоки.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $l = \dfrac{R \cdot S}{\rho}$.</div>
+                    <div class="answer">✅ Ответ: $l \approx 4{,}55$ м</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== СР НА ВАХ (с мини-графиками) ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи на ВАХ для самостоятельной работы (3 задачи)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-ВАХ-1</div>
+                <div class="task-condition"><strong>Условие:</strong> На графике ВАХ прямая проходит через точку $U = 10$ В, $I = 2$ А. Найдите сопротивление проводника.</div>
+                <div style="margin:8px 0;text-align:center;">
+                    <canvas class="vah-mini" data-points="10,2" data-R="5" width="200" height="130" style="background:var(--canvas-bg);border-radius:10px;max-width:100%;"></canvas>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('srvah1')">💡 Подсказка и ответ</button>
+                <div id="srvah1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $R = U / I$.</div>
+                    <div class="answer">✅ Ответ: $R = 5$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-ВАХ-2</div>
+                <div class="task-condition"><strong>Условие:</strong> ВАХ проводника — прямая с сопротивлением $R = 4$ Ом. Найдите силу тока при напряжении $U = 16$ В.</div>
+                <div style="margin:8px 0;text-align:center;">
+                    <canvas class="vah-mini" data-points="16,4" data-R="4" width="200" height="130" style="background:var(--canvas-bg);border-radius:10px;max-width:100%;"></canvas>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('srvah2')">💡 Подсказка и ответ</button>
+                <div id="srvah2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $I = U / R$.</div>
+                    <div class="answer">✅ Ответ: $I = 4$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-ВАХ-3</div>
+                <div class="task-condition"><strong>Условие:</strong> На графике ВАХ две прямые. Первая проходит через точку $U = 12$ В, $I = 6$ А; вторая — через $U = 12$ В, $I = 3$ А. У какого проводника сопротивление больше и во сколько раз?</div>
+                <div style="margin:8px 0;text-align:center;">
+                    <canvas class="vah-mini" data-two="2,4" width="200" height="130" style="background:var(--canvas-bg);border-radius:10px;max-width:100%;"></canvas>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('srvah3')">💡 Подсказка и ответ</button>
+                <div id="srvah3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $R_1 = 12/6 = 2$ Ом, $R_2 = 12/3 = 4$ Ом. Вторая прямая идёт положе.</div>
+                    <div class="answer">✅ Ответ: $R_2 > R_1$ в 2 раза</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-current').style.display = model === 'current' ? 'block' : 'none';
+        document.getElementById('model-resistance').style.display = model === 'resistance' ? 'block' : 'none';
+        document.getElementById('model-circuit').style.display = model === 'circuit' ? 'block' : 'none';
+        setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    }
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');}})();
+</script>
+
+<!-- ===== МОДЕЛЬ 1: ЭЛЕКТРИЧЕСКИЙ ТОК ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-current');
+        const canvas = document.getElementById('canvas-current');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const pipeGeo = new THREE.CylinderGeometry(1.5, 1.5, 10, 32, 1, true);
+        const pipeMat = new THREE.MeshStandardMaterial({
+            color: 0x8ba5b8, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false
+        });
+        const pipe = new THREE.Mesh(pipeGeo, pipeMat);
+        pipe.rotation.z = Math.PI / 2;
+        group.add(pipe);
+
+        const ringMat = new THREE.LineBasicMaterial({ color: 0x8ba5b8, transparent: true, opacity: 0.4 });
+        const circlePts = [];
+        for (let i = 0; i <= 32; i++) {
+            const angle = (i / 32) * Math.PI * 2;
+            circlePts.push(new THREE.Vector3(Math.cos(angle) * 1.5, Math.sin(angle) * 1.5, 0));
+        }
+        const circleGeo = new THREE.BufferGeometry().setFromPoints(circlePts);
+
+        const ring1 = new THREE.Line(circleGeo, ringMat);
+        ring1.position.x = -5;
+        ring1.rotation.y = Math.PI / 2;
+        group.add(ring1);
+
+        const ring2 = new THREE.Line(circleGeo, ringMat);
+        ring2.position.x = 5;
+        ring2.rotation.y = Math.PI / 2;
+        group.add(ring2);
+
+        const electrons = [];
+        const N = 60;
+        const eGeo = new THREE.SphereGeometry(0.12, 8, 8);
+        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+
+        for (let i = 0; i < N; i++) {
+            const e = new THREE.Mesh(eGeo, eMat);
+            e.position.set(
+                (Math.random() - 0.5) * 10,
+                (Math.random() - 0.5) * 2.5,
+                (Math.random() - 0.5) * 2.5
+            );
+            group.add(e);
+            electrons.push({ mesh: e, speed: 0 });
+        }
+
+        const slider = document.getElementById('cur-slider');
+        const valueDisplay = document.getElementById('cur-value');
+        const UDisplay = document.getElementById('cur-U');
+        const IDisplay = document.getElementById('cur-I');
+        const R_fixed = 5;
+
+        function updateSpeed() {
+            const U = parseFloat(slider.value);
+            valueDisplay.textContent = U;
+            UDisplay.textContent = U;
+            const I = U / R_fixed;
+            IDisplay.textContent = I.toFixed(1);
+            const speed = I * 0.02;
+            electrons.forEach(e => { e.speed = speed + Math.random() * 0.005; });
+        }
+
+        slider.addEventListener('input', updateSpeed);
+        document.getElementById('cur-reset').addEventListener('click', () => {
+            slider.value = 10;
+            updateSpeed();
+        });
+
+        document.getElementById('fs-current').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateSpeed();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            electrons.forEach(e => {
+                e.mesh.position.x += e.speed;
+                if (e.mesh.position.x > 5) {
+                    e.mesh.position.x = -5;
+                    e.mesh.position.y = (Math.random() - 0.5) * 2.5;
+                    e.mesh.position.z = (Math.random() - 0.5) * 2.5;
+                }
+            });
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 2: НАГРЕВ И СОПРОТИВЛЕНИЕ (как в исходнике) ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-resistance');
+        const canvas = document.getElementById('canvas-resistance');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0, 5, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Кристаллическая решётка (ионы)
+        const ions = [];
+        const N_IONS = 30;
+        const ionGeo = new THREE.SphereGeometry(0.25, 16, 16);
+        const ionMat = new THREE.MeshStandardMaterial({ color: 0xff6644, emissive: 0x441111 });
+
+        for (let i = 0; i < N_IONS; i++) {
+            const ion = new THREE.Mesh(ionGeo, ionMat);
+            const x = (Math.random() - 0.5) * 10;
+            const y = (Math.random() - 0.5) * 6;
+            const z = (Math.random() - 0.5) * 2;
+            ion.position.set(x, y, z);
+            group.add(ion);
+            ions.push({
+                mesh: ion,
+                basePos: new THREE.Vector3(x, y, z),
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+
+        // Электроны
+        const electrons = [];
+        const N_E = 20;
+        const eGeo = new THREE.SphereGeometry(0.1, 8, 8);
+        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+
+        for (let i = 0; i < N_E; i++) {
+            const e = new THREE.Mesh(eGeo, eMat);
+            e.position.set(-5, (Math.random() - 0.5) * 6, 1);
+            group.add(e);
+            electrons.push({ mesh: e, speed: 0.05 });
+        }
+
+        const slider = document.getElementById('res-slider');
+        const valueDisplay = document.getElementById('res-value');
+        const TDisplay = document.getElementById('res-T');
+        const RDisplay = document.getElementById('res-R');
+
+        const R0 = 10;
+        const alpha = 0.004;
+
+        function updateTemp() {
+            const T = parseFloat(slider.value);
+            valueDisplay.textContent = T;
+            TDisplay.textContent = T;
+
+            const R = R0 * (1 + alpha * T);
+            RDisplay.textContent = R.toFixed(1);
+
+            const amplitude = 0.05 + T * 0.001;
+            ions.forEach(ion => { ion.amplitude = amplitude; });
+
+            electrons.forEach(e => { e.speed = 0.1 / (R / 10); });
+        }
+
+        slider.addEventListener('input', updateTemp);
+        document.getElementById('res-reset').addEventListener('click', () => {
+            slider.value = 20;
+            updateTemp();
+        });
+
+        document.getElementById('fs-resistance').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateTemp();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            const time = Date.now() * 0.005;
+
+            ions.forEach(ion => {
+                const amp = ion.amplitude || 0.05;
+                ion.mesh.position.x = ion.basePos.x + Math.sin(time + ion.phase) * amp;
+                ion.mesh.position.y = ion.basePos.y + Math.cos(time * 1.3 + ion.phase) * amp;
+            });
+
+            electrons.forEach(e => {
+                e.mesh.position.x += e.speed;
+                if (e.mesh.position.x > 5) {
+                    e.mesh.position.x = -5;
+                    e.mesh.position.y = (Math.random() - 0.5) * 6;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 3: ЭЛЕКТРИЧЕСКАЯ ЦЕПЬ (с ярким свечением лампы) ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-circuit');
+        const canvas = document.getElementById('canvas-circuit');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 14);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(5, 10, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const wireMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 2 });
+        const wirePoints = [
+            new THREE.Vector3(-6, -3, 0),
+            new THREE.Vector3(6, -3, 0),
+            new THREE.Vector3(6, 3, 0),
+            new THREE.Vector3(-6, 3, 0),
+            new THREE.Vector3(-6, -3, 0)
+        ];
+        const wireGeo = new THREE.BufferGeometry().setFromPoints(wirePoints);
+        const wire = new THREE.Line(wireGeo, wireMat);
+        group.add(wire);
+
+        const batteryGroup = new THREE.Group();
+        batteryGroup.position.set(-4, -3, 0);
+        const batBody = new THREE.Mesh(
+            new THREE.BoxGeometry(1.6, 0.9, 0.5),
+            new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x112244 })
+        );
+        batteryGroup.add(batBody);
+        const batPlus = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.6, 0.55),
+            new THREE.MeshStandardMaterial({ color: 0xffdd44, emissive: 0x443311 })
+        );
+        batPlus.position.set(0.9, 0, 0);
+        batteryGroup.add(batPlus);
+        group.add(batteryGroup);
+
+        const switchGroup = new THREE.Group();
+        switchGroup.position.set(4, -3, 0);
+        const swBase = new THREE.Mesh(
+            new THREE.BoxGeometry(1.2, 0.25, 0.5),
+            new THREE.MeshStandardMaterial({ color: 0x8ba5b8 })
+        );
+        switchGroup.add(swBase);
+        const swLever = new THREE.Mesh(
+            new THREE.BoxGeometry(1.0, 0.12, 0.12),
+            new THREE.MeshStandardMaterial({ color: 0xff6644, emissive: 0x441111 })
+        );
+        swLever.position.set(0, 0.2, 0);
+        switchGroup.add(swLever);
+        group.add(switchGroup);
+
+        const lampGroup = new THREE.Group();
+        lampGroup.position.set(-4, 3, 0);
+        const lampBase = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.35, 0.4, 0.4, 16),
+            new THREE.MeshStandardMaterial({ color: 0x8ba5b8 })
+        );
+        lampGroup.add(lampBase);
+        const lampBulb = new THREE.Mesh(
+            new THREE.SphereGeometry(0.55, 16, 16),
+            new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0x000000, transparent: true, opacity: 0.85 })
+        );
+        lampBulb.position.set(0, 0.7, 0);
+        lampGroup.add(lampBulb);
+        const lampLight = new THREE.PointLight(0xffdd44, 0, 15);
+        lampLight.position.set(0, 0.7, 0);
+        lampGroup.add(lampLight);
+        group.add(lampGroup);
+
+        function makeGlowTexture() {
+            const size = 256;
+            const c = document.createElement('canvas');
+            c.width = c.height = size;
+            const ctx = c.getContext('2d');
+            const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            grad.addColorStop(0, 'rgba(255,230,120,1)');
+            grad.addColorStop(0.25, 'rgba(255,210,80,0.75)');
+            grad.addColorStop(0.55, 'rgba(255,180,40,0.30)');
+            grad.addColorStop(1, 'rgba(255,160,20,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(c);
+        }
+        const glowTex = makeGlowTexture();
+        const glowMat = new THREE.SpriteMaterial({
+            map: glowTex,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity: 0
+        });
+        const glowSprite = new THREE.Sprite(glowMat);
+        glowSprite.position.set(0, 0.7, 0.01);
+        lampGroup.add(glowSprite);
+
+        const resistorGroup = new THREE.Group();
+        resistorGroup.position.set(4, 3, 0);
+        const resBody = new THREE.Mesh(
+            new THREE.BoxGeometry(1.6, 0.6, 0.5),
+            new THREE.MeshStandardMaterial({ color: 0xcc8844, emissive: 0x221100 })
+        );
+        resistorGroup.add(resBody);
+        group.add(resistorGroup);
+
+        const ammeterGroup = new THREE.Group();
+        ammeterGroup.position.set(6, 0, 0);
+        const amBody = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.7, 0.7, 0.4, 24),
+            new THREE.MeshStandardMaterial({ color: 0xe8f0fe })
+        );
+        amBody.rotation.x = Math.PI / 2;
+        ammeterGroup.add(amBody);
+        const amLabel = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.8, 0.3),
+            new THREE.MeshBasicMaterial({ color: 0x1a2d3c })
+        );
+        amLabel.position.set(0, 0.45, 0.21);
+        ammeterGroup.add(amLabel);
+        group.add(ammeterGroup);
+
+        const voltmeterGroup = new THREE.Group();
+        voltmeterGroup.position.set(4, 5, 0);
+        const vmBody = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.7, 0.7, 0.4, 24),
+            new THREE.MeshStandardMaterial({ color: 0xe8f0fe })
+        );
+        vmBody.rotation.x = Math.PI / 2;
+        voltmeterGroup.add(vmBody);
+        const vmLabel = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.8, 0.3),
+            new THREE.MeshBasicMaterial({ color: 0x1a2d3c })
+        );
+        vmLabel.position.set(0, 0.45, 0.21);
+        voltmeterGroup.add(vmLabel);
+        group.add(voltmeterGroup);
+
+        const vmWireMat = new THREE.LineBasicMaterial({ color: 0xf59e0b });
+        const vmWireGeo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(3.2, 3, 0), new THREE.Vector3(3.2, 5, 0),
+            new THREE.Vector3(3.3, 5, 0)
+        ]);
+        group.add(new THREE.Line(vmWireGeo, vmWireMat));
+        const vmWireGeo2 = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(4.7, 3, 0), new THREE.Vector3(4.7, 5, 0),
+            new THREE.Vector3(4.7, 5, 0)
+        ]);
+        group.add(new THREE.Line(vmWireGeo2, vmWireMat));
+
+        function makeTextSprite(text, color) {
+            const canvasEl = document.createElement('canvas');
+            canvasEl.width = 256; canvasEl.height = 128;
+            const ctx = canvasEl.getContext('2d');
+            ctx.fillStyle = 'rgba(0,0,0,0.75)';
+            ctx.fillRect(0, 0, 256, 128);
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 6;
+            ctx.strokeRect(3, 3, 250, 122);
+            ctx.fillStyle = color || '#f59e0b';
+            ctx.font = 'bold 56px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 128, 64);
+            const tex = new THREE.CanvasTexture(canvasEl);
+            const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false });
+            const sprite = new THREE.Sprite(mat);
+            sprite.scale.set(1.6, 0.8, 1);
+            return sprite;
+        }
+
+        const amReading = makeTextSprite('0.00 A');
+        amReading.position.set(6, -1.2, 0.3);
+        group.add(amReading);
+
+        const vmReading = makeTextSprite('0.0 V');
+        vmReading.position.set(4, 6.2, 0.3);
+        group.add(vmReading);
+
+        const electrons = [];
+        const N_E = 40;
+        const eGeo = new THREE.SphereGeometry(0.1, 8, 8);
+        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+
+        const perimeter = [];
+        const corners = [
+            new THREE.Vector3(-6, -3, 0),
+            new THREE.Vector3(6, -3, 0),
+            new THREE.Vector3(6, 3, 0),
+            new THREE.Vector3(-6, 3, 0),
+            new THREE.Vector3(-6, -3, 0)
+        ];
+        let totalLen = 0;
+        for (let i = 0; i < corners.length - 1; i++) {
+            const a = corners[i], b = corners[i + 1];
+            const segLen = a.distanceTo(b);
+            perimeter.push({ a, b, segLen, start: totalLen });
+            totalLen += segLen;
+        }
+
+        function pointOnPerimeter(t) {
+            const d = ((t % 1) + 1) % 1 * totalLen;
+            for (const seg of perimeter) {
+                if (d <= seg.start + seg.segLen) {
+                    const local = (d - seg.start) / seg.segLen;
+                    return new THREE.Vector3().lerpVectors(seg.a, seg.b, local);
+                }
+            }
+            return corners[0].clone();
+        }
+
+        for (let i = 0; i < N_E; i++) {
+            const e = new THREE.Mesh(eGeo, eMat);
+            const t = i / N_E;
+            e.position.copy(pointOnPerimeter(t));
+            group.add(e);
+            electrons.push({ mesh: e, t });
+        }
+
+        const E_slider = document.getElementById('cir-slider-E');
+        const R_slider = document.getElementById('cir-slider-R');
+        const E_val = document.getElementById('cir-value-E');
+        const R_val = document.getElementById('cir-value-R');
+        const E_disp = document.getElementById('cir-E');
+        const R_disp = document.getElementById('cir-R');
+        const I_disp = document.getElementById('cir-I');
+        const U_disp = document.getElementById('cir-U');
+        const switchBtn = document.getElementById('cir-switch');
+
+        const R_L = 10;
+        const r_int = 1;
+        let isOn = true;
+        let currentIntensity = 0;
+
+        function recalc() {
+            const E = parseFloat(E_slider.value);
+            const R = parseFloat(R_slider.value);
+            E_val.textContent = E;
+            R_val.textContent = R;
+            E_disp.textContent = E;
+            R_disp.textContent = R;
+            const I = isOn ? E / (R + R_L + r_int) : 0;
+            const U_R = I * R;
+            I_disp.textContent = I.toFixed(2);
+            U_disp.textContent = U_R.toFixed(2);
+
+            amReading.material.map.dispose();
+            const amNew = makeTextSprite(I.toFixed(2) + ' A', '#60a5fa');
+            amReading.material.map = amNew.material.map;
+            amReading.material.needsUpdate = true;
+            vmReading.material.map.dispose();
+            const vmNew = makeTextSprite(U_R.toFixed(1) + ' V', '#facc15');
+            vmReading.material.map = vmNew.material.map;
+            vmReading.material.needsUpdate = true;
+
+            const intensity = Math.max(0, Math.min(1, I / 1.6));
+            currentIntensity = intensity;
+
+            lampBulb.material.color.setRGB(0.33 + intensity * 0.67, 0.33 + intensity * 0.55, 0.33 + intensity * 0.1);
+            lampBulb.material.emissive.setRGB(1, 0.82, 0.25);
+            lampBulb.material.emissiveIntensity = intensity * 3;
+            lampLight.intensity = intensity * 6;
+
+            const glowBase = 2.0;
+            const glowMax = 5.5;
+            const s = glowBase + (glowMax - glowBase) * intensity;
+            glowSprite.scale.set(s, s, 1);
+            glowMat.opacity = intensity * 0.95;
+
+            swLever.rotation.z = isOn ? 0 : -0.6;
+        }
+
+        E_slider.addEventListener('input', recalc);
+        R_slider.addEventListener('input', recalc);
+        switchBtn.addEventListener('click', () => {
+            isOn = !isOn;
+            switchBtn.textContent = isOn ? '🔌 Выключить' : '🔌 Включить';
+            switchBtn.classList.toggle('off', !isOn);
+            recalc();
+        });
+        document.getElementById('cir-reset').addEventListener('click', () => {
+            E_slider.value = 12;
+            R_slider.value = 10;
+            isOn = true;
+            switchBtn.textContent = '🔌 Выключить';
+            switchBtn.classList.remove('off');
+            recalc();
+        });
+
+        document.getElementById('fs-circuit').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await container.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 1, 0);
+        controls.update();
+
+        recalc();
+
+        let time = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            time += 0.016;
+
+            if (isOn) {
+                const E = parseFloat(E_slider.value);
+                const R = parseFloat(R_slider.value);
+                const I = E / (R + R_L + r_int);
+                const speed = 0.001 + I * 0.0008;
+                electrons.forEach(e => {
+                    e.t = (e.t + speed) % 1;
+                    e.mesh.position.copy(pointOnPerimeter(e.t));
+                });
+            }
+
+            if (isOn && currentIntensity > 0.01) {
+                const flicker = 1 + Math.sin(time * 9) * 0.04;
+                glowMat.opacity = currentIntensity * 0.95 * flicker;
+                const s = 2.0 + 3.5 * currentIntensity;
+                glowSprite.scale.set(s * flicker, s * flicker, 1);
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<!-- ===== СКРИПТЫ ДЛЯ ГРАФИКОВ ВАХ ===== -->
+<script>
+    (function(){
+        // ---------- Интерактивный график в теории ----------
+        var canvas = document.getElementById('vah-canvas');
+        var slider = document.getElementById('vah-slider-R');
+        var valEl = document.getElementById('vah-value-R');
+        if (canvas && slider && valEl) {
+            var ctx = canvas.getContext('2d');
+            var Umax = 20, Imax = 4;
+
+            function drawTheory() {
+                var dpr = window.devicePixelRatio || 1;
+                var rect = canvas.getBoundingClientRect();
+                var W = rect.width, H = rect.height;
+                canvas.width = W * dpr; canvas.height = H * dpr;
+                ctx.setTransform(dpr,0,0,dpr,0,0);
+                ctx.clearRect(0,0,W,H);
+
+                var padL = 50, padB = 40, padT = 20, padR = 20;
+                var plotW = W - padL - padR;
+                var plotH = H - padT - padB;
+                var isLight = document.documentElement.classList.contains('light-mode');
+                var axisColor = isLight ? '#5a7a94' : '#8ba5b8';
+                var textColor = isLight ? '#1a2a3f' : '#ffffff';
+                var gridColor = isLight ? 'rgba(90,122,148,0.2)' : 'rgba(139,165,184,0.2)';
+                var lineColor = '#f59e0b';
+
+                ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+                for (var u = 0; u <= Umax; u += 5) {
+                    var x = padL + (u/Umax)*plotW;
+                    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+plotH); ctx.stroke();
+                }
+                for (var i = 0; i <= Imax; i += 1) {
+                    var y = padT + plotH - (i/Imax)*plotH;
+                    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL+plotW, y); ctx.stroke();
+                }
+                ctx.strokeStyle = axisColor; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+plotH); ctx.lineTo(padL+plotW, padT+plotH); ctx.stroke();
+                ctx.fillStyle = textColor; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+                for (var u2 = 0; u2 <= Umax; u2 += 5) {
+                    ctx.fillText(u2, padL + (u2/Umax)*plotW, padT+plotH+18);
+                }
+                ctx.textAlign = 'right';
+                for (var i2 = 0; i2 <= Imax; i2 += 1) {
+                    ctx.fillText(i2, padL-8, padT + plotH - (i2/Imax)*plotH + 4);
+                }
+                ctx.textAlign = 'center';
+                ctx.fillText('U, В', padL+plotW/2, H-8);
+                ctx.save(); ctx.translate(14, padT+plotH/2); ctx.rotate(-Math.PI/2); ctx.fillText('I, А', 0, 0); ctx.restore();
+
+                var R = parseFloat(slider.value);
+                valEl.textContent = R;
+                var uEnd = Math.min(Umax, Imax * R);
+                var x1 = padL + (uEnd/Umax)*plotW;
+                var y1 = padT + plotH - ((uEnd/R)/Imax)*plotH;
+                ctx.strokeStyle = lineColor; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.moveTo(padL, padT+plotH); ctx.lineTo(x1, y1); ctx.stroke();
+                ctx.fillStyle = lineColor; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'left';
+                ctx.fillText('R = ' + R + ' Ом', Math.max(padL+8, x1-90), Math.max(padT+16, y1-8));
+            }
+
+            slider.addEventListener('input', drawTheory);
+            if (window.ResizeObserver) new ResizeObserver(drawTheory).observe(canvas);
+            setTimeout(drawTheory, 200);
+            document.addEventListener('click', function(e){
+                if (e.target.closest('#themeBtn, .theme-toggle')) setTimeout(drawTheory, 400);
+            }, true);
+        }
+
+        // ---------- Мини-графики в задачах ----------
+        function drawMini(c) {
+            var ctx = c.getContext('2d');
+            var W = c.width, H = c.height;
+            ctx.clearRect(0,0,W,H);
+            var padL = 28, padB = 24, padT = 10, padR = 10;
+            var plotW = W - padL - padR;
+            var plotH = H - padT - padB;
+            var Umax = 20, Imax = 7;
+            var isLight = document.documentElement.classList.contains('light-mode');
+            var axis = isLight ? '#5a7a94' : '#8ba5b8';
+            var grid = isLight ? 'rgba(90,122,148,0.2)' : 'rgba(139,165,184,0.2)';
+            var text = isLight ? '#1a2a3f' : '#ffffff';
+
+            ctx.strokeStyle = grid; ctx.lineWidth = 1;
+            for (var u = 0; u <= Umax; u += 5) {
+                var x = padL + (u/Umax)*plotW;
+                ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+plotH); ctx.stroke();
+            }
+            for (var i = 0; i <= Imax; i += 1) {
+                var y = padT + plotH - (i/Imax)*plotH;
+                ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL+plotW, y); ctx.stroke();
+            }
+            ctx.strokeStyle = axis; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+plotH); ctx.lineTo(padL+plotW, padT+plotH); ctx.stroke();
+            ctx.fillStyle = text; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('U', padL+plotW/2, H-4);
+            ctx.save(); ctx.translate(10, padT+plotH/2); ctx.rotate(-Math.PI/2); ctx.fillText('I', 0, 0); ctx.restore();
+
+            function toX(u){ return padL + (u/Umax)*plotW; }
+            function toY(i){ return padT + plotH - (i/Imax)*plotH; }
+
+            if (c.dataset.R) {
+                var R = parseFloat(c.dataset.R);
+                var uEnd = Math.min(Umax, Imax*R);
+                ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(toX(0), toY(0)); ctx.lineTo(toX(uEnd), toY(uEnd/R)); ctx.stroke();
+            }
+            if (c.dataset.points) {
+                c.dataset.points.split(';').forEach(function(p){
+                    var arr = p.split(','); var u = +arr[0], i = +arr[1];
+                    ctx.fillStyle = '#60a5fa';
+                    ctx.beginPath(); ctx.arc(toX(u), toY(i), 4, 0, Math.PI*2); ctx.fill();
+                });
+            }
+            if (c.dataset.extra) {
+                var arr2 = c.dataset.extra.split(','); var u2 = +arr2[0], i2 = +arr2[1];
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath(); ctx.arc(toX(u2), toY(i2), 4, 0, Math.PI*2); ctx.fill();
+            }
+            if (c.dataset.two) {
+                var Rs = c.dataset.two.split(',').map(Number);
+                var colors = ['#60a5fa', '#f59e0b'];
+                Rs.forEach(function(R, idx){
+                    var uE = Math.min(Umax, Imax*R);
+                    ctx.strokeStyle = colors[idx]; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(toX(0), toY(0)); ctx.lineTo(toX(uE), toY(uE/R)); ctx.stroke();
+                });
+            }
+            if (c.dataset.nonlinear) {
+                var pts = c.dataset.nonlinear.split(';').map(function(p){ return p.split(',').map(Number); });
+                ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2;
+                ctx.beginPath();
+                pts.forEach(function(pt, idx){ if (idx===0) ctx.moveTo(toX(pt[0]), toY(pt[1])); else ctx.lineTo(toX(pt[0]), toY(pt[1])); });
+                ctx.stroke();
+                pts.forEach(function(pt){
+                    ctx.fillStyle = '#60a5fa';
+                    ctx.beginPath(); ctx.arc(toX(pt[0]), toY(pt[1]), 4, 0, Math.PI*2); ctx.fill();
+                });
+            }
+        }
+
+        function drawAllMini(){
+            document.querySelectorAll('.vah-mini').forEach(drawMini);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawAllMini);
+        else drawAllMini();
+        document.addEventListener('click', function(e){
+            if (e.target.closest('#themeBtn, .theme-toggle')) setTimeout(drawAllMini, 400);
+        }, true);
+    })();
+</script>
+<!-- Подключение скриптов для кнопок -->
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<!-- ===== НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ ===== -->
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</nav>
+
+<!-- ===== СТИЛЬ ДЛЯ ПРИНУДИТЕЛЬНОГО СКРЫТИЯ ===== -->
+<style id="bottom-nav-force-hide">
+    body .bottom-nav.nav-hidden {
+        transform: translate(-50%, 150%) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: transform 0.3s ease, opacity 0.3s ease !important;
+    }
+</style>
+
+<!-- ===== СКРИПТ АВТОСКРЫТИЯ ПАНЕЛИ ===== -->
+<script id="nav-autohide-script">
+    document.addEventListener('DOMContentLoaded', function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 5;
+        var ticking = false;
+
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) {
+                ticking = false;
+                return;
+            }
+            if (y > lastY && y > 50) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', function(){
+            if (!ticking) {
+                requestAnimationFrame(onScroll);
+                ticking = true;
+            }
+        }, { passive: true });
+    });
+</script>
+</body>
+</html>

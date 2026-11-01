@@ -1,0 +1,1621 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электрические цепи. Последовательное и параллельное соединение</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --menu-item-hover: #233e50;
+            --group-header-bg: #1a3a5a;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+            --accent: #2563eb;
+            --accent-hover: #3b82f6;
+            --menu-item-hover: #f0f4fa;
+            --group-header-bg: #e8edf5;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;padding-bottom:78px;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle{background:#3b82f6;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-toggle:hover{transform:scale(1.05);opacity:0.9;}
+        .btn-toggle.off{background:#666;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:110px;top:8px;right:8px;}
+            .model-tabs{gap:4px;}
+            .model-tab{padding:6px 12px;font-size:0.75rem;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+
+        /* Общие стили для панелей и тем */
+        .bottom-nav {
+            position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+            display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px;
+            background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border);
+            box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900;
+            transition: background 0.3s, border 0.3s, transform 0.3s;
+        }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button {
+            display: flex; align-items: center; justify-content: center;
+            width: 46px; height: 46px; border-radius: 14px;
+            border: none; background: transparent;
+            color: var(--text-secondary); font-size: 22px;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
+            background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px);
+        }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+
+        /* Фиксированный размер панели и кнопок */
+        .bottom-nav { max-width: 340px; width: auto; flex: 0 0 auto; }
+        .bottom-nav a, .bottom-nav button {
+            width: 46px !important; height: 46px !important;
+            min-width: 46px !important; min-height: 46px !important;
+            max-width: 46px !important; max-height: 46px !important;
+            flex: 0 0 46px !important; padding: 0 !important; box-sizing: border-box;
+        }
+        .bottom-nav a svg, .bottom-nav button svg {
+            width: 22px !important; height: 22px !important; flex: 0 0 22px !important;
+        }
+
+        /* Ripple */
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple {
+            position: absolute; border-radius: 50%;
+            background: rgba(59,130,246,0.35); transform: scale(0);
+            animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0;
+        }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+
+        /* Градиенты и стрелки */
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; }
+        .section.collapsed > .section-title:hover, .section:not(.collapsed) > .section-title {
+            background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, transparent 100%);
+        }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title {
+            background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, transparent 100%);
+        }
+        .section.collapsed > .section-title::after {
+            color: var(--accent, #3b82f6) !important;
+            text-shadow: 0 0 6px rgba(59, 130, 246, 0.85); transform: translateY(-50%) rotate(-90deg) !important;
+        }
+        .section:not(.collapsed) > .section-title::after {
+            color: var(--text-secondary, #8ba5b8) !important;
+            text-shadow: none !important; transform: translateY(-50%) rotate(0deg) !important;
+        }
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; margin-left: 0 !important; }
+        h1, .page-title { text-align: center !important; }
+    </style>
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+<style id="fix-nav-bounce">
+    /* Отключаем сдвиги и пружины у кнопок нижней панели */
+    .bottom-nav a, .bottom-nav button {
+        transform: none !important;
+        transition: background 0.2s ease, color 0.2s ease !important;
+    }
+    .bottom-nav a:active, .bottom-nav button:active, 
+    .bottom-nav a:focus, .bottom-nav button:focus {
+        transform: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Электрические цепи.<br>Последовательное и параллельное соединение</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Электрическая цепь и её элементы</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Электрическая цепь</strong> — совокупность устройств, соединённых проводниками, по которым может протекать электрический ток.</p>
+                <p><strong>Основные элементы цепи:</strong></p>
+                <ul>
+                    <li><strong>Источник тока</strong> (батарея, генератор) — создаёт и поддерживает ток;</li>
+                    <li><strong>Потребитель</strong> (лампа, резистор, двигатель) — преобразует электрическую энергию;</li>
+                    <li><strong>Ключ (выключатель)</strong> — замыкает/размыкает цепь;</li>
+                    <li><strong>Провода</strong> — соединяют элементы;</li>
+                    <li><strong>Измерительные приборы</strong> — амперметр (включается последовательно), вольтметр (параллельно).</li>
+                </ul>
+                <p><strong>Схема</strong> — чертёж цепи с условными обозначениями элементов.</p>
+                <p><strong>Простое соединение</strong> — когда несколько потребителей соединяют в одну цепь. Есть три основных вида: <strong>последовательное</strong>, <strong>параллельное</strong> и <strong>смешанное</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Последовательное соединение</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Последовательное соединение</strong> — элементы соединены друг за другом, так что через каждый из них течёт <strong>один и тот же ток</strong>.</p>
+                <div class="formula-block">
+                    <span class="f">$I = I_1 = I_2 = \dots = I_n$</span>
+                    <span class="f-label">— сила тока одинакова на всех участках</span>
+                </div>
+                <div class="formula-block">
+                    <span class="f">$U = U_1 + U_2 + \dots + U_n$</span>
+                    <span class="f-label">— общее напряжение равно сумме напряжений на элементах</span>
+                </div>
+                <div class="formula-block">
+                    <span class="f">$R = R_1 + R_2 + \dots + R_n$</span>
+                    <span class="f-label">— общее сопротивление равно сумме сопротивлений</span>
+                </div>
+                <p><strong>Особенности:</strong></p>
+                <ul>
+                    <li>При выходе из строя одного элемента цепь разрывается — все перестают работать;</li>
+                    <li>Общее сопротивление <strong>больше</strong> любого из отдельных;</li>
+                    <li>Один выключатель управляет всей цепью;</li>
+                    <li>Напряжение распределяется пропорционально сопротивлениям: $U_i = I \cdot R_i$.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Параллельное соединение</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Параллельное соединение</strong> — элементы соединены так, что имеют <strong>две общие точки</strong> (узлы) и на них подаётся <strong>одинаковое напряжение</strong>.</p>
+                <div class="formula-block">
+                    <span class="f">$U = U_1 = U_2 = \dots = U_n$</span>
+                    <span class="f-label">— напряжение одинаково на всех ветвях</span>
+                </div>
+                <div class="formula-block">
+                    <span class="f">$I = I_1 + I_2 + \dots + I_n$</span>
+                    <span class="f-label">— общий ток равен сумме токов в ветвях</span>
+                </div>
+                <div class="formula-block">
+                    <span class="f">$\dfrac{1}{R} = \dfrac{1}{R_1} + \dfrac{1}{R_2} + \dots + \dfrac{1}{R_n}$</span>
+                    <span class="f-label">— общее сопротивление</span>
+                </div>
+                <p>Для двух параллельных сопротивлений удобно:</p>
+                <div class="formula-block">
+                    <span class="f">$R = \dfrac{R_1 \cdot R_2}{R_1 + R_2}$</span>
+                </div>
+                <p><strong>Особенности:</strong></p>
+                <ul>
+                    <li>При выходе из строя одной ветви остальные продолжают работать;</li>
+                    <li>Общее сопротивление <strong>меньше</strong> наименьшего из сопротивлений;</li>
+                    <li>Каждая ветвь имеет свой выключатель (квартирная проводка);</li>
+                    <li>Токи в ветвях обратно пропорциональны сопротивлениям: $I_i = U / R_i$.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 4 ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Смешанное соединение</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Смешанное соединение</strong> — сочетание последовательного и параллельного соединений.</p>
+                <p><strong>Как считать:</strong></p>
+                <ul>
+                    <li>Сначала выделяют параллельные участки и считают их общее сопротивление;</li>
+                    <li>Затем получившиеся эквивалентные сопротивления складывают как последовательные;</li>
+                    <li>И наоборот — если сначала идёт последовательный участок, его сворачивают первым.</li>
+                </ul>
+                <p><strong>Пример:</strong> $R_1$ последовательно с параллельным участком $(R_2 \parallel R_3)$:</p>
+                <div class="formula-block">
+                    <span class="f">$R = R_1 + \dfrac{R_2 \cdot R_3}{R_2 + R_3}$</span>
+                </div>
+                <p class="important">⚠️ Правило: сворачиваем цепь «изнутри наружу» — сначала самые вложенные участки.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛИ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивные 3D-модели</div>
+        <div class="section-content">
+
+            <div class="model-tabs">
+                <div class="model-tab active" data-model="series" onclick="switchModel('series')">🔗 Последовательное</div>
+                <div class="model-tab" data-model="parallel" onclick="switchModel('parallel')">🔀 Параллельное</div>
+                <div class="model-tab" data-model="mixed" onclick="switchModel('mixed')">🧩 Смешанное</div>
+            </div>
+
+            <!-- МОДЕЛЬ 1: ПОСЛЕДОВАТЕЛЬНОЕ -->
+            <div id="model-series" class="model-content">
+                <div class="model-container" id="container-series">
+                    <canvas id="canvas-series" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-series">⛶</button>
+                    <div class="info-display">
+                        <div>$R_1$ = <span class="val" id="s-R1d">4</span> Ом</div>
+                        <div>$R_2$ = <span class="val" id="s-R2d">6</span> Ом</div>
+                        <div>$R$ = <span class="val" id="s-Rd">10</span> Ом</div>
+                        <div>$I$ = <span class="val" id="s-Id">1.20</span> А</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>$R_1$ (Ом)</label>
+                        <input type="range" id="s-slider-R1" min="1" max="20" step="1" value="4">
+                        <span class="control-value" id="s-R1v">4</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$R_2$ (Ом)</label>
+                        <input type="range" id="s-slider-R2" min="1" max="20" step="1" value="6">
+                        <span class="control-value" id="s-R2v">6</span>
+                    </div>
+                    <button class="btn-reset" id="s-reset">⟳ Сброс</button>
+                </div>
+                <div class="def-card">
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Что происходит в модели</h4>
+                    <p>Два резистора \(R_1\) и \(R_2\) соединены <strong>последовательно</strong> (друг за другом). Ток (движение синих шариков) выходит из положительного полюса батареи (\(+\)), проходит через \(R_1\), затем через \(R_2\) и возвращается к отрицательному полюсу (\(-\)).</p>
+                    <p><strong>1. Сила тока одинакова на всех участках.</strong></p>
+                    <p>Обрати внимание: шарики движутся по всему контуру с одинаковой скоростью. Где бы ты ни остановил взгляд, количество шариков, проходящих за секунду, одно и то же. Это значит, что сила тока \(I\) одинакова и в \(R_1\), и в \(R_2\), и в проводах. Формула: \(I = I_1 = I_2\).</p>
+                    <p><strong>2. Как меняется скорость при движении ползунков?</strong></p>
+                    <p>Сопротивление при последовательном соединении складывается: \(R = R_1 + R_2\). Если ты увеличиваешь \(R_1\) или \(R_2\), общее сопротивление \(R\) растёт, а сила тока \(I = \frac{U}{R}\) (где \(U = 12 В) — падает. Это видно по замедлению шариков. Чем меньше ток, тем медленнее они движутся.</p>
+
+                    <p><strong>3. Напряжение (разность потенциалов).</strong></p>
+                    <p>Хотя ток везде одинаков, напряжение между резисторами распределяется. На резисторе с <strong>большим</strong> сопротивлением напряжение больше: \(U_1 = I \cdot R_1\) и \(U_2 = I \cdot R_2\). Это как водопад: чем больше камней на пути (сопротивление), тем больше энергии теряет вода (напряжение).</p>
+
+                    <p><strong>4. Что будет, если один резистор сломается?</strong></p>
+                    <p>Поскольку цепь одна, разрыв в любом месте остановит ток полностью. Все приборы в такой цепи зависят друг от друга (как в гирлянде, где перегоревшая лампочка гасит всю ветку).</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 2: ПАРАЛЛЕЛЬНОЕ -->
+            <div id="model-parallel" class="model-content" style="display:none;">
+                <div class="model-container" id="container-parallel">
+                    <canvas id="canvas-parallel" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-parallel">⛶</button>
+                    <div class="info-display">
+                        <div>$R_1$ = <span class="val" id="p-R1d">4</span> Ом</div>
+                        <div>$R_2$ = <span class="val" id="p-R2d">6</span> Ом</div>
+                        <div>$R$ = <span class="val" id="p-Rd">2.4</span> Ом</div>
+                        <div>$I$ = <span class="val" id="p-Id">5.00</span> А</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>$R_1$ (Ом)</label>
+                        <input type="range" id="p-slider-R1" min="1" max="20" step="1" value="4">
+                        <span class="control-value" id="p-R1v">4</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$R_2$ (Ом)</label>
+                        <input type="range" id="p-slider-R2" min="1" max="20" step="1" value="6">
+                        <span class="control-value" id="p-R2v">6</span>
+                    </div>
+                    <button class="btn-reset" id="p-reset">⟳ Сброс</button>
+                </div>
+                <div class="def-card">
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Что происходит в модели</h4>
+                    <p>Два резистора \(R_1\) и \(R_2\) соединены <strong>параллельно</strong>. Ток от батареи подходит к узлу A и <strong>разветвляется</strong> на две ветви (верхнюю и нижнюю), а затем в узле B снова сливается в один поток.</p>
+
+                    <p><strong>1. Напряжение одинаково на обеих ветвях.</strong></p>
+                    <p>Поскольку обе ветви начинаются в узле A и заканчиваются в узле B, разность потенциалов (напряжение \(U\)) на них одна и та же: \(U = U_1 = U_2\). Поэтому батарея как бы «толкает» заряды в обе ветви одинаково сильно.</p>
+
+                    <p><strong>2. Сила тока делится.</strong></p>
+                    <p>Обрати внимание: общий поток шариков от батареи на подходе к узлу A густой, а после узла он разделяется на два более редких ручейка. Общий ток равен сумме токов в ветвях: \(I = I_1 + I_2\). Причём больше шариков идёт по той ветви, где сопротивление <strong>меньше</strong> (по закону Ома \(I_i = U / R_i\)).</p>
+
+                    <p><strong>3. Скорость движения в ветвях.</strong></p>
+                    <p>Если ты сделаешь \(R_1\) маленьким, шарики по верхней ветви будут лететь быстрее, а по нижней (\(R_2\)) — медленнее. Это наглядно показывает, что ток в ветви зависит только от её собственного сопротивления.</p>
+
+                    <p><strong>4. Общее сопротивление и ток.</strong></p>
+                    <p>Общее сопротивление при параллельном соединении меньше самого маленького из резисторов: \(\frac{1}{R} = \frac{1}{R_1} + \frac{1}{R_2}\). Поэтому общий ток \(I = U/R\) получается большим. Двигая ползунки, можно убедиться: если уменьшить любое сопротивление, общий ток (густота шариков от батареи) вырастет.</p>
+
+                    <p><strong>5. Что будет, если одна ветвь сломается?</strong></p>
+                    <p>Если одна из параллельных ветвей перестанет работать (оборвётся), ток во второй ветви не прекратится. Каждый прибор в параллельной цепи работает независимо (как розетки и лампочки в квартире).</p>
+                </div>
+            </div>
+
+            <!-- МОДЕЛЬ 3: СМЕШАННОЕ -->
+            <div id="model-mixed" class="model-content" style="display:none;">
+                <div class="model-container" id="container-mixed">
+                    <canvas id="canvas-mixed" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-mixed">⛶</button>
+                    <div class="info-display">
+                        <div>$R_1$ = <span class="val" id="m-R1d">4</span> Ом</div>
+                        <div>$R_2$ = <span class="val" id="m-R2d">6</span> Ом</div>
+                        <div>$R_3$ = <span class="val" id="m-R3d">12</span> Ом</div>
+                        <div>$R$ = <span class="val" id="m-Rd">8.00</span> Ом</div>
+                        <div>$I$ = <span class="val" id="m-Id">1.50</span> А</div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>$R_1$ (Ом)</label>
+                        <input type="range" id="m-slider-R1" min="1" max="20" step="1" value="4">
+                        <span class="control-value" id="m-R1v">4</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$R_2$ (Ом)</label>
+                        <input type="range" id="m-slider-R2" min="1" max="20" step="1" value="6">
+                        <span class="control-value" id="m-R2v">6</span>
+                    </div>
+                    <div class="control-group">
+                        <label>$R_3$ (Ом)</label>
+                        <input type="range" id="m-slider-R3" min="1" max="20" step="1" value="12">
+                        <span class="control-value" id="m-R3v">12</span>
+                    </div>
+                    <button class="btn-reset" id="m-reset">⟳ Сброс</button>
+                </div>
+                <div class="def-card">
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Что происходит в модели</h4>
+                    <p>Это <strong>смешанное соединение</strong>: резистор \(R_1\) включён последовательно, а \(R_2\) и \(R_3\) — параллельно друг другу. Ток выходит из \(+\), идёт через \(R_1\), затем в узле A разветвляется: часть идёт через верхнюю ветвь (\(R_2\)), часть — через нижнюю (\(R_3\)). После этого в узле B ветви сливаются, и общий ток возвращается к \(-\) батареи.</p>
+
+                    <p><strong>1. Участок с \(R_1\) (последовательный).</strong></p>
+                    <p>До узла A и после узла B течёт <strong>весь общий ток цепи</strong>. Поэтому в \(R_1\) шарики движутся густо и с одной скоростью. Именно \(R_1\) ограничивает общий ток, который доходит до параллельного участка.</p>
+
+                    <p><strong>2. Разветвление в узле A.</strong></p>
+                    <p>В узле A (жёлтая точка) общий поток делится на две части. Верхняя ветвь с \(R_2\) и нижняя с \(R_3\) имеют одинаковое напряжение \(U_{AB}\) (разность потенциалов между узлами A и B). Ток распределяется обратно пропорционально сопротивлениям: \(I_2 = U_{AB} / R_2\) и \(I_3 = U_{AB} / R_3\).</p>
+
+                    <p><strong>3. Что видно на модели при изменении ползунков?</strong></p>
+                    <ul>
+                        <li><strong>Двигаем \(R_1\):</strong> меняется общее сопротивление и общий ток. Все шарики (и в верхней, и в нижней ветвях) ускоряются или замедляются одновременно. Напряжение на параллельном участке тоже меняется.</li>
+                        <li><strong>Двигаем \(R_2\) или \(R_3\):</strong> общий ток меняется слабее. Но внутри параллельного участка ток перераспределяется: если увеличить \(R_3\), шарики в нижней ветви замедляются, а в верхнюю (\(R_2\)) идёт большая часть тока. Общий ток \(I = I_1 = I_2 + I_3\) при этом немного падает.</li>
+                    </ul>
+
+                    <p><strong>4. Как посчитать общее сопротивление?</strong></p>
+                    <p>Сначала сворачиваем параллельный участок: \(R_{23} = \frac{R_2 R_3}{R_2 + R_3}\). Затем складываем с последовательным резистором: \(R = R_1 + R_{23}\). Именно эти значения показаны на табло. Ток в цепи: \(I = \frac{U}{R}\).</p>
+
+                    <p><strong>5. Особенность.</strong></p>
+                    <p>Смешанное соединение — это «всё сразу». Если в параллельной ветви что-то сломается, вторая продолжит работать, но если оборвётся \(R_1\) (последовательный участок), ток остановится везде.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Последовательное: общее сопротивление</div>
+                <div class="task-condition"><strong>Условие:</strong> Два резистора \(R_1 = 4\) Ом и \(R_2 = 6\) Ом соединены последовательно. Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = 4\) Ом, \(R_2 = 6\) Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(R\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> При последовательном соединении \(R = R_1 + R_2\).</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">\(R = 4 + 6 = 10 \text{ Ом}\)</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Общее сопротивление больше каждого из слагаемых.</div>
+                    <div class="answer">✅ Ответ: \(R = 10\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Последовательное: сила тока</div>
+                <div class="task-condition"><strong>Условие:</strong> Резисторы \(R_1 = 5\) Ом и \(R_2 = 10\) Ом соединены последовательно. Напряжение на участке \(U = 30\) В. Найдите силу тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = 5\) Ом, \(R_2 = 10\) Ом, \(U = 30\) В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(I\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> \(R = R_1 + R_2 = 5 + 10 = 15\) Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> \(I = \dfrac{U}{R} = \dfrac{30}{15} = 2\) А.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Этот же ток течёт через каждый резистор.</div>
+                    <div class="answer">✅ Ответ: \(I = 2\) А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Последовательное: напряжения на резисторах</div>
+                <div class="task-condition"><strong>Условие:</strong> \(R_1 = 3\) Ом и \(R_2 = 7\) Ом соединены последовательно, ток \(I = 2\) А. Найдите напряжения \(U_1\), \(U_2\) и общее \(U\).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = 3\) Ом, \(R_2 = 7\) Ом, \(I = 2\) А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(U_1, U_2, U\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> \(U_1 = I R_1 = 2 \cdot 3 = 6\) В.</div>
+                    <div class="step"><strong>Шаг 2.</strong> \(U_2 = I R_2 = 2 \cdot 7 = 14\) В.</div>
+                    <div class="step"><strong>Шаг 3.</strong> \(U = U_1 + U_2 = 6 + 14 = 20\) В.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Напряжение распределяется пропорционально сопротивлениям.</div>
+                    <div class="answer">✅ Ответ: \(U_1 = 6\) В, \(U_2 = 14\) В, \(U = 20\) В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Параллельное: общее сопротивление</div>
+                <div class="task-condition"><strong>Условие:</strong> Два резистора \(R_1 = 4\) Ом и \(R_2 = 6\) Ом соединены параллельно. Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = 4\) Ом, \(R_2 = 6\) Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(R\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> \(R = \dfrac{R_1 R_2}{R_1 + R_2}\).</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">\(R = \dfrac{4 \cdot 6}{4 + 6} = \dfrac{24}{10} = 2{,}4 \text{ Ом}\)</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Общее сопротивление меньше наименьшего (4 Ом).</div>
+                    <div class="answer">✅ Ответ: \(R = 2{,}4\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Параллельное: токи в ветвях</div>
+                <div class="task-condition"><strong>Условие:</strong> \(R_1 = 6\) Ом и \(R_2 = 3\) Ом соединены параллельно, напряжение \(U = 12\) В. Найдите токи \(I_1\), \(I_2\) и общий \(I\).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = 6\) Ом, \(R_2 = 3\) Ом, \(U = 12\) В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(I_1, I_2, I\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> \(I_1 = \dfrac{U}{R_1} = \dfrac{12}{6} = 2\) А.</div>
+                    <div class="step"><strong>Шаг 2.</strong> \(I_2 = \dfrac{U}{R_2} = \dfrac{12}{3} = 4\) А.</div>
+                    <div class="step"><strong>Шаг 3.</strong> \(I = I_1 + I_2 = 2 + 4 = 6\) А.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Ток больше в ветви с меньшим сопротивлением.</div>
+                    <div class="answer">✅ Ответ: \(I_1 = 2\) А, \(I_2 = 4\) А, \(I = 6\) А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Параллельное: напряжение</div>
+                <div class="task-condition"><strong>Условие:</strong> Два резистора \(R_1 = 10\) Ом и \(R_2 = 15\) Ом соединены параллельно. Общий ток \(I = 5\) А. Найдите напряжение и токи в ветвях.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = 10\) Ом, \(R_2 = 15\) Ом, \(I = 5\) А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(U, I_1, I_2\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> \(R = \dfrac{10 \cdot 15}{10 + 15} = \dfrac{150}{25} = 6\) Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> \(U = I R = 5 \cdot 6 = 30\) В.</div>
+                    <div class="step"><strong>Шаг 3.</strong> \(I_1 = \dfrac{U}{R_1} = \dfrac{30}{10} = 3\) А; \(I_2 = \dfrac{30}{15} = 2\) А.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Проверка: \(I_1 + I_2 = 3 + 2 = 5\) А = \(I\).</div>
+                    <div class="answer">✅ Ответ: \(U = 30\) В, \(I_1 = 3\) А, \(I_2 = 2\) А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Сравнение соединений</div>
+                <div class="task-condition"><strong>Условие:</strong> Два резистора \(R_1 = 4\) Ом и \(R_2 = 12\) Ом. Сравните общее сопротивление при последовательном и параллельном соединении.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = 4\) Ом, \(R_2 = 12\) Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(R_{\text{посл}}\), \(R_{\text{пар}}\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> \(R_{\text{посл}} = 4 + 12 = 16\) Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> \(R_{\text{пар}} = \dfrac{4 \cdot 12}{4 + 12} = \dfrac{48}{16} = 3\) Ом.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Последовательное даёт 16 Ом, параллельное — 3 Ом. Разница более чем в 5 раз.</div>
+                    <div class="answer">✅ Ответ: \(R_{\text{посл}} = 16\) Ом, \(R_{\text{пар}} = 3\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Смешанное соединение</div>
+                <div class="task-condition"><strong>Условие:</strong> \(R_1 = 5\) Ом последовательно с параллельным участком \(R_2 = 6\) Ом и \(R_3 = 3\) Ом. Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = 5\) Ом, \(R_2 = 6\) Ом, \(R_3 = 3\) Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(R\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Параллельный участок: \(R_{23} = \dfrac{6 \cdot 3}{6 + 3} = \dfrac{18}{9} = 2\) Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Общее: \(R = R_1 + R_{23} = 5 + 2 = 7\) Ом.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сворачиваем «изнутри наружу»: сначала параллельный участок, потом последовательный.</div>
+                    <div class="answer">✅ Ответ: \(R = 7\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Лампочки последовательно</div>
+                <div class="task-condition"><strong>Условие:</strong> Две одинаковые лампочки по \(R = 20\) Ом соединены последовательно и подключены к \(U = 40\) В. Найдите ток и напряжение на каждой лампе.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = R_2 = 20\) Ом, \(U = 40\) В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(I, U_1\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> \(R = 20 + 20 = 40\) Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> \(I = \dfrac{U}{R} = \dfrac{40}{40} = 1\) А.</div>
+                    <div class="step"><strong>Шаг 3.</strong> \(U_1 = I R_1 = 1 \cdot 20 = 20\) В. Аналогично \(U_2 = 20\) В.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При равных сопротивлениях напряжение делится пополам.</div>
+                    <div class="answer">✅ Ответ: \(I = 1\) А, \(U_1 = U_2 = 20\) В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Квартирная проводка (параллельно)</div>
+                <div class="task-condition"><strong>Условие:</strong> В квартире параллельно включены лампа \(R_1 = 440\) Ом и утюг \(R_2 = 44\) Ом. Напряжение \(U = 220\) В. Найдите общий ток.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> \(R_1 = 440\) Ом, \(R_2 = 44\) Ом, \(U = 220\) В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> \(I\)</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> \(I_1 = \dfrac{220}{440} = 0{,}5\) А (лампа).</div>
+                    <div class="step"><strong>Шаг 2.</strong> \(I_2 = \dfrac{220}{44} = 5\) А (утюг).</div>
+                    <div class="step"><strong>Шаг 3.</strong> \(I = I_1 + I_2 = 0{,}5 + 5 = 5{,}5\) А.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При параллельном включении каждый прибор работает независимо, общий ток — сумма токов.</div>
+                    <div class="answer">✅ Ответ: \(I = 5{,}5\) А</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> \(R_1 = 3\) Ом и \(R_2 = 7\) Ом последовательно. Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> \(R = R_1 + R_2\).</div>
+                    <div class="answer">✅ Ответ: \(R = 10\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> \(R_1 = 2\) Ом и \(R_2 = 8\) Ом параллельно. Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> \(R = \dfrac{R_1 R_2}{R_1 + R_2}\).</div>
+                    <div class="answer">✅ Ответ: \(R = 1{,}6\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Последовательно \(R_1 = 5\) Ом, \(R_2 = 15\) Ом, \(U = 40\) В. Найдите ток.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> \(R = 20\) Ом, \(I = U/R\).</div>
+                    <div class="answer">✅ Ответ: \(I = 2\) А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Параллельно \(R_1 = 6\) Ом, \(R_2 = 12\) Ом, \(U = 24\) В. Найдите общий ток.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> \(I_1 = 4\) А, \(I_2 = 2\) А.</div>
+                    <div class="answer">✅ Ответ: \(I = 6\) А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Последовательно \(R_1 = 2\) Ом, \(R_2 = 4\) Ом, \(R_3 = 6\) Ом. Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Сложите все три.</div>
+                    <div class="answer">✅ Ответ: \(R = 12\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> Параллельно \(R_1 = 10\) Ом, \(R_2 = 10\) Ом. Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Два одинаковых параллельно — половина.</div>
+                    <div class="answer">✅ Ответ: \(R = 5\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> \(R_1 = 4\) Ом последовательно с \((R_2 = 6 \text{ Ом} \parallel R_3 = 3 \text{ Ом})\). Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> \(R_{23} = 2\) Ом, \(R = 4 + 2 = 6\) Ом.</div>
+                    <div class="answer">✅ Ответ: \(R = 6\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> Последовательно \(R_1 = 8\) Ом, \(R_2 = 12\) Ом, \(I = 0{,}5\) А. Найдите общее напряжение.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> \(R = 20\) Ом, \(U = IR\).</div>
+                    <div class="answer">✅ Ответ: \(U = 10\) В</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> Параллельно \(R_1 = 5\) Ом, \(R_2 = 20\) Ом. Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> \(R = \dfrac{5 \cdot 20}{5 + 20} = \dfrac{100}{25}\).</div>
+                    <div class="answer">✅ Ответ: \(R = 4\) Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> Три резистора \(R_1 = 2\) Ом, \(R_2 = 2\) Ом, \(R_3 = 4\) Ом соединены последовательно. Найдите общее сопротивление и напряжение при токе \(I = 3\) А.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> \(R = 2 + 2 + 4 = 8\) Ом; \(U = IR\).</div>
+                    <div class="answer">✅ Ответ: \(R = 8\) Ом, \(U = 24\) В</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<!-- НИЖНЯЯ ПАНЕЛЬ -->
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</nav>
+
+<script>
+    function toggleSolution(id){
+        var el = document.getElementById(id);
+        var btn = el.previousElementSibling;
+        if (el.classList.contains('open')) { el.classList.remove('open'); btn.textContent = '📖 Показать решение'; }
+        else { el.classList.add('open'); btn.textContent = '📕 Скрыть решение'; }
+    }
+
+    function switchModel(model) {
+        document.querySelectorAll('.model-tab').forEach(function(tab){
+            tab.classList.toggle('active', tab.dataset.model === model);
+        });
+        document.getElementById('model-series').style.display = model === 'series' ? 'block' : 'none';
+        document.getElementById('model-parallel').style.display = model === 'parallel' ? 'block' : 'none';
+        document.getElementById('model-mixed').style.display = model === 'mixed' ? 'block' : 'none';
+        setTimeout(function(){ window.dispatchEvent(new Event('resize')); }, 100);
+    }
+
+    (function(){ if (localStorage.getItem('physicsTheme') === 'light') { document.documentElement.classList.add('light-mode'); } })();
+
+    window.togglePhysicsTheme = function(ev) {
+        var root = document.documentElement;
+        var isLight = root.classList.toggle('light-mode');
+        try { localStorage.setItem('physicsTheme', isLight ? 'light' : 'dark'); } catch(e){}
+        if (ev) {
+            var x = ev.clientX || 0, y = ev.clientY || 0;
+            var circle = document.createElement('div');
+            circle.className = 'theme-circle';
+            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+            circle.style.width = circle.style.height = (maxR*2) + 'px';
+            circle.style.left = (x - maxR) + 'px';
+            circle.style.top  = (y - maxR) + 'px';
+            document.body.appendChild(circle);
+            requestAnimationFrame(function(){ circle.classList.add('expand'); });
+            setTimeout(function(){ circle.remove(); }, 700);
+        }
+    };
+
+    // --- СКРИПТЫ ПАНЕЛИ И ТЕМ ---
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
+
+    (function(){
+        function classify(cat){
+            var c = (cat||'').toLowerCase();
+            if (c.indexOf('механик') >= 0) return 'cat-mech';
+            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+            if (c.indexOf('электр') >= 0) return 'cat-elec';
+            return 'cat-other';
+        }
+        function decorate(){
+            document.querySelectorAll('.search-result-category').forEach(function(el){
+                if (el.dataset.chip) return;
+                el.dataset.chip = '1';
+                el.classList.add(classify(el.textContent));
+            });
+        }
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                decorate();
+            };
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+        else decorate();
+    })();
+
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){
+            document.querySelectorAll(sel).forEach(bind);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                setTimeout(bindAll, 30);
+            };
+        }
+    })();
+
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 8;
+        var ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
+        }
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
+</script>
+
+<!-- ===== МОДЕЛЬ 1: ПОСЛЕДОВАТЕЛЬНОЕ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-series');
+        const canvas = document.getElementById('canvas-series');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 15);
+        camera.lookAt(0, 0, 0);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width || 800, h = rect.height || 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(updateSize).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(5, 10, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        function makeLabel(text, color, scale) {
+            scale = scale || 1;
+            const c = document.createElement('canvas');
+            const ctx = c.getContext('2d');
+            c.width = 512; c.height = 256;
+            ctx.font = 'bold 72px Segoe UI, Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = color || '#fff';
+            ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.lineWidth = 10;
+            ctx.strokeText(text, 256, 128); ctx.fillText(text, 256, 128);
+            const tex = new THREE.CanvasTexture(c);
+            tex.minFilter = THREE.LinearFilter;
+            const sp = new THREE.Sprite(new THREE.SpriteMaterial({map: tex, transparent: true, depthTest: false}));
+            sp.scale.set(2.4 * scale, 1.2 * scale, 1);
+            sp.renderOrder = 999;
+            return sp;
+        }
+
+        function makeBattery(x, y, vertical) {
+            const g = new THREE.Group(); g.position.set(x, y, 0);
+            if (vertical) {
+                const p = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.16, 0.4),
+                    new THREE.MeshStandardMaterial({color: 0xff5555, emissive: 0x330000}));
+                p.position.y = 0.24; g.add(p);
+                const n = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.16, 0.4),
+                    new THREE.MeshStandardMaterial({color: 0x5555ff, emissive: 0x000033}));
+                n.position.y = -0.24; g.add(n);
+                const pl = makeLabel('+', '#ff7777', 0.75); pl.position.set(1.0, 0.4, 0); g.add(pl);
+                const mn = makeLabel('\u2212', '#7777ff', 0.75); mn.position.set(1.0, -0.4, 0); g.add(mn);
+            } else {
+                const p = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.9, 0.4),
+                    new THREE.MeshStandardMaterial({color: 0xff5555, emissive: 0x330000}));
+                p.position.x = -0.24; g.add(p);
+                const n = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.5, 0.4),
+                    new THREE.MeshStandardMaterial({color: 0x5555ff, emissive: 0x000033}));
+                n.position.x = 0.24; g.add(n);
+                const pl = makeLabel('+', '#ff7777', 0.75); pl.position.set(0.75, 0.75, 0); g.add(pl);
+                const mn = makeLabel('\u2212', '#7777ff', 0.75); mn.position.set(-0.75, 0.75, 0); g.add(mn);
+            }
+            return g;
+        }
+
+        function makeResistor(x, y, label, horizontal) {
+            const g = new THREE.Group(); g.position.set(x, y, 0);
+            g.add(new THREE.Mesh(
+                new THREE.BoxGeometry(horizontal ? 1.6 : 0.7, horizontal ? 0.7 : 1.6, 0.5),
+                new THREE.MeshStandardMaterial({color: 0xcc8844, emissive: 0x221100})
+            ));
+            const lbl = makeLabel(label, '#facc15', 0.85);
+            if (horizontal) lbl.position.set(0, 1.05, 0); else lbl.position.set(1.35, 0, 0);
+            g.add(lbl);
+            return g;
+        }
+
+        const wireMat = new THREE.LineBasicMaterial({ color: 0xf59e0b });
+        function wire(pts) {
+            group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat));
+        }
+
+        const L = -5, R = 5, T = 2, B = -2;
+        wire([new THREE.Vector3(L, B, 0), new THREE.Vector3(R, B, 0),
+              new THREE.Vector3(R, T, 0), new THREE.Vector3(L, T, 0),
+              new THREE.Vector3(L, B, 0)]);
+
+        group.add(makeBattery(L, 0, true));
+        group.add(makeResistor(-2, T, 'R1', true));
+        group.add(makeResistor(2, T, 'R2', true));
+
+        const electrons = [], N = 40;
+        const eGeo = new THREE.SphereGeometry(0.11, 10, 10);
+        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        for (let i = 0; i < N; i++) {
+            const e = new THREE.Mesh(eGeo, eMat); group.add(e);
+            electrons.push({ mesh: e, t: i / N });
+        }
+
+        const R1s = document.getElementById('s-slider-R1');
+        const R2s = document.getElementById('s-slider-R2');
+        const R1v = document.getElementById('s-R1v');
+        const R2v = document.getElementById('s-R2v');
+        const R1d = document.getElementById('s-R1d');
+        const R2d = document.getElementById('s-R2d');
+        const Rd = document.getElementById('s-Rd');
+        const Id = document.getElementById('s-Id');
+
+        let currentI = 1.2;
+
+        function recalc() {
+            const r1 = parseFloat(R1s.value);
+            const r2 = parseFloat(R2s.value);
+            R1v.textContent = r1; R2v.textContent = r2;
+            R1d.textContent = r1; R2d.textContent = r2;
+            const Rsum = r1 + r2; const I = 12 / Rsum;
+            currentI = I;
+            Rd.textContent = Rsum.toFixed(1);
+            Id.textContent = I.toFixed(2);
+        }
+        R1s.addEventListener('input', recalc);
+        R2s.addEventListener('input', recalc);
+        document.getElementById('s-reset').addEventListener('click', () => { R1s.value = 4; R2s.value = 6; recalc(); });
+        document.getElementById('fs-series').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen();
+            else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.target.set(0, 0, 0); controls.update();
+        recalc();
+
+        const W = 28;
+        const t1 = 10 / W;
+        const t2 = t1 + 4 / W;
+        const t3 = t2 + 10 / W;
+        const t4 = 1.0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            const speed = 0.0004 + currentI * 0.0002;
+            electrons.forEach(e => {
+                e.t = (e.t + speed) % 1;
+                const p = e.t;
+                if (p < t1) {
+                    const k = p / t1;
+                    e.mesh.position.set(L + k * (R - L), T, 0);
+                } else if (p < t2) {
+                    const k = (p - t1) / (t2 - t1);
+                    e.mesh.position.set(R, T - k * (T - B), 0);
+                } else if (p < t3) {
+                    const k = (p - t2) / (t3 - t2);
+                    e.mesh.position.set(R - k * (R - L), B, 0);
+                } else {
+                    const k = (p - t3) / (t4 - t3);
+                    e.mesh.position.set(L, B + k * (T - B), 0);
+                }
+            });
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script><!-- ===== МОДЕЛЬ 2: ПАРАЛЛЕЛЬНОЕ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-parallel');
+        const canvas = document.getElementById('canvas-parallel');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 17);
+        camera.lookAt(0, 0, 0);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width || 800, h = rect.height || 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(updateSize).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(5, 10, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        function makeLabel(text, color, scale) {
+            scale = scale || 1;
+            const c = document.createElement('canvas');
+            const ctx = c.getContext('2d');
+            c.width = 512; c.height = 256;
+            ctx.font = 'bold 72px Segoe UI, Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = color || '#fff';
+            ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.lineWidth = 10;
+            ctx.strokeText(text, 256, 128); ctx.fillText(text, 256, 128);
+            const tex = new THREE.CanvasTexture(c);
+            tex.minFilter = THREE.LinearFilter;
+            const sp = new THREE.Sprite(new THREE.SpriteMaterial({map: tex, transparent: true, depthTest: false}));
+            sp.scale.set(2.4 * scale, 1.2 * scale, 1);
+            sp.renderOrder = 999;
+            return sp;
+        }
+
+        function makeBattery(x, y, vertical) {
+            const g = new THREE.Group(); g.position.set(x, y, 0);
+            if (vertical) {
+                const p = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.16, 0.4),
+                    new THREE.MeshStandardMaterial({color: 0xff5555, emissive: 0x330000}));
+                p.position.y = 0.24; g.add(p);
+                const n = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.16, 0.4),
+                    new THREE.MeshStandardMaterial({color: 0x5555ff, emissive: 0x000033}));
+                n.position.y = -0.24; g.add(n);
+                const pl = makeLabel('+', '#ff7777', 0.75); pl.position.set(1.0, 0.4, 0); g.add(pl);
+                const mn = makeLabel('\u2212', '#7777ff', 0.75); mn.position.set(1.0, -0.4, 0); g.add(mn);
+            } else {
+                const p = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.9, 0.4),
+                    new THREE.MeshStandardMaterial({color: 0xff5555, emissive: 0x330000}));
+                p.position.x = -0.24; g.add(p);
+                const n = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.5, 0.4),
+                    new THREE.MeshStandardMaterial({color: 0x5555ff, emissive: 0x000033}));
+                n.position.x = 0.24; g.add(n);
+                const pl = makeLabel('+', '#ff7777', 0.75); pl.position.set(0.75, 0.75, 0); g.add(pl);
+                const mn = makeLabel('\u2212', '#7777ff', 0.75); mn.position.set(-0.75, 0.75, 0); g.add(mn);
+            }
+            return g;
+        }
+
+        function makeResistor(x, y, label, horizontal) {
+            const g = new THREE.Group(); g.position.set(x, y, 0);
+            g.add(new THREE.Mesh(
+                new THREE.BoxGeometry(horizontal ? 1.6 : 0.7, horizontal ? 0.7 : 1.6, 0.5),
+                new THREE.MeshStandardMaterial({color: 0xcc8844, emissive: 0x221100})
+            ));
+            const lbl = makeLabel(label, '#facc15', 0.85);
+            if (horizontal) lbl.position.set(0, 1.05, 0); else lbl.position.set(1.35, 0, 0);
+            g.add(lbl);
+            return g;
+        }
+
+        function makeNode(x, y, label) {
+            const g = new THREE.Group(); g.position.set(x, y, 0);
+            g.add(new THREE.Mesh(new THREE.SphereGeometry(0.18, 14, 14),
+                new THREE.MeshStandardMaterial({color: 0xfacc15, emissive: 0x332200})));
+            if (label) {
+                const l = makeLabel(label, '#facc15', 0.7);
+                l.position.set(0, -0.85, 0); g.add(l);
+            }
+            return g;
+        }
+
+        const wireMat = new THREE.LineBasicMaterial({ color: 0xf59e0b });
+        function wire(pts) {
+            group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat));
+        }
+
+        const batX = -7, batY = 0;
+        const nAX = -3, nBX = 3;
+        const topY = 3, botY = -3;
+        const rightX = 7, bottomY = -5;
+
+        wire([new THREE.Vector3(batX, batY, 0), new THREE.Vector3(batX, topY, 0),
+              new THREE.Vector3(nAX, topY, 0)]);
+        wire([new THREE.Vector3(nAX, topY, 0), new THREE.Vector3(nBX, topY, 0)]);
+        wire([new THREE.Vector3(nAX, topY, 0), new THREE.Vector3(nAX, botY, 0),
+              new THREE.Vector3(nBX, botY, 0), new THREE.Vector3(nBX, topY, 0)]);
+        wire([new THREE.Vector3(nBX, topY, 0), new THREE.Vector3(rightX, topY, 0),
+              new THREE.Vector3(rightX, bottomY, 0), new THREE.Vector3(batX, bottomY, 0),
+              new THREE.Vector3(batX, batY, 0)]);
+
+        group.add(makeBattery(batX, batY, true));
+        group.add(makeResistor((nAX + nBX) / 2, topY, 'R1', true));
+        group.add(makeResistor((nAX + nBX) / 2, botY, 'R2', true));
+        group.add(makeNode(nAX, topY, 'A'));
+        group.add(makeNode(nBX, topY, 'B'));
+
+        const electrons = [], N = 40;
+        const eGeo = new THREE.SphereGeometry(0.11, 10, 10);
+        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        for (let i = 0; i < N; i++) {
+            const e = new THREE.Mesh(eGeo, eMat); group.add(e);
+            electrons.push({ mesh: e, t: i / N, branch: i % 2 });
+        }
+
+        const R1s = document.getElementById('p-slider-R1');
+        const R2s = document.getElementById('p-slider-R2');
+        const R1v = document.getElementById('p-R1v');
+        const R2v = document.getElementById('p-R2v');
+        const R1d = document.getElementById('p-R1d');
+        const R2d = document.getElementById('p-R2d');
+        const Rd = document.getElementById('p-Rd');
+        const Id = document.getElementById('p-Id');
+
+        let currentI = 5;
+        function recalc() {
+            const r1 = parseFloat(R1s.value), r2 = parseFloat(R2s.value);
+            R1v.textContent = r1; R2v.textContent = r2;
+            R1d.textContent = r1; R2d.textContent = r2;
+            const R = (r1 * r2) / (r1 + r2); const I = 12 / R;
+            currentI = I;
+            Rd.textContent = R.toFixed(2);
+            Id.textContent = I.toFixed(2);
+        }
+        R1s.addEventListener('input', recalc);
+        R2s.addEventListener('input', recalc);
+        document.getElementById('p-reset').addEventListener('click', () => { R1s.value = 4; R2s.value = 6; recalc(); });
+        document.getElementById('fs-parallel').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen();
+            else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.target.set(0, 0, 0); controls.update();
+        recalc();
+
+        const W = 44;
+        const t1 = 7 / W;
+        const t2 = 13 / W;
+        const t3 = 1.0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            const speed = 0.0003 + currentI * 0.00008;
+            electrons.forEach(e => {
+                e.t = (e.t + speed) % 1;
+                const p = e.t;
+                if (p < t1) {
+                    const k = p / t1;
+                    if (k < 0.4) {
+                        const kk = k / 0.4;
+                        e.mesh.position.set(batX, batY + kk * (topY - batY), 0);
+                    } else {
+                        const kk = (k - 0.4) / 0.6;
+                        e.mesh.position.set(batX + kk * (nAX - batX), topY, 0);
+                    }
+                } else if (p < t2) {
+                    const k = (p - t1) / (t2 - t1);
+                    const y = e.branch ? botY : topY;
+                    if (k < 0.25) {
+                        const kk = k / 0.25;
+                        e.mesh.position.set(nAX, topY - kk * (topY - y), 0);
+                    } else if (k < 0.75) {
+                        const kk = (k - 0.25) / 0.5;
+                        e.mesh.position.set(nAX + kk * (nBX - nAX), y, 0);
+                    } else {
+                        const kk = (k - 0.75) / 0.25;
+                        e.mesh.position.set(nBX, y + kk * (topY - y), 0);
+                    }
+                } else {
+                    const k = (p - t2) / (t3 - t2);
+                    if (k < 0.15) {
+                        const kk = k / 0.15;
+                        e.mesh.position.set(nBX + kk * (rightX - nBX), topY, 0);
+                    } else if (k < 0.40) {
+                        const kk = (k - 0.15) / 0.25;
+                        e.mesh.position.set(rightX, topY + kk * (bottomY - topY), 0);
+                    } else if (k < 0.85) {
+                        const kk = (k - 0.40) / 0.45;
+                        e.mesh.position.set(rightX + kk * (batX - rightX), bottomY, 0);
+                    } else {
+                        const kk = (k - 0.85) / 0.15;
+                        e.mesh.position.set(batX, bottomY + kk * (batY - bottomY), 0);
+                    }
+                }
+            });
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script><!-- ===== МОДЕЛЬ 3: СМЕШАННОЕ ===== -->
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+    (function() {
+        const container = document.getElementById('container-mixed');
+        const canvas = document.getElementById('canvas-mixed');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 0, 20);
+        camera.lookAt(0, 0, 0);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width || 800, h = rect.height || 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(updateSize).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(5, 10, 10);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        function makeLabel(text, color, scale) {
+            scale = scale || 1;
+            const c = document.createElement('canvas');
+            const ctx = c.getContext('2d');
+            c.width = 512; c.height = 256;
+            ctx.font = 'bold 72px Segoe UI, Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = color || '#fff';
+            ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.lineWidth = 10;
+            ctx.strokeText(text, 256, 128); ctx.fillText(text, 256, 128);
+            const tex = new THREE.CanvasTexture(c);
+            tex.minFilter = THREE.LinearFilter;
+            const sp = new THREE.Sprite(new THREE.SpriteMaterial({map: tex, transparent: true, depthTest: false}));
+            sp.scale.set(2.4 * scale, 1.2 * scale, 1);
+            sp.renderOrder = 999;
+            return sp;
+        }
+
+        function makeBattery(x, y) {
+            const g = new THREE.Group(); g.position.set(x, y, 0);
+            const p = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.16, 0.4),
+                new THREE.MeshStandardMaterial({color: 0xff5555, emissive: 0x330000}));
+            p.position.y = 0.24; g.add(p);
+            const n = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.16, 0.4),
+                new THREE.MeshStandardMaterial({color: 0x5555ff, emissive: 0x000033}));
+            n.position.y = -0.24; g.add(n);
+            const pl = makeLabel('+', '#ff7777', 0.75); pl.position.set(1.0, 0.4, 0); g.add(pl);
+            const mn = makeLabel('\u2212', '#7777ff', 0.75); mn.position.set(1.0, -0.4, 0); g.add(mn);
+            return g;
+        }
+
+        function makeResistor(x, y, label, horizontal) {
+            const g = new THREE.Group(); g.position.set(x, y, 0);
+            g.add(new THREE.Mesh(
+                new THREE.BoxGeometry(horizontal ? 1.6 : 0.7, horizontal ? 0.7 : 1.6, 0.5),
+                new THREE.MeshStandardMaterial({color: 0xcc8844, emissive: 0x221100})
+            ));
+            const lbl = makeLabel(label, '#facc15', 0.85);
+            if (horizontal) lbl.position.set(0, 1.05, 0); else lbl.position.set(1.35, 0, 0);
+            g.add(lbl);
+            return g;
+        }
+
+        function makeNode(x, y, label) {
+            const g = new THREE.Group(); g.position.set(x, y, 0);
+            g.add(new THREE.Mesh(new THREE.SphereGeometry(0.18, 14, 14),
+                new THREE.MeshStandardMaterial({color: 0xfacc15, emissive: 0x332200})));
+            if (label) {
+                const l = makeLabel(label, '#facc15', 0.7);
+                l.position.set(0, -0.85, 0); g.add(l);
+            }
+            return g;
+        }
+
+        const wireMat = new THREE.LineBasicMaterial({ color: 0xf59e0b });
+        function wire(pts) {
+            group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat));
+        }
+
+        // Координаты
+        const batX = -7, batY = 0;
+        const topY = 4, botY = -4;
+        const rightEdgeX = 7;
+        const r1X = -2, r2X = 2;
+        const nodeAX = 0, nodeBX = 5;
+        const midY = 0;
+
+        // Провода
+        wire([new THREE.Vector3(batX, batY, 0), new THREE.Vector3(batX, topY, 0), new THREE.Vector3(r1X - 0.8, topY, 0)]);
+        wire([new THREE.Vector3(r1X + 0.8, topY, 0), new THREE.Vector3(nodeAX, topY, 0)]);
+        wire([new THREE.Vector3(nodeAX, topY, 0), new THREE.Vector3(r2X - 0.8, topY, 0)]);
+        wire([new THREE.Vector3(r2X + 0.8, topY, 0), new THREE.Vector3(nodeBX, topY, 0)]);
+        wire([new THREE.Vector3(nodeAX, topY, 0), new THREE.Vector3(nodeAX, midY, 0), new THREE.Vector3(r2X - 0.8, midY, 0)]);
+        wire([new THREE.Vector3(r2X + 0.8, midY, 0), new THREE.Vector3(nodeBX, midY, 0), new THREE.Vector3(nodeBX, topY, 0)]);
+        wire([new THREE.Vector3(nodeBX, topY, 0), new THREE.Vector3(rightEdgeX, topY, 0),
+              new THREE.Vector3(rightEdgeX, botY, 0), new THREE.Vector3(batX, botY, 0),
+              new THREE.Vector3(batX, batY, 0)]);
+
+        group.add(makeBattery(batX, batY));
+        group.add(makeResistor(r1X, topY, 'R1', true));
+        group.add(makeResistor(r2X, topY, 'R2', true));
+        group.add(makeResistor(r2X, midY, 'R3', true));
+        group.add(makeNode(nodeAX, topY, 'A'));
+        group.add(makeNode(nodeBX, topY, 'B'));
+
+        // --- Пути и их длины ---
+        const pathIn = [
+            new THREE.Vector3(batX, batY, 0),
+            new THREE.Vector3(batX, topY, 0),
+            new THREE.Vector3(nodeAX, topY, 0)
+        ];
+        const pathTopBranch = [
+            new THREE.Vector3(nodeAX, topY, 0),
+            new THREE.Vector3(nodeBX, topY, 0)
+        ];
+        const pathBotBranch = [
+            new THREE.Vector3(nodeAX, topY, 0),
+            new THREE.Vector3(nodeAX, midY, 0),
+            new THREE.Vector3(nodeBX, midY, 0),
+            new THREE.Vector3(nodeBX, topY, 0)
+        ];
+        const pathOut = [
+            new THREE.Vector3(nodeBX, topY, 0),
+            new THREE.Vector3(rightEdgeX, topY, 0),
+            new THREE.Vector3(rightEdgeX, botY, 0),
+            new THREE.Vector3(batX, botY, 0),
+            new THREE.Vector3(batX, batY, 0)
+        ];
+
+        function getPathLength(path) {
+            let len = 0;
+            for (let i = 0; i < path.length - 1; i++) {
+                len += path[i].distanceTo(path[i + 1]);
+            }
+            return len;
+        }
+
+        function getPointAndLength(path, dist) {
+            let remaining = dist;
+            for (let i = 0; i < path.length - 1; i++) {
+                const p1 = path[i];
+                const p2 = path[i + 1];
+                const segLen = p1.distanceTo(p2);
+                if (remaining <= segLen) {
+                    const k = segLen === 0 ? 0 : remaining / segLen;
+                    return new THREE.Vector3().lerpVectors(p1, p2, k);
+                }
+                remaining -= segLen;
+            }
+            return path[path.length - 1].clone();
+        }
+
+        const L_in = getPathLength(pathIn);
+        const L_top = getPathLength(pathTopBranch);
+        const L_bot = getPathLength(pathBotBranch);
+        const L_out = getPathLength(pathOut);
+
+        const T_par = (L_top + L_bot) / 2;
+        const T_total = L_in + T_par + L_out;
+        const f_in = L_in / T_total;
+        const f_par = T_par / T_total;
+        const f_out = L_out / T_total;
+
+        // Электроны
+        const N = 120;
+        const W = Math.max(1, Math.round(N * f_par));
+        const topInWindow = Math.round(W * L_top / (L_top + L_bot));
+        const electrons = [];
+        const eGeo = new THREE.SphereGeometry(0.11, 10, 10);
+        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+
+        for (let i = 0; i < N; i++) {
+            const e = new THREE.Mesh(eGeo, eMat);
+            group.add(e);
+            const k = i % W;
+            const isTop = (Math.floor((k + 1) * topInWindow / W) > Math.floor(k * topInWindow / W));
+            electrons.push({
+                mesh: e,
+                t: i / N,
+                isTop: isTop
+            });
+        }
+
+        // Ползунки
+        const R1s = document.getElementById('m-slider-R1');
+        const R2s = document.getElementById('m-slider-R2');
+        const R3s = document.getElementById('m-slider-R3');
+        const R1v = document.getElementById('m-R1v');
+        const R2v = document.getElementById('m-R2v');
+        const R3v = document.getElementById('m-R3v');
+        const R1d = document.getElementById('m-R1d');
+        const R2d = document.getElementById('m-R2d');
+        const R3d = document.getElementById('m-R3d');
+        const Rd = document.getElementById('m-Rd');
+        const Id = document.getElementById('m-Id');
+
+        let currentI = 1.5;
+        function recalc() {
+            const r1 = parseFloat(R1s.value), r2 = parseFloat(R2s.value), r3 = parseFloat(R3s.value);
+            R1v.textContent = r1; R2v.textContent = r2; R3v.textContent = r3;
+            R1d.textContent = r1; R2d.textContent = r2; R3d.textContent = r3;
+            const r23 = (r2 * r3) / (r2 + r3);
+            const R = r1 + r23;
+            currentI = 12 / R;
+            Rd.textContent = R.toFixed(2);
+            Id.textContent = currentI.toFixed(2);
+        }
+        R1s.addEventListener('input', recalc);
+        R2s.addEventListener('input', recalc);
+        R3s.addEventListener('input', recalc);
+        document.getElementById('m-reset').addEventListener('click', () => {
+            R1s.value = 4; R2s.value = 6; R3s.value = 12; recalc();
+        });
+        document.getElementById('fs-mixed').addEventListener('click', async () => {
+            if (!document.fullscreenElement) await container.requestFullscreen();
+            else await container.exitFullscreen();
+            updateSize();
+        });
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.target.set(0, 0, 0); controls.update();
+        recalc();
+
+        let lastTime = performance.now();
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const dt = Math.min((time - lastTime) / 1000, 0.1);
+            lastTime = time;
+
+            const speed = currentI * 0.08;
+
+            electrons.forEach(e => {
+                e.t = (e.t + speed * dt) % 1;
+
+                let pos;
+                if (e.t < f_in) {
+                    const dist = (e.t / f_in) * L_in;
+                    pos = getPointAndLength(pathIn, dist);
+                } else if (e.t < f_in + f_par) {
+                    const local_t = (e.t - f_in) / f_par;
+                    if (e.isTop) {
+                        pos = getPointAndLength(pathTopBranch, local_t * L_top);
+                    } else {
+                        pos = getPointAndLength(pathBotBranch, local_t * L_bot);
+                    }
+                } else {
+                    const dist = ((e.t - f_in - f_par) / f_out) * L_out;
+                    pos = getPointAndLength(pathOut, dist);
+                }
+                e.mesh.position.copy(pos);
+            });
+
+            renderer.render(scene, camera);
+        }
+        requestAnimationFrame(animate);
+    })();
+</script>
+
+<!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ -->
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+</body>
+</html>

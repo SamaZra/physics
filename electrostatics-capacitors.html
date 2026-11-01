@@ -743,6 +743,20 @@
             transition: transform 0.1s;
         }
     </style>
+
+<style id="fix-nav-bounce">
+    /* Отключаем сдвиги и пружины у кнопок нижней панели */
+    .bottom-nav a, .bottom-nav button {
+        transform: none !important;
+        transition: background 0.2s ease, color 0.2s ease !important;
+    }
+    .bottom-nav a:active, .bottom-nav button:active, 
+    .bottom-nav a:focus, .bottom-nav button:focus {
+        transform: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+</style>
 </head>
 <body>
 <div class="container">
@@ -1895,136 +1909,46 @@
         </svg>
     </button>
 </nav>
-<script>
-    /* ==== 5. Скелетоны для формул MathJax ==== */
-    (function(){
-        function addSkeletons(){
-            document.querySelectorAll('.formula-block').forEach(function(el){
-                if (el.querySelector('mjx-container')) return;
-                if (el.dataset.sk) return;
-                el.dataset.sk = '1';
-                var s = document.createElement('span');
-                s.className = 'skeleton';
-                s.style.width = (60 + Math.random()*80) + 'px';
-                el.appendChild(s);
-            });
+<style id="bottom-nav-force-hide">
+    /* Принудительное скрытие панели */
+    body .bottom-nav.nav-hidden {
+        transform: translate(-50%, 150%) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: transform 0.3s ease, opacity 0.3s ease !important;
+    }
+</style>
+<script id="nav-autohide-script">
+document.addEventListener('DOMContentLoaded', function(){
+    var nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    var lastY = window.scrollY;
+    var threshold = 5;
+    var ticking = false;
+    
+    function onScroll(){
+        var y = window.scrollY;
+        if (Math.abs(y - lastY) < threshold) { 
+            ticking = false; 
+            return; 
         }
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
-        else addSkeletons();
-        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
-    })();
-
-    /* ==== 6. Чипы категорий в результатах поиска ==== */
-    (function(){
-        function classify(cat){
-            var c = (cat||'').toLowerCase();
-            if (c.indexOf('механик') >= 0) return 'cat-mech';
-            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
-            if (c.indexOf('электр') >= 0) return 'cat-elec';
-            return 'cat-other';
+        if (y > lastY && y > 50) {
+            nav.classList.add('nav-hidden');
+        } else {
+            nav.classList.remove('nav-hidden');
         }
-        function decorate(){
-            document.querySelectorAll('.search-result-category').forEach(function(el){
-                if (el.dataset.chip) return;
-                el.dataset.chip = '1';
-                el.classList.add(classify(el.textContent));
-            });
+        lastY = y;
+        ticking = false;
+    }
+    
+    window.addEventListener('scroll', function(){
+        if (!ticking) { 
+            requestAnimationFrame(onScroll); 
+            ticking = true; 
         }
-        var orig = window.performSearch;
-        if (typeof orig === 'function') {
-            window.performSearch = function(){
-                orig.apply(this, arguments);
-                decorate();
-            };
-        }
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
-        else decorate();
-    })();
-
-    /* ==== 10. Анимация смены темы «как на iPhone» ==== */
-    (function(){
-        function animateThemeChange(x, y){
-            var circle = document.createElement('div');
-            circle.className = 'theme-circle';
-            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
-            circle.style.width = circle.style.height = (maxR*2) + 'px';
-            circle.style.left = (x - maxR) + 'px';
-            circle.style.top  = (y - maxR) + 'px';
-            document.body.appendChild(circle);
-            requestAnimationFrame(function(){ circle.classList.add('expand'); });
-            setTimeout(function(){ circle.remove(); }, 700);
-        }
-        document.addEventListener('click', function(e){
-            var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
-            if (!t) return;
-            var r = t.getBoundingClientRect();
-            animateThemeChange(r.left + r.width/2, r.top + r.height/2);
-        }, true);
-    })();
-
-    /* ==== 2. Ripple при тапе ==== */
-    (function(){
-        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
-        function bind(el){
-            if (el.dataset.rippleBound) return;
-            el.dataset.rippleBound = '1';
-            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
-            el.addEventListener('pointerdown', function(e){
-                var rect = el.getBoundingClientRect();
-                var size = Math.max(rect.width, rect.height);
-                var r = document.createElement('span');
-                r.className = 'ripple';
-                r.style.width = r.style.height = size + 'px';
-                r.style.left = (e.clientX - rect.left - size/2) + 'px';
-                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
-                el.appendChild(r);
-                setTimeout(function(){ r.remove(); }, 650);
-            });
-        }
-        function bindAll(){
-            document.querySelectorAll(sel).forEach(bind);
-        }
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
-        else bindAll();
-        /* Перепривязка после поиска */
-        var orig = window.performSearch;
-        if (typeof orig === 'function') {
-            window.performSearch = function(){
-                orig.apply(this, arguments);
-                setTimeout(bindAll, 30);
-            };
-        }
-    })();
+    }, { passive: true });
+});
 </script>
-<script src="search-overlay.js"></script>
-<!-- bottom-nav-autohide-script -->
-<script>
-    /* Автоскрытие нижней панели при скролле */
-    (function(){
-        var nav = document.querySelector('.bottom-nav');
-        if (!nav) return;
-        var lastY = window.scrollY;
-        var threshold = 8;
-        var ticking = false;
-        function onScroll(){
-            var y = window.scrollY;
-            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
-            if (y > lastY && y > 80) {
-                nav.classList.add('nav-hidden');
-            } else {
-                nav.classList.remove('nav-hidden');
-            }
-            lastY = y;
-            ticking = false;
-        }
-        window.addEventListener('scroll', function(){
-            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
-        }, { passive: true });
-    })();
-</script>
-<script src="page-search.js"></script>
-<script src="physics-data.js"></script>
-</div>
 </body>
 </html>
 

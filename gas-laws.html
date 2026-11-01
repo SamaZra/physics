@@ -75,18 +75,14 @@
         .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
         .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
         .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
-        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
-        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+
         .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:130px;}
         .info-display div{margin:2px 0;}
         .info-display .val{font-weight:700;color:var(--special-border);}
         .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
-        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
-        .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
-        .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
+
         .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
-        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
-        .back-link:hover{background:#b45309;}
+
         .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
         .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
         .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
@@ -97,8 +93,7 @@
         .task-given-find .find{color:var(--find-color);}
         .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
         .task-given-find mjx-container{font-size:1.1rem !important;}
-        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
-        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+
         .task-solution{display:none;margin-top:12px;}
         .task-solution.open{display:block;}
         .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
@@ -128,7 +123,7 @@
             .formula-block{font-size:0.95rem;padding:10px 12px;}
             .formula-block .f{font-size:1.1rem;}
             .model-tabs{gap:4px;}
-            .model-tab{padding:6px 12px;font-size:0.75rem;}
+
             .info-display{font-size:0.6rem;padding:4px 10px;min-width:100px;top:8px;right:8px;}
             .process-table{font-size:0.8rem;}
         }
@@ -151,601 +146,261 @@
     </script>
     <script src="es5/tex-chtml.js" async></script>
     <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
-<style id="titles-center-fix">
-/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
-.section-title {
-    justify-content: center !important;
-    text-align: center !important;
-    position: relative !important;
-    padding-left: 16px !important;
-    padding-right: 28px !important;
-}
-.section-title::after {
-    position: absolute !important;
-    right: 8px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    margin-left: 0 !important;
-}
-.section.collapsed .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-/* Названия файлов / страниц — по центру */
-h1, .page-title, .file-title, .title {
-    text-align: center !important;
-}
-</style>
-<style id="section-gradient-fix">
-/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
-/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
 
-.section { position: relative; }
 
-/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
 
-/* Закрыт: градиента нет */
-.section.collapsed > .section-title {
-    background-image: none;
-    transition: background-image 0.35s ease;
-}
-
-/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
-.section.collapsed > .section-title:hover {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Открыт: тот же градиент постоянно */
-.section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Светлая тема — цвет из --special-border (#d97706) */
-:root.light-mode .section.collapsed > .section-title:hover,
-:root.light-mode .section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(217, 119, 6, 0.18) 0%,
-        rgba(217, 119, 6, 0.06) 45%,
-        rgba(217, 119, 6, 0.00) 100%);
-}
-
-/* ---------- СТРЕЛКА ---------- */
-
-/* Закрыт: светящаяся синяя */
-.section.collapsed > .section-title::after {
-    color: var(--accent, #3b82f6) !important;
-    text-shadow:
-        0 0 6px rgba(59, 130, 246, 0.85),
-        0 0 14px rgba(59, 130, 246, 0.55);
-    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
-    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
-}
-
-/* Открыт: свечение убираем, стрелка обычная */
-.section:not(.collapsed) > .section-title::after {
-    color: var(--text-secondary, #8ba5b8) !important;
-    text-shadow: none !important;
-    filter: none !important;
-}
-
-/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
-.section.collapsed > .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-.section:not(.collapsed) > .section-title::after {
-    transform: translateY(-50%) rotate(0deg) !important;
-}
-
-/* Светлая тема: синий чуть темнее, свечение мягче */
-:root.light-mode .section.collapsed > .section-title::after {
-    color: var(--accent, #2563eb) !important;
-    text-shadow:
-        0 0 6px rgba(37, 99, 235, 0.6),
-        0 0 12px rgba(37, 99, 235, 0.35);
-    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
-}
-</style>
 <style id="modern-visual-fix">
-/* ==== 7. Плавный скролл + отступ у заголовков ==== */
 html { scroll-behavior: smooth; }
 .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
-
-/* ==== 8. Радиальный градиент на фоне ==== */
 body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
-        var(--bg) !important;
+    background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important;
 }
 :root.light-mode body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
-        var(--bg) !important;
+    background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important;
 }
-
-/* ==== 3. «Стеклянная» шапка ==== */
 @media (prefers-reduced-motion: no-preference) {
-    .header {
-        background: rgba(30, 53, 69, 0.72) !important;
-        backdrop-filter: blur(14px) saturate(140%);
-        -webkit-backdrop-filter: blur(14px) saturate(140%);
-        border-bottom: 1px solid var(--border);
-    }
+    .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); }
     :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
 }
-
-/* ==== 5. Скелетоны для формул ==== */
 .skeleton {
-    display: inline-block;
-    min-width: 60px;
-    height: 1.1em;
-    vertical-align: middle;
-    border-radius: 6px;
+    display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px;
     background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
-    background-size: 200% 100%;
-    animation: shimmerSk 1.2s infinite linear;
+    background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear;
 }
 @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
-
-/* ==== 6. Чипы категорий в поиске ==== */
-.search-result-category {
-    display: inline-block;
-    padding: 2px 10px;
-    margin-top: 4px;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    color: #fff;
-    background: var(--accent, #3b82f6);
-}
+.search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
 .search-result-category.cat-mech  { background: #3b82f6; }
 .search-result-category.cat-thermo{ background: #f59e0b; }
 .search-result-category.cat-elec  { background: #eab308; }
 .search-result-category.cat-other { background: #64748b; }
 
-/* ==== 4. Нижняя навигация ==== */
-.bottom-nav {
-    position: fixed;
-    left: 50%;
-    bottom: 14px;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 22px;
-    background: rgba(30, 53, 69, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
-    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
-    z-index: 900;
-    transition: background 0.3s, border 0.3s;
-}
-:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
-.bottom-nav a, .bottom-nav button {
-    display: flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px; border-radius: 14px;
-    border: none; background: transparent;
-    color: var(--text-secondary); font-size: 22px;
-    cursor: pointer; text-decoration: none;
-    transition: all 0.2s;
-}
-.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
-    background: rgba(59,130,246,0.15);
-    color: var(--accent);
-    transform: translateY(-2px);
-}
+:root.light-mode 
+
 body { padding-bottom: 78px; }
-
-/* ==== 10. Круг смены темы ==== */
-.theme-circle {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    background: var(--bg);
-    transform: scale(0);
-    opacity: 0.95;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
-}
+.theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
 .theme-circle.expand { transform: scale(1); opacity: 0; }
-
-/* ==== 2. Ripple при тапе ==== */
 .ripple-host { position: relative !important; overflow: hidden !important; }
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(59,130,246,0.35);
-    transform: scale(0);
-    animation: rippleAnim 0.6s ease-out forwards;
-    pointer-events: none;
-    z-index: 0;
-}
+.ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
 @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
 :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
 </style>
 <style id="search-clean-fix">
-/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
-.search-result-icon {
-    display: none !important;
-}
+.search-result-icon { display: none !important; }
+.search-results { scrollbar-width: none; -ms-overflow-style: none; }
+.search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+body { scrollbar-width: none; -ms-overflow-style: none; }
+</style>
+<style id="nav-back-hide-index"> body.is-index .nav-back-btn { display: none !important; } </style>
 
-/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
-.search-results {
-    scrollbar-width: none;          /* Firefox */
-    -ms-overflow-style: none;       /* IE/Edge */
-}
-.search-results::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-}
-
-/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
-body::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-}
-body {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-</style>
-<style id="nav-back-hide-index">
-/* На главной кнопка «Назад» не нужна */
-body.is-index .nav-back-btn { display: none !important; }
-</style>
-<style id="bottom-nav-autohide">
-/* Автоскрытие нижней панели при скролле вниз */
-.bottom-nav {
-    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
-}
-.bottom-nav.nav-hidden {
-    transform: translate(-50%, 120%);
-    opacity: 0;
-    pointer-events: none;
-}
-/* На главной панель всегда видна */
-body.is-index .bottom-nav.nav-hidden {
-    transform: translate(-50%, 0);
-    opacity: 1;
-    pointer-events: auto;
-}
-</style>
 <style id="fav-nav-yellow">
-/* Избранное в нижней панели — жёлтое выделение, когда активно */
-.bottom-nav a[href="favorites.html"].active,
-.bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(250, 204, 21, 0.18) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover,
-.bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(250, 204, 21, 0.28) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(234, 179, 8, 0.18) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(234, 179, 8, 0.28) !important;
-    color: #92400e !important;
-}
-/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
-
+.bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+.bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+:root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
 </style>
 <style id="nav-order-fix">
-/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
-.bottom-nav { display: flex; align-items: center; }
+
 .bottom-nav .nav-back-btn { order: 1; }
 .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
 .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
 .bottom-nav a[href="favorites.html"] { order: 4; }
-
-/* Звезда активна — жёлтая */
-.bottom-nav a[href="favorites.html"].active {
-    background: rgba(250, 204, 21, 0.20) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(250, 204, 21, 0.30) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active {
-    background: rgba(234, 179, 8, 0.20) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(234, 179, 8, 0.30) !important;
-    color: #92400e !important;
-}
+.bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+.bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+:root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+:root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
 </style>
 <style id="unified-buttons">
-/* ==== Единый стиль кнопок ==== */
+.btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap;
+}
+.btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+.btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+.btn-primary, .show-solution-btn, 
+.btn-primary:hover, .show-solution-btn:hover, 
+:root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode 
+:root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode 
+.btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+.btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+:root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
 
-/* База для всех кнопок */
-.btn-primary,
-.btn-secondary,
-.btn-danger,
-.show-solution-btn,
-.btn-reset,
-.model-tab,
-.clear-all-btn,
-.search-clear,
-.back-link,
-.fullscreen-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 8px 18px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: inherit;
-    line-height: 1.2;
-    border: 1px solid transparent;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s, border-color 0.2s,
-                box-shadow 0.2s, transform 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    white-space: nowrap;
-}
-
-/* Hover / active — общий отклик */
-.btn-primary:hover,
-.btn-secondary:hover,
-.btn-danger:hover,
-.show-solution-btn:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover,
-.back-link:hover,
-.fullscreen-btn:hover {
-    transform: translateY(-1px);
-}
-.btn-primary:active,
-.btn-secondary:active,
-.btn-danger:active,
-.show-solution-btn:active,
-.btn-reset:active,
-.model-tab:active,
-.clear-all-btn:active,
-.back-link:active,
-.fullscreen-btn:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* ==== PRIMARY (синий акцент) ==== */
-.btn-primary,
-.show-solution-btn,
-.back-link {
-    background: var(--accent, #3b82f6);
-    color: #fff;
-    border-color: var(--accent, #3b82f6);
-}
-.btn-primary:hover,
-.show-solution-btn:hover,
-.back-link:hover {
-    background: var(--accent-hover, #60a5fa);
-    border-color: var(--accent-hover, #60a5fa);
-    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
-}
-:root.light-mode .btn-primary,
-:root.light-mode .show-solution-btn,
-:root.light-mode .back-link {
-    background: var(--accent, #2563eb);
-    border-color: var(--accent, #2563eb);
-}
-:root.light-mode .btn-primary:hover,
-:root.light-mode .show-solution-btn:hover,
-:root.light-mode .back-link:hover {
-    background: var(--accent-hover, #3b82f6);
-    border-color: var(--accent-hover, #3b82f6);
-}
-
-/* ==== SECONDARY (нейтральный) ==== */
-.btn-secondary,
-.btn-reset,
-.model-tab,
-.clear-all-btn {
-    background: var(--menu-item-hover, #233e50);
-    color: var(--text, #fff);
-    border-color: var(--border, rgba(59,130,246,0.15));
-}
-.btn-secondary:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover {
-    background: var(--group-header-bg, #1a3a5a);
-    border-color: var(--accent, #3b82f6);
-    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
-}
-:root.light-mode .btn-secondary,
-:root.light-mode .btn-reset,
-:root.light-mode .model-tab,
-:root.light-mode .clear-all-btn {
-    background: var(--menu-item-hover, #f0f4fa);
-    color: var(--text, #1a2a3f);
-}
-
-/* Активный таб — как primary */
-.model-tab.active {
-    background: var(--accent, #3b82f6) !important;
-    color: #fff !important;
-    border-color: var(--accent, #3b82f6) !important;
-    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
-}
-.model-tab.active:hover {
-    background: var(--accent-hover, #60a5fa) !important;
-    border-color: var(--accent-hover, #60a5fa) !important;
-}
-
-/* ==== DANGER (красный) ==== */
-.btn-danger,
-.clear-all-btn.danger,
-.clear-all-btn:hover {
-    background: #ef4444 !important;
-    color: #fff !important;
-    border-color: #ef4444 !important;
-}
-.btn-danger:hover,
-.clear-all-btn.danger:hover,
-.clear-all-btn:hover {
-    background: #dc2626 !important;
-    border-color: #dc2626 !important;
-    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
-}
-
-/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
-.search-clear {
-    background: transparent;
-    border: none;
-    padding: 6px 10px;
-    min-height: auto;
-    color: var(--text-secondary, #8ba5b8);
-    border-radius: 50%;
-}
-.search-clear:hover {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--accent, #3b82f6);
-    transform: none;
-}
-
-/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
-.fullscreen-btn {
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.25);
-    font-size: 20px;
-}
-.fullscreen-btn:hover {
-    background: var(--accent, #3b82f6);
-    border-color: var(--accent, #3b82f6);
-}
-
-/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
-.remove-fav {
-    border-radius: 50%;
-    min-height: 32px;
-    min-width: 32px;
-    padding: 4px 8px;
-}
-.remove-fav:hover {
-    background: rgba(239, 68, 68, 0.15) !important;
-    color: #ef4444 !important;
-}
-
-/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
-.btn-link {
-    background: transparent;
-    border: none;
-    color: var(--accent, #3b82f6);
-    padding: 0;
-    min-height: auto;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-.btn-link:hover {
-    color: var(--accent-hover, #60a5fa);
-    transform: none;
-    box-shadow: none;
-}
+.model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+.btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+.btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+.search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+.search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+.fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+.fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+.remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+.remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+.btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+.btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
 </style>
 <style id="page-fade-in">
-/* ==== Плавное появление страницы (fade-in) ==== */
-
-/* Мягкий вход всей страницы */
-body {
-    animation: pageFade 0.3s ease-out;
-}
-@keyframes pageFade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Контент чуть «подъезжает» снизу */
-.container,
-.main-content {
-    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-}
-@keyframes pageFadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Если в системе включено «уменьшить движение» — анимации отключаем */
-@media (prefers-reduced-motion: reduce) {
-    body,
-    .container,
-    .main-content {
-        animation: none !important;
-    }
-}
+body { animation: pageFade 0.3s ease-out; }
+@keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+.container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+@keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
 </style>
-<style id="share-btn-right">
-/* Прижимаем кнопку «Поделиться» к правому краю панели */
-.bottom-nav button[title="Поделиться"] {
-    order: 99 !important;
-    margin-left: auto !important;
-}
-</style>
-<style id="no-tap-highlight">
-/* Убираем системный голубой/серый прямоугольник при тапе */
-* {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-}
-a, button, div, span, label, input, textarea, select {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-}
-</style>
+<style id="share-btn-right"> .bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; } </style>
+<style id="no-tap-highlight"> * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; } a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; } </style>
 <style id="no-tap-highlight-accordion">
-/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
-.section-title,
-.group-header,
-.menu-item,
-.submenu-item,
-.model-tab,
-.search-result-item {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-    user-select: none;
-    -webkit-user-select: none;
-    cursor: pointer;
-}
+.section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+.section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+</style>
 
-/* Лёгкий отклик при нажатии (вместо системного квадратика) */
-.section-title:active,
-.group-header:active {
-    transform: scale(0.99);
-    transition: transform 0.1s;
+
+
+<style id="gas-laws-correct-styles">
+/* Панель */
+.bottom-nav {
+    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+    display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px;
+    background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border);
+    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900;
+    transition: background 0.3s, border 0.3s, transform 0.3s;
 }
+:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+.bottom-nav a, .bottom-nav button {
+    display: flex; align-items: center; justify-content: center;
+    width: 46px !important; height: 46px !important; border-radius: 14px;
+    border: none; background: transparent; color: var(--text-secondary); font-size: 22px;
+    cursor: pointer; text-decoration: none; transition: all 0.2s; padding: 0 !important;
+}
+.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
+    background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px);
+}
+.bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+.bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+.bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+
+/* Заголовки (градиент и стрелка) */
+.section-title {
+    justify-content: center !important; text-align: center !important; position: relative !important;
+    padding-left: 16px !important; padding-right: 28px !important;
+}
+.section-title::after {
+    position: absolute !important; right: 8px !important; top: 50% !important;
+    transform: translateY(-50%) !important; margin-left: 0 !important;
+}
+.section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+h1, .page-title, .file-title, .title { text-align: center !important; }
+
+.section { position: relative; }
+.section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+.section.collapsed > .section-title:hover {
+    background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat; background-size: 100% 100%;
+}
+.section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat; background-size: 100% 100%;
+}
+:root.light-mode .section.collapsed > .section-title:hover,
+:root.light-mode .section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%);
+}
+.section.collapsed > .section-title::after {
+    color: var(--accent, #3b82f6) !important;
+    text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55);
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
+}
+.section:not(.collapsed) > .section-title::after {
+    color: var(--text-secondary, #8ba5b8) !important;
+    text-shadow: none !important; filter: none !important;
+}
+</style>
+<style id="fix-nav-bounce">
+    /* Отключаем сдвиги и пружины у кнопок нижней панели */
+    .bottom-nav a, .bottom-nav button {
+        transform: none !important;
+        transition: background 0.2s ease, color 0.2s ease !important;
+    }
+    .bottom-nav a:active, .bottom-nav button:active, 
+    .bottom-nav a:focus, .bottom-nav button:focus {
+        transform: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+</style>
+</head>
+
+
+
+<style id="gas-laws-correct-styles">
+/* Панель */
+.bottom-nav {
+    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+    display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px;
+    background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border);
+    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900;
+    transition: background 0.3s, border 0.3s, transform 0.3s;
+}
+:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+.bottom-nav a, .bottom-nav button {
+    display: flex; align-items: center; justify-content: center;
+    width: 46px !important; height: 46px !important; border-radius: 14px;
+    border: none; background: transparent; color: var(--text-secondary); font-size: 22px;
+    cursor: pointer; text-decoration: none; transition: all 0.2s; padding: 0 !important;
+}
+.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
+    background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px);
+}
+.bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+.bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+.bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+
+/* Заголовки (градиент и стрелка) */
+.section-title {
+    justify-content: center !important; text-align: center !important; position: relative !important;
+    padding-left: 16px !important; padding-right: 28px !important;
+}
+.section-title::after {
+    position: absolute !important; right: 8px !important; top: 50% !important;
+    transform: translateY(-50%) !important; margin-left: 0 !important;
+}
+.section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+h1, .page-title, .file-title, .title { text-align: center !important; }
+
+.section { position: relative; }
+.section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+.section.collapsed > .section-title:hover {
+    background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat; background-size: 100% 100%;
+}
+.section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%);
+    background-repeat: no-repeat; background-size: 100% 100%;
+}
+:root.light-mode .section.collapsed > .section-title:hover,
+:root.light-mode .section:not(.collapsed) > .section-title {
+    background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%);
+}
+.section.collapsed > .section-title::after {
+    color: var(--accent, #3b82f6) !important;
+    text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55);
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
+}
+.section:not(.collapsed) > .section-title::after {
+    color: var(--text-secondary, #8ba5b8) !important;
+    text-shadow: none !important; filter: none !important;
+}
+</style>
+<style id="fix-nav-bounce">
+    /* Отключаем сдвиги и пружины у кнопок нижней панели */
+    .bottom-nav a, .bottom-nav button {
+        transform: none !important;
+        transition: background 0.2s ease, color 0.2s ease !important;
+    }
+    .bottom-nav a:active, .bottom-nav button:active, 
+    .bottom-nav a:focus, .bottom-nav button:focus {
+        transform: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
 </style>
 </head>
 <body>
@@ -2302,34 +1957,27 @@ a, button, div, span, label, input, textarea, select {
 })();
 </script>
 <script src="page-search.js"></script>
-<script src="physics-data.js"></script>`r`n</body>
+<script src="physics-data.js"></script>`r`n<script id="nav-autohide-script">
+document.addEventListener('DOMContentLoaded', function(){
+    var nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    var lastY = window.scrollY, threshold = 5, ticking = false;
+    window.addEventListener('scroll', function(){
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                var y = window.scrollY;
+                if (Math.abs(y - lastY) >= threshold) {
+                    if (y > lastY && y > 50) nav.classList.add('nav-hidden');
+                    else nav.classList.remove('nav-hidden');
+                    lastY = y;
+                }
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+});
+</script>
+</body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
