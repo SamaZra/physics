@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -438,6 +438,18 @@
             .section-title { font-size: 0.95rem; }
             .control-group input[type="range"] { max-width: 120px; }
         }
+        .derivation-btn {
+    background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+    font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+    margin-top: 8px; transition: all 0.2s; display: inline-block;
+}
+.derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+.derivation-content {
+    display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+    border-left: 3px solid var(--text-secondary); border-radius: 8px;
+    font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+}
+.derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -450,7 +462,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
 .section-title {
@@ -1079,6 +1133,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block" style="margin:8px 0;">
                     <span class="f">$F = G \cdot \dfrac{m_1 m_2}{r^2}$</span>
                     <span class="f-label">— закон всемирного тяготения</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Ньютон установил, что сила притяжения между двумя телами пропорциональна произведению их масс и обратно пропорциональна квадрату расстояния между ними. Коэффициент пропорциональности $G$ — гравитационная постоянная, измеренная Кавендишем в 1798 году. Закон справедлив для любых тел, если расстояние между ними много больше их размеров (или для сферически симметричных тел — для расстояния между центрами).
+                    </div>
                 </div>
 
                 <p><strong>Обозначения:</strong></p>
@@ -1112,6 +1170,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block" style="margin:8px 0;">
                     <span class="f">$F_{тяж} = mg$</span>
                     <span class="f-label">— сила тяжести</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Сила тяжести — частный случай закона тяготения. Для тела массой $m$ на поверхности планеты массой $M$ и радиусом $R$: $F = G \cdot \dfrac{mM}{R^2} = m \cdot \left(G\dfrac{M}{R^2}\right) = mg$, где $g = G\dfrac{M}{R^2}$ — ускорение свободного падения. На Земле $g \approx 9.8$ м/с².
+                    </div>
                 </div>
 
                 <p><strong>Обозначения:</strong></p>
@@ -1144,13 +1206,17 @@ a, button, div, span, label, input, textarea, select {
                 <ul>
                     <li><span class="important">В покое или при равномерном движении:</span> $P = mg$.</li>
                     <li><span class="important">При ускоренном движении вверх:</span> $P = m(g + a)$ — <span class="important">перегрузка</span>.</li>
-                    <li><span class="important">При ускоренном движении вниз:</span> $P = m(g - a)$.</li>
+                    <li><span class="important">При ускоренном движении вниз:</span> $P = m(g - a)$. Если $a > g$, тело теряет контакт с опорой (вес «отрицательный» — тело давит на потолок).</li>
                     <li><span class="important">При свободном падении ($a = g$):</span> $P = 0$ — <span class="important">невесомость</span>.</li>
                 </ul>
 
                 <div class="formula-block" style="margin:8px 0;">
                     <span class="f">$P = m(g \pm a)$</span>
                     <span class="f-label">— общая формула веса</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Вес — сила, с которой тело давит на опору или растягивает подвес. По второму закону Ньютона для тела в лифте: $ma = N - mg$ (при движении вверх) или $ma = mg - N$ (при движении вниз), где $N$ — сила реакции опоры. По третьему закону Ньютона $P = N$. Отсюда $P = m(g + a)$ при движении вверх и $P = m(g - a)$ при движении вниз. При $a = g$ (свободное падение) $P = 0$ — невесомость.
+                    </div>
                 </div>
 
                 <p><strong>Невесомость</strong> — состояние, при котором тело <span class="important">не давит</span> на опору и не растягивает подвес.</p>
@@ -1320,7 +1386,7 @@ a, button, div, span, label, input, textarea, select {
             <!-- Задача 4 -->
             <div class="task-block">
                 <div class="task-title">📘 Задача 4. Сравнение силы притяжения и веса</div>
-                <div class="task-condition"><strong>Условие:</strong> Два шара массами $m_1 = 200$ кг и $m_2 = 300$ кг на расстоянии $r = 5$ м. Найдите силу притяжения. Сравните её с весом тела массой $1$ кг. ($G = 6.67 \cdot 10^{-11}$, $g = 9.8$).</div>
+                <div class="task-condition"><strong>Условие:</strong> Два шара массами $m_1 = 200$ кг и $m_2 = 300$ кг на расстоянии $r = 5$ м. Найдите силу притяжения. Сравните её с весом тела массой $1$ кг в покое на Земле. ($G = 6.67 \cdot 10^{-11}$, $g = 9.8$).</div>
                 <div class="task-given-find">
                     <div class="given"><strong>📌 Дано:</strong> $m_1 = 200$ кг, $m_2 = 300$ кг, $r = 5$ м</div>
                     <div class="find"><strong>🔍 Найти:</strong> $F$, сравнить с весом $1$ кг</div>
@@ -1832,11 +1898,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- 3D-модель -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-gravity');
         const canvas = document.getElementById('canvas-gravity');
@@ -1849,7 +1911,7 @@ a, button, div, span, label, input, textarea, select {
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1868,7 +1930,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.padding = '0';
             div.style.border = 'none';
             div.style.borderRadius = '0';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -1895,7 +1957,7 @@ a, button, div, span, label, input, textarea, select {
         }
 
         function createSphere(radius, color, pos) {
-            const geo = new THREE.SphereGeometry(radius, 32, 32);
+            const geo = new THREE.SphereGeometry(radius, window.qualitySettings3D.segments, window.qualitySettings3D.segments);
             const mat = new THREE.MeshStandardMaterial({
                 color, emissive: new THREE.Color(color).multiplyScalar(0.15),
                 roughness: 0.3, metalness: 0.1
@@ -2042,7 +2104,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -2214,7 +2276,8 @@ a, button, div, span, label, input, textarea, select {
 })();
 </script>
 <script src="page-search.js"></script>
-<script src="physics-data.js"></script>`r`n</body>
+<script src="physics-data.js"></script>
+</body>
 </html>
 
 

@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электрический ток в газах. Термоэлектронная эмиссия. Плазма</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:160px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .derivation-btn { background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary); font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer; margin-top: 8px; transition: all 0.2s; display: inline-block; }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content { display: none; margin-top: 10px; padding: 12px; background: var(--card-bg); border-left: 3px solid var(--text-secondary); border-radius: 8px; font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left; }
+        .derivation-content.open { display: block; }
+        .btn-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid #3b82f6;border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:#3b82f6;}
+        .hint-box mjx-container{font-size:1rem !important;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:120px;top:8px;right:8px;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script>
+        let quality3D = 'high';
+        if (window.Android && window.Android.getQuality3D) {
+            quality3D = window.Android.getQuality3D();
+        } else {
+            const saved = localStorage.getItem('quality3d');
+            if (saved) quality3D = saved;
+        }
+        window.quality3D = quality3D;
+        window.qualitySettings = {
+            low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+            medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+            high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+        };
+        window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+        (function() {
+            if (!window.THREE) return;
+            const OriginalRenderer = THREE.WebGLRenderer;
+            THREE.WebGLRenderer = function(params) {
+                const r = new OriginalRenderer(params);
+                const q = window.qualitySettings3D || {};
+                if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+                if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+                return r;
+            };
+        })();
+        window.applyQualitySegments = function() {
+            if (!window.THREE || !window.qualitySettings3D) return;
+            return window.qualitySettings3D.segments;
+        };
+    </script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech  { background: #3b82f6; }
+        .search-result-category.cat-thermo{ background: #f59e0b; }
+        .search-result-category.cat-elec  { background: #eab308; }
+        .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index"> body.is-index .nav-back-btn { display: none !important; } </style>
+    <style id="bottom-nav-autohide">
+        .bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; }
+        body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+    </style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; }
+        .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+        .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+        .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right"> .bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; } </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; }
+        a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Электрический ток в газах. Термоэлектронная эмиссия. Плазма</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Ионизация газов и газовый разряд</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Газы в обычных условиях</strong> — диэлектрики, так как их молекулы нейтральны. Чтобы газ начал проводить ток, его нужно <span class="important">ионизировать</span> — оторвать от молекул электроны.</p>
+                <p><strong>Ионизация</strong> происходит под действием внешних факторов: высокой температуры, рентгеновского или ультрафиолетового излучения, радиоактивного облучения.</p>
+                <p>В результате образуются <strong>свободные электроны</strong> и <strong>положительные ионы</strong>. Если к газу приложить напряжение, эти заряженные частицы начнут двигаться к электродам, создавая <span class="important">электрический ток</span>.</p>
+                <p><strong>Типы разрядов:</strong></p>
+                <ul>
+                    <li><strong>Несамостоятельный разряд</strong> — существует только пока действует внешний ионизатор. Убрали ионизатор — ток исчез.</li>
+                    <li><strong>Самостоятельный разряд</strong> — может существовать и без внешнего ионизатора за счёт энергии самого электрического поля (например, искра, дуга, коронный разряд).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Термоэлектронная эмиссия и плазма</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Термоэлектронная эмиссия</strong> — явление испускания электронов нагретым металлом. При высокой температуре электроны получают достаточно энергии, чтобы покинуть поверхность металла.</p>
+                <p>На этом явлении основана работа <span class="important">вакуумного диода</span> и <span class="important">электронно-лучевой трубки</span>. Также термоэлектронная эмиссия — причина нагрева нити накала в лампах.</p>
+                <p><strong>Плазма</strong> — это ионизированный газ, в котором концентрация заряженных частиц достаточно велика, чтобы он проводил электрический ток. По сути, плазма — это <span class="important">четвёртое агрегатное состояние вещества</span>.</p>
+                <p><strong>Свойства плазмы:</strong></p>
+                <ul>
+                    <li>высокая электропроводность;</li>
+                    <li>сильное взаимодействие с магнитными полями;</li>
+                    <li>излучение света (свечение).</li>
+                </ul>
+                <p><strong>Где встречается плазма:</strong> звёзды (включая Солнце), молния, полярное сияние, пламя костра, плазменные лампы и телевизоры (в прошлом).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Применение газовых разрядов</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Виды газовых разрядов и их применение:</strong></p>
+                <ul>
+                    <li><strong>Дуговой разряд</strong> (электрическая дуга) — сварка, резка металлов, дуговые печи.</li>
+                    <li><strong>Тлеющий разряд</strong> — газосветные трубки, неоновые вывески, лампы дневного света.</li>
+                    <li><strong>Искровой разряд</strong> — молния, свечи зажигания в двигателях, электроискровая обработка металлов.</li>
+                    <li><strong>Коронный разряд</strong> — очистка газов от пыли (электрофильтры), защита от перенапряжений.</li>
+                </ul>
+                <p><strong>График ВАХ газового разряда:</strong></p>
+                <svg viewBox="0 0 360 240" width="100%" style="display:block;margin:12px auto;max-width:400px;">
+                    <defs>
+                        <marker id="arrowAxisGas" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#8ba5b8"/>
+                        </marker>
+                    </defs>
+                    <line x1="40" y1="200" x2="340" y2="200" stroke="#8ba5b8" stroke-width="1.5" marker-end="url(#arrowAxisGas)"/>
+                    <line x1="40" y1="220" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1.5" marker-end="url(#arrowAxisGas)"/>
+                    <text x="330" y="220" fill="#8ba5b8" font-size="13" font-weight="bold">U</text>
+                    <text x="15" y="30" fill="#8ba5b8" font-size="13" font-weight="bold">I</text>
+
+                    <!-- Кривая ВАХ -->
+                    <path d="M 40 200 Q 100 180 140 180 L 180 180 Q 220 180 240 130 Q 260 80 280 40" stroke="#44ff88" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+                    <!-- Подписи участков -->
+                    <text x="90" y="170" fill="#8ba5b8" font-size="11" text-anchor="middle">насыщение</text>
+                    <text x="210" y="160" fill="#8ba5b8" font-size="11" text-anchor="middle">ударная ионизация</text>
+                    <text x="280" y="60" fill="#44ff88" font-size="13" font-weight="bold">пробой</text>
+                </svg>
+                <p><strong>💡 Это интересно:</strong> В 1950-х годах плазменные телевизоры (PDP) начали разрабатываться, чтобы заменить громоздкие ЭЛТ. Каждая ячейка экрана — это крошечная плазменная лампа, где газ ионизируется и излучает ультрафиолет, заставляющий светиться люминофор. Хотя сегодня их вытеснили OLED и LCD, плазма по-прежнему остаётся в центре внимания учёных: термоядерные реакторы (например, ITER) используют плазму с температурой в миллионы градусов.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛЬ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивная 3D-модель</div>
+        <div class="section-content">
+            <div class="model-container" id="container-gas">
+                <canvas id="canvas-gas" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-gas">⛶</button>
+                <div class="info-display">
+                    <div>Напряжение: <span class="val" id="gas-U">0</span> В</div>
+                    <div>Состояние: <span class="val" id="gas-state">нейтральный</span></div>
+                </div>
+            </div>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Напряжение $U$ (В)</label>
+                    <input type="range" id="gas-U-slider" min="0" max="100" step="1" value="0">
+                    <span class="control-value" id="gas-U-value">0</span>
+                </div>
+                <button class="btn-reset" id="gas-reset">⟳ Сброс</button>
+                <span class="control-label">⬤ При увеличении $U$ газ ионизируется (пробой) и начинает светиться</span>
+            </div>
+            <div class="def-card">
+                <p><strong>🪐 Что происходит в модели (по шагам):</strong></p>
+
+                <p><strong>1. Пока напряжение маленькое (меньше 20 В):</strong> газ находится в обычном состоянии. Вы видите только <strong>серые шарики</strong> — это нейтральные молекулы. Они беспорядочно летают, но электрический ток не проводят, потому что у них нет заряда.</p>
+
+                <p><strong>2. При увеличении напряжения (от 20 до 70 В):</strong> начинается процесс <strong>ионизации</strong>. Электрическое поле разгоняет частицы, и они при столкновениях выбивают электроны из молекул. В этот момент часть серых шариков превращается в <strong>красные</strong> (это положительные ионы, они летят к нижней пластине «−») и <strong>синие</strong> (это свободные электроны, они летят к верхней пластине «+»). Газ начинает проводить ток.</p>
+
+                <p><strong>3. При напряжении пробоя (выше 70 В):</strong> ионизация становится лавинообразной. Появляется <strong>фиолетовое свечение</strong> — это плазма. Газ превращается в самостоятельный разряд, который будет гореть, даже если убрать внешний ионизатор.</p>
+
+                <p><span class="important">Попробуйте сами:</span> подвигайте ползунок вправо и понаблюдайте, как серые молекулы превращаются в красных ионов и синие электроны, а затем весь газ вспыхивает фиолетовым светом.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <!-- Шпаргалка с формулами -->
+            <div class="def-card" style="border-left-color: #3b82f6; background: rgba(59,130,246,0.08); cursor: pointer;" onclick="this.nextElementSibling.classList.toggle('open')">
+                <p style="margin: 0; display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong>💡 Шпаргалка: какие формулы понадобятся</strong></span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;">▼ Показать</span>
+                </p>
+            </div>
+            <div class="derivation-content" style="margin-top: -10px; margin-bottom: 20px;">
+                <p>Для решения этих задач не нужно новых формул — все они уже знакомы вам из предыдущих тем:</p>
+                <ul>
+                    <li><strong>Заряд и ток:</strong> $q = N \cdot e$, $q = I \cdot t$, $N = \dfrac{q}{e}$;</li>
+                    <li><strong>Мощность и работа:</strong> $P = U \cdot I$, $W = U \cdot I \cdot t = P \cdot t$;</li>
+                    <li><strong>Кинетическая энергия:</strong> $E_k = \dfrac{m v^2}{2} \Rightarrow v = \sqrt{\dfrac{2 E_k}{m}}$;</li>
+                    <li><strong>Энергия конденсатора:</strong> $W = \dfrac{C U^2}{2}$;</li>
+                    <li><strong>Средняя энергия молекул:</strong> $E_k = \dfrac{3}{2}kT$;</li>
+                    <li><strong>Концентрация:</strong> $n = \dfrac{N}{V}$.</li>
+                </ul>
+                <p style="margin-bottom: 0;"><em>Все задачи сводятся к подстановке чисел в эти базовые формулы.</em></p>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Ионизация и ток</div>
+                <div class="task-condition"><strong>Условие:</strong> В ионизированном газе образовалось $N = 10^{10}$ пар ионов. Заряд каждого иона $e = 1{,}6 \cdot 10^{-19}$ Кл. Какой заряд перенесут эти ионы при полной рекомбинации?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $N = 10^{10}$, $e = 1{,}6 \cdot 10^{-19}$ Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Каждая пара ионов несёт заряд $2e$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$q = N \cdot 2e = 10^{10} \cdot 3{,}2 \cdot 10^{-19} = 3{,}2 \cdot 10^{-9} \text{ Кл}$</span></div>
+                    <div class="answer">✅ Ответ: $q = 3{,}2 \cdot 10^{-9}$ Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Несамостоятельный разряд</div>
+                <div class="task-condition"><strong>Условие:</strong> Ток в газе равен $I = 2$ мА. Сколько электронов проходит через поперечное сечение за $t = 1$ с?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $I = 2 \cdot 10^{-3}$ А, $t = 1$ с, $e = 1{,}6 \cdot 10^{-19}$ Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $q = I \cdot t = 2 \cdot 10^{-3}$ Кл.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $N = \dfrac{q}{e} = \dfrac{2 \cdot 10^{-3}}{1{,}6 \cdot 10^{-19}} = 1{,}25 \cdot 10^{16}$.</div>
+                    <div class="answer">✅ Ответ: $N = 1{,}25 \cdot 10^{16}$ электронов</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Энергия ионизации</div>
+                <div class="task-condition"><strong>Условие:</strong> Для ионизации молекулы газа требуется энергия $W = 15$ эВ. Найдите минимальную скорость электрона, способного ионизировать молекулу. ($1 \text{ эВ} = 1{,}6 \cdot 10^{-19}$ Дж, $m_e = 9{,}1 \cdot 10^{-31}$ кг).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $W = 15 \cdot 1{,}6 \cdot 10^{-19}$ Дж $= 2{,}4 \cdot 10^{-18}$ Дж, $m_e = 9{,}1 \cdot 10^{-31}$ кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $W = \dfrac{m_e v^2}{2} \Rightarrow v = \sqrt{\dfrac{2W}{m_e}}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$v = \sqrt{\dfrac{2 \cdot 2{,}4 \cdot 10^{-18}}{9{,}1 \cdot 10^{-31}}} = \sqrt{5{,}27 \cdot 10^{12}} \approx 2{,}3 \cdot 10^6 \text{ м/с}$</span></div>
+                    <div class="answer">✅ Ответ: $v \approx 2{,}3 \cdot 10^6$ м/с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Термоэлектронная эмиссия</div>
+                <div class="task-condition"><strong>Условие:</strong> Катод вакуумного диода нагрет до температуры $T = 2000$ К. Как изменится ток насыщения, если температуру увеличить в 1,5 раза?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_1 = 2000$ К, $T_2 = 3000$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> изменение тока</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> По закону Ричардсона-Дэшмана ток насыщения экспоненциально зависит от температуры.</div>
+                    <div class="step"><strong>Шаг 2.</strong> При увеличении температуры в 1,5 раза ток возрастает в десятки и сотни раз (зависимость $I \sim T^2 e^{-A/kT}$).</div>
+                    <div class="answer">✅ Ответ: Ток сильно возрастёт (в десятки раз)</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Плазма: концентрация</div>
+                <div class="task-condition"><strong>Условие:</strong> В плазме объёмом $V = 1$ л содержится $N = 10^{15}$ свободных электронов. Найдите концентрацию электронов.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $V = 1$ л $= 10^{-3}$ м³, $N = 10^{15}$</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $n$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $n = \dfrac{N}{V}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$n = \dfrac{10^{15}}{10^{-3}} = 10^{18} \text{ м}^{-3}$</span></div>
+                    <div class="answer">✅ Ответ: $n = 10^{18}$ м⁻³</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Энергия, запасённая в конденсаторе</div>
+                <div class="task-condition"><strong>Условие:</strong> Конденсатор ёмкостью $C = 10$ мкФ заряжен до напряжения $U = 200$ В. Найдите запасённую энергию.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $C = 10 \cdot 10^{-6}$ Ф, $U = 200$ В</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $W$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $W = \dfrac{CU^2}{2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$W = \dfrac{10 \cdot 10^{-6} \cdot 40000}{2} = \dfrac{0{,}4}{2} = 0{,}2 \text{ Дж}$</span></div>
+                    <div class="answer">✅ Ответ: $W = 0{,}2$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Мощность разряда</div>
+                <div class="task-condition"><strong>Условие:</strong> Молния имеет напряжение $U = 10^8$ В и ток $I = 10^4$ А. Свечение длится $t = 10^{-4}$ с. Найдите энергию разряда.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $U = 10^8$ В, $I = 10^4$ А, $t = 10^{-4}$ с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $W$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $W = P \cdot t = U \cdot I \cdot t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$W = 10^8 \cdot 10^4 \cdot 10^{-4} = 10^8 \text{ Дж}$</span></div>
+                    <div class="answer">✅ Ответ: $W = 100$ МДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Дуговой разряд</div>
+                <div class="task-condition"><strong>Условие:</strong> При сварке дуга горит при $U = 30$ В и $I = 200$ А. Найдите мощность дуги.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $U = 30$ В, $I = 200$ А</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $P$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $P = U \cdot I$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$P = 30 \cdot 200 = 6000 \text{ Вт} = 6 \text{ кВт}$</span></div>
+                    <div class="answer">✅ Ответ: $P = 6$ кВт</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Плазма в космосе</div>
+                <div class="task-condition"><strong>Условие:</strong> Температура солнечной плазмы достигает $T = 10^6$ К. Оцените среднюю кинетическую энергию частиц ($k = 1{,}38 \cdot 10^{-23}$ Дж/К).</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T = 10^6$ К, $k = 1{,}38 \cdot 10^{-23}$ Дж/К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $E_k$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $E_k = \dfrac{3}{2} k T$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$E_k = 1{,}5 \cdot 1{,}38 \cdot 10^{-23} \cdot 10^6 \approx 2{,}07 \cdot 10^{-17} \text{ Дж} \approx 130 \text{ эВ}$</span></div>
+                    <div class="answer">✅ Ответ: $E_k \approx 2{,}07 \cdot 10^{-17}$ Дж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Ионизация в разряде</div>
+                <div class="task-condition"><strong>Условие:</strong> В газовом разряде ионизатор ежесекундно создаёт $10^{15}$ пар ионов. Каждый ион рекомбинирует в среднем через $10^{-3}$ с. Оцените концентрацию ионов, если объём $V = 1$ л.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\Delta N/\Delta t = 10^{15}$ с⁻¹, $\tau = 10^{-3}$ с, $V = 10^{-3}$ м³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $n$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> В равновесии рождение = рекомбинация: $N = \dfrac{\Delta N}{\Delta t} \cdot \tau$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $N = 10^{15} \cdot 10^{-3} = 10^{12}$ ионов.</div>
+                    <div class="step"><strong>Шаг 3.</strong> <span class="formula">$n = \dfrac{N}{V} = \dfrac{10^{12}}{10^{-3}} = 10^{15} \text{ м}^{-3}$</span></div>
+                    <div class="answer">✅ Ответ: $n = 10^{15}$ м⁻³</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== САМОСТОЯТЕЛЬНОЕ РЕШЕНИЕ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Заряд ионов</div>
+                <div class="task-condition"><strong>Условие:</strong> В газе $N = 5 \cdot 10^9$ пар ионов. Какой заряд они перенесут?</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s1')">💡 Подсказка</button></div>
+                <div id="s1" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $q = N \cdot 2e$.</div><div class="answer">✅ Ответ: $q = 1{,}6 \cdot 10^{-9}$ Кл</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Ток в газе</div>
+                <div class="task-condition"><strong>Условие:</strong> Ток $I = 5$ мА, время $t = 2$ с. Найдите заряд и число электронов.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s2')">💡 Подсказка</button></div>
+                <div id="s2" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $q = It$, $N = q/e$.</div><div class="answer">✅ Ответ: $q = 10^{-2}$ Кл; $N = 6{,}25 \cdot 10^{16}$</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. Энергия ионизации</div>
+                <div class="task-condition"><strong>Условие:</strong> Энергия ионизации $W = 20$ эВ. Найдите скорость электрона.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s3')">💡 Подсказка</button></div>
+                <div id="s3" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $v = \sqrt{2W/m_e}$, $W$ в джоулях.</div><div class="answer">✅ Ответ: $v \approx 2{,}65 \cdot 10^6$ м/с</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. Мощность дуги</div>
+                <div class="task-condition"><strong>Условие:</strong> Дуга при $U = 40$ В и $I = 100$ А. Найдите мощность.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s4')">💡 Подсказка</button></div>
+                <div id="s4" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $P = U \cdot I$.</div><div class="answer">✅ Ответ: $P = 4$ кВт</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Концентрация плазмы</div>
+                <div class="task-condition"><strong>Условие:</strong> В объёме $V = 2$ л содержится $N = 10^{14}$ электронов. Найдите концентрацию.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s5')">💡 Подсказка</button></div>
+                <div id="s5" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $n = N/V$, литры в м³.</div><div class="answer">✅ Ответ: $n = 5 \cdot 10^{16}$ м⁻³</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Энергия молнии</div>
+                <div class="task-condition"><strong>Условие:</strong> Молния при $U = 10^8$ В, $I = 10^5$ А, $t = 10^{-5}$ с. Найдите энергию.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s6')">💡 Подсказка</button></div>
+                <div id="s6" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $W = U \cdot I \cdot t$.</div><div class="answer">✅ Ответ: $W = 10^8$ Дж</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Конденсатор</div>
+                <div class="task-condition"><strong>Условие:</strong> $C = 5$ мкФ, $U = 100$ В. Найдите энергию.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s7')">💡 Подсказка</button></div>
+                <div id="s7" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $W = CU^2/2$.</div><div class="answer">✅ Ответ: $W = 0{,}025$ Дж</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Температура плазмы</div>
+                <div class="task-condition"><strong>Условие:</strong> $E_k = 10^{-16}$ Дж. Найдите температуру ($k = 1{,}38 \cdot 10^{-23}$ Дж/К).</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s8')">💡 Подсказка</button></div>
+                <div id="s8" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $T = 2E_k / 3k$.</div><div class="answer">✅ Ответ: $T \approx 4{,}8 \cdot 10^6$ К</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. Тлеющий разряд</div>
+                <div class="task-condition"><strong>Условие:</strong> Тлеющий разряд при $U = 300$ В и $I = 10$ мА. Найдите мощность.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s9')">💡 Подсказка</button></div>
+                <div id="s9" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $P = U \cdot I$.</div><div class="answer">✅ Ответ: $P = 3$ Вт</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. Равновесие ионизации</div>
+                <div class="task-condition"><strong>Условие:</strong> $10^{14}$ пар ионов/с, $\tau = 10^{-2}$ с, $V = 1$ л. Найдите концентрацию.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s10')">💡 Подсказка</button></div>
+                <div id="s10" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $N = (\Delta N/\Delta t) \cdot \tau$, $n = N/V$.</div><div class="answer">✅ Ответ: $n = 10^{15}$ м⁻³</div></div></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function findButton(el){
+        const block = el.closest('.task-block');
+        if (!block) return null;
+        return block.querySelector('.show-solution-btn');
+    }
+    function toggleSolution(id){
+        const el = document.getElementById(id);
+        const btn = findButton(el);
+        if (!btn) return;
+        if (el.classList.contains('open')) { el.classList.remove('open'); btn.textContent = '📖 Показать решение'; }
+        else { el.classList.add('open'); btn.textContent = '📕 Скрыть решение'; }
+    }
+    function toggleHint(id){
+        const el = document.getElementById(id);
+        const btn = findButton(el);
+        if (!btn) return;
+        if (el.classList.contains('open')) { el.classList.remove('open'); btn.textContent = '💡 Подсказка'; }
+        else { el.classList.add('open'); btn.textContent = '📕 Скрыть подсказку'; }
+    }
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');}})();
+</script>
+
+<!-- 3D-модель газового разряда -->
+<script>
+    (function() {
+        const container = document.getElementById('container-gas');
+        const canvas = document.getElementById('canvas-gas');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(6, 4, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const key = new THREE.DirectionalLight(0xffffff, 1.0);
+        key.position.set(5, 8, 6);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Электроды
+        const plateGeo = new THREE.CylinderGeometry(2, 2, 0.2, 32);
+        const plateMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.2 });
+
+        const topPlate = new THREE.Mesh(plateGeo, plateMat);
+        topPlate.position.y = 4;
+        group.add(topPlate);
+
+        const bottomPlate = new THREE.Mesh(plateGeo, plateMat);
+        bottomPlate.position.y = -4;
+        group.add(bottomPlate);
+
+        // Свечение (плазма)
+        const glowGeo = new THREE.CylinderGeometry(1.8, 1.8, 7.8, 32, 1, true);
+        const glowMat = new THREE.MeshBasicMaterial({
+            color: 0xaa66ff,
+            transparent: true,
+            opacity: 0,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide
+        });
+        const glow = new THREE.Mesh(glowGeo, glowMat);
+        group.add(glow);
+
+        // Частицы (нейтральные, ионы, электроны)
+        const particles = [];
+        const N_PARTICLES = 150;
+
+        const neutralGeo = new THREE.SphereGeometry(0.12, 8, 8);
+        const neutralMat = new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0x111111 });
+
+        const ionGeo = new THREE.SphereGeometry(0.18, 8, 8);
+        const ionMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x661111 });
+
+        const electronGeo = new THREE.SphereGeometry(0.08, 8, 8);
+        const electronMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x003366 });
+
+        for (let i = 0; i < N_PARTICLES; i++) {
+            const m = new THREE.Mesh(neutralGeo, neutralMat);
+            m.position.set(
+                (Math.random() - 0.5) * 3,
+                (Math.random() - 0.5) * 7.5,
+                (Math.random() - 0.5) * 3
+            );
+            group.add(m);
+            particles.push({
+                mesh: m,
+                vx: (Math.random() - 0.5) * 0.08,
+                vy: (Math.random() - 0.5) * 0.08,
+                vz: (Math.random() - 0.5) * 0.08,
+                type: 'neutral' // neutral, ion, electron
+            });
+        }
+
+        // UI
+        const USlider = document.getElementById('gas-U-slider');
+        const UValue = document.getElementById('gas-U-value');
+        const UDisplay = document.getElementById('gas-U');
+        const stateDisplay = document.getElementById('gas-state');
+
+        let U = 0;
+        let breakdownThreshold = 70; // Напряжение пробоя
+
+        function updateUI() {
+            UDisplay.textContent = U;
+            UValue.textContent = U;
+
+            if (U < 20) {
+                stateDisplay.textContent = 'нейтральный';
+                stateDisplay.style.color = 'var(--text-secondary)';
+            } else if (U < breakdownThreshold) {
+                stateDisplay.textContent = 'ионизация';
+                stateDisplay.style.color = '#f59e0b';
+            } else {
+                stateDisplay.textContent = 'пробой (плазма)';
+                stateDisplay.style.color = '#aa66ff';
+            }
+        }
+
+        USlider.addEventListener('input', () => {
+            U = parseFloat(USlider.value);
+            updateUI();
+        });
+
+        document.getElementById('gas-reset').addEventListener('click', () => {
+            U = 0;
+            USlider.value = 0;
+            updateUI();
+            // Сброс частиц
+            particles.forEach(p => {
+                p.type = 'neutral';
+                p.mesh.geometry = neutralGeo;
+                p.mesh.material = neutralMat;
+                p.mesh.scale.set(1, 1, 1);
+            });
+        });
+
+        document.getElementById('fs-gas').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateUI();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Логика ионизации
+            const isBreakdown = U >= breakdownThreshold;
+            const isIonizing = U >= 20;
+
+            // Свечение плазмы
+            if (isBreakdown) {
+                glowMat.opacity = 0.3 + Math.sin(Date.now() * 0.01) * 0.1;
+                glowMat.color.setHex(0xaa66ff);
+            } else {
+                glowMat.opacity = 0;
+            }
+
+            const speed = U / 100 * 0.15;
+
+            particles.forEach(p => {
+                // Ионизация
+                if (isIonizing && p.type === 'neutral' && Math.random() < 0.005) {
+                    p.type = Math.random() > 0.5 ? 'ion' : 'electron';
+                    if (p.type === 'ion') {
+                        p.mesh.geometry = ionGeo;
+                        p.mesh.material = ionMat;
+                    } else {
+                        p.mesh.geometry = electronGeo;
+                        p.mesh.material = electronMat;
+                    }
+                }
+
+                // Движение
+                if (p.type === 'ion') {
+                    // Ионы летят к нижней пластине (-)
+                    p.mesh.position.y -= speed;
+                    if (p.mesh.position.y < -3.8) p.mesh.position.y = 3.8;
+                } else if (p.type === 'electron') {
+                    // Электроны летят к верхней пластине (+)
+                    p.mesh.position.y += speed * 2;
+                    if (p.mesh.position.y > 3.8) p.mesh.position.y = -3.8;
+                } else {
+                    // Нейтральные хаотично
+                    p.mesh.position.x += p.vx;
+                    p.mesh.position.y += p.vy;
+                    p.mesh.position.z += p.vz;
+                    if (Math.abs(p.mesh.position.x) > 1.5) p.vx *= -1;
+                    if (Math.abs(p.mesh.position.y) > 3.8) p.vy *= -1;
+                    if (Math.abs(p.mesh.position.z) > 1.5) p.vz *= -1;
+                }
+
+                // Дрожание при ионизации
+                if (isBreakdown && (p.type === 'ion' || p.type === 'electron')) {
+                    p.mesh.position.x += (Math.random() - 0.5) * 0.05;
+                    p.mesh.position.z += (Math.random() - 0.5) * 0.05;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</nav>
+<script>
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
+
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){ document.querySelectorAll(sel).forEach(bind); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+    })();
+</script>
+<script src="search-overlay.js"></script>
+<script>
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY, threshold = 8, ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) nav.classList.add('nav-hidden');
+            else nav.classList.remove('nav-hidden');
+            lastY = y; ticking = false;
+        }
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>
+</body>
+</html>

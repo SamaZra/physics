@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -56,10 +56,6 @@
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1400px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
 
-        
-
-        
-
         .model-tabs {
             display: flex;
             gap: 8px;
@@ -77,6 +73,7 @@
             font-size: 0.9rem;
             font-weight: 600;
             transition: all 0.3s;
+            flex-shrink: 0;
         }
         .model-tab:hover { background: var(--special-border); color: white; border-color: var(--special-border); }
         .model-tab.active { background: var(--special-border); color: white; border-color: var(--special-border); }
@@ -323,6 +320,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
 
@@ -337,6 +335,7 @@
             cursor: pointer;
             transition: all 0.2s;
             margin-left: 8px;
+            flex-shrink: 0;
         }
         .hint-btn:hover { transform: scale(1.03); opacity: 0.9; }
 
@@ -390,10 +389,6 @@
             text-align: center;
             margin-top: 10px;
         }
-
-        
-        
-        
 
         .note-box {
             background: var(--info-bg);
@@ -472,6 +467,20 @@
             border-radius: 0;
         }
 
+        /* Стили для скрытых выводов формул */
+        .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
+
         @media(max-width:700px){
             .model-container { min-height: 300px; }
             .fullscreen-btn { width: 38px; height: 38px; font-size: 18px; bottom: 12px; right: 12px; }
@@ -509,616 +518,157 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
-<style id="titles-center-fix">
-/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
-.section-title {
-    justify-content: center !important;
-    text-align: center !important;
-    position: relative !important;
-    padding-left: 16px !important;
-    padding-right: 28px !important;
-}
-.section-title::after {
-    position: absolute !important;
-    right: 8px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    margin-left: 0 !important;
-}
-.section.collapsed .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-/* Названия файлов / страниц — по центру */
-h1, .page-title, .file-title, .title {
-    text-align: center !important;
-}
-</style>
-<style id="section-gradient-fix">
-/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
-/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script>
+        let quality3D = 'high';
+        if (window.Android && window.Android.getQuality3D) {
+            quality3D = window.Android.getQuality3D();
+        } else {
+            const saved = localStorage.getItem('quality3d');
+            if (saved) quality3D = saved;
+        }
+        window.quality3D = quality3D;
 
-.section { position: relative; }
+        window.qualitySettings = {
+            low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+            medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+            high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+        };
+        window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
 
-/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
-
-/* Закрыт: градиента нет */
-.section.collapsed > .section-title {
-    background-image: none;
-    transition: background-image 0.35s ease;
-}
-
-/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
-.section.collapsed > .section-title:hover {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Открыт: тот же градиент постоянно */
-.section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Светлая тема — цвет из --special-border (#d97706) */
-:root.light-mode .section.collapsed > .section-title:hover,
-:root.light-mode .section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(217, 119, 6, 0.18) 0%,
-        rgba(217, 119, 6, 0.06) 45%,
-        rgba(217, 119, 6, 0.00) 100%);
-}
-
-/* ---------- СТРЕЛКА ---------- */
-
-/* Закрыт: светящаяся синяя */
-.section.collapsed > .section-title::after {
-    color: var(--accent, #3b82f6) !important;
-    text-shadow:
-        0 0 6px rgba(59, 130, 246, 0.85),
-        0 0 14px rgba(59, 130, 246, 0.55);
-    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
-    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
-}
-
-/* Открыт: свечение убираем, стрелка обычная */
-.section:not(.collapsed) > .section-title::after {
-    color: var(--text-secondary, #8ba5b8) !important;
-    text-shadow: none !important;
-    filter: none !important;
-}
-
-/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
-.section.collapsed > .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-.section:not(.collapsed) > .section-title::after {
-    transform: translateY(-50%) rotate(0deg) !important;
-}
-
-/* Светлая тема: синий чуть темнее, свечение мягче */
-:root.light-mode .section.collapsed > .section-title::after {
-    color: var(--accent, #2563eb) !important;
-    text-shadow:
-        0 0 6px rgba(37, 99, 235, 0.6),
-        0 0 12px rgba(37, 99, 235, 0.35);
-    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
-}
-</style>
-<style id="modern-visual-fix">
-/* ==== 7. Плавный скролл + отступ у заголовков ==== */
-html { scroll-behavior: smooth; }
-.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
-
-/* ==== 8. Радиальный градиент на фоне ==== */
-body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
-        var(--bg) !important;
-}
-:root.light-mode body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
-        var(--bg) !important;
-}
-
-/* ==== 3. «Стеклянная» шапка ==== */
-@media (prefers-reduced-motion: no-preference) {
-    .header {
-        background: rgba(30, 53, 69, 0.72) !important;
-        backdrop-filter: blur(14px) saturate(140%);
-        -webkit-backdrop-filter: blur(14px) saturate(140%);
-        border-bottom: 1px solid var(--border);
-    }
-    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
-}
-
-/* ==== 5. Скелетоны для формул ==== */
-.skeleton {
-    display: inline-block;
-    min-width: 60px;
-    height: 1.1em;
-    vertical-align: middle;
-    border-radius: 6px;
-    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
-    background-size: 200% 100%;
-    animation: shimmerSk 1.2s infinite linear;
-}
-@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
-
-/* ==== 6. Чипы категорий в поиске ==== */
-.search-result-category {
-    display: inline-block;
-    padding: 2px 10px;
-    margin-top: 4px;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    color: #fff;
-    background: var(--accent, #3b82f6);
-}
-.search-result-category.cat-mech  { background: #3b82f6; }
-.search-result-category.cat-thermo{ background: #f59e0b; }
-.search-result-category.cat-elec  { background: #eab308; }
-.search-result-category.cat-other { background: #64748b; }
-
-/* ==== 4. Нижняя навигация ==== */
-.bottom-nav {
-    position: fixed;
-    left: 50%;
-    bottom: 14px;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 22px;
-    background: rgba(30, 53, 69, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
-    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
-    z-index: 900;
-    transition: background 0.3s, border 0.3s;
-}
-:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
-.bottom-nav a, .bottom-nav button {
-    display: flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px; border-radius: 14px;
-    border: none; background: transparent;
-    color: var(--text-secondary); font-size: 22px;
-    cursor: pointer; text-decoration: none;
-    transition: all 0.2s;
-}
-.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
-    background: rgba(59,130,246,0.15);
-    color: var(--accent);
-    transform: translateY(-2px);
-}
-body { padding-bottom: 78px; }
-
-/* ==== 10. Круг смены темы ==== */
-.theme-circle {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    background: var(--bg);
-    transform: scale(0);
-    opacity: 0.95;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
-}
-.theme-circle.expand { transform: scale(1); opacity: 0; }
-
-/* ==== 2. Ripple при тапе ==== */
-.ripple-host { position: relative !important; overflow: hidden !important; }
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(59,130,246,0.35);
-    transform: scale(0);
-    animation: rippleAnim 0.6s ease-out forwards;
-    pointer-events: none;
-    z-index: 0;
-}
-@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
-:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
-</style>
-<style id="search-clean-fix">
-/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
-.search-result-icon {
-    display: none !important;
-}
-
-/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
-.search-results {
-    scrollbar-width: none;          /* Firefox */
-    -ms-overflow-style: none;       /* IE/Edge */
-}
-.search-results::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-}
-
-/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
-body::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-}
-body {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-</style>
-<style id="nav-back-hide-index">
-/* На главной кнопка «Назад» не нужна */
-body.is-index .nav-back-btn { display: none !important; }
-</style>
-<style id="bottom-nav-autohide">
-/* Автоскрытие нижней панели при скролле вниз */
-.bottom-nav {
-    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
-}
-.bottom-nav.nav-hidden {
-    transform: translate(-50%, 120%);
-    opacity: 0;
-    pointer-events: none;
-}
-/* На главной панель всегда видна */
-body.is-index .bottom-nav.nav-hidden {
-    transform: translate(-50%, 0);
-    opacity: 1;
-    pointer-events: auto;
-}
-</style>
-<style id="fav-nav-yellow">
-/* Избранное в нижней панели — жёлтое выделение, когда активно */
-.bottom-nav a[href="favorites.html"].active,
-.bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(250, 204, 21, 0.18) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover,
-.bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(250, 204, 21, 0.28) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(234, 179, 8, 0.18) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(234, 179, 8, 0.28) !important;
-    color: #92400e !important;
-}
-/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
-
-</style>
-<style id="nav-order-fix">
-/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
-.bottom-nav { display: flex; align-items: center; }
-.bottom-nav .nav-back-btn { order: 1; }
-.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
-.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
-.bottom-nav a[href="favorites.html"] { order: 4; }
-
-/* Звезда активна — жёлтая */
-.bottom-nav a[href="favorites.html"].active {
-    background: rgba(250, 204, 21, 0.20) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(250, 204, 21, 0.30) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active {
-    background: rgba(234, 179, 8, 0.20) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(234, 179, 8, 0.30) !important;
-    color: #92400e !important;
-}
-</style>
-<style id="unified-buttons">
-/* ==== Единый стиль кнопок ==== */
-
-/* База для всех кнопок */
-.btn-primary,
-.btn-secondary,
-.btn-danger,
-.show-solution-btn,
-.btn-reset,
-.model-tab,
-.clear-all-btn,
-.search-clear,
-.back-link,
-.fullscreen-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 8px 18px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: inherit;
-    line-height: 1.2;
-    border: 1px solid transparent;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s, border-color 0.2s,
-                box-shadow 0.2s, transform 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    white-space: nowrap;
-}
-
-/* Hover / active — общий отклик */
-.btn-primary:hover,
-.btn-secondary:hover,
-.btn-danger:hover,
-.show-solution-btn:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover,
-.back-link:hover,
-.fullscreen-btn:hover {
-    transform: translateY(-1px);
-}
-.btn-primary:active,
-.btn-secondary:active,
-.btn-danger:active,
-.show-solution-btn:active,
-.btn-reset:active,
-.model-tab:active,
-.clear-all-btn:active,
-.back-link:active,
-.fullscreen-btn:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* ==== PRIMARY (синий акцент) ==== */
-.btn-primary,
-.show-solution-btn,
-.back-link {
-    background: var(--accent, #3b82f6);
-    color: #fff;
-    border-color: var(--accent, #3b82f6);
-}
-.btn-primary:hover,
-.show-solution-btn:hover,
-.back-link:hover {
-    background: var(--accent-hover, #60a5fa);
-    border-color: var(--accent-hover, #60a5fa);
-    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
-}
-:root.light-mode .btn-primary,
-:root.light-mode .show-solution-btn,
-:root.light-mode .back-link {
-    background: var(--accent, #2563eb);
-    border-color: var(--accent, #2563eb);
-}
-:root.light-mode .btn-primary:hover,
-:root.light-mode .show-solution-btn:hover,
-:root.light-mode .back-link:hover {
-    background: var(--accent-hover, #3b82f6);
-    border-color: var(--accent-hover, #3b82f6);
-}
-
-/* ==== SECONDARY (нейтральный) ==== */
-.btn-secondary,
-.btn-reset,
-.model-tab,
-.clear-all-btn {
-    background: var(--menu-item-hover, #233e50);
-    color: var(--text, #fff);
-    border-color: var(--border, rgba(59,130,246,0.15));
-}
-.btn-secondary:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover {
-    background: var(--group-header-bg, #1a3a5a);
-    border-color: var(--accent, #3b82f6);
-    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
-}
-:root.light-mode .btn-secondary,
-:root.light-mode .btn-reset,
-:root.light-mode .model-tab,
-:root.light-mode .clear-all-btn {
-    background: var(--menu-item-hover, #f0f4fa);
-    color: var(--text, #1a2a3f);
-}
-
-/* Активный таб — как primary */
-.model-tab.active {
-    background: var(--accent, #3b82f6) !important;
-    color: #fff !important;
-    border-color: var(--accent, #3b82f6) !important;
-    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
-}
-.model-tab.active:hover {
-    background: var(--accent-hover, #60a5fa) !important;
-    border-color: var(--accent-hover, #60a5fa) !important;
-}
-
-/* ==== DANGER (красный) ==== */
-.btn-danger,
-.clear-all-btn.danger,
-.clear-all-btn:hover {
-    background: #ef4444 !important;
-    color: #fff !important;
-    border-color: #ef4444 !important;
-}
-.btn-danger:hover,
-.clear-all-btn.danger:hover,
-.clear-all-btn:hover {
-    background: #dc2626 !important;
-    border-color: #dc2626 !important;
-    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
-}
-
-/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
-.search-clear {
-    background: transparent;
-    border: none;
-    padding: 6px 10px;
-    min-height: auto;
-    color: var(--text-secondary, #8ba5b8);
-    border-radius: 50%;
-}
-.search-clear:hover {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--accent, #3b82f6);
-    transform: none;
-}
-
-/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
-.fullscreen-btn {
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.25);
-    font-size: 20px;
-}
-.fullscreen-btn:hover {
-    background: var(--accent, #3b82f6);
-    border-color: var(--accent, #3b82f6);
-}
-
-/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
-.remove-fav {
-    border-radius: 50%;
-    min-height: 32px;
-    min-width: 32px;
-    padding: 4px 8px;
-}
-.remove-fav:hover {
-    background: rgba(239, 68, 68, 0.15) !important;
-    color: #ef4444 !important;
-}
-
-/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
-.btn-link {
-    background: transparent;
-    border: none;
-    color: var(--accent, #3b82f6);
-    padding: 0;
-    min-height: auto;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-.btn-link:hover {
-    color: var(--accent-hover, #60a5fa);
-    transform: none;
-    box-shadow: none;
-}
-</style>
-<style id="page-fade-in">
-/* ==== Плавное появление страницы (fade-in) ==== */
-
-/* Мягкий вход всей страницы */
-body {
-    animation: pageFade 0.3s ease-out;
-}
-@keyframes pageFade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Контент чуть «подъезжает» снизу */
-.container,
-.main-content {
-    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-}
-@keyframes pageFadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Если в системе включено «уменьшить движение» — анимации отключаем */
-@media (prefers-reduced-motion: reduce) {
-    body,
-    .container,
-    .main-content {
-        animation: none !important;
-    }
-}
-</style>
-<style id="share-btn-right">
-/* Прижимаем кнопку «Поделиться» к правому краю панели */
-.bottom-nav button[title="Поделиться"] {
-    order: 99 !important;
-    margin-left: auto !important;
-}
-</style>
-<style id="no-tap-highlight">
-/* Убираем системный голубой/серый прямоугольник при тапе */
-* {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-}
-a, button, div, span, label, input, textarea, select {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-}
-</style>
-<style id="no-tap-highlight-accordion">
-/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
-.section-title,
-.group-header,
-.menu-item,
-.submenu-item,
-.model-tab,
-.search-result-item {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-    user-select: none;
-    -webkit-user-select: none;
-    cursor: pointer;
-}
-
-/* Лёгкий отклик при нажатии (вместо системного квадратика) */
-.section-title:active,
-.group-header:active {
-    transform: scale(0.99);
-    transition: transform 0.1s;
-}
-</style>
-<style id="fix-nav-bounce">
-    /* Отключаем сдвиги и пружины у кнопок нижней панели */
-    .bottom-nav a, .bottom-nav button {
-        transform: none !important;
-        transition: background 0.2s ease, color 0.2s ease !important;
-    }
-    .bottom-nav a:active, .bottom-nav button:active, 
-    .bottom-nav a:focus, .bottom-nav button:focus {
-        transform: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-    }
-</style>
+        (function() {
+            if (!window.THREE) return;
+            const OriginalRenderer = THREE.WebGLRenderer;
+            THREE.WebGLRenderer = function(params) {
+                const r = new OriginalRenderer(params);
+                const q = window.qualitySettings3D || {};
+                if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+                if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+                return r;
+            };
+        })();
+    </script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech { background: #3b82f6; } .search-result-category.cat-thermo{ background: #f59e0b; } .search-result-category.cat-elec { background: #eab308; } .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index">body.is-index .nav-back-btn { display: none !important; }</style>
+    <style id="bottom-nav-autohide">.bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; } .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; } body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }</style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; } .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; } .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; } .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right">.bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; }</style>
+    <style id="no-tap-highlight">* { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; } a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }</style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-3d-buttons">
+        .controls-panel button, .btn-toggle, .btn-reset {
+            position: relative !important;
+            overflow: visible !important;
+            z-index: 10 !important;
+            touch-action: manipulation !important;
+        }
+        .controls-panel button::after, .controls-panel button .ripple, .btn-toggle .ripple, .btn-reset .ripple {
+            display: none !important;
+        }
+        .controls-panel button:active {
+            transform: scale(0.95) !important;
+            transition: transform 0.05s !important;
+        }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -1165,6 +715,10 @@ a, button, div, span, label, input, textarea, select {
                 <span class="f">$\vec{F} = m\vec{a}$</span>
                 <span class="f-label">— сила равна произведению массы на ускорение</span>
                 <span class="f" style="font-size:1rem;font-style:normal;margin-top:4px;">Ускорение тела прямо пропорционально приложенной силе и обратно пропорционально массе тела.</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Второй закон Ньютона является обобщением экспериментальных фактов. Ускорение тела прямо пропорционально приложенной силе ($a \sim F$) и обратно пропорционально массе тела ($a \sim 1/m$). Объединяя эти зависимости, получаем $a = F/m$, откуда $\vec{F} = m\vec{a}$. Вектор силы совпадает по направлению с вектором ускорения.
+                </div>
             </div>
         </div>
     </div>
@@ -1289,9 +843,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint1')">💡 Подсказка</button>
                 <div id="hint1" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $F_{тяж}$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $F_{тяж}$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Используй формулу силы тяжести $F_{тяж} = mg$. Умножь массу на ускорение свободного падения.</div>
                         <div class="answer">✅ Ответ: $F_{тяж} = 49$ Н</div>
@@ -1314,9 +868,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint2')">💡 Подсказка</button>
                 <div id="hint2" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $F_{тяж} = 78.4$ Н, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $F_{тяж} = 78.4$ Н, $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Из формулы $F_{тяж} = mg$ вырази массу: $m = \frac{F_{тяж}}{g}$. Раздели силу тяжести на $g$.</div>
                         <div class="answer">✅ Ответ: $m = 8$ кг</div>
@@ -1339,9 +893,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint3')">💡 Подсказка</button>
                 <div id="hint3" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Второй закон Ньютона: $F = ma$, откуда $a = \frac{F}{m}$. Раздели силу на массу.</div>
                         <div class="answer">✅ Ответ: $a = 5$ м/с²</div>
@@ -1366,9 +920,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint4')">💡 Подсказка</button>
                 <div id="hint4" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н, $\mu = 0.15$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 4$ кг, $F = 20$ Н, $\mu = 0.15$, $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Сначала найди силу трения $F_{тр} = \mu N = \mu mg$. Потом равнодействующую $F_{рез} = F - F_{тр}$. Ускорение $a = \frac{F_{рез}}{m}$.</div>
                         <div class="answer">✅ Ответ: $a = 3.53$ м/с²</div>
@@ -1403,9 +957,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint5')">💡 Подсказка</button>
                 <div id="hint5" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $k = 150$ Н/м, $F = 30$ Н</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $k = 150$ Н/м, $F = 30$ Н</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> По закону Гука $F_{упр} = k \cdot \Delta x$, значит $\Delta x = \frac{F}{k}$. Раздели силу на жёсткость.</div>
                         <div class="answer">✅ Ответ: $\Delta x = 0.2$ м = 20 см</div>
@@ -1428,9 +982,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint6')">💡 Подсказка</button>
                 <div id="hint6" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $F_1 = 8$ Н (→), $F_2 = 5$ Н (←), $F_3 = 3$ Н (→)</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $R$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $F_1 = 8$ Н (→), $F_2 = 5$ Н (←), $F_3 = 3$ Н (→)</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Сложи силы, направленные в одну сторону, и вычти силу, направленную в противоположную. Равнодействующая — геометрическая сумма всех сил.</div>
                         <div class="answer">✅ Ответ: $R = 6$ Н (вправо)</div>
@@ -1456,9 +1010,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint7')">💡 Подсказка</button>
                 <div id="hint7" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 5$ кг, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\frac{F_{тяж2}}{F_{тяж1}}$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 5$ кг, $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\frac{F_{тяж2}}{F_{тяж1}}$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Сила тяжести $F_{тяж} = mg$. Отношение сил тяжести равно отношению масс: $\frac{F_{тяж2}}{F_{тяж1}} = \frac{m_2}{m_1}$.</div>
                         <div class="answer">✅ Ответ: в 2.5 раза</div>
@@ -1485,9 +1039,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint8')">💡 Подсказка</button>
                 <div id="hint8" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $\alpha = 30°$, $\mu = 0.2$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $\alpha = 30°$, $\mu = 0.2$, $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $a$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Проекция силы тяжести вдоль плоскости: $F_{\parallel} = mg \sin\alpha$. Сила трения: $F_{тр} = \mu mg \cos\alpha$. Ускорение: $a = \frac{F_{\parallel} - F_{тр}}{m}$.</div>
                         <div class="answer">✅ Ответ: $a \approx 3.20$ м/с²</div>
@@ -1523,9 +1077,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint9')">💡 Подсказка</button>
                 <div id="hint9" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $k = 100$ Н/м, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $k = 100$ Н/м, $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Пружина растягивается под действием суммарного веса обоих грузов: $F = (m_1 + m_2)g$. Затем по закону Гука $\Delta x = \frac{F}{k}$.</div>
                         <div class="answer">✅ Ответ: $\Delta x = 0.49$ м = 49 см</div>
@@ -1552,9 +1106,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint10')">💡 Подсказка</button>
                 <div id="hint10" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $\alpha = 25°$, $\mu = 0.3$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $F$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 3$ кг, $\alpha = 25°$, $\mu = 0.3$, $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $F$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> При равномерном движении сила тяги компенсирует и составляющую тяжести, и трение: $F = mg \sin\alpha + \mu mg \cos\alpha$.</div>
                         <div class="answer">✅ Ответ: $F \approx 20.43$ Н</div>
@@ -1589,9 +1143,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint11')">💡 Подсказка</button>
                 <div id="hint11" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $F = 15$ Н, $a_A = 3$ м/с², $a_Б = 5$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $m_A$, $m_Б$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $F = 15$ Н, $a_A = 3$ м/с², $a_Б = 5$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $m_A$, $m_Б$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> По второму закону Ньютона $m = \frac{F}{a}$. Найди массу каждого тела отдельно.</div>
                         <div class="answer">✅ Ответ: $m_A = 5$ кг, $m_Б = 3$ кг</div>
@@ -1618,9 +1172,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint12')">💡 Подсказка</button>
                 <div id="hint12" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $k = 80$ Н/м, $m = 4$ кг, $a = 2$ м/с², $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $k = 80$ Н/м, $m = 4$ кг, $a = 2$ м/с², $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\Delta x$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> При движении вниз с ускорением вес груза уменьшается: $P = m(g - a)$. Затем по закону Гука $\Delta x = \frac{P}{k}$.</div>
                         <div class="answer">✅ Ответ: $\Delta x = 0.39$ м = 39 см</div>
@@ -1647,9 +1201,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint13')">💡 Подсказка</button>
                 <div id="hint13" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $F = 15$ Н</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $a$, $T$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $m_2 = 3$ кг, $F = 15$ Н</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $a$, $T$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Ускорение системы: $a = \frac{F}{m_1 + m_2}$. Сила натяжения нити: $T = m_2 \cdot a$.</div>
                         <div class="answer">✅ Ответ: $a = 3$ м/с², $T = 9$ Н</div>
@@ -1676,9 +1230,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint14')">💡 Подсказка</button>
                 <div id="hint14" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $m_2 = 3$ кг, $\mu = 0.25$, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $F_{тр1}$, $F_{тр2}$, отношение</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 5$ кг, $m_2 = 3$ кг, $\mu = 0.25$, $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $F_{тр1}$, $F_{тр2}$, отношение</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> $F_{тр} = \mu mg$. Во втором случае общая масса $m_{общ} = m + m_2$. Отношение сил равно отношению масс.</div>
                         <div class="answer">✅ Ответ: $F_{тр1} = 12.25$ Н, $F_{тр2} = 19.6$ Н, отношение $= 1.6$</div>
@@ -1709,9 +1263,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="hint-btn" onclick="toggleHint('hint15')">💡 Подсказка</button>
                 <div id="hint15" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $l_0 = 20$ см $= 0.2$ м, $l = 28$ см $= 0.28$ м, $F = 12$ Н</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $k$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $l_0 = 20$ см $= 0.2$ м, $l = 28$ см $= 0.28$ м, $F = 12$ Н</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $k$</div>
+                    </div>
                     <div class="step">
                         <div class="explanation"><strong>Как решать:</strong> Сначала найди удлинение $\Delta x = l - l_0$. Затем по закону Гука $k = \frac{F}{\Delta x}$.</div>
                         <div class="answer">✅ Ответ: $k = 150$ Н/м</div>
@@ -1732,20 +1286,155 @@ a, button, div, span, label, input, textarea, select {
 
         </div>
     </div>
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
 
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 8$ кг находится на поверхности Земли. Определите силу тяжести, действующую на тело. ($g = 9.8$ м/с²).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Используй формулу $F_{тяж} = mg$.</div>
+                    <div class="answer">✅ Ответ: $F_{тяж} = 8 \cdot 9.8 = 78.4$ Н</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело действует сила тяжести $F_{тяж} = 49$ Н. Определите массу тела. ($g = 9.8$ м/с²).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Из формулы $F_{тяж} = mg$ вырази массу: $m = \frac{F_{тяж}}{g}$.</div>
+                    <div class="answer">✅ Ответ: $m = \frac{49}{9.8} = 5$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело массой $m = 6$ кг действует сила $F = 30$ Н. Найдите ускорение тела.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Второй закон Ньютона: $a = \frac{F}{m}$.</div>
+                    <div class="answer">✅ Ответ: $a = \frac{30}{6} = 5$ м/с²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 2$ кг тянут по горизонтальной поверхности с силой $F = 12$ Н. Коэффициент трения $\mu = 0.2$. Найдите ускорение тела. ($g = 9.8$ м/с²).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $F_{тр} = \mu mg$. $F_{рез} = F - F_{тр}$. $a = \frac{F_{рез}}{m}$.</div>
+                    <div class="answer">✅ Ответ: $F_{тр} = 0.2 \cdot 2 \cdot 9.8 = 3.92$ Н. $F_{рез} = 12 - 3.92 = 8.08$ Н. $a = \frac{8.08}{2} = 4.04$ м/с²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Пружина жёсткостью $k = 200$ Н/м растягивается под действием силы $F = 40$ Н. Найдите удлинение пружины.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> По закону Гука $\Delta x = \frac{F}{k}$.</div>
+                    <div class="answer">✅ Ответ: $\Delta x = \frac{40}{200} = 0.2$ м = 20 см</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> На тело действуют две силы: $F_1 = 10$ Н вправо и $F_2 = 4$ Н влево. Найдите модуль и направление равнодействующей силы.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Равнодействующая — геометрическая сумма. Вычти меньшую силу из большей.</div>
+                    <div class="answer">✅ Ответ: $R = 10 - 4 = 6$ Н (вправо)</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> Два тела имеют массы $m_1 = 4$ кг и $m_2 = 10$ кг. Во сколько раз сила тяжести второго тела больше силы тяжести первого?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Отношение сил тяжести равно отношению масс: $\frac{F_{тяж2}}{F_{тяж1}} = \frac{m_2}{m_1}$.</div>
+                    <div class="answer">✅ Ответ: $\frac{10}{4} = 2.5$ раза</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело массой $m = 4$ кг находится на наклонной плоскости с углом $\alpha = 45°$. Коэффициент трения $\mu = 0.1$. Найдите ускорение тела, если оно скользит вниз. ($g = 9.8$ м/с²).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $F_{\parallel} = mg \sin\alpha$, $N = mg \cos\alpha$, $F_{тр} = \mu N$. $a = \frac{F_{\parallel} - F_{тр}}{m}$.</div>
+                    <div class="answer">✅ Ответ: $F_{\parallel} = 4 \cdot 9.8 \cdot 0.707 = 27.7$ Н. $N = 4 \cdot 9.8 \cdot 0.707 = 27.7$ Н. $F_{тр} = 0.1 \cdot 27.7 = 2.77$ Н. $a = \frac{27.7 - 2.77}{4} = 6.23$ м/с²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> Два груза массами $m_1 = 1$ кг и $m_2 = 4$ кг подвешены на пружине жёсткостью $k = 200$ Н/м последовательно. Найдите удлинение пружины. ($g = 9.8$ м/с²).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Суммарная сила тяжести $F = (m_1 + m_2)g$. Затем $\Delta x = \frac{F}{k}$.</div>
+                    <div class="answer">✅ Ответ: $F = (1 + 4) \cdot 9.8 = 49$ Н. $\Delta x = \frac{49}{200} = 0.245$ м = 24.5 см</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> На пружине жёсткостью $k = 100$ Н/м висит груз массой $m = 2$ кг. Пружину с грузом поднимают в лифте с ускорением $a = 3$ м/с² вверх. Найдите удлинение пружины. ($g = 9.8$ м/с²).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> При движении вверх с ускорением вес груза увеличивается: $P = m(g + a)$. Затем по закону Гука $\Delta x = \frac{P}{k}$.</div>
+                    <div class="answer">✅ Ответ: $P = 2 \cdot (9.8 + 3) = 25.6$ Н. $\Delta x = \frac{25.6}{100} = 0.256$ м = 25.6 см</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
     <div class="back-link-wrapper">
         <a href="mechanics.html" class="back-link">← Назад</a>
     </div>
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
-    function toggleHint(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='💡 Подсказка';}else{el.classList.add('open');btn.textContent='📕 Скрыть подсказку';}}
-    
-    (function(){if(localStorage.getItem('mathTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    
+    // Безопасная проверка темы
+    (function(){
+        if(localStorage.getItem('mathTheme')==='light' || localStorage.getItem('physicsTheme')==='light'){
+            document.documentElement.classList.add('light-mode');
+            var btn = document.getElementById('themeBtn');
+            if (btn) btn.textContent = '☀️';
+        }
+    })();
 
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть решение';
+        }
+    }
+
+    function toggleHint(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='💡 Подсказка';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть подсказку';
+        }
+    }
+
+    let activeModel = 'block';
     function switchModel(model) {
+        activeModel = model;
         document.querySelectorAll('.model-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.model === model);
         });
@@ -1760,11 +1449,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- 3D-модель 1: Брусок на опоре -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-block');
         const canvas = document.getElementById('canvas-block');
@@ -1776,7 +1461,7 @@ a, button, div, span, label, input, textarea, select {
         camera.position.set(4, 3, 6);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1798,7 +1483,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.padding = '0';
             div.style.border = 'none';
             div.style.borderRadius = '0';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -1809,29 +1494,31 @@ a, button, div, span, label, input, textarea, select {
             const len = dir.length();
             if (len < 0.01) return g;
             dir.normalize();
-            let lineMat = new THREE.LineBasicMaterial({ color, linewidth: thickness });
-            if (dash) {
-                lineMat = new THREE.LineDashedMaterial({
-                    color: color,
-                    dashSize: 0.04,
-                    gapSize: 0.04,
-                    transparent: true,
-                    opacity: 0.5
-                });
-            }
-            const line = new THREE.Line(
-                new THREE.BufferGeometry().setFromPoints([from, to]),
-                lineMat
-            );
-            if (dash) line.computeLineDistances();
-            g.add(line);
-            const cone = new THREE.Mesh(
-                new THREE.ConeGeometry(0.055, 0.12, 8),
-                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.3) })
-            );
-            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.06)));
-            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
-            g.add(cone);
+
+            const radius = 0.03;
+            const headLen = 0.16;
+            const headRadius = 0.08;
+            const shaftLen = Math.max(len - headLen, 0.01);
+
+            const mat = new THREE.MeshStandardMaterial({
+                color,
+                emissive: new THREE.Color(color).multiplyScalar(0.4),
+                metalness: 0.2,
+                roughness: 0.5
+            });
+
+            const shaftGeo = new THREE.CylinderGeometry(radius, radius, shaftLen, 12);
+            const shaft = new THREE.Mesh(shaftGeo, mat);
+            shaft.position.copy(from.clone().add(dir.clone().multiplyScalar(shaftLen / 2)));
+            shaft.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(shaft);
+
+            const headGeo = new THREE.ConeGeometry(headRadius, headLen, 16);
+            const head = new THREE.Mesh(headGeo, mat);
+            head.position.copy(from.clone().add(dir.clone().multiplyScalar(shaftLen + headLen / 2)));
+            head.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(head);
+
             return g;
         }
 
@@ -1841,19 +1528,32 @@ a, button, div, span, label, input, textarea, select {
             const len = dir.length();
             if (len < 0.01) return g;
             dir.normalize();
-            const lineMat = new THREE.LineBasicMaterial({ color, linewidth: thickness, transparent: true, opacity: 0.7 });
-            const line = new THREE.Line(
-                new THREE.BufferGeometry().setFromPoints([from, to]),
-                lineMat
-            );
-            g.add(line);
-            const cone = new THREE.Mesh(
-                new THREE.ConeGeometry(0.04, 0.1, 8),
-                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.2), transparent: true, opacity: 0.7 })
-            );
-            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.05)));
-            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
-            g.add(cone);
+
+            const shaftRadius = 0.025;
+            const headLength = 0.18;
+            const headRadius = 0.07;
+            const shaftLength = Math.max(len - headLength, 0.01);
+
+            const shaftGeo = new THREE.CylinderGeometry(shaftRadius, shaftRadius, shaftLength, 12);
+            const mat = new THREE.MeshStandardMaterial({
+                color,
+                emissive: new THREE.Color(color).multiplyScalar(0.35),
+                metalness: 0.2,
+                roughness: 0.5
+            });
+            const shaft = new THREE.Mesh(shaftGeo, mat);
+            const shaftCenter = from.clone().add(dir.clone().multiplyScalar(shaftLength / 2));
+            shaft.position.copy(shaftCenter);
+            shaft.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(shaft);
+
+            const headGeo = new THREE.ConeGeometry(headRadius, headLength, 16);
+            const head = new THREE.Mesh(headGeo, mat);
+            const headCenter = from.clone().add(dir.clone().multiplyScalar(shaftLength + headLength / 2));
+            head.position.copy(headCenter);
+            head.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(head);
+
             return g;
         }
 
@@ -1891,7 +1591,7 @@ a, button, div, span, label, input, textarea, select {
         const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
         key.position.set(2, 5, 2);
         scene.add(key);
-        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+        const _pl = new THREE.PointLight(0xccaa77, 0.5); _pl.position.set(-1.5, 2, 2); scene.add(_pl);
 
         const group = new THREE.Group();
         scene.add(group);
@@ -1961,15 +1661,15 @@ a, button, div, span, label, input, textarea, select {
             group.add(planeGroup);
 
             const planeGeo = new THREE.BoxGeometry(2.4, 0.05, 0.6);
-            const planeMat = new THREE.MeshStandardMaterial({ color: 0x446688, transparent: true, opacity: 0.35 });
+            const planeMat = new THREE.MeshStandardMaterial({ color: 0x446688, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity });
             const planeMesh = new THREE.Mesh(planeGeo, planeMat);
             planeMesh.position.set(0, 0, 0);
             planeGroup.add(planeMesh);
 
             const boxMat = new THREE.MeshStandardMaterial({
                 color: 0x1e88e5,
-                transparent: true,
-                opacity: 0.55,
+                transparent: window.qualitySettings3D.transparent,
+                opacity: window.qualitySettings3D.opacity,
                 emissive: 0x0d47a1,
                 emissiveIntensity: 0.25,
                 roughness: 0.2,
@@ -2029,11 +1729,12 @@ a, button, div, span, label, input, textarea, select {
             dynamicObjects.push(gravLabel);
 
             const normalDirLocal = new THREE.Vector3(0, 1, 0);
-            const normalEndLocal = center.clone().add(normalDirLocal.clone().multiplyScalar(scale * 0.9));
-            const normalArrowLocal = createArrow(center, normalEndLocal, 0x44ff88, 3);
+            const normalStartLocal = center.clone().add(new THREE.Vector3(0, 0.05, 0));
+            const normalEndLocal = normalStartLocal.clone().add(normalDirLocal.clone().multiplyScalar(scale * 1.1));
+            const normalArrowLocal = createArrow(normalStartLocal, normalEndLocal, 0x00ffcc, 4);
             planeGroup.add(normalArrowLocal);
             dynamicObjects.push(normalArrowLocal);
-            const normalLabelLocal = makeLabel('N', '#44ff88', normalEndLocal.clone().add(normalDirLocal.clone().multiplyScalar(0.25)), '0.8rem');
+            const normalLabelLocal = makeLabel('N', '#00ffcc', normalEndLocal.clone().add(normalDirLocal.clone().multiplyScalar(0.28)), '0.95rem');
             planeGroup.add(normalLabelLocal);
             dynamicObjects.push(normalLabelLocal);
 
@@ -2134,7 +1835,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.maxPolarAngle = Math.PI / 2 + 0.25;
         controls.minPolarAngle = Math.PI / 2 - 0.25;
@@ -2145,6 +1846,8 @@ a, button, div, span, label, input, textarea, select {
 
         function animate() {
             requestAnimationFrame(animate);
+            if (activeModel !== 'block') return; // Оптимизация
+
             controls.update();
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
@@ -2154,11 +1857,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- 3D-модель 2: Пружина с грузом (вертикальная) -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-spring');
         const canvas = document.getElementById('canvas-spring');
@@ -2170,7 +1869,7 @@ a, button, div, span, label, input, textarea, select {
         camera.position.set(3.5, 2.5, 5);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -2189,7 +1888,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.padding = '0';
             div.style.border = 'none';
             div.style.borderRadius = '0';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -2200,29 +1899,31 @@ a, button, div, span, label, input, textarea, select {
             const len = dir.length();
             if (len < 0.01) return g;
             dir.normalize();
-            let lineMat = new THREE.LineBasicMaterial({ color, linewidth: thickness });
-            if (dash) {
-                lineMat = new THREE.LineDashedMaterial({
-                    color: color,
-                    dashSize: 0.04,
-                    gapSize: 0.04,
-                    transparent: true,
-                    opacity: 0.5
-                });
-            }
-            const line = new THREE.Line(
-                new THREE.BufferGeometry().setFromPoints([from, to]),
-                lineMat
-            );
-            if (dash) line.computeLineDistances();
-            g.add(line);
-            const cone = new THREE.Mesh(
-                new THREE.ConeGeometry(0.055, 0.12, 8),
-                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.3) })
-            );
-            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.06)));
-            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
-            g.add(cone);
+
+            const radius = 0.03;
+            const headLen = 0.16;
+            const headRadius = 0.08;
+            const shaftLen = Math.max(len - headLen, 0.01);
+
+            const mat = new THREE.MeshStandardMaterial({
+                color,
+                emissive: new THREE.Color(color).multiplyScalar(0.4),
+                metalness: 0.2,
+                roughness: 0.5
+            });
+
+            const shaftGeo = new THREE.CylinderGeometry(radius, radius, shaftLen, 12);
+            const shaft = new THREE.Mesh(shaftGeo, mat);
+            shaft.position.copy(from.clone().add(dir.clone().multiplyScalar(shaftLen / 2)));
+            shaft.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(shaft);
+
+            const headGeo = new THREE.ConeGeometry(headRadius, headLen, 16);
+            const head = new THREE.Mesh(headGeo, mat);
+            head.position.copy(from.clone().add(dir.clone().multiplyScalar(shaftLen + headLen / 2)));
+            head.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(head);
+
             return g;
         }
 
@@ -2232,19 +1933,32 @@ a, button, div, span, label, input, textarea, select {
             const len = dir.length();
             if (len < 0.01) return g;
             dir.normalize();
-            const lineMat = new THREE.LineBasicMaterial({ color, linewidth: thickness, transparent: true, opacity: 0.7 });
-            const line = new THREE.Line(
-                new THREE.BufferGeometry().setFromPoints([from, to]),
-                lineMat
-            );
-            g.add(line);
-            const cone = new THREE.Mesh(
-                new THREE.ConeGeometry(0.04, 0.1, 8),
-                new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.2), transparent: true, opacity: 0.7 })
-            );
-            cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.05)));
-            cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
-            g.add(cone);
+
+            const shaftRadius = 0.025;
+            const headLength = 0.18;
+            const headRadius = 0.07;
+            const shaftLength = Math.max(len - headLength, 0.01);
+
+            const shaftGeo = new THREE.CylinderGeometry(shaftRadius, shaftRadius, shaftLength, 12);
+            const mat = new THREE.MeshStandardMaterial({
+                color,
+                emissive: new THREE.Color(color).multiplyScalar(0.35),
+                metalness: 0.2,
+                roughness: 0.5
+            });
+            const shaft = new THREE.Mesh(shaftGeo, mat);
+            const shaftCenter = from.clone().add(dir.clone().multiplyScalar(shaftLength / 2));
+            shaft.position.copy(shaftCenter);
+            shaft.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(shaft);
+
+            const headGeo = new THREE.ConeGeometry(headRadius, headLength, 16);
+            const head = new THREE.Mesh(headGeo, mat);
+            const headCenter = from.clone().add(dir.clone().multiplyScalar(shaftLength + headLength / 2));
+            head.position.copy(headCenter);
+            head.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
+            g.add(head);
+
             return g;
         }
 
@@ -2282,7 +1996,7 @@ a, button, div, span, label, input, textarea, select {
         }
 
         function createSphere(radius, color, pos) {
-            const geo = new THREE.SphereGeometry(radius, 16, 16);
+            const geo = new THREE.SphereGeometry(radius, window.qualitySettings3D.segments, window.qualitySettings3D.segments);
             const mat = new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.2) });
             const mesh = new THREE.Mesh(geo, mat);
             mesh.position.copy(pos);
@@ -2316,7 +2030,7 @@ a, button, div, span, label, input, textarea, select {
         const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
         key.position.set(2, 5, 2);
         scene.add(key);
-        scene.add(new THREE.PointLight(0xccaa77, 0.5).position.set(-1.5, 2, 2));
+        const _pl = new THREE.PointLight(0xccaa77, 0.5); _pl.position.set(-1.5, 2, 2); scene.add(_pl);
 
         const group = new THREE.Group();
         scene.add(group);
@@ -2454,7 +2168,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.maxPolarAngle = Math.PI / 2 + 0.25;
         controls.minPolarAngle = Math.PI / 2 - 0.25;
@@ -2465,6 +2179,8 @@ a, button, div, span, label, input, textarea, select {
 
         function animate() {
             requestAnimationFrame(animate);
+            if (activeModel !== 'spring') return; // Оптимизация
+
             controls.update();
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
@@ -2500,164 +2216,134 @@ a, button, div, span, label, input, textarea, select {
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
     </button>
-    </nav>
+</nav>
 <script>
-/* ==== 5. Скелетоны для формул MathJax ==== */
-(function(){
-    function addSkeletons(){
-        document.querySelectorAll('.formula-block').forEach(function(el){
-            if (el.querySelector('mjx-container')) return;
-            if (el.dataset.sk) return;
-            el.dataset.sk = '1';
-            var s = document.createElement('span');
-            s.className = 'skeleton';
-            s.style.width = (60 + Math.random()*80) + 'px';
-            el.appendChild(s);
-        });
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
-    else addSkeletons();
-    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
-})();
+    /* ==== 5. Скелетоны для формул MathJax ==== */
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
 
-/* ==== 6. Чипы категорий в результатах поиска ==== */
-(function(){
-    function classify(cat){
-        var c = (cat||'').toLowerCase();
-        if (c.indexOf('механик') >= 0) return 'cat-mech';
-        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
-        if (c.indexOf('электр') >= 0) return 'cat-elec';
-        return 'cat-other';
-    }
-    function decorate(){
-        document.querySelectorAll('.search-result-category').forEach(function(el){
-            if (el.dataset.chip) return;
-            el.dataset.chip = '1';
-            el.classList.add(classify(el.textContent));
-        });
-    }
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            decorate();
-        };
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
-    else decorate();
-})();
+    /* ==== 6. Чипы категорий в результатах поиска ==== */
+    (function(){
+        function classify(cat){
+            var c = (cat||'').toLowerCase();
+            if (c.indexOf('механик') >= 0) return 'cat-mech';
+            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+            if (c.indexOf('электр') >= 0) return 'cat-elec';
+            return 'cat-other';
+        }
+        function decorate(){
+            document.querySelectorAll('.search-result-category').forEach(function(el){
+                if (el.dataset.chip) return;
+                el.dataset.chip = '1';
+                el.classList.add(classify(el.textContent));
+            });
+        }
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                decorate();
+            };
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+        else decorate();
+    })();
 
-/* ==== 10. Анимация смены темы «как на iPhone» ==== */
-(function(){
-    function animateThemeChange(x, y){
-        var circle = document.createElement('div');
-        circle.className = 'theme-circle';
-        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
-        circle.style.width = circle.style.height = (maxR*2) + 'px';
-        circle.style.left = (x - maxR) + 'px';
-        circle.style.top  = (y - maxR) + 'px';
-        document.body.appendChild(circle);
-        requestAnimationFrame(function(){ circle.classList.add('expand'); });
-        setTimeout(function(){ circle.remove(); }, 700);
-    }
-    document.addEventListener('click', function(e){
-        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
-        if (!t) return;
-        var r = t.getBoundingClientRect();
-        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
-    }, true);
-})();
+    /* ==== 10. Анимация смены темы «как на iPhone» ==== */
+    (function(){
+        function animateThemeChange(x, y){
+            var circle = document.createElement('div');
+            circle.className = 'theme-circle';
+            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+            circle.style.width = circle.style.height = (maxR*2) + 'px';
+            circle.style.left = (x - maxR) + 'px';
+            circle.style.top  = (y - maxR) + 'px';
+            document.body.appendChild(circle);
+            requestAnimationFrame(function(){ circle.classList.add('expand'); });
+            setTimeout(function(){ circle.remove(); }, 700);
+        }
+        document.addEventListener('click', function(e){
+            var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+            if (!t) return;
+            var r = t.getBoundingClientRect();
+            animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+        }, true);
+    })();
 
-/* ==== 2. Ripple при тапе ==== */
-(function(){
-    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
-    function bind(el){
-        if (el.dataset.rippleBound) return;
-        el.dataset.rippleBound = '1';
-        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
-        el.addEventListener('pointerdown', function(e){
-            var rect = el.getBoundingClientRect();
-            var size = Math.max(rect.width, rect.height);
-            var r = document.createElement('span');
-            r.className = 'ripple';
-            r.style.width = r.style.height = size + 'px';
-            r.style.left = (e.clientX - rect.left - size/2) + 'px';
-            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
-            el.appendChild(r);
-            setTimeout(function(){ r.remove(); }, 650);
-        });
-    }
-    function bindAll(){
-        document.querySelectorAll(sel).forEach(bind);
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
-    else bindAll();
-    /* Перепривязка после поиска */
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            setTimeout(bindAll, 30);
-        };
-    }
-})();
+    /* ==== 2. Ripple при тапе ==== */
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){
+            document.querySelectorAll(sel).forEach(bind);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+        /* Перепривязка после поиска */
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                setTimeout(bindAll, 30);
+            };
+        }
+    })();
 </script>
 <script src="search-overlay.js"></script>
 <!-- bottom-nav-autohide-script -->
 <script>
-/* Автоскрытие нижней панели при скролле */
-(function(){
-    var nav = document.querySelector('.bottom-nav');
-    if (!nav) return;
-    var lastY = window.scrollY;
-    var threshold = 8;
-    var ticking = false;
-    function onScroll(){
-        var y = window.scrollY;
-        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
-        if (y > lastY && y > 80) {
-            nav.classList.add('nav-hidden');
-        } else {
-            nav.classList.remove('nav-hidden');
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 8;
+        var ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
         }
-        lastY = y;
-        ticking = false;
-    }
-    window.addEventListener('scroll', function(){
-        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
-    }, { passive: true });
-})();
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
 </script>
 <script src="page-search.js"></script>
 <script src="physics-data.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

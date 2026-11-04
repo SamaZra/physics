@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электрический ток в металлах. Сверхпроводимость</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:160px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .derivation-btn { background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary); font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer; margin-top: 8px; transition: all 0.2s; display: inline-block; }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content { display: none; margin-top: 10px; padding: 12px; background: var(--card-bg); border-left: 3px solid var(--text-secondary); border-radius: 8px; font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left; }
+        .derivation-content.open { display: block; }
+        .btn-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid #3b82f6;border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:#3b82f6;}
+        .hint-box mjx-container{font-size:1rem !important;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:120px;top:8px;right:8px;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script>
+        let quality3D = 'high';
+        if (window.Android && window.Android.getQuality3D) {
+            quality3D = window.Android.getQuality3D();
+        } else {
+            const saved = localStorage.getItem('quality3d');
+            if (saved) quality3D = saved;
+        }
+        window.quality3D = quality3D;
+        window.qualitySettings = {
+            low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+            medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+            high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+        };
+        window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+        (function() {
+            if (!window.THREE) return;
+            const OriginalRenderer = THREE.WebGLRenderer;
+            THREE.WebGLRenderer = function(params) {
+                const r = new OriginalRenderer(params);
+                const q = window.qualitySettings3D || {};
+                if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+                if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+                return r;
+            };
+        })();
+        window.applyQualitySegments = function() {
+            if (!window.THREE || !window.qualitySettings3D) return;
+            return window.qualitySettings3D.segments;
+        };
+    </script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech  { background: #3b82f6; }
+        .search-result-category.cat-thermo{ background: #f59e0b; }
+        .search-result-category.cat-elec  { background: #eab308; }
+        .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index"> body.is-index .nav-back-btn { display: none !important; } </style>
+    <style id="bottom-nav-autohide">
+        .bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; }
+        body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+    </style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; }
+        .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+        .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+        .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right"> .bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; } </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; }
+        a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Электрический ток в металлах. Сверхпроводимость</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Природа тока в металлах</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Электрический ток в металлах</strong> — это направленное движение <span class="important">свободных электронов</span> (электронов проводимости). Ионы металла образуют кристаллическую решётку и в переносе заряда не участвуют.</p>
+                <p><strong>Опыт, доказывающий электронную природу тока (опыт Рикке, 1901):</strong> три плотно прижатых цилиндра (медный — алюминиевый — медный) пропускали ток в течение года. За это время через них прошёл заряд $\approx 3 \cdot 10^7$ Кл. Взвешивание показало, что массы цилиндров не изменились. Значит, заряд переносят не ионы (иначе была бы диффузия одного металла в другой), а общие для всех металлов частицы — электроны.</p>
+                <p><strong>Другие доказательства:</strong></p>
+                <ul>
+                    <li><strong>Опыт Толмена и Стюарта:</strong> при резком торможении катушки с проводом в ней возникает ток — по инерции продолжают двигаться именно лёгкие электроны.</li>
+                    <li><strong>Сверхпроводимость:</strong> при низких температурах сопротивление скачком падает до нуля — электроны перестают испытывать столкновения.</li>
+                </ul>
+                <p><strong>Механизм сопротивления:</strong> электроны при движении сталкиваются с ионами кристаллической решётки — это и есть причина электрического сопротивления металла.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Скорость тока. Сопротивление и температура</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Важно понимать:</strong> скорость упорядоченного движения электронов в проводнике очень мала (доли миллиметра в секунду), но <span class="important">электрическое поле</span> распространяется по проводнику со скоростью, близкой к скорости света. Поэтому ток «включается» почти мгновенно по всей цепи.</p>
+                <p><strong>Сопротивление металлического проводника</strong> зависит от материала, длины и сечения:</p>
+                <div class="formula-block">
+                    <span class="f">$R = \rho \dfrac{l}{S}$</span>
+                    <span class="f-label">— сопротивление проводника</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Сопротивление прямо пропорционально длине проводника (чем длиннее — тем больше столкновений электронов с ионами) и обратно пропорционально площади сечения (чем толще — тем «просторнее» для электронов). Коэффициент пропорциональности $\rho$ — удельное сопротивление, характеристика материала. Единица $\rho$ — Ом·м (или Ом·мм²/м).
+                    </div>
+                </div>
+                <p><strong>Зависимость сопротивления от температуры:</strong></p>
+                <div class="formula-block">
+                    <span class="f">$R = R_0 (1 + \alpha \Delta t)$</span>
+                    <span class="f-label">— сопротивление при нагревании</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        При нагревании ионы кристаллической решётки колеблются сильнее, электронам труднее «протискиваться» — сопротивление растёт. Для металлов температурный коэффициент $\alpha > 0$ (обычно $\sim 0{,}004$ К⁻¹). У полупроводников — наоборот, $\alpha < 0$: сопротивление падает с ростом температуры.
+                    </div>
+                </div>
+                <p><strong>График зависимости сопротивления металла от температуры:</strong></p>
+                <svg viewBox="0 0 300 180" width="300" height="180" style="display:block;margin:12px auto;max-width:100%;">
+                    <line x1="40" y1="150" x2="280" y2="150" stroke="#8ba5b8" stroke-width="1"/>
+                    <line x1="40" y1="150" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1"/>
+                    <text x="285" y="154" fill="#8ba5b8" font-size="11">T</text>
+                    <text x="22" y="20" fill="#8ba5b8" font-size="11">R</text>
+                    <line x1="40" y1="140" x2="270" y2="40" stroke="#f59e0b" stroke-width="2.5"/>
+                    <circle cx="40" cy="140" r="3" fill="#f59e0b"/>
+                    <text x="44" y="138" fill="#8ba5b8" font-size="10">R₀</text>
+                    <text x="150" y="170" fill="#8ba5b8" font-size="10" text-anchor="middle">металл: R растёт линейно</text>
+                </svg>
+
+                <p><strong>Удельное сопротивление некоторых металлов</strong> при 20 °C:</p>
+                <ul>
+                    <li>серебро — $0{,}016$ Ом·мм²/м;</li>
+                    <li>медь — $0{,}017$ Ом·мм²/м;</li>
+                    <li>алюминий — $0{,}028$ Ом·мм²/м;</li>
+                    <li>железо — $0{,}10$ Ом·мм²/м;</li>
+                    <li>нихром — $1{,}1$ Ом·мм²/м.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Сверхпроводимость</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Сверхпроводимость</strong> — явление <span class="important">полного исчезновения электрического сопротивления</span> при охлаждении проводника ниже критической температуры $T_c$.</p>
+                <p>Открыто <span class="important">Хейке Камерлинг-Оннесом</span> в 1911 году: при охлаждении ртути ниже $T_c \approx 4{,}2$ К её сопротивление скачком падало до нуля.</p>
+                                <p><strong>График зависимости сопротивления сверхпроводника от температуры:</strong></p>
+                <svg viewBox="0 0 300 180" width="300" height="180" style="display:block;margin:12px auto;max-width:100%;">
+                    <line x1="40" y1="150" x2="280" y2="150" stroke="#8ba5b8" stroke-width="1"/>
+                    <line x1="40" y1="150" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1"/>
+                    <text x="285" y="154" fill="#8ba5b8" font-size="11">T</text>
+                    <text x="22" y="20" fill="#8ba5b8" font-size="11">R</text>
+                    <line x1="100" y1="140" x2="270" y2="60" stroke="#f59e0b" stroke-width="2.5"/>
+                    <line x1="40" y1="140" x2="100" y2="140" stroke="#44ff88" stroke-width="3"/>
+                    <line x1="100" y1="140" x2="100" y2="60" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 3"/>
+                    <circle cx="100" cy="140" r="3" fill="#44ff88"/>
+                    <text x="102" y="158" fill="#8ba5b8" font-size="10">T_c</text>
+                    <text x="50" y="135" fill="#44ff88" font-size="10">R = 0</text>
+                    <text x="170" y="170" fill="#8ba5b8" font-size="10" text-anchor="middle">сверхпроводник: скачок в 0 при T_c</text>
+                </svg>
+
+                <p><strong>Свойства сверхпроводников:</strong></p>
+                <ul>
+                    <li>сопротивление <span class="important">строго равно нулю</span> — ток может течь годами без источника;</li>
+                    <li><span class="important">эффект Мейснера</span> — магнитное поле выталкивается из сверхпроводника (он «не пускает» магнитное поле внутрь);</li>
+                    <li>при превышении критического тока $I_c$ или критического магнитного поля $B_c$ сверхпроводимость разрушается.</li>
+                </ul>
+                <p><strong>Критические температуры некоторых сверхпроводников:</strong></p>
+                <ul>
+                    <li>ртуть Hg — $4{,}2$ К;</li>
+                    <li>свинец Pb — $7{,}2$ К;</li>
+                    <li>ниобий Nb — $9{,}3$ К;</li>
+                    <li>сплав Nb₃Sn — $18$ К;</li>
+                    <li>керамика YBa₂Cu₃O₇ (ВТСП) — $92$ К (выше температуры кипения азота $77$ К!).</li>
+                </ul>
+                <p><strong>Применение:</strong> обмотки мощных электромагнитов (МРТ, ускорители частиц, поезда на магнитной подушке), сверхпроводящие кабели, квантовые компьютеры.</p>
+                <p><strong>💡 Это интересно:</strong> В 2020 году в Японии на линии Тюо-Синкансэн испытали поезд на магнитной подушке со сверхпроводящими магнитами. Состав удерживается в воздухе над путями и разгоняется до 600 км/ч — это быстрее, чем самолёт на коротких рейсах. Сверхпроводящие обмотки не нагреваются, потому что ток в них течёт без сопротивления.</p>
+                <p><strong>Ограничение:</strong> для работы нужны криогенные температуры (жидкий гелий, азот), что дорого и технически сложно. Комнатной сверхпроводимости пока не существует.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛЬ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивная 3D-модель</div>
+        <div class="section-content">
+            <div class="model-container" id="container-metals">
+                <canvas id="canvas-metals" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-metals">⛶</button>
+                <div class="info-display">
+                    <div>$T$ = <span class="val" id="met-temp">300</span> К</div>
+                    <div>$\rho$ = <span class="val" id="met-rho">0.017</span> Ом·мм²/м</div>
+                    <div>Режим: <span class="val" id="met-mode">металл</span></div>
+                </div>
+            </div>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Температура $T$ (К)</label>
+                    <input type="range" id="met-temp-slider" min="1" max="600" step="1" value="300">
+                    <span class="control-value" id="met-temp-value">300</span>
+                </div>
+                <button class="btn-reset" id="met-reset">⟳ Сброс</button>
+                <span class="control-label">⬤ Ниже $T_c \approx 4$ К сопротивление скачком падает до нуля</span>
+            </div>
+            <div class="def-card">
+                <p><strong>🪐 Как работает модель:</strong></p>
+                <p>Оранжевые шарики — <strong>ионы кристаллической решётки</strong>, синие — <strong>свободные электроны</strong>. Электроны дрейфуют между ионами и отскакивают от стенок.</p>
+                <p><span class="important">Двигайте ползунок температуры:</span></p>
+                <ul>
+                    <li>при нагревании ионы колеблются сильнее — сопротивление растёт (табло $\rho$ увеличивается);</li>
+                    <li>при охлаждении колебания затухают — сопротивление падает;</li>
+                    <li><span class="important">ниже $T_c \approx 4$ К</span> ионы почти замирают, электроны становятся <strong>зелёными</strong>, а $\rho$ скачком падает до <strong>нуля</strong> — это <strong>сверхпроводимость</strong>.</li>
+                </ul>
+                <p>Смотрите на табло справа: там текущие $T$, $\rho$ и режим («металл» / «СВЕРХПРОВОДИМОСТЬ»).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сопротивление медного провода</div>
+                <div class="task-condition"><strong>Условие:</strong> Медный провод ($\rho = 0{,}017$ Ом·мм²/м) длиной $l = 50$ м и сечением $S = 2$ мм². Найдите сопротивление.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\rho = 0{,}017$ Ом·мм²/м, $l = 50$ м, $S = 2$ мм²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $R = \rho \dfrac{l}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 0{,}017 \cdot \dfrac{50}{2} = 0{,}425 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Медь — хороший проводник, сопротивление мало.</div>
+                    <div class="answer">✅ Ответ: $R = 0{,}425$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Сопротивление алюминиевого провода</div>
+                <div class="task-condition"><strong>Условие:</strong> Алюминиевый провод ($\rho = 0{,}028$ Ом·мм²/м) длиной $l = 100$ м и сечением $S = 4$ мм². Найдите сопротивление.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\rho = 0{,}028$ Ом·мм²/м, $l = 100$ м, $S = 4$ мм²</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $R = \rho \dfrac{l}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 0{,}028 \cdot \dfrac{100}{4} = 0{,}7 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Алюминий хуже меди, но легче — поэтому его используют в ЛЭП.</div>
+                    <div class="answer">✅ Ответ: $R = 0{,}7$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Длина провода по сопротивлению</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление медного провода $R = 1{,}7$ Ом, сечение $S = 1$ мм². Найдите длину провода.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $R = 1{,}7$ Ом, $S = 1$ мм², $\rho = 0{,}017$ Ом·мм²/м</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $l$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $R = \rho \dfrac{l}{S}$ выражаем $l = \dfrac{R \cdot S}{\rho}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$l = \dfrac{1{,}7 \cdot 1}{0{,}017} = 100 \text{ м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 100 м медного провода сечением 1 мм² имеют сопротивление 1,7 Ом.</div>
+                    <div class="answer">✅ Ответ: $l = 100$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Нагрев проводника</div>
+                <div class="task-condition"><strong>Условие:</strong> Через проводник сопротивлением $R = 5$ Ом течёт ток $I = 4$ А в течение $t = 2$ мин. Найдите количество теплоты.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $R = 5$ Ом, $I = 4$ А, $t = 2$ мин = 120 с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Закон Джоуля–Ленца: $Q = I^2 R t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 16 \cdot 5 \cdot 120 = 9600 \text{ Дж} = 9{,}6 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При столкновениях электронов с ионами решётки выделяется тепло.</div>
+                    <div class="answer">✅ Ответ: $Q = 9{,}6$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Температурный коэффициент сопротивления</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление медного провода при $t_1 = 0$ °C равно $R_0 = 10$ Ом. Температурный коэффициент $\alpha = 0{,}004$ К⁻¹. Найдите сопротивление при $t_2 = 100$ °C.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $R_0 = 10$ Ом, $\alpha = 0{,}004$ К⁻¹, $\Delta t = 100$ °C</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $R = R_0(1 + \alpha \Delta t)$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 10 \cdot (1 + 0{,}004 \cdot 100) = 10 \cdot 1{,}4 = 14 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При нагревании на 100 °C сопротивление меди выросло на 40%.</div>
+                    <div class="answer">✅ Ответ: $R = 14$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Во сколько раз выросло сопротивление</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление проводника при $0$ °C равно $R_0$, при $200$ °C — $R$. $\alpha = 0{,}004$ К⁻¹. Найдите отношение $R/R_0$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $\alpha = 0{,}004$ К⁻¹, $\Delta t = 200$ °C</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{R}{R_0}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\dfrac{R}{R_0} = 1 + \alpha \Delta t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\dfrac{R}{R_0} = 1 + 0{,}004 \cdot 200 = 1{,}8$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сопротивление выросло в 1,8 раза.</div>
+                    <div class="answer">✅ Ответ: $\dfrac{R}{R_0} = 1{,}8$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Скорость дрейфа электронов</div>
+                <div class="task-condition"><strong>Условие:</strong> По медному проводу сечением $S = 1$ мм² течёт ток $I = 1$ А. Концентрация свободных электронов в меди $n = 8{,}5 \cdot 10^{28}$ м⁻³, заряд электрона $e = 1{,}6 \cdot 10^{-19}$ Кл. Найдите скорость дрейфа электронов.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $S = 10^{-6}$ м², $I = 1$ А, $n = 8{,}5 \cdot 10^{28}$ м⁻³, $e = 1{,}6 \cdot 10^{-19}$ Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $v$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $I = n e S v \Rightarrow v = \dfrac{I}{n e S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$v = \dfrac{1}{8{,}5 \cdot 10^{28} \cdot 1{,}6 \cdot 10^{-19} \cdot 10^{-6}} \approx 7{,}4 \cdot 10^{-5} \text{ м/с}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Около 0,07 мм/с — очень медленно. Но поле распространяется почти со скоростью света, поэтому лампа загорается мгновенно.</div>
+                    <div class="answer">✅ Ответ: $v \approx 7{,}4 \cdot 10^{-5}$ м/с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Сверхпроводимость: критическая температура</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление ртути при $T_c = 4{,}2$ К скачком падает до нуля. Что произойдёт с сопротивлением, если температура повысится до $10$ К?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $T_c = 4{,}2$ К, $T = 10$ К</div>
+                    <div class="find"><strong>🔍 Найти:</strong> состояние проводника</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> При $T < T_c$ — сверхпроводимость ($R = 0$).</div>
+                    <div class="step"><strong>Шаг 2.</strong> $T = 10$ К $> T_c = 4{,}2$ К — сверхпроводимость разрушается, сопротивление возвращается к обычному значению.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сверхпроводимость существует только ниже критической температуры.</div>
+                    <div class="answer">✅ Ответ: сверхпроводимость исчезнет, $R > 0$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Ток в сверхпроводящем кольце</div>
+                <div class="task-condition"><strong>Условие:</strong> В сверхпроводящем кольце индуктивностью $L = 0{,}1$ Гн возбуждён ток $I = 10$ А. Сопротивление кольца равно нулю. Какое количество теплоты выделится за $t = 1$ год?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $R = 0$, $t = 1$ год</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $Q = I^2 R t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> При $R = 0$: $Q = 0$ — теплота не выделяется.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сверхпроводящий ток может течь годами без потерь.</div>
+                    <div class="answer">✅ Ответ: $Q = 0$</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Удельное сопротивление по данным опыта</div>
+                <div class="task-condition"><strong>Условие:</strong> Провод длиной $l = 2$ м и сечением $S = 0{,}5$ мм² имеет сопротивление $R = 2{,}2$ Ом. Найдите удельное сопротивление материала.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $l = 2$ м, $S = 0{,}5$ мм², $R = 2{,}2$ Ом</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\rho$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Из $R = \rho \dfrac{l}{S}$ выражаем $\rho = \dfrac{R \cdot S}{l}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\rho = \dfrac{2{,}2 \cdot 0{,}5}{2} = 0{,}55 \text{ Ом·мм}^2/\text{м}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Такое значение близко к нихрому ($1{,}1$) или другому сплаву с высоким сопротивлением.</div>
+                    <div class="answer">✅ Ответ: $\rho = 0{,}55$ Ом·мм²/м</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== САМОСТОЯТЕЛЬНОЕ РЕШЕНИЕ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Сопротивление нихромового провода</div>
+                <div class="task-condition"><strong>Условие:</strong> Нихромовый провод ($\rho = 1{,}1$ Ом·мм²/м) длиной $l = 3$ м и сечением $S = 0{,}5$ мм². Найдите сопротивление.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s1')">💡 Подсказка</button></div>
+                <div id="s1" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $R = \rho \dfrac{l}{S}$.</div><div class="answer">✅ Ответ: $R = 6{,}6$ Ом</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Сечение провода</div>
+                <div class="task-condition"><strong>Условие:</strong> Медный провод длиной $l = 20$ м имеет сопротивление $R = 0{,}34$ Ом. Найдите сечение.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s2')">💡 Подсказка</button></div>
+                <div id="s2" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $S = \dfrac{\rho l}{R}$, $\rho = 0{,}017$ Ом·мм²/м.</div><div class="answer">✅ Ответ: $S = 1$ мм²</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. Мощность нагрева</div>
+                <div class="task-condition"><strong>Условие:</strong> Проводник сопротивлением $R = 10$ Ом при токе $I = 3$ А. Найдите мощность нагрева.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s3')">💡 Подсказка</button></div>
+                <div id="s3" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $P = I^2 R$.</div><div class="answer">✅ Ответ: $P = 90$ Вт</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. Теплота в проводнике</div>
+                <div class="task-condition"><strong>Условие:</strong> Через проводник $R = 8$ Ом течёт ток $I = 2$ А в течение $t = 5$ мин. Найдите количество теплоты.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s4')">💡 Подсказка</button></div>
+                <div id="s4" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $Q = I^2 R t$, $t$ в секундах.</div><div class="answer">✅ Ответ: $Q = 9{,}6$ кДж</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Температурная зависимость</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление при $0$ °C равно $R_0 = 5$ Ом, $\alpha = 0{,}004$ К⁻¹. Найдите сопротивление при $50$ °C.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s5')">💡 Подсказка</button></div>
+                <div id="s5" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $R = R_0(1 + \alpha \Delta t)$.</div><div class="answer">✅ Ответ: $R = 6$ Ом</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Во сколько раз выросло сопротивление</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление проводника выросло с $R_0$ до $R$ при нагреве на $250$ °C. $\alpha = 0{,}004$ К⁻¹. Найдите $R/R_0$.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s6')">💡 Подсказка</button></div>
+                <div id="s6" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $R/R_0 = 1 + \alpha \Delta t$.</div><div class="answer">✅ Ответ: $R/R_0 = 2$</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Скорость дрейфа</div>
+                <div class="task-condition"><strong>Условие:</strong> Ток $I = 2$ А, сечение $S = 2$ мм², $n = 8{,}5 \cdot 10^{28}$ м⁻³. Найдите скорость дрейфа.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s7')">💡 Подсказка</button></div>
+                <div id="s7" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $v = \dfrac{I}{neS}$, $e = 1{,}6 \cdot 10^{-19}$ Кл.</div><div class="answer">✅ Ответ: $v \approx 7{,}4 \cdot 10^{-5}$ м/с</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Сверхпроводимость</div>
+                <div class="task-condition"><strong>Условие:</strong> Критическая температура сверхпроводника $T_c = 9{,}3$ К. Будет ли он сверхпроводящим при $T = 5$ К?</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s8')">💡 Подсказка</button></div>
+                <div id="s8" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> Сверхпроводимость наступает при $T < T_c$.</div><div class="answer">✅ Ответ: да, $5$ К $< 9{,}3$ К</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. Удельное сопротивление</div>
+                <div class="task-condition"><strong>Условие:</strong> Провод длиной $l = 10$ м, сечением $S = 1$ мм² имеет сопротивление $R = 1{,}1$ Ом. Найдите $\rho$.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s9')">💡 Подсказка</button></div>
+                <div id="s9" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $\rho = \dfrac{RS}{l}$.</div><div class="answer">✅ Ответ: $\rho = 0{,}11$ Ом·мм²/м</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. Сопротивление при нагреве</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление при $20$ °C равно $R_1 = 10$ Ом, $\alpha = 0{,}004$ К⁻¹. Найдите сопротивление при $120$ °C.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s10')">💡 Подсказка</button></div>
+                <div id="s10" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $\Delta t = 120 - 20 = 100$ °C, $R = R_1(1 + \alpha \Delta t)$.</div><div class="answer">✅ Ответ: $R = 14$ Ом</div></div></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function findButton(el){
+        // ищем кнопку в пределах всего .task-block
+        const block = el.closest('.task-block');
+        if (!block) return null;
+        return block.querySelector('.show-solution-btn');
+    }
+    function toggleSolution(id){
+        const el = document.getElementById(id);
+        const btn = findButton(el);
+        if (!btn) return;
+        if (el.classList.contains('open')) { el.classList.remove('open'); btn.textContent = '📖 Показать решение'; }
+        else { el.classList.add('open'); btn.textContent = '📕 Скрыть решение'; }
+    }
+    function toggleHint(id){
+        const el = document.getElementById(id);
+        const btn = findButton(el);
+        if (!btn) return;
+        if (el.classList.contains('open')) { el.classList.remove('open'); btn.textContent = '💡 Подсказка'; }
+        else { el.classList.add('open'); btn.textContent = '📕 Скрыть подсказку'; }
+    }
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');}})();
+</script>
+
+<!-- 3D-модель проводимости металла (с столкновениями электронов и ионов) -->
+<script>
+    (function() {
+        const container = document.getElementById('container-metals');
+        const canvas = document.getElementById('canvas-metals');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(7, 5, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const key = new THREE.DirectionalLight(0xffffff, 1.0);
+        key.position.set(5, 8, 6);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // ===== РЕШЁТКА ИОНОВ =====
+        const GRID = 4;
+        const SPACING = 2;
+        const BOUND = GRID * SPACING / 2;     // граница куба
+        const ION_RADIUS = 0.25;              // радиус иона
+        const ELECTRON_RADIUS = 0.12;         // радиус электрона
+        const COLLISION_DIST = ION_RADIUS + ELECTRON_RADIUS;  // порог столкновения
+
+        const ions = [];
+        const ionGeo = new THREE.SphereGeometry(ION_RADIUS, 16, 16);
+        const ionMat = new THREE.MeshStandardMaterial({
+            color: 0xff8800, emissive: 0x441100, roughness: 0.4, metalness: 0.2
+        });
+
+        for (let x = 0; x < GRID; x++) {
+            for (let y = 0; y < GRID; y++) {
+                for (let z = 0; z < GRID; z++) {
+                    const m = new THREE.Mesh(ionGeo, ionMat);
+                    m.position.set(
+                        (x - (GRID - 1) / 2) * SPACING,
+                        (y - (GRID - 1) / 2) * SPACING,
+                        (z - (GRID - 1) / 2) * SPACING
+                    );
+                    group.add(m);
+                    ions.push({
+                        mesh: m,
+                        baseX: m.position.x,
+                        baseY: m.position.y,
+                        baseZ: m.position.z,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+        }
+
+        // ===== ЭЛЕКТРОНЫ =====
+        const N_ELECTRONS = 40;
+        const electrons = [];
+        const elGeo = new THREE.SphereGeometry(ELECTRON_RADIUS, 12, 12);
+
+        for (let i = 0; i < N_ELECTRONS; i++) {
+            // каждый электрон — со своим материалом (чтобы можно было красить по отдельности)
+            const mat = new THREE.MeshStandardMaterial({
+                color: 0x44aaff, emissive: 0x003366, roughness: 0.3
+            });
+            const m = new THREE.Mesh(elGeo, mat);
+            m.position.set(
+                (Math.random() - 0.5) * (GRID * SPACING - 0.6),
+                (Math.random() - 0.5) * (GRID * SPACING - 0.6),
+                (Math.random() - 0.5) * (GRID * SPACING - 0.6)
+            );
+            group.add(m);
+            const dir = new THREE.Vector3(
+                Math.random() - 0.5,
+                Math.random() - 0.5,
+                Math.random() - 0.5
+            ).normalize();
+            electrons.push({
+                mesh: m,
+                mat: mat,
+                vx: dir.x,
+                vy: dir.y,
+                vz: dir.z,
+                hitFlash: 0    // таймер «вспышки» после столкновения
+            });
+        }
+
+        // ===== УПРАВЛЕНИЕ =====
+        const tempSlider = document.getElementById('met-temp-slider');
+        const tempValue = document.getElementById('met-temp-value');
+        const tempDisplay = document.getElementById('met-temp');
+        const rhoDisplay = document.getElementById('met-rho');
+        const modeDisplay = document.getElementById('met-mode');
+
+        let T = 300;
+
+        function updateTemp() {
+            T = parseFloat(tempSlider.value);
+            tempValue.textContent = T;
+            tempDisplay.textContent = T;
+
+            let rho, mode;
+            if (T < 4) {
+                rho = 0; mode = 'СВЕРХПРОВОДИМОСТЬ';
+            } else {
+                rho = 0.017 * (T / 300);
+                mode = 'металл';
+            }
+            rhoDisplay.textContent = rho === 0 ? '0' : rho.toFixed(4);
+            modeDisplay.textContent = mode;
+            modeDisplay.style.color = (T < 4) ? '#44ff88' : 'var(--special-border)';
+        }
+
+        tempSlider.addEventListener('input', updateTemp);
+        document.getElementById('met-reset').addEventListener('click', () => {
+            tempSlider.value = 300;
+            updateTemp();
+        });
+
+        document.getElementById('fs-metals').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateTemp();
+
+        let t = 0;
+
+        // ===== АНИМАЦИЯ =====
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            t += 0.016;
+
+            const isSuperconducting = T < 4;
+            // Амплитуда колебаний ионов: при сверхпроводимости почти ноль
+            const amplitude = isSuperconducting ? 0.01 : 0.06 * (T / 300);
+
+            // --- Колебания ионов ---
+            ions.forEach(ion => {
+                ion.mesh.position.x = ion.baseX + Math.sin(t * 2 + ion.phase) * amplitude;
+                ion.mesh.position.y = ion.baseY + Math.cos(t * 2.3 + ion.phase) * amplitude;
+                ion.mesh.position.z = ion.baseZ + Math.sin(t * 1.9 + ion.phase * 1.3) * amplitude;
+            });
+
+            // --- Скорость электронов ---
+            const speed = isSuperconducting
+                ? 0.15
+                : Math.min(0.15, 0.03 + (T / 300) * 0.08);
+
+            // --- Движение электронов + столкновения ---
+            electrons.forEach(e => {
+                const pos = e.mesh.position;
+
+                // Двигаем
+                pos.x += e.vx * speed;
+                pos.y += e.vy * speed;
+                pos.z += e.vz * speed;
+
+                // --- Отскок от стенок куба ---
+                if (Math.abs(pos.x) > BOUND - ELECTRON_RADIUS) {
+                    pos.x = Math.sign(pos.x) * (BOUND - ELECTRON_RADIUS);
+                    e.vx *= -1;
+                }
+                if (Math.abs(pos.y) > BOUND - ELECTRON_RADIUS) {
+                    pos.y = Math.sign(pos.y) * (BOUND - ELECTRON_RADIUS);
+                    e.vy *= -1;
+                }
+                if (Math.abs(pos.z) > BOUND - ELECTRON_RADIUS) {
+                    pos.z = Math.sign(pos.z) * (BOUND - ELECTRON_RADIUS);
+                    e.vz *= -1;
+                }
+
+                // --- Столкновения с ионами (только в обычном режиме) ---
+                if (!isSuperconducting) {
+                    for (let i = 0; i < ions.length; i++) {
+                        const ionPos = ions[i].mesh.position;
+                        const dx = pos.x - ionPos.x;
+                        const dy = pos.y - ionPos.y;
+                        const dz = pos.z - ionPos.z;
+                        const dist2 = dx*dx + dy*dy + dz*dz;
+
+                        if (dist2 < COLLISION_DIST * COLLISION_DIST) {
+                            // Нормаль от иона к электрону
+                            const dist = Math.sqrt(dist2) || 0.0001;
+                            const nx = dx / dist, ny = dy / dist, nz = dz / dist;
+
+                            // Выталкиваем электрон наружу
+                            pos.x = ionPos.x + nx * (COLLISION_DIST + 0.01);
+                            pos.y = ionPos.y + ny * (COLLISION_DIST + 0.01);
+                            pos.z = ionPos.z + nz * (COLLISION_DIST + 0.01);
+
+                            // Отражаем скорость относительно нормали
+                            const dot = e.vx * nx + e.vy * ny + e.vz * nz;
+                            e.vx = e.vx - 2 * dot * nx;
+                            e.vy = e.vy - 2 * dot * ny;
+                            e.vz = e.vz - 2 * dot * nz;
+
+                            // Небольшое случайное отклонение (тепловой разброс)
+                            e.vx += (Math.random() - 0.5) * 0.15;
+                            e.vy += (Math.random() - 0.5) * 0.15;
+                            e.vz += (Math.random() - 0.5) * 0.15;
+
+                            // Нормируем скорость, чтобы не разгонялся
+                            const vlen = Math.sqrt(e.vx*e.vx + e.vy*e.vy + e.vz*e.vz) || 0.0001;
+                            e.vx /= vlen;
+                            e.vy /= vlen;
+                            e.vz /= vlen;
+
+                            // Вспышка при столкновении
+                             e.hitFlash = 0.5;
+                            break; // одно столкновение за кадр достаточно
+                        }
+                    }
+                }
+
+                // --- Цвет электрона ---
+                if (isSuperconducting) {
+                    // Сверхпроводимость: зелёный, «чистое» движение
+                    e.mat.color.setHex(0x44ff88);
+                    e.mat.emissive.setHex(0x00aa44);
+                } else {
+                    // Обычный режим: синий, но при столкновении — красная вспышка
+                    if (e.hitFlash > 0) {
+                       e.mat.color.setHex(0xffffff);
+                    e.mat.emissive.setHex(0x888888)
+                        e.hitFlash -= 0.06;
+                    } else {
+                        e.mat.color.setHex(0x44aaff);
+                        e.mat.emissive.setHex(0x003366);
+                    }
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</nav>
+<script>
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
+
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){ document.querySelectorAll(sel).forEach(bind); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+    })();
+</script>
+<script src="search-overlay.js"></script>
+<script>
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY, threshold = 8, ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) nav.classList.add('nav-hidden');
+            else nav.classList.remove('nav-hidden');
+            lastY = y; ticking = false;
+        }
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>
+</body>
+</html>

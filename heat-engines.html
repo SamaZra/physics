@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -131,6 +131,20 @@
             h1{font-size:1.1rem;}
             .section-title{font-size:0.95rem;}
         }
+
+        /* ==== СПОЙЛЕРЫ ВЫВОДОВ ФОРМУЛ ==== */
+        .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -143,7 +157,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
 .section-title {
@@ -779,6 +835,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$A = Q_1 - Q_2$</span>
                     <span class="f-label">— полезная работа за цикл</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        За цикл рабочее тело возвращается в исходное состояние, поэтому изменение внутренней энергии $\Delta U = 0$. По первому началу термодинамики $Q_{цикл} = \Delta U + A_{цикл}$, значит $A_{цикл} = Q_{цикл}$. Но $Q_{цикл} = Q_1 - Q_2$ (получил от нагревателя, отдал холодильнику). Отсюда $A = Q_1 - Q_2$.
+                    </div>
                 </div>
                 <p><strong>Важно:</strong> не вся теплота превращается в работу — часть обязательно отдаётся холодильнику. Это следствие второго начала термодинамики.</p>
             </div>
@@ -794,6 +854,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$\eta = \dfrac{A}{Q_1} = \dfrac{Q_1 - Q_2}{Q_1} = 1 - \dfrac{Q_2}{Q_1}$</span>
                     <span class="f-label">— КПД теплового двигателя</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        КПД — это отношение полезной работы к затраченной теплоте. Полезная работа $A = Q_1 - Q_2$ (см. вывод 1). Подставляем: $\eta = \dfrac{Q_1 - Q_2}{Q_1} = 1 - \dfrac{Q_2}{Q_1}$. Так как $Q_2 > 0$ (часть теплоты обязательно отдаётся холодильнику), $\eta < 1$ — КПД всегда меньше 100%.
+                    </div>
                 </div>
                 <p>где:</p>
                 <ul>
@@ -808,6 +872,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$\eta_{max} = \dfrac{T_1 - T_2}{T_1} = 1 - \dfrac{T_2}{T_1}$</span>
                     <span class="f-label">— КПД цикла Карно</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Цикл Карно состоит из двух изотерм и двух адиабат. Для идеального газа можно показать, что $Q_2/Q_1 = T_2/T_1$ (отношение отданной и полученной теплоты равно отношению температур холодильника и нагревателя). Подставляем в формулу КПД: $\eta = 1 - \dfrac{Q_2}{Q_1} = 1 - \dfrac{T_2}{T_1} = \dfrac{T_1 - T_2}{T_1}$. Это максимально возможный КПД для данных температур — никакой реальный двигатель не может его превысить.
+                    </div>
                 </div>
                 <p>где $T_1$ — температура нагревателя, $T_2$ — температура холодильника (в кельвинах).</p>
                 <p><strong>Никакой тепловой двигатель не может иметь КПД больше, чем КПД цикла Карно</strong> при тех же температурах.</p>
@@ -1080,7 +1148,7 @@ a, button, div, span, label, input, textarea, select {
                     <div class="find"><strong>🔍 Найти:</strong> возможно ли $\eta = 100\%$?</div>
                 </div>
                     <div class="step"><strong>Шаг 1.</strong> $\eta = 1 - \dfrac{T_2}{T_1}$. Чтобы $\eta = 1$, нужно $\dfrac{T_2}{T_1} = 0$, то есть $T_2 = 0$ К.</div>
-                    <div class="step"><strong>Шаг 2.</strong> Но абсолютный нуль ($T = 0$ К) недостижим (третье начало термодинамики).</div>
+                    <div class="step"><strong>Шаг 2.</strong> Но абсолютный нуль ($T = 0$ К) недостижим (третье начало термодинамики), а второе начало запрещает полное превращение теплоты в работу в циклическом процессе.</div>
                     <div class="step"><strong>Шаг 3.</strong> Значит, $\eta < 100\%$ для любого реального двигателя.</div>
                     <div class="step explanation"><strong>Пояснение:</strong> Это прямое следствие второго начала термодинамики. Часть теплоты обязательно должна уйти в холодильник — иначе процесс не будет циклическим.</div>
                     <div class="answer">✅ Ответ: нет, $\eta < 100\%$</div>
@@ -1238,11 +1306,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 1: ТЕПЛОВОЙ ДВИГАТЕЛЬ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-engine');
         const canvas = document.getElementById('canvas-engine');
@@ -1255,7 +1319,7 @@ a, button, div, span, label, input, textarea, select {
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1272,7 +1336,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.fontFamily = "'Segoe UI', sans-serif";
             div.style.background = 'transparent';
             div.style.padding = '0';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -1414,7 +1478,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1433,11 +1497,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 2: ЦИКЛ КАРНО ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-carnot');
         const canvas = document.getElementById('canvas-carnot');
@@ -1450,7 +1510,7 @@ a, button, div, span, label, input, textarea, select {
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1467,7 +1527,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.fontFamily = "'Segoe UI', sans-serif";
             div.style.background = 'transparent';
             div.style.padding = '0';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -1548,7 +1608,7 @@ a, button, div, span, label, input, textarea, select {
         group.add(label41);
 
         const workBody = new THREE.Mesh(
-            new THREE.SphereGeometry(0.25, 16, 16),
+            new THREE.SphereGeometry(0.25, window.qualitySettings3D.segments, window.qualitySettings3D.segments),
             new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x664400 })
         );
         group.add(workBody);
@@ -1589,7 +1649,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();

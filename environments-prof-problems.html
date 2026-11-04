@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электрический ток в различных средах — задачи с профессиональной направленностью</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+            --badge-welder: #ff6644;
+            --badge-electric: #ffcc00;
+            --badge-auto: #44aaff;
+            --badge-mech: #aa66ff;
+            --badge-it: #44ff88;
+            --self-border: #3b82f6;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+            --badge-welder: #dc2626;
+            --badge-electric: #ca8a04;
+            --badge-auto: #2563eb;
+            --badge-mech: #7c3aed;
+            --badge-it: #059669;
+            --self-border: #2563eb;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .intro-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:14px 16px;margin:12px 0;transition:background 0.3s;}
+        .intro-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .intro-card ul{color:var(--text);padding-left:20px;line-height:1.8;}
+        .intro-card .important{color:var(--special-border);font-weight:700;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:600000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .prof-header{display:flex;align-items:center;gap:10px;background:var(--info-bg);border-left:5px solid var(--special-border);border-radius:14px;padding:12px 16px;margin:18px 0 10px 0;}
+        .prof-header .prof-icon{font-size:1.8rem;}
+        .prof-header .prof-title{font-size:1.1rem;font-weight:700;color:var(--text);}
+        .prof-header .prof-sub{font-size:0.8rem;color:var(--text-secondary);margin-top:2px;}
+        .prof-header.welder{border-left-color:var(--badge-welder);}
+        .prof-header.electric{border-left-color:var(--badge-electric);}
+        .prof-header.auto{border-left-color:var(--badge-auto);}
+        .prof-header.mech{border-left-color:var(--badge-mech);}
+        .prof-header.it{border-left-color:var(--badge-it);}
+        .prof-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;margin-left:auto;}
+        .prof-badge.welder{background:var(--badge-welder);}
+        .prof-badge.electric{background:var(--badge-electric);}
+        .prof-badge.auto{background:var(--badge-auto);}
+        .prof-badge.mech{background:var(--badge-mech);}
+        .prof-badge.it{background:var(--badge-it);}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block.hard{border-left:5px solid #ff4444;background:linear-gradient(135deg, var(--task-bg) 0%, rgba(255,68,68,0.05) 100%);}
+        .task-block.self{border-left:5px solid var(--self-border);background:linear-gradient(135deg, var(--task-bg) 0%, rgba(59,130,246,0.06) 100%);}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .hard-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:#ff4444;margin-left:8px;vertical-align:middle;}
+        .self-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:var(--self-border);margin-left:8px;vertical-align:middle;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid var(--self-border);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:var(--self-border);}
+        .hint-box mjx-container{font-size:1rem !important;}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        @media(max-width:700px){
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech  { background: #3b82f6; }
+        .search-result-category.cat-thermo{ background: #f59e0b; }
+        .search-result-category.cat-elec  { background: #eab308; }
+        .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index"> body.is-index .nav-back-btn { display: none !important; } </style>
+    <style id="bottom-nav-autohide">
+        .bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; }
+        body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+    </style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; }
+        .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+        .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+        .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right"> .bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; } </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; }
+        a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Электрический ток в различных средах — задачи с профессиональной направленностью</h1>
+
+    <div class="intro-card">
+        <p><strong>📌 О разделе.</strong> Задачи по теме «Электрический ток в различных средах» (металлы, полупроводники, жидкости, газы), связанные с реальными профессиональными ситуациями.</p>
+        <p>По каждой специальности — <strong>5 задач</strong>:</p>
+        <ul>
+            <li>🔴 1 задача <strong>сложная</strong> — с подробным решением.</li>
+            <li>🟠 2 задачи <strong>обычные</strong> — с подробным решением.</li>
+            <li>🔵 2 задачи <strong>для самостоятельного решения</strong> — только условие и подсказка.</li>
+        </ul>
+    </div>
+
+    <!-- ===== СВАРЩИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔧 Задачи для сварщика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header welder">
+                <div class="prof-icon">🔧</div>
+                <div>
+                    <div class="prof-title">Сварочное производство</div>
+                    <div class="prof-sub">Дуговой разряд, ионизация, плазма</div>
+                </div>
+                <span class="prof-badge welder">Сварщик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Ток в сварочной дуге</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Через сварочную дугу за $t = 10$ с проходит заряд $q = 1800$ Кл. Найдите силу тока в дуге.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('w1')">📖 Показать решение</button>
+                <div id="w1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 1800$ Кл, $t = 10$ с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $I = \dfrac{q}{t}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{1800}{10} = 180 \text{ А}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 180 А — типичный сварочный ток. Дуга — это газовый разряд, в котором ток переносится ионами и электронами.</div>
+                    <div class="answer">✅ Ответ: $I = 180$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Напряжение на дуге</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Сварочная дуга горит при токе $I = 150$ А и сопротивлении дугового промежутка $R = 0{,}16$ Ом. Найдите напряжение на дуге.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('w2')">📖 Показать решение</button>
+                <div id="w2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $I = 150$ А, $R = 0{,}16$ Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Закон Ома: $U = I \cdot R$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = 150 \cdot 0{,}16 = 24 \text{ В}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 24 В — рабочее напряжение дуги. Газовый разряд имеет нелинейное сопротивление.</div>
+                    <div class="answer">✅ Ответ: $U = 24$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Мощность и теплота дуги <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Дуга горит при $U = 25$ В и $I = 200$ А в течение $t = 30$ с. Найдите: а) мощность дуги; б) количество теплоты; в) массу расплавленного металла, если на плавление 1 кг нужно $Q_{уд} = 3 \cdot 10^5$ Дж/кг (упрощённо).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('w3')">📖 Показать решение</button>
+                <div id="w3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U = 25$ В, $I = 200$ А, $t = 30$ с, $Q_{уд} = 3 \cdot 10^5$ Дж/кг</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $P$, $Q$, $m$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Мощность: $P = U \cdot I = 25 \cdot 200 = 5000$ Вт = 5 кВт.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Теплота: $Q = P \cdot t = 5000 \cdot 30 = 150000$ Дж = 150 кДж.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Масса: $m = \dfrac{Q}{Q_{уд}} = \dfrac{150000}{3 \cdot 10^5} = 0{,}5$ кг.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> За 30 с дуга выделяет 150 кДж — достаточно, чтобы расплавить 0,5 кг металла (упрощённая оценка).</div>
+                    <div class="answer">✅ Ответ: $P = 5$ кВт; $Q = 150$ кДж; $m \approx 0{,}5$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Заряд через дугу <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Сварочный ток $I = 120$ А, сварка длится $t = 2$ мин. Какой заряд прошёл через дугу?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $q = I \cdot t$. Переведите минуты в секунды.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Работа тока дуги <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Дуга при $U = 28$ В и $I = 160$ А горит $t = 20$ с. Найдите работу тока.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $A = U \cdot I \cdot t$.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЭЛЕКТРИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚡ Задачи для электрика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header electric">
+                <div class="prof-icon">⚡</div>
+                <div>
+                    <div class="prof-title">Электротехника</div>
+                    <div class="prof-sub">Проводимость металлов, нагрев, полупроводники</div>
+                </div>
+                <span class="prof-badge electric">Электрик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сопротивление медного провода</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Медный провод ($\rho = 0{,}017$ Ом·мм²/м) длиной $l = 100$ м и сечением $S = 2{,}5$ мм². Найдите сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('e1')">📖 Показать решение</button>
+                <div id="e1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $\rho = 0{,}017$ Ом·мм²/м, $l = 100$ м, $S = 2{,}5$ мм²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = \rho \dfrac{l}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 0{,}017 \cdot \dfrac{100}{2{,}5} = 0{,}68 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В металлах ток переносится свободными электронами. Сопротивление зависит от материала, длины и сечения.</div>
+                    <div class="answer">✅ Ответ: $R = 0{,}68$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Нагрев проводника</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Через проводник сопротивлением $R = 4$ Ом течёт ток $I = 5$ А в течение $t = 10$ мин. Найдите количество теплоты.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('e2')">📖 Показать решение</button>
+                <div id="e2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R = 4$ Ом, $I = 5$ А, $t = 10$ мин = 600 с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Закон Джоуля–Ленца: $Q = I^2 R t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 25 \cdot 4 \cdot 600 = 60000 \text{ Дж} = 60 \text{ кДж}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В металлах при протекании тока электроны сталкиваются с ионами решётки — проводник нагревается.</div>
+                    <div class="answer">✅ Ответ: $Q = 60$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Температурный коэффициент сопротивления <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Сопротивление медной обмотки при $t_1 = 20$ °C равно $R_1 = 10$ Ом. Температурный коэффициент меди $\alpha = 0{,}004$ К⁻¹. Найдите: а) сопротивление при $t_2 = 80$ °C; б) во сколько раз оно выросло.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('e3')">📖 Показать решение</button>
+                <div id="e3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R_1 = 10$ Ом, $t_1 = 20$ °C, $t_2 = 80$ °C, $\alpha = 0{,}004$ К⁻¹</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R_2$, $\dfrac{R_2}{R_1}$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $\Delta t = 80 - 20 = 60$ °C.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $R_2 = R_1 (1 + \alpha \Delta t) = 10 \cdot (1 + 0{,}004 \cdot 60) = 10 \cdot 1{,}24 = 12{,}4$ Ом.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $\dfrac{R_2}{R_1} = 1{,}24$ — сопротивление выросло в 1,24 раза.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> У металлов сопротивление растёт с температурой (положительный коэффициент). У полупроводников — наоборот, падает.</div>
+                    <div class="answer">✅ Ответ: $R_2 = 12{,}4$ Ом; выросло в 1,24 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Сопротивление алюминиевого провода <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Алюминиевый провод ($\rho = 0{,}028$ Ом·мм²/м) длиной $l = 50$ м и сечением $S = 4$ мм². Найдите сопротивление.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $R = \rho \dfrac{l}{S}$.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Мощность нагревателя <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Нагреватель сопротивлением $R = 22$ Ом подключён к $U = 220$ В. Найдите мощность.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $P = \dfrac{U^2}{R}$.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== АВТОМЕХАНИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🚗 Задачи для автомеханика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header auto">
+                <div class="prof-icon">🚗</div>
+                <div>
+                    <div class="prof-title">Автосервис</div>
+                    <div class="prof-sub">Аккумулятор (электролит), датчики (полупроводники)</div>
+                </div>
+                <span class="prof-badge auto">Автомеханик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Ток через электролит</div>
+                <div class="task-condition"><strong>Ситуация:</strong> В аккумуляторе через электролит за $t = 1$ ч проходит заряд $q = 1800$ Кл. Найдите средний ток.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('a1')">📖 Показать решение</button>
+                <div id="a1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 1800$ Кл, $t = 1$ ч = 3600 с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $I = \dfrac{q}{t}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{1800}{3600} = 0{,}5 \text{ А}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В электролитах ток переносится ионами (катионами и анионами).</div>
+                    <div class="answer">✅ Ответ: $I = 0{,}5$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Закон электролиза</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При электролизе за $t = 30$ мин при токе $I = 2$ А выделилась масса вещества. Электрохимический эквивалент $k = 0{,}33$ мг/Кл. Найдите массу.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('a2')">📖 Показать решение</button>
+                <div id="a2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $I = 2$ А, $t = 30$ мин = 1800 с, $k = 0{,}33 \cdot 10^{-6}$ кг/Кл</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Закон Фарадея: $m = k \cdot I \cdot t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = 0{,}33 \cdot 10^{-6} \cdot 2 \cdot 1800 = 1{,}188 \cdot 10^{-3} \text{ кг} \approx 1{,}19 \text{ г}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Масса выделившегося вещества пропорциональна заряду, прошедшему через электролит.</div>
+                    <div class="answer">✅ Ответ: $m \approx 1{,}19$ г</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Заряд аккумулятора и электролиз <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Аккумулятор ёмкостью $q = 60$ А·ч заряжается током $I = 6$ А. Найдите: а) время полной зарядки; б) заряд в Кл; в) массу вещества, которое могло бы выделиться при электролизе с $k = 0{,}3$ мг/Кл.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('a3')">📖 Показать решение</button>
+                <div id="a3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 60$ А·ч, $I = 6$ А, $k = 0{,}3 \cdot 10^{-6}$ кг/Кл</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $t$, $q$ (Кл), $m$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Время: $t = \dfrac{q}{I} = \dfrac{60}{6} = 10$ ч.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Заряд в Кл: $q = 60 \text{ А·ч} \cdot 3600 \text{ с/ч} = 216000$ Кл.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Масса: $m = k \cdot q = 0{,}3 \cdot 10^{-6} \cdot 216000 = 0{,}0648$ кг $\approx 64{,}8$ г.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 1 А·ч = 3600 Кл. Через электролит прошёл бы весь этот заряд — выделилось бы ~65 г вещества.</div>
+                    <div class="answer">✅ Ответ: $t = 10$ ч; $q = 216000$ Кл; $m \approx 64{,}8$ г</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Сопротивление электролита <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Через электролит сопротивлением $R = 5$ Ом течёт ток $I = 0{,}4$ А. Найдите напряжение.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Закон Ома: $U = I \cdot R$.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Масса при электролизе <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> При токе $I = 1{,}5$ А за $t = 20$ мин выделилось вещество с $k = 0{,}2$ мг/Кл. Найдите массу.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $m = k \cdot I \cdot t$. Переведите минуты в секунды, мг в кг.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== МАШИНОСТРОЕНИЕ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚙️ Задачи для машиностроения (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header mech">
+                <div class="prof-icon">⚙️</div>
+                <div>
+                    <div class="prof-title">Машиностроение</div>
+                    <div class="prof-sub">Полупроводники, датчики, нагрев</div>
+                </div>
+                <span class="prof-badge mech">Машиностроение</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Ток через полупроводник</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Через полупроводниковый элемент сопротивлением $R = 200$ Ом при напряжении $U = 12$ В течёт ток. Найдите ток.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('m1')">📖 Показать решение</button>
+                <div id="m1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R = 200$ Ом, $U = 12$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $I = \dfrac{U}{R}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{12}{200} = 0{,}06 \text{ А} = 60 \text{ мА}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В полупроводниках ток переносится электронами и «дырками».</div>
+                    <div class="answer">✅ Ответ: $I = 60$ мА</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Сопротивление металлического провода</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Стальной провод ($\rho = 0{,}12$ Ом·мм²/м) длиной $l = 10$ м и сечением $S = 2$ мм². Найдите сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('m2')">📖 Показать решение</button>
+                <div id="m2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $\rho = 0{,}12$ Ом·мм²/м, $l = 10$ м, $S = 2$ мм²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = \rho \dfrac{l}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 0{,}12 \cdot \dfrac{10}{2} = 0{,}6 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Сталь имеет большее удельное сопротивление, чем медь, поэтому греется сильнее.</div>
+                    <div class="answer">✅ Ответ: $R = 0{,}6$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Нагрев проводника с током <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Проводник сопротивлением $R = 5$ Ом работает при токе $I = 4$ А в течение $t = 5$ мин. Найдите: а) количество теплоты; б) мощность нагрева; в) работу тока за это время.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('m3')">📖 Показать решение</button>
+                <div id="m3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R = 5$ Ом, $I = 4$ А, $t = 5$ мин = 300 с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $Q$, $P$, $A$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Мощность: $P = I^2 R = 16 \cdot 5 = 80$ Вт.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Теплота: $Q = I^2 R t = 80 \cdot 300 = 24000$ Дж = 24 кДж.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Работа тока: $A = P \cdot t = 24$ кДж (вся работа идёт в тепло, так как нет ЭДС).</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В металлах вся работа тока превращается в теплоту (закон Джоуля–Ленца).</div>
+                    <div class="answer">✅ Ответ: $Q = 24$ кДж; $P = 80$ Вт; $A = 24$ кДж</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Сопротивление нихрома <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Нихромовый провод ($\rho = 1{,}1$ Ом·мм²/м) длиной $l = 3$ м и сечением $S = 0{,}5$ мм². Найдите сопротивление.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $R = \rho \dfrac{l}{S}$.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Ток через датчик <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Полупроводниковый датчик сопротивлением $R = 500$ Ом при напряжении $U = 10$ В. Найдите ток.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $I = \dfrac{U}{R}$.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ИНФОРМАЦИОННЫЕ СИСТЕМЫ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">💻 Задачи для информационных систем (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header it">
+                <div class="prof-icon">💻</div>
+                <div>
+                    <div class="prof-title">Информационные системы</div>
+                    <div class="prof-sub">Полупроводники, диоды, платы</div>
+                </div>
+                <span class="prof-badge it">ИС</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Ток через диод</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Через полупроводниковый диод при прямом включении течёт ток $I = 20$ мА при напряжении $U = 0{,}7$ В. Найдите сопротивление диода в этой точке.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('i1')">📖 Показать решение</button>
+                <div id="i1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $I = 20 \cdot 10^{-3}$ А, $U = 0{,}7$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = \dfrac{U}{I}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = \dfrac{0{,}7}{0{,}02} = 35 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 35 Ом — сопротивление диода в данной точке. У диода ВАХ нелинейная, поэтому сопротивление зависит от тока.</div>
+                    <div class="answer">✅ Ответ: $R = 35$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Сопротивление дорожки платы</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Медная дорожка на плате ($\rho = 0{,}017$ Ом·мм²/м) длиной $l = 0{,}1$ м и шириной $0{,}2$ мм, толщиной $0{,}035$ мм. Найдите сопротивление (сечение $S = 0{,}2 \cdot 0{,}035 = 0{,}007$ мм²).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('i2')">📖 Показать решение</button>
+                <div id="i2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $\rho = 0{,}017$ Ом·мм²/м, $l = 0{,}1$ м, $S = 0{,}007$ мм²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = \rho \dfrac{l}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 0{,}017 \cdot \dfrac{0{,}1}{0{,}007} \approx 0{,}243 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Около 0,24 Ом — типичное сопротивление дорожки. Поэтому дорожки делают широкими.</div>
+                    <div class="answer">✅ Ответ: $R \approx 0{,}243$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Нагрев резистора на плате <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Резистор $R = 100$ Ом работает при токе $I = 50$ мА в течение $t = 1$ мин. Найдите: а) мощность; б) количество теплоты; в) проверьте, не превышает ли мощность допустимые 0,125 Вт.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('i3')">📖 Показать решение</button>
+                <div id="i3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R = 100$ Ом, $I = 0{,}05$ А, $t = 60$ с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $P$, $Q$, проверка</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Мощность: $P = I^2 R = 0{,}0025 \cdot 100 = 0{,}25$ Вт.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Теплота: $Q = P \cdot t = 0{,}25 \cdot 60 = 15$ Дж.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $P = 0{,}25$ Вт > 0{,}125 Вт — резистор перегружен! Нужен резистор мощностью ≥ 0,25 Вт (например, 0,5 Вт).</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Превышение мощности ведёт к перегреву и выходу резистора из строя.</div>
+                    <div class="answer">✅ Ответ: $P = 0{,}25$ Вт; $Q = 15$ Дж; резистор перегружен</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Ток через светодиод <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Светодиод подключён к $U = 5$ В через резистор $R = 220$ Ом. Падение напряжения на светодиоде $U_{сд} = 2$ В. Найдите ток.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Напряжение на резисторе $U_R = U - U_{сд} = 3$ В. Ток $I = \dfrac{U_R}{R}$.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Заряд через диод <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Через диод течёт ток $I = 10$ мА в течение $t = 5$ с. Какой заряд прошёл?</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $q = I \cdot t$. Переведите мА в А.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+</script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</nav>
+<script>
+    /* ==== 5. Скелетоны для формул MathJax ==== */
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
+
+    /* ==== 6. Чипы категорий в результатах поиска ==== */
+    (function(){
+        function classify(cat){
+            var c = (cat||'').toLowerCase();
+            if (c.indexOf('механик') >= 0) return 'cat-mech';
+            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+            if (c.indexOf('электр') >= 0) return 'cat-elec';
+            return 'cat-other';
+        }
+        function decorate(){
+            document.querySelectorAll('.search-result-category').forEach(function(el){
+                if (el.dataset.chip) return;
+                el.dataset.chip = '1';
+                el.classList.add(classify(el.textContent));
+            });
+        }
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                decorate();
+            };
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+        else decorate();
+    })();
+
+    /* ==== 10. Анимация смены темы «как на iPhone» ==== */
+    (function(){
+        function animateThemeChange(x, y){
+            var circle = document.createElement('div');
+            circle.className = 'theme-circle';
+            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+            circle.style.width = circle.style.height = (maxR*2) + 'px';
+            circle.style.left = (x - maxR) + 'px';
+            circle.style.top  = (y - maxR) + 'px';
+            document.body.appendChild(circle);
+            requestAnimationFrame(function(){ circle.classList.add('expand'); });
+            setTimeout(function(){ circle.remove(); }, 700);
+        }
+        document.addEventListener('click', function(e){
+            var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+            if (!t) return;
+            var r = t.getBoundingClientRect();
+            animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+        }, true);
+    })();
+
+    /* ==== 2. Ripple при тапе ==== */
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){
+            document.querySelectorAll(sel).forEach(bind);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                setTimeout(bindAll, 30);
+            };
+        }
+    })();
+</script>
+<script src="search-overlay.js"></script>
+<!-- bottom-nav-autohide-script -->
+<script>
+    /* Автоскрытие нижней панели при скролле */
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 8;
+        var ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
+        }
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>
+</body>
+</html>

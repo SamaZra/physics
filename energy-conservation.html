@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -221,6 +221,18 @@
             .section-title { font-size: 0.95rem; }
             .control-group input[type="range"] { max-width: 120px; }
         }
+                .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -233,7 +245,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
 .section-title {
@@ -875,8 +929,16 @@ a, button, div, span, label, input, textarea, select {
             <div class="formula-block">
                 <span class="f">$E_k = \dfrac{mv^2}{2}$</span>
                 <span class="f-label">— кинетическая энергия (энергия движения)</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Кинетическая энергия — это работа, которую нужно совершить, чтобы разогнать тело из состояния покоя до скорости \(v\). По второму закону Ньютона \(F = ma\), а работа \(A = F \cdot s\). Используя формулу перемещения при равноускоренном движении \(s = \frac{v^2}{2a}\), получаем \(A = ma \cdot \frac{v^2}{2a} = \frac{mv^2}{2}\). Именно эту работу тело запасает в виде энергии движения.
+                </div>
                 <span class="f">$E_p = mgh$</span>
                 <span class="f-label">— потенциальная энергия в поле тяжести</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Потенциальная энергия — это работа, которую совершит сила тяжести при падении тела с высоты \(h\) до нулевого уровня. Сила тяжести \(F = mg\) постоянна, а путь, который она проходит, равен \(h\). Работа \(A = F \cdot h = mgh\). Эта работа может быть «извлечена» обратно, если мы поднимем тело на ту же высоту — поэтому говорят, что тело «обладает» потенциальной энергией.
+                </div>
                 <span class="f">$E_p = \dfrac{kx^2}{2}$</span>
                 <span class="f-label">— потенциальная энергия упругой пружины</span>
                 <span class="f">$E = E_k + E_p$</span>
@@ -899,7 +961,7 @@ a, button, div, span, label, input, textarea, select {
 
                 <p><em>Пример (маятник):</em> в крайней точке маятник замирает — вся энергия потенциальная ($E_k = 0$, $E_p$ максимальна). В нижней точке он движется быстрее всего — вся энергия стала кинетической ($E_p = 0$, $E_k$ максимальна). Но сумма $E_k + E_p$ в любой момент одна и та же.</p>
 
-                <p><strong>Что если есть трение?</strong> Сила трения — <span class="important">неконсервативная</span> сила. Она «съедает» часть механической энергии, превращая её во внутреннюю (теплоту). Тогда закон сохранения записывается так:</p>
+                <p><strong>Что если есть трение?</strong> Сила трения — <span class="important">неконсервативная</span> сила. Она <em>не уничтожает</em> энергию, а <em>превращает</em> её во внутреннюю (теплоту). Механическая энергия не сохраняется, но <strong>полная энергия системы</strong> (механическая + внутренняя) сохраняется. Закон сохранения энергии — всеобщий:</p>
                 <p>$E_{k1} + E_{p1} = E_{k2} + E_{p2} + Q$</p>
                 <p>где $Q$ — количество теплоты, выделившееся из-за трения. Механическая энергия <em>не сохраняется</em>, но сохраняется <strong>полная энергия</strong> (механическая + внутренняя).</p>
 
@@ -913,6 +975,10 @@ a, button, div, span, label, input, textarea, select {
             <div class="formula-block">
                 <span class="f">$E_k + E_p = \text{const}$</span>
                 <span class="f-label">— закон сохранения механической энергии (без трения)</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Работа консервативной силы (тяжести или упругости) равна убыли потенциальной энергии: \(A = -\Delta E_p\). По теореме о кинетической энергии та же работа равна приросту кинетической: \(A = \Delta E_k\). Приравниваем: \(\Delta E_k = -\Delta E_p\), то есть \(\Delta E_k + \Delta E_p = 0\). Это значит, что сумма \(E_k + E_p\) не меняется — это и есть закон сохранения механической энергии.
+                </div>
                 <span class="f">$E_{k1} + E_{p1} = E_{k2} + E_{p2} + Q$</span>
                 <span class="f-label">— с учётом потерь на трение</span>
                 <span class="f">$A = \Delta E = E_2 - E_1$</span>
@@ -1238,7 +1304,8 @@ a, button, div, span, label, input, textarea, select {
                     <div class="step"><strong>Шаг 1. Что происходит.</strong> Сначала удар: пуля влетает в брусок и застревает. Это <strong>неупругий удар</strong> — тела слипаются. Затем брусок с пулей поднимается как маятник. Это два разных этапа, и на каждом работает свой закон.</div>
                     <div class="step"><strong>Шаг 2. ЗСИ для удара.</strong> Система «пуля + брусок» замкнута по горизонтали (внешних сил по горизонтали нет). Импульс до удара равен импульсу после:<br><span class="formula">$mv + M \cdot 0 = (m + M)u$</span></div>
                     <div class="step"><strong>Шаг 3. Находим скорость после удара.</strong><br><span class="formula">$u = \dfrac{mv}{m + M} = \dfrac{0.01 \cdot 400}{0.01 + 1.99} = \dfrac{4}{2} = 2$ м/с</span></div>
-                    <div class="step"><strong>Шаг 4. ЗСЭ для подъёма.</strong> После удара брусок с пулей имеет скорость $u$ и кинетическую энергию $\dfrac{(m+M)u^2}{2}$. Поднимаясь на высоту $h$, эта энергия переходит в потенциальную $(m+M)gh$:<br><span class="formula">$\dfrac{(m+M)u^2}{2} = (m+M)gh$</span></div>
+                    <div class="step"><strong>Шаг 4а. ЗСИ дал нам скорость после удара: $u = 2$ м/с.</strong> Теперь начинается «вторая жизнь» системы: брусок с пулей уже слиплись и движутся как одно тело. Дальше они поднимаются по дуге, и здесь мы применяем ЗСЭ.</div>
+                    <div class="step"><strong>Шаг 4б. ЗСЭ для подъёма.</strong> После удара кинетическая энергия $\dfrac{(m+M)u^2}{2}$ переходит в потенциальную $(m+M)gh$:<br><span class="formula">$\dfrac{(m+M)u^2}{2} = (m+M)gh$</span></div>
                     <div class="step"><strong>Шаг 5. Сокращаем массу.</strong> $(m+M)$ сокращается:<br><span class="formula">$h = \dfrac{u^2}{2g} = \dfrac{4}{2 \cdot 9.8} = \dfrac{4}{19.6} \approx 0.204$ м</span></div>
                     <div class="step explanation"><strong>Важно!</strong> Обратите внимание: мы <strong>не</strong> применяем ЗСЭ между «до удара» и «после удара» — потому что удар неупругий, часть энергии ушла в теплоту. Сначала ЗСИ (сохраняется всегда), потом ЗСЭ (для движения маятника — там механическая энергия сохраняется). Это классический приём решения задач на «удар + подъём».</div>
                     <div class="answer">✅ Ответ: $h \approx 0.204$ м ≈ 20.4 см</div>
@@ -1559,11 +1626,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- 3D-модель 1: Маятник -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-pendulum');
         const canvas = document.getElementById('canvas-pendulum');
@@ -1576,7 +1639,7 @@ a, button, div, span, label, input, textarea, select {
         camera.lookAt(0.5, 0.5, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1597,7 +1660,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.borderRadius = '0';
             div.style.textShadow = '0 0 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.7), 0 1px 2px rgba(0,0,0,0.6)';
             div.style.transition = 'color 0.3s ease';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -1696,8 +1759,13 @@ a, button, div, span, label, input, textarea, select {
         );
         barGroup.add(baseLine);
 
-        function updateBars(ek, ep, full) {
-            const maxE = m * g * L * (1 - Math.cos(alpha0 * Math.PI / 180)) || 1;
+                function updateBars(ek, ep, full) {
+            // Берем "эталонный" максимум, не зависящий от текущей массы
+            // (например, фиксируем массу 5 кг и максимальный угол 80°)
+            const fixedMaxMass = 5;
+            const fixedMaxH = L * (1 - Math.cos(80 * Math.PI / 180));
+            const maxE = fixedMaxMass * g * fixedMaxH || 1;
+
             const heightScale = 2.2;
             const ekH = (ek / maxE) * heightScale;
             const epH = (ep / maxE) * heightScale;
@@ -1789,7 +1857,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize3D();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0.2, 0.3, 0);
         controls.update();
@@ -1809,11 +1877,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- 3D-модель 2: Горка с трением -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-slide');
         const canvas = document.getElementById('canvas-slide');
@@ -1826,7 +1890,7 @@ a, button, div, span, label, input, textarea, select {
         camera.lookAt(-1.5, 1, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1847,7 +1911,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.borderRadius = '0';
             div.style.textShadow = '0 0 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.7), 0 1px 2px rgba(0,0,0,0.6)';
             div.style.transition = 'color 0.3s ease';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -1899,7 +1963,7 @@ a, button, div, span, label, input, textarea, select {
 
         const ground = new THREE.Mesh(
             new THREE.BoxGeometry(groundWidth, 0.05, 1.5),
-            new THREE.MeshStandardMaterial({ color: 0x3a4a5a, transparent: true, opacity: 0.3 })
+            new THREE.MeshStandardMaterial({ color: 0x3a4a5a, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity })
         );
         ground.position.set(groundCenterX, -0.025, 0);
         group.add(ground);
@@ -1942,7 +2006,7 @@ a, button, div, span, label, input, textarea, select {
 
             const slopeMesh = new THREE.Mesh(
                 new THREE.BoxGeometry(slopeLength, 0.06, 1.2),
-                new THREE.MeshStandardMaterial({ color: 0x446688, transparent: true, opacity: 0.45 })
+                new THREE.MeshStandardMaterial({ color: 0x446688, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity })
             );
             const cx = (slopeTopX + slopeBottomX) / 2;
             const cy = (slopeTopY + 0) / 2;
@@ -2082,7 +2146,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize3D();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(-1.5, 1, 0);
         controls.update();

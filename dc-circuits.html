@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -208,12 +208,66 @@
         .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
         .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; margin-left: 0 !important; }
         h1, .page-title { text-align: center !important; }
+                .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="fix-nav-bounce">
     /* Отключаем сдвиги и пружины у кнопок нижней панели */
     .bottom-nav a, .bottom-nav button {
@@ -248,6 +302,9 @@
                 </ul>
                 <p><strong>Схема</strong> — чертёж цепи с условными обозначениями элементов.</p>
                 <p><strong>Простое соединение</strong> — когда несколько потребителей соединяют в одну цепь. Есть три основных вида: <strong>последовательное</strong>, <strong>параллельное</strong> и <strong>смешанное</strong>.</p>
+                <p style="margin-top: 12px; font-size: 0.85rem; color: var(--text-secondary); background: rgba(0,0,0,0.1); padding: 8px; border-radius: 8px;">
+                    💡 <em>Примечание: В металлах ток создают электроны, которые движутся от «минуса» к «плюсу». Однако исторически условились считать направление тока от «плюса» к «минусу». В наших 3D-моделях жёлтые шарики показывают именно направление тока, чтобы было проще разбираться со схемами.</em>
+                </p>
             </div>
         </div>
     </div>
@@ -265,10 +322,18 @@
                 <div class="formula-block">
                     <span class="f">$U = U_1 + U_2 + \dots + U_n$</span>
                     <span class="f-label">— общее напряжение равно сумме напряжений на элементах</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Работа электрического поля по переносу заряда из начала цепи в конец равна сумме работ на каждом участке: $A = A_1 + A_2 + \dots$. Так как работа $A = qU$, получаем: $qU = qU_1 + qU_2 + \dots$. Заряд $q$ везде одинаков, поэтому, разделив обе части на $q$, получаем $U = U_1 + U_2 + \dots$.
+                    </div>
                 </div>
                 <div class="formula-block">
                     <span class="f">$R = R_1 + R_2 + \dots + R_n$</span>
                     <span class="f-label">— общее сопротивление равно сумме сопротивлений</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        По закону Ома напряжение на участке $U = IR$. Подставим это в формулу $U = U_1 + U_2 + \dots$: $IR = IR_1 + IR_2 + \dots$. Поскольку сила тока $I$ при последовательном соединении везде одинакова, мы можем сократить всё выражение на $I$. В итоге остаётся $R = R_1 + R_2 + \dots$.
+                    </div>
                 </div>
                 <p><strong>Особенности:</strong></p>
                 <ul>
@@ -294,10 +359,18 @@
                 <div class="formula-block">
                     <span class="f">$I = I_1 + I_2 + \dots + I_n$</span>
                     <span class="f-label">— общий ток равен сумме токов в ветвях</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Заряд не накапливается в узлах (точках разветвления). Сколько заряда подходит к узлу за секунду, столько же и вытекает из него по всем ветвям. Так как сила тока — это заряд, проходящий за 1 секунду ($I = q/t$), то общий заряд $q = q_1 + q_2 + \dots$, разделив на время $t$, получаем $I = I_1 + I_2 + \dots$.
+                    </div>
                 </div>
                 <div class="formula-block">
                     <span class="f">$\dfrac{1}{R} = \dfrac{1}{R_1} + \dfrac{1}{R_2} + \dots + \dfrac{1}{R_n}$</span>
                     <span class="f-label">— общее сопротивление</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        По закону Ома сила тока в каждой ветви: $I_1 = \frac{U}{R_1}$, $I_2 = \frac{U}{R_2}$ и т.д. Подставим это в формулу $I = I_1 + I_2 + \dots$: $\frac{U}{R} = \frac{U}{R_1} + \frac{U}{R_2} + \dots$. Так как напряжение $U$ на всех ветвях одинаково, разделим обе части уравнения на $U$ и получим: $\frac{1}{R} = \frac{1}{R_1} + \frac{1}{R_2} + \dots$.
+                    </div>
                 </div>
                 <p>Для двух параллельных сопротивлений удобно:</p>
                 <div class="formula-block">
@@ -373,7 +446,7 @@
                 </div>
                 <div class="def-card">
                     <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Что происходит в модели</h4>
-                    <p>Два резистора \(R_1\) и \(R_2\) соединены <strong>последовательно</strong> (друг за другом). Ток (движение синих шариков) выходит из положительного полюса батареи (\(+\)), проходит через \(R_1\), затем через \(R_2\) и возвращается к отрицательному полюсу (\(-\)).</p>
+                    <p>Два резистора \(R_1\) и \(R_2\) соединены <strong>последовательно</strong> (друг за другом). <strong>Движение жёлтых шариков</strong> показывает направление электрического тока. Ток выходит из положительного полюса батареи (\(+\)), проходит через \(R_1\), затем через \(R_2\) и возвращается к отрицательному полюсу (\(-\)).</p>
                     <p><strong>1. Сила тока одинакова на всех участках.</strong></p>
                     <p>Обрати внимание: шарики движутся по всему контуру с одинаковой скоростью. Где бы ты ни остановил взгляд, количество шариков, проходящих за секунду, одно и то же. Это значит, что сила тока \(I\) одинакова и в \(R_1\), и в \(R_2\), и в проводах. Формула: \(I = I_1 = I_2\).</p>
                     <p><strong>2. Как меняется скорость при движении ползунков?</strong></p>
@@ -420,10 +493,10 @@
                     <p>Поскольку обе ветви начинаются в узле A и заканчиваются в узле B, разность потенциалов (напряжение \(U\)) на них одна и та же: \(U = U_1 = U_2\). Поэтому батарея как бы «толкает» заряды в обе ветви одинаково сильно.</p>
 
                     <p><strong>2. Сила тока делится.</strong></p>
-                    <p>Обрати внимание: общий поток шариков от батареи на подходе к узлу A густой, а после узла он разделяется на два более редких ручейка. Общий ток равен сумме токов в ветвях: \(I = I_1 + I_2\). Причём больше шариков идёт по той ветви, где сопротивление <strong>меньше</strong> (по закону Ома \(I_i = U / R_i\)).</p>
+                    <p>Обрати внимание: общий поток зарядов (жёлтые шарики) от батареи на подходе к узлу A густой, а после узла он разделяется на два более редких ручейка. Общий ток равен сумме токов в ветвях: \(I = I_1 + I_2\). Причём больший ток идёт по той ветви, где сопротивление <strong>меньше</strong> (по закону Ома \(I_i = U / R_i\)).</p>
 
                     <p><strong>3. Скорость движения в ветвях.</strong></p>
-                    <p>Если ты сделаешь \(R_1\) маленьким, шарики по верхней ветви будут лететь быстрее, а по нижней (\(R_2\)) — медленнее. Это наглядно показывает, что ток в ветви зависит только от её собственного сопротивления.</p>
+                    <p>Если ты сделаешь \(R_1\) маленьким, ток (и скорость шариков) по верхней ветви будет больше, а по нижней (\(R_2\)) — медленнее. Это наглядно показывает, что ток в ветви зависит только от её собственного сопротивления.</p>
 
                     <p><strong>4. Общее сопротивление и ток.</strong></p>
                     <p>Общее сопротивление при параллельном соединении меньше самого маленького из резисторов: \(\frac{1}{R} = \frac{1}{R_1} + \frac{1}{R_2}\). Поэтому общий ток \(I = U/R\) получается большим. Двигая ползунки, можно убедиться: если уменьшить любое сопротивление, общий ток (густота шариков от батареи) вырастет.</p>
@@ -943,9 +1016,7 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 1: ПОСЛЕДОВАТЕЛЬНОЕ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-series');
@@ -1047,7 +1118,7 @@
 
         const electrons = [], N = 40;
         const eGeo = new THREE.SphereGeometry(0.11, 10, 10);
-        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        const eMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x331100 });
         for (let i = 0; i < N; i++) {
             const e = new THREE.Mesh(eGeo, eMat); group.add(e);
             electrons.push({ mesh: e, t: i / N });
@@ -1083,7 +1154,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; controls.target.set(0, 0, 0); controls.update();
         recalc();
 
@@ -1119,9 +1190,7 @@
         animate();
     })();
 </script><!-- ===== МОДЕЛЬ 2: ПАРАЛЛЕЛЬНОЕ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-parallel');
@@ -1245,7 +1314,7 @@
 
         const electrons = [], N = 40;
         const eGeo = new THREE.SphereGeometry(0.11, 10, 10);
-        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        const eMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x331100 });
         for (let i = 0; i < N; i++) {
             const e = new THREE.Mesh(eGeo, eMat); group.add(e);
             electrons.push({ mesh: e, t: i / N, branch: i % 2 });
@@ -1279,7 +1348,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; controls.target.set(0, 0, 0); controls.update();
         recalc();
 
@@ -1339,9 +1408,7 @@
         animate();
     })();
 </script><!-- ===== МОДЕЛЬ 3: СМЕШАННОЕ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-mixed');
@@ -1522,7 +1589,7 @@
         const topInWindow = Math.round(W * L_top / (L_top + L_bot));
         const electrons = [];
         const eGeo = new THREE.SphereGeometry(0.11, 10, 10);
-        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        const eMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x331100 });
 
         for (let i = 0; i < N; i++) {
             const e = new THREE.Mesh(eGeo, eMat);
@@ -1572,7 +1639,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; controls.target.set(0, 0, 0); controls.update();
         recalc();
 

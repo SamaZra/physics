@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электрический ток в полупроводниках. Полупроводниковые приборы</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:160px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .derivation-btn { background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary); font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer; margin-top: 8px; transition: all 0.2s; display: inline-block; }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content { display: none; margin-top: 10px; padding: 12px; background: var(--card-bg); border-left: 3px solid var(--text-secondary); border-radius: 8px; font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left; }
+        .derivation-content.open { display: block; }
+        .btn-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid #3b82f6;border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:#3b82f6;}
+        .hint-box mjx-container{font-size:1rem !important;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:120px;top:8px;right:8px;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script>
+        let quality3D = 'high';
+        if (window.Android && window.Android.getQuality3D) {
+            quality3D = window.Android.getQuality3D();
+        } else {
+            const saved = localStorage.getItem('quality3d');
+            if (saved) quality3D = saved;
+        }
+        window.quality3D = quality3D;
+        window.qualitySettings = {
+            low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+            medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+            high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+        };
+        window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+        (function() {
+            if (!window.THREE) return;
+            const OriginalRenderer = THREE.WebGLRenderer;
+            THREE.WebGLRenderer = function(params) {
+                const r = new OriginalRenderer(params);
+                const q = window.qualitySettings3D || {};
+                if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+                if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+                return r;
+            };
+        })();
+        window.applyQualitySegments = function() {
+            if (!window.THREE || !window.qualitySettings3D) return;
+            return window.qualitySettings3D.segments;
+        };
+    </script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech  { background: #3b82f6; }
+        .search-result-category.cat-thermo{ background: #f59e0b; }
+        .search-result-category.cat-elec  { background: #eab308; }
+        .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index"> body.is-index .nav-back-btn { display: none !important; } </style>
+    <style id="bottom-nav-autohide">
+        .bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; }
+        body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+    </style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; }
+        .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+        .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+        .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right"> .bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; } </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; }
+        a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Электрический ток в полупроводниках. Полупроводниковые приборы</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Собственная проводимость полупроводников</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Полупроводники</strong> — вещества, по удельной проводимости занимающие промежуточное положение между металлами и диэлектриками. Типичные примеры: <span class="important">кремний Si</span>, <span class="important">германий Ge</span>, селен Se, арсенид галлия GaAs.</p>
+                <p><strong>Собственная проводимость</strong> — проводимость чистого полупроводника (без примесей). При нагреве или освещении часть валентных электронов разрывает связи и становится <span class="important">свободными электронами</span>. На месте ушедшего электрона остаётся <span class="important">дырка</span> — вакантное место с положительным зарядом.</p>
+                <p><strong>Два типа носителей заряда:</strong></p>
+                <ul>
+                    <li><span class="important">электроны</span> — движутся к «+» источника;</li>
+                    <li><span class="important">дырки</span> — движутся к «−» источника (по сути — перескок электронов из соседних связей).</li>
+                </ul>
+                <div class="formula-block">
+                    <span class="f">$n_i = p_i$</span>
+                    <span class="f-label">— в собственном полупроводнике концентрации электронов и дырок равны</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Каждый раз, когда электрон покидает валентную связь, образуется ровно одна дырка. Поэтому в чистом полупроводнике число свободных электронов $n_i$ в точности равно числу дырок $p_i$. Проводимость в этом случае называется собственной.
+                    </div>
+                </div>
+                <p><strong>Важное отличие от металлов:</strong> у полупроводников сопротивление при нагревании <span class="important">падает</span> (растёт число носителей), а у металлов — растёт.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Примесная проводимость. p–n-переход</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Примесная проводимость</strong> — проводимость полупроводника с добавленными примесями. Она бывает двух типов.</p>
+                <p><strong>1. Донорная примесь (n-тип).</strong> Добавляем атомы с <em>большей</em> валентностью, чем у основного полупроводника (например, фосфор P в кремний Si). Лишний электрон легко отрывается — проводимость <span class="important">электронная</span>. Основные носители — электроны ($n > p$).</p>
+                <p><strong>2. Акцепторная примесь (p-тип).</strong> Добавляем атомы с <em>меньшей</em> валентностью (например, бор B в кремний Si). Не хватает одного электрона — образуется дырка. Проводимость <span class="important">дырочная</span>. Основные носители — дырки ($p > n$).</p>
+                <p><strong>p–n-переход</strong> — контакт двух полупроводников: p-типа и n-типа. В тонком слое на границе электроны и дырки рекомбинируют, образуется <span class="important">запирающий слой</span> без свободных носителей.</p>
+                <p><strong>Свойства p–n-перехода:</strong></p>
+                <ul>
+                    <li><span class="important">прямое включение</span> (p к «+», n к «−») — запирающий слой сужается, ток идёт;</li>
+                    <li><span class="important">обратное включение</span> (p к «−», n к «+») — запирающий слой расширяется, ток практически не идёт.</li>
+                </ul>
+                <p>Именно на этом свойстве работают <span class="important">полупроводниковый диод</span> (пропускает ток в одну сторону) и <span class="important">транзистор</span> (усилитель и переключатель).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Полупроводниковые приборы</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Полупроводниковый диод</strong> — прибор на основе одного p–n-перехода. Пропускает ток в прямом направлении и не пропускает в обратном. Применяется для выпрямления переменного тока.</p>
+                <p><strong>Вольт-амперная характеристика (ВАХ) диода:</strong> прямая ветвь — резкий рост тока при $U \approx 0{,}7$ В (для кремния), обратная — очень малый ток.</p>
+                <p><strong>Транзистор</strong> — прибор из трёх чередующихся слоёв (n–p–n или p–n–p). Имеет три вывода: <em>база</em>, <em>коллектор</em>, <em>эмиттер</em>. Слабый ток базы управляет сильным током коллектора — это свойство используется для усиления и переключения.</p>
+                <p><strong>Другие полупроводниковые приборы:</strong></p>
+                <ul>
+                    <li><strong>фотодиод</strong> — преобразует свет в электрический ток;</li>
+                    <li><strong>светодиод (LED)</strong> — преобразует ток в свет;</li>
+                    <li><strong>терморезистор</strong> — сопротивление сильно зависит от температуры;</li>
+                    <li><strong>варистор</strong> — сопротивление зависит от напряжения;</li>
+                    <li><strong>солнечная батарея</strong> — фотоэлемент на p–n-переходе;</li>
+                    <li><strong>микросхема</strong> — миллионы транзисторов на одном кристалле.</li>
+                </ul>
+                <p><strong>Вольт-амперная характеристика (ВАХ) диода:</strong></p>
+                <div style="text-align:center; margin: 12px 0;">
+                    <svg viewBox="0 0 400 300" style="display:inline-block; width:100%; max-width:420px; height:auto;">
+                        <defs>
+                            <marker id="arrowAxis" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M0,0 L10,5 L0,10 z" fill="#8ba5b8"/>
+                            </marker>
+                        </defs>
+
+                        <!-- Оси -->
+                        <line x1="40" y1="240" x2="380" y2="240" stroke="#8ba5b8" stroke-width="2" marker-end="url(#arrowAxis)"/>
+                        <line x1="200" y1="280" x2="200" y2="20" stroke="#8ba5b8" stroke-width="2" marker-end="url(#arrowAxis)"/>
+
+                        <!-- Подписи осей -->
+                        <text x="370" y="265" fill="#8ba5b8" font-size="16" font-weight="bold">U</text>
+                        <text x="210" y="20" fill="#8ba5b8" font-size="16" font-weight="bold">I</text>
+
+                        <!-- Прямая ветвь -->
+                        <path d="M 200 240 L 215 238 Q 220 236 225 180 L 228 50" stroke="#44ff88" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <circle cx="228" cy="50" r="4" fill="#44ff88"/>
+
+                        <!-- Обратная ветвь -->
+                        <path d="M 200 240 L 60 248" stroke="#f59e0b" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <circle cx="60" cy="248" r="4" fill="#f59e0b"/>
+
+                        <!-- Отметка 0.7 В -->
+                        <line x1="220" y1="240" x2="220" y2="252" stroke="#c0d0e0" stroke-width="2"/>
+                        <text x="220" y="275" fill="#e0e8f0" font-size="16" font-weight="bold" text-anchor="middle">0,7 В</text>
+
+                        <!-- Подписи -->
+                        <text x="240" y="120" fill="#44ff88" font-size="16" font-weight="bold">Прямая ветвь</text>
+                        <text x="240" y="145" fill="#c0d0e0" font-size="13">диод открыт</text>
+
+                        <text x="50" y="230" fill="#f59e0b" font-size="16" font-weight="bold">Обратная ветвь</text>
+                        <text x="50" y="215" fill="#c0d0e0" font-size="13">ток мал</text>
+                    </svg>
+                </div>
+                <div class="def-card" style="margin-top: -5px;">
+                    <p><strong>📖 Как читать график:</strong></p>
+                    <ul>
+                        <li><strong>Прямая ветвь (зелёная):</strong> диод включён «правильно» (прямое включение). Пока напряжение меньше $0{,}7$ В, ток почти не идёт. Как только напряжение превышает $0{,}7$ В, сопротивление диода резко падает, и ток быстро растёт. Диод пропускает ток.</li>
+                        <li><strong>Обратная ветвь (оранжевая):</strong> диод включён «наоборот» (обратное включение). Ток почти не идёт — диод заперт. Сила тока в этом режиме очень мала (микроамперы).</li>
+                    </ul>
+                    <p><span class="important">Главное свойство диода:</span> он пропускает ток <strong>только в одну сторону</strong>. Именно поэтому диоды используют для выпрямления переменного тока.</p>
+                </div>
+                <p><strong>💡 Это интересно:</strong> Современный процессор содержит <strong>десятки миллиардов</strong> транзисторов на кристалле размером с ноготь. Каждый транзистор переключается за доли наносекунды — именно поэтому компьютер может выполнять миллиарды операций в секунду. А светодиоды, открытые в 1962 году, сначала были только красными; синие светодиоды (за них в 2014 году дали Нобелевскую премию) позволили создать белые LED-лампы, которые сегодня заменяют лампы накаливания.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛЬ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивная 3D-модель</div>
+        <div class="section-content">
+            <div class="model-container" id="container-semi">
+                <canvas id="canvas-semi" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-semi">⛶</button>
+                <div class="info-display">
+                    <div>Тип: <span class="val" id="semi-type">собственный</span></div>
+                    <div>Носители: <span class="val" id="semi-carriers">n = p</span></div>
+                    <div>Сопротивление: <span class="val" id="semi-res">высокое</span></div>
+                </div>
+            </div>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Тип проводимости</label>
+                    <input type="range" id="semi-type-slider" min="0" max="2" step="1" value="0">
+                    <span class="control-value" id="semi-type-value">собственный</span>
+                </div>
+                <div class="control-group">
+                    <label>Температура $T$ (К)</label>
+                    <input type="range" id="semi-temp-slider" min="100" max="600" step="10" value="300">
+                    <span class="control-value" id="semi-temp-value">300</span>
+                </div>
+                <button class="btn-reset" id="semi-reset">⟳ Сброс</button>
+                <span class="control-label">⬤ Собственный → n-тип (электроны) → p-тип (дырки)</span>
+            </div>
+            <div class="def-card">
+                <p><strong>🪐 Как работает модель:</strong></p>
+                <p>Серые шарики — <strong>ионы решётки</strong>, синие — <strong>электроны</strong>, красные — <strong>дырки</strong>.</p>
+                <ul>
+                    <li><strong>Собственный:</strong> электронов и дырок поровну.</li>
+                    <li><strong>n-тип:</strong> преобладают электроны (донорная примесь).</li>
+                    <li><strong>p-тип:</strong> преобладают дырки (акцепторная примесь).</li>
+                    <li><span class="important">p–n прямое:</span> посередине появляется узкий <strong>запирающий слой</strong>. Электроны и дырки проходят сквозь него — идёт ток.</li>
+                    <li><span class="important">p–n обратное:</span> запирающий слой становится <strong>широким</strong>. Носители не могут его преодолеть — тока нет.</li>
+                </ul>
+                <p><strong>Ползунок температуры</strong> меняет число носителей: чем выше $T$, тем их больше и тем быстрее они движутся.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сопротивление полупроводника при нагреве</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление полупроводника при $20$ °C равно $R_1 = 100$ Ом, а при $80$ °C — $R_2 = 25$ Ом. Во сколько раз уменьшилось сопротивление?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $R_1 = 100$ Ом, $R_2 = 25$ Ом</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{R_1}{R_2}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\dfrac{R_1}{R_2} = \dfrac{100}{25} = 4$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> У полупроводников при нагревании сопротивление <strong>падает</strong> (в отличие от металлов), так как растёт число свободных носителей.</div>
+                    <div class="answer">✅ Ответ: уменьшилось в 4 раза</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Собственная проводимость</div>
+                <div class="task-condition"><strong>Условие:</strong> В собственном полупроводнике концентрация электронов $n = 10^{16}$ м⁻³. Найдите концентрацию дырок $p$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $n = 10^{16}$ м⁻³, собственный полупроводник</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $p$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> В собственном полупроводнике $n = p$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$p = 10^{16} \text{ м}^{-3}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Каждый ушедший электрон оставляет одну дырку.</div>
+                    <div class="answer">✅ Ответ: $p = 10^{16}$ м⁻³</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Донорная примесь</div>
+                <div class="task-condition"><strong>Условие:</strong> В полупроводник добавили донорную примесь. Концентрация электронов стала $n = 10^{22}$ м⁻³, дырок $p = 10^{16}$ м⁻³. Во сколько раз электронов больше, чем дырок?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $n = 10^{22}$ м⁻³, $p = 10^{16}$ м⁻³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{n}{p}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\dfrac{n}{p} = \dfrac{10^{22}}{10^{16}} = 10^6$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> В n-типе электроны — основные носители, их в миллион раз больше.</div>
+                    <div class="answer">✅ Ответ: в $10^6$ раз</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Акцепторная примесь</div>
+                <div class="task-condition"><strong>Условие:</strong> В полупроводнике p-типа $p = 10^{20}$ м⁻³, $n = 10^{14}$ м⁻³. Какой тип проводимости?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $p = 10^{20}$ м⁻³, $n = 10^{14}$ м⁻³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> тип проводимости</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $p > n$ (в $10^6$ раз).</div>
+                    <div class="step"><strong>Шаг 2.</strong> Основные носители — дырки, значит, проводимость <strong>дырочная</strong> (p-тип).</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Акцепторная примесь создаёт дырки.</div>
+                    <div class="answer">✅ Ответ: p-тип (дырочная)</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Прямое включение диода</div>
+                <div class="task-condition"><strong>Условие:</strong> На диод подали прямое напряжение $U = 0{,}8$ В. Сопротивление диода в этой точке $R = 4$ Ом. Найдите ток.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $U = 0{,}8$ В, $R = 4$ Ом</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $I = \dfrac{U}{R}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{0{,}8}{4} = 0{,}2 \text{ А} = 200 \text{ мА}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При прямом включении диод пропускает ток.</div>
+                    <div class="answer">✅ Ответ: $I = 200$ мА</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Обратное включение</div>
+                <div class="task-condition"><strong>Условие:</strong> При обратном напряжении $U = 5$ В обратный ток диода $I = 5$ мкА. Найдите сопротивление диода в этой точке.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $U = 5$ В, $I = 5 \cdot 10^{-6}$ А</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $R = \dfrac{U}{I}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = \dfrac{5}{5 \cdot 10^{-6}} = 10^6 \text{ Ом} = 1 \text{ МОм}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При обратном включении сопротивление диода огромно — ток практически не идёт.</div>
+                    <div class="answer">✅ Ответ: $R = 1$ МОм</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Сопротивление полупроводника при нагреве</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление полупроводника при $0$ °C равно $R_0 = 500$ Ом. При нагревании до $50$ °C сопротивление уменьшилось в 2 раза. Найдите $R$.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $R_0 = 500$ Ом, уменьшилось в 2 раза</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $R = \dfrac{R_0}{2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = \dfrac{500}{2} = 250 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> У полупроводников при нагревании сопротивление падает.</div>
+                    <div class="answer">✅ Ответ: $R = 250$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Мощность, выделяемая на диоде</div>
+                <div class="task-condition"><strong>Условие:</strong> Через диод в прямом направлении течёт ток $I = 0{,}1$ А при напряжении $U = 0{,}7$ В. Найдите мощность, выделяемую на диоде.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $I = 0{,}1$ А, $U = 0{,}7$ В</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $P$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $P = U \cdot I$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$P = 0{,}7 \cdot 0{,}1 = 0{,}07 \text{ Вт} = 70 \text{ мВт}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 70 мВт — типичная мощность рассеяния маломощного диода.</div>
+                    <div class="answer">✅ Ответ: $P = 70$ мВт</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Концентрация при нагреве</div>
+                <div class="task-condition"><strong>Условие:</strong> При нагревании полупроводника концентрация носителей выросла с $10^{16}$ до $10^{22}$ м⁻³. Во сколько раз выросла проводимость?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $n_1 = 10^{16}$ м⁻³, $n_2 = 10^{22}$ м⁻³</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{n_2}{n_1}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Проводимость $\sigma = e n (\mu_n + \mu_p)$, пропорциональна концентрации.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $\dfrac{n_2}{n_1} = 10^6$ — во столько раз выросла проводимость.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Поэтому сопротивление полупроводника резко падает при нагреве.</div>
+                    <div class="answer">✅ Ответ: в $10^6$ раз</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. ВАХ диода</div>
+                <div class="task-condition"><strong>Условие:</strong> При прямом напряжении $0{,}6$ В ток диода $I_1 = 10$ мА, при $0{,}8$ В — $I_2 = 100$ мА. Во сколько раз вырос ток при увеличении напряжения на $0{,}2$ В?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $I_1 = 10$ мА, $I_2 = 100$ мА</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{I_2}{I_1}$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $\dfrac{I_2}{I_1} = \dfrac{100}{10} = 10$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> ВАХ диода нелинейна: малый рост напряжения даёт большой рост тока.</div>
+                    <div class="answer">✅ Ответ: в 10 раз</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== САМОСТОЯТЕЛЬНОЕ РЕШЕНИЕ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Сопротивление полупроводника</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление полупроводника при $0$ °C равно $R_0 = 200$ Ом. При нагреве оно уменьшилось в 5 раз. Найдите $R$.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s1')">💡 Подсказка</button></div>
+                <div id="s1" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $R = R_0 / 5$.</div><div class="answer">✅ Ответ: $R = 40$ Ом</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Собственный полупроводник</div>
+                <div class="task-condition"><strong>Условие:</strong> В собственном полупроводнике $p = 10^{18}$ м⁻³. Найдите $n$.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s2')">💡 Подсказка</button></div>
+                <div id="s2" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $n = p$.</div><div class="answer">✅ Ответ: $n = 10^{18}$ м⁻³</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. n-тип</div>
+                <div class="task-condition"><strong>Условие:</strong> В полупроводнике n-типа $n = 10^{24}$ м⁻³, $p = 10^{14}$ м⁻³. Во сколько раз электронов больше?</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s3')">💡 Подсказка</button></div>
+                <div id="s3" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $\dfrac{n}{p} = \dfrac{10^{24}}{10^{14}}$.</div><div class="answer">✅ Ответ: в $10^{10}$ раз</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. p-тип</div>
+                <div class="task-condition"><strong>Условие:</strong> В полупроводнике p-типа $p = 10^{22}$ м⁻³, $n = 10^{12}$ м⁻³. Какой тип проводимости?</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s4')">💡 Подсказка</button></div>
+                <div id="s4" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> Сравните $p$ и $n$.</div><div class="answer">✅ Ответ: p-тип (дырочная)</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Прямое включение</div>
+                <div class="task-condition"><strong>Условие:</strong> Диод при прямом напряжении $U = 0{,}7$ В имеет сопротивление $R = 3{,}5$ Ом. Найдите ток.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s5')">💡 Подсказка</button></div>
+                <div id="s5" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $I = U/R$.</div><div class="answer">✅ Ответ: $I = 0{,}2$ А = 200 мА</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Обратное включение</div>
+                <div class="task-condition"><strong>Условие:</strong> При обратном напряжении $U = 10$ В обратный ток $I = 2$ мкА. Найдите сопротивление.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s6')">💡 Подсказка</button></div>
+                <div id="s6" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $R = U/I$, $I$ в амперах.</div><div class="answer">✅ Ответ: $R = 5$ МОм</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Нагрев полупроводника</div>
+                <div class="task-condition"><strong>Условие:</strong> Сопротивление полупроводника при $0$ °C $R_0 = 800$ Ом. При нагреве оно уменьшилось в 4 раза. Найдите $R$.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s7')">💡 Подсказка</button></div>
+                <div id="s7" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $R = R_0 / 4$.</div><div class="answer">✅ Ответ: $R = 200$ Ом</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Мощность на диоде</div>
+                <div class="task-condition"><strong>Условие:</strong> Ток через диод $I = 0{,}2$ А, напряжение $U = 0{,}7$ В. Найдите мощность.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s8')">💡 Подсказка</button></div>
+                <div id="s8" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $P = U \cdot I$.</div><div class="answer">✅ Ответ: $P = 140$ мВт</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. Рост проводимости</div>
+                <div class="task-condition"><strong>Условие:</strong> Концентрация носителей выросла с $10^{15}$ до $10^{21}$ м⁻³. Во сколько раз выросла проводимость?</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s9')">💡 Подсказка</button></div>
+                <div id="s9" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $\dfrac{n_2}{n_1} = \dfrac{10^{21}}{10^{15}}$.</div><div class="answer">✅ Ответ: в $10^6$ раз</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. ВАХ диода</div>
+                <div class="task-condition"><strong>Условие:</strong> При $0{,}6$ В ток диода $5$ мА, при $0{,}8$ В — $50$ мА. Во сколько раз вырос ток?</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s10')">💡 Подсказка</button></div>
+                <div id="s10" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $\dfrac{I_2}{I_1} = \dfrac{50}{5}$.</div><div class="answer">✅ Ответ: в 10 раз</div></div></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function findButton(el){
+        const block = el.closest('.task-block');
+        if (!block) return null;
+        return block.querySelector('.show-solution-btn');
+    }
+    function toggleSolution(id){
+        const el = document.getElementById(id);
+        const btn = findButton(el);
+        if (!btn) return;
+        if (el.classList.contains('open')) { el.classList.remove('open'); btn.textContent = '📖 Показать решение'; }
+        else { el.classList.add('open'); btn.textContent = '📕 Скрыть решение'; }
+    }
+    function toggleHint(id){
+        const el = document.getElementById(id);
+        const btn = findButton(el);
+        if (!btn) return;
+        if (el.classList.contains('open')) { el.classList.remove('open'); btn.textContent = '💡 Подсказка'; }
+        else { el.classList.add('open'); btn.textContent = '📕 Скрыть подсказку'; }
+    }
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');}})();
+</script>
+
+<!-- 3D-модель полупроводника (собственная, примесная проводимость, p-n переход) -->
+<script>
+    (function() {
+        const container = document.getElementById('container-semi');
+        const canvas = document.getElementById('canvas-semi');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(0, 4, 14);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        const key = new THREE.DirectionalLight(0xffffff, 1.0);
+        key.position.set(5, 8, 6);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const BOX_W = 16; // Ширина сцены
+        const BOX_H = 6;  // Высота
+        const BOX_D = 6;  // Глубина
+
+        // ===== ИОНЫ РЕШЁТКИ =====
+        const ionGeo = new THREE.SphereGeometry(0.15, 12, 12);
+        const ionMat = new THREE.MeshStandardMaterial({ color: 0x888888, emissive: 0x222222, roughness: 0.5 });
+        for (let x = 0; x < 8; x++) {
+            for (let y = 0; y < 4; y++) {
+                for (let z = 0; z < 4; z++) {
+                    const m = new THREE.Mesh(ionGeo, ionMat);
+                    m.position.set(
+                        (x - 3.5) * 2,
+                        (y - 1.5) * 1.5,
+                        (z - 1.5) * 1.5
+                    );
+                    group.add(m);
+                }
+            }
+        }
+
+        // ===== НОСИТЕЛИ ЗАРЯДА =====
+        const electrons = [];
+        const holes = [];
+        const carrierGeo = new THREE.SphereGeometry(0.18, 12, 12);
+        const elMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x003366 });
+        const holeMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x661111 });
+
+        function randPos() {
+            return new THREE.Vector3(
+                (Math.random() - 0.5) * (BOX_W - 1),
+                (Math.random() - 0.5) * (BOX_H - 1),
+                (Math.random() - 0.5) * (BOX_D - 1)
+            );
+        }
+
+        let targetE = 0, targetH = 0;
+
+        function computeTargets() {
+            const type = parseInt(document.getElementById('semi-type-slider').value);
+            const T = parseFloat(document.getElementById('semi-temp-slider').value);
+            const factor = Math.max(0.3, T / 300);
+
+            if (type === 0) { targetE = 20 * factor; targetH = 20 * factor; } // Собственный
+            else if (type === 1) { targetE = 40 * factor; targetH = 4 * factor; } // n-тип
+            else if (type === 2) { targetE = 4 * factor; targetH = 40 * factor; } // p-тип
+            else if (type === 3) { targetE = 30; targetH = 30; } // Прямое (ток есть)
+            else if (type === 4) { targetE = 5; targetH = 5; }   // Обратное (тока нет)
+        }
+
+        function spawnElectron(xPos) {
+            const m = new THREE.Mesh(carrierGeo, elMat);
+            m.position.copy(randPos());
+            if (xPos !== undefined) m.position.x = xPos;
+            m.scale.set(0.01, 0.01, 0.01);
+            group.add(m);
+            electrons.push({ mesh: m, vx: (Math.random() - 0.5) * 0.1, vy: (Math.random() - 0.5) * 0.1, spawnScale: 0.01 });
+        }
+
+        function spawnHole(xPos) {
+            const m = new THREE.Mesh(carrierGeo, holeMat);
+            m.position.copy(randPos());
+            if (xPos !== undefined) m.position.x = xPos;
+            m.scale.set(0.01, 0.01, 0.01);
+            group.add(m);
+            holes.push({ mesh: m, vx: (Math.random() - 0.5) * 0.1, vy: (Math.random() - 0.5) * 0.1, spawnScale: 0.01 });
+        }
+
+        function removeElectron() {
+            if (!electrons.length) return;
+            const e = electrons.pop();
+            group.remove(e.mesh);
+        }
+
+        function removeHole() {
+            if (!holes.length) return;
+            const h = holes.pop();
+            group.remove(h.mesh);
+        }
+
+        function smoothCarriers() {
+            if (electrons.length < Math.floor(targetE)) spawnElectron();
+            else if (electrons.length > Math.ceil(targetE)) removeElectron();
+
+            if (holes.length < Math.floor(targetH)) spawnHole();
+            else if (holes.length > Math.ceil(targetH)) removeHole();
+        }
+
+        // ===== ЗАПИРАЮЩИЙ СЛОЙ (ДЛЯ P-N ПЕРЕХОДА) =====
+        let depletionZone = null;
+        const depletionGeo = new THREE.BoxGeometry(1, BOX_H, BOX_D);
+        const depletionMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1, depthWrite: false });
+
+        depletionZone = new THREE.Mesh(depletionGeo, depletionMat);
+        depletionZone.position.set(0, 0, 0);
+        group.add(depletionZone);
+        depletionZone.visible = false;
+
+        // ===== UI =====
+        const typeSlider = document.getElementById('semi-type-slider');
+        const tempSlider = document.getElementById('semi-temp-slider');
+        const typeValue = document.getElementById('semi-type-value');
+        const tempValue = document.getElementById('semi-temp-value');
+        const typeDisplay = document.getElementById('semi-type');
+        const carriersDisplay = document.getElementById('semi-carriers');
+        const resDisplay = document.getElementById('semi-res');
+
+        function updateInfo() {
+            const type = parseInt(typeSlider.value);
+            const T = parseFloat(tempSlider.value);
+            tempValue.textContent = T;
+
+            if (type === 0) {
+                typeValue.textContent = 'собственный';
+                typeDisplay.textContent = 'собственный';
+                carriersDisplay.textContent = 'n = p';
+                resDisplay.textContent = 'высокое';
+            } else if (type === 1) {
+                typeValue.textContent = 'n-тип';
+                typeDisplay.textContent = 'n-тип (донор)';
+                carriersDisplay.textContent = 'n > p';
+                resDisplay.textContent = 'низкое';
+            } else if (type === 2) {
+                typeValue.textContent = 'p-тип';
+                typeDisplay.textContent = 'p-тип (акцептор)';
+                carriersDisplay.textContent = 'p > n';
+                resDisplay.textContent = 'низкое';
+            } else if (type === 3) {
+                typeValue.textContent = 'p-n прямое';
+                typeDisplay.textContent = 'p–n переход';
+                carriersDisplay.textContent = 'ток есть';
+                resDisplay.textContent = 'малое';
+            } else if (type === 4) {
+                typeValue.textContent = 'p-n обратное';
+                typeDisplay.textContent = 'p–n переход';
+                carriersDisplay.textContent = 'тока нет';
+                resDisplay.textContent = 'огромное';
+            }
+        }
+
+        typeSlider.min = 0;
+        typeSlider.max = 4;
+        typeSlider.step = 1;
+
+        typeSlider.addEventListener('input', () => { updateInfo(); computeTargets(); });
+        tempSlider.addEventListener('input', () => { updateInfo(); computeTargets(); });
+
+        document.getElementById('semi-reset').addEventListener('click', () => {
+            typeSlider.value = 0; tempSlider.value = 300;
+            updateInfo(); computeTargets();
+            while(electrons.length) removeElectron();
+            while(holes.length) removeHole();
+            for (let i = 0; i < 20; i++) { spawnElectron(); spawnHole(); }
+        });
+
+        document.getElementById('fs-semi').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateInfo();
+        computeTargets();
+        for (let i = 0; i < 20; i++) { spawnElectron(); spawnHole(); }
+
+        // ===== АНИМАЦИЯ =====
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const type = parseInt(typeSlider.value);
+            const isPN = (type === 3 || type === 4);
+
+            // Настройка p-n перехода
+            if (isPN) {
+                depletionZone.visible = true;
+                // Прямое - слой узкий (0.5), обратное - широкий (4)
+                const targetWidth = (type === 3) ? 0.5 : 4.0;
+                depletionZone.scale.x += (targetWidth - depletionZone.scale.x) * 0.1;
+
+                // В p-n переходе электроны летят вправо, дырки влево
+                electrons.forEach(e => { if (Math.random() > 0.95) e.vx = 0.1; else e.vx = Math.random() * 0.2; });
+                holes.forEach(h => { if (Math.random() > 0.95) h.vx = -0.1; else h.vx = -Math.random() * 0.2; });
+            } else {
+                depletionZone.visible = false;
+            }
+
+            smoothCarriers();
+
+            const speed = 0.05 + (parseFloat(tempSlider.value) / 600) * 0.1;
+            const boundX = BOX_W / 2 - 0.3;
+            const boundY = BOX_H / 2 - 0.3;
+            const boundZ = BOX_D / 2 - 0.3;
+
+            function moveCarriers(arr, isElectron) {
+                arr.forEach(c => {
+                    if (c.spawnScale < 1) {
+                        c.spawnScale = Math.min(1, c.spawnScale + 0.08);
+                        c.mesh.scale.set(c.spawnScale, c.spawnScale, c.spawnScale);
+                    }
+
+                    c.mesh.position.x += c.vx * speed * 10;
+                    c.mesh.position.y += c.vy * speed * 10;
+
+                    // Обратное включение (4): носители не могут пройти через широкий слой
+                    if (type === 4) {
+                        const halfLayer = (depletionZone.scale.x * 1) / 2;
+                        if (isElectron && c.mesh.position.x < halfLayer && c.mesh.position.x > -halfLayer) {
+                            // Если электрон залетел в слой - выталкиваем обратно
+                            c.mesh.position.x = halfLayer;
+                            c.vx = Math.abs(c.vx);
+                        }
+                        if (!isElectron && c.mesh.position.x > -halfLayer && c.mesh.position.x < halfLayer) {
+                            c.mesh.position.x = -halfLayer;
+                            c.vx = -Math.abs(c.vx);
+                        }
+                    }
+
+                    // Отскок от стенок
+                    if (Math.abs(c.mesh.position.x) > boundX) { c.vx *= -1; c.mesh.position.x = Math.sign(c.mesh.position.x) * boundX; }
+                    if (Math.abs(c.mesh.position.y) > boundY) { c.vy *= -1; c.mesh.position.y = Math.sign(c.mesh.position.y) * boundY; }
+                });
+            }
+
+            moveCarriers(electrons, true);
+            moveCarriers(holes, false);
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</nav>
+<script>
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
+
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){ document.querySelectorAll(sel).forEach(bind); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+    })();
+</script>
+<script src="search-overlay.js"></script>
+<script>
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY, threshold = 8, ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) nav.classList.add('nav-hidden');
+            else nav.classList.remove('nav-hidden');
+            lastY = y; ticking = false;
+        }
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>
+</body>
+</html>

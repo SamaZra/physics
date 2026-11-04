@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -443,6 +443,18 @@
             .section-title { font-size: 0.95rem; }
             .control-group input[type="range"] { max-width: 120px; }
         }
+        .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -455,7 +467,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
 .section-title {
@@ -1091,8 +1145,16 @@ a, button, div, span, label, input, textarea, select {
             <div class="formula-block">
                 <span class="f">$\vec{p} = m\vec{v}$</span>
                 <span class="f-label">— импульс тела</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Импульс — это «количество движения». По второму закону Ньютона \(\vec{F} = m\vec{a} = m \cdot \frac{\Delta\vec{v}}{\Delta t}\). Если умножить обе части на \(\Delta t\), получим \(\vec{F}\Delta t = m\Delta\vec{v} = \Delta\vec{p}\). Величина \(\vec{F}\Delta t\) называется импульсом силы. Значит, изменение импульса тела равно импульсу действующей силы. Само по себе произведение \(m\vec{v}\) и есть запас «движения», которым обладает тело.
+                </div>
                 <span class="f">$m_1\vec{v}_1 + m_2\vec{v}_2 = m_1\vec{v}_1' + m_2\vec{v}_2'$</span>
                 <span class="f-label">— ЗСИ для двух тел</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    По третьему закону Ньютона тела действуют друг на друга с равными по модулю и противоположными по направлению силами: \(\vec{F}_{12} = -\vec{F}_{21}\). Умножая на время взаимодействия \(\Delta t\), получаем \(\vec{F}_{12}\Delta t = -\vec{F}_{21}\Delta t\), то есть \(\Delta\vec{p}_1 = -\Delta\vec{p}_2\). Значит, изменения импульсов тел равны по модулю и противоположны по знаку: \(\Delta\vec{p}_1 + \Delta\vec{p}_2 = 0\). Суммарный импульс не меняется — это и есть ЗСИ.
+                </div>
                 <span class="f">$v = \frac{m_1 v_1 + m_2 v_2}{m_1 + m_2}$</span>
                 <span class="f-label">— скорость после неупругого удара</span>
             </div>
@@ -1131,8 +1193,16 @@ a, button, div, span, label, input, textarea, select {
             <div class="formula-block">
                 <span class="f">$A = F S \cos \alpha$</span>
                 <span class="f-label">— работа</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Работа силы — это мера передачи энергии. Если сила направлена вдоль движения (\(\alpha = 0°\)), то \(\cos\alpha = 1\), и вся сила идёт на совершение работы: \(A = FS\). Если сила перпендикулярна движению (\(\alpha = 90°\)), то \(\cos\alpha = 0\), и работа равна нулю — сила лишь меняет направление скорости, но не её величину (как центростремительная сила). В общем случае «полезной» является только проекция силы на направление движения: \(F\cos\alpha\). Отсюда и формула \(A = F S \cos\alpha\).
+                </div>
                 <span class="f">$N = \frac{A}{t} = F v \cos \alpha$</span>
                 <span class="f-label">— мощность</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Мощность — это скорость совершения работы: \(N = A/t\). Если работа совершается с постоянной силой на пути \(S\), то \(A = FS\cos\alpha\), а \(S/t = v\) — скорость. Подставляя, получаем \(N = F v \cos\alpha\). При \(\alpha = 0°\) формула упрощается до \(N = Fv\), что часто используется для автомобилей и механизмов.
+                </div>
                 <span class="f">$E_k = \frac{mv^2}{2}$</span>
                 <span class="f-label">— кинетическая энергия</span>
                 <span class="f">$E_p = mgh$</span>
@@ -1459,7 +1529,7 @@ a, button, div, span, label, input, textarea, select {
                 </div>
                 <div id="sol8" class="task-solution">
                     <div class="step"><span class="formula">$N = F v = 2000 \cdot 20 = 40000$ Вт $= 40$ кВт</span></div>
-                    <div class="step explanation"><strong>Пояснение:</strong> Мощность — это скорость совершения работы. При движении с постоянной скоростью $N = F v$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Мощность — это скорость совершения работы. При равномерном движении (когда сила тяги уравновешивает все силы сопротивления) мощность равна \(N = Fv\).</div>
                     <div class="answer">✅ Ответ: $N = 40$ кВт</div>
                 </div>
             </div>
@@ -1865,11 +1935,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- 3D-модель 1: Столкновения -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-collision');
         const canvas = document.getElementById('canvas-collision');
@@ -1882,7 +1948,7 @@ a, button, div, span, label, input, textarea, select {
         camera.lookAt(0, 0.3, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1901,7 +1967,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.padding = '0';
             div.style.border = 'none';
             div.style.borderRadius = '0';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -2015,7 +2081,7 @@ a, button, div, span, label, input, textarea, select {
 
         const ground = new THREE.Mesh(
             new THREE.PlaneGeometry(12, 1.5),
-            new THREE.MeshStandardMaterial({ color: 0x446688, transparent: true, opacity: 0.3 })
+            new THREE.MeshStandardMaterial({ color: 0x446688, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity })
         );
         ground.rotation.x = -Math.PI / 2;
         ground.position.set(0, 0, 0);
@@ -2211,7 +2277,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.maxPolarAngle = Math.PI / 2 + 0.25;
         controls.minPolarAngle = Math.PI / 2 - 0.25;
@@ -2233,11 +2299,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- 3D-модель 2: Работа и мощность -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-work');
         const canvas = document.getElementById('canvas-work');
@@ -2250,7 +2312,7 @@ a, button, div, span, label, input, textarea, select {
         camera.lookAt(0, 0.3, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -2269,7 +2331,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.padding = '0';
             div.style.border = 'none';
             div.style.borderRadius = '0';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -2357,7 +2419,7 @@ a, button, div, span, label, input, textarea, select {
 
         const ground = new THREE.Mesh(
             new THREE.PlaneGeometry(12, 1.5),
-            new THREE.MeshStandardMaterial({ color: 0x446688, transparent: true, opacity: 0.3 })
+            new THREE.MeshStandardMaterial({ color: 0x446688, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity })
         );
         ground.rotation.x = -Math.PI / 2;
         ground.position.set(0, 0, 0);
@@ -2518,7 +2580,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.maxPolarAngle = Math.PI / 2 + 0.25;
         controls.minPolarAngle = Math.PI / 2 - 0.25;

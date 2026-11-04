@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -146,7 +146,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
     <style id="titles-center-fix">
         /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
         .section-title {
@@ -170,6 +212,18 @@
         h1, .page-title, .file-title, .title {
             text-align: center !important;
         }
+                .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <style id="section-gradient-fix">
         /* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
@@ -771,6 +825,10 @@
                 <div class="formula-block">
                     <span class="f">$C = \dfrac{q}{U}$</span>
                     <span class="f-label">— электроёмкость (Фарад, Ф)</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Опыт показывает: чем больше заряд мы сообщаем проводнику, тем больше растёт его потенциал. То есть заряд \(q\) прямо пропорционален напряжению \(U\): \(q \sim U\). Коэффициент пропорциональности между ними и есть ёмкость: \(q = C \cdot U\), откуда \(C = q/U\). Ёмкость показывает, сколько кулонов заряда нужно сообщить, чтобы потенциал вырос на 1 Вольт.
+                    </div>
                 </div>
                 <p>Единица измерения — <strong>Фарад (Ф)</strong>. 1 Ф = 1 Кл / 1 В. Фарад — очень большая единица, поэтому на практике обычно используют микрофарады (мкФ) и пикофарады (пФ).</p>
                 <p>Электроёмкость зависит только от <strong>геометрии проводника</strong> (размеров, формы) и свойств среды вокруг него, но не зависит от заряда или напряжения.</p>
@@ -788,6 +846,10 @@
                 <div class="formula-block">
                     <span class="f">$C = \dfrac{\varepsilon_0 \varepsilon S}{d}$</span>
                     <span class="f-label">— ёмкость плоского конденсатора</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Чем больше площадь обкладок \(S\), тем больше заряда на них может поместиться (как на большой тарелке). Чем меньше расстояние \(d\), тем сильнее они притягивают друг друга и удерживают заряд. Диэлектрик с проницаемостью \(\varepsilon\) ослабляет поле внутри, позволяя накопить больше заряда. Всё это собирается в единую формулу с коэффициентом \(\varepsilon_0\) — электрической постоянной.
+                    </div>
                 </div>
                 <p>где $\varepsilon_0$ — электрическая постоянная (8,85·10⁻¹² Ф/м), $\varepsilon$ — диэлектрическая проницаемость среды, $S$ — площадь обкладок, $d$ — расстояние между ними.</p>
             </div>
@@ -803,6 +865,10 @@
                 <div class="formula-block">
                     <span class="f">$W = \dfrac{C U^2}{2} = \dfrac{q^2}{2C} = \dfrac{q U}{2}$</span>
                     <span class="f-label">— энергия заряженного конденсатора (Дж)</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        При зарядке конденсатора напряжение на нём растёт от 0 до \(U\). Среднее напряжение за процесс равно \(U/2\). Работа по переносу всего заряда \(q\) при этом среднем напряжении: \(A = q \cdot (U/2)\). Так как \(q = C \cdot U\), получаем \(W = (C \cdot U) \cdot U / 2 = C \cdot U^2 / 2\).
+                    </div>
                 </div>
                 <p>Эта энергия может быть выделена при разрядке конденсатора (например, вспышка фотоаппарата или дефибриллятор).</p>
                 <p><strong>Объёмная плотность энергии</strong> электрического поля (энергия в единице объёма):</p>
@@ -846,8 +912,7 @@
                 </div>
                 <div class="def-card">
                     <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
-                    <p>Перед вами плоский конденсатор. Синие частицы — это электроны. При зарядке они «набегают» на одну из пластин.</p>
-
+                    <p>Перед вами плоский конденсатор. Жёлтые частицы символизируют заряды, которые накапливаются на обкладках. При зарядке одна пластина приобретает избыток электронов, а другая — их недостаток.</p>
                     <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Ёмкость C»</strong><br>Чем больше ёмкость, тем больше заряда может накопить конденсатор при том же напряжении. Формула: \(q = C \cdot U\).</p>
                     <p style="margin-top:12px;"><strong>2. Нажмите «▶ Зарядить»</strong><br>Вы увидите, как на пластине накапливаются заряды. Число «Заряд q» растёт. Чем больше ёмкость, тем быстрее и больше он накопит заряд.</p>
 
@@ -933,7 +998,8 @@
                     </p>
                 </div>
             </div>
-
+        </div>
+    </div>
     <!-- ===== ЗАДАЧИ ===== -->
 <div class="section collapsed">
     <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
@@ -1210,11 +1276,10 @@
 
     </div>
 </div>
-
-</div>`r`n`r`n<div class="back-link-wrapper">
+<div class="back-link-wrapper">
     <a href="electrodynamics.html" class="back-link">← Назад</a>
 </div>
-</div>
+        </div>
 
 <script>
     function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
@@ -1233,11 +1298,7 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 1: ЗАРЯДКА КОНДЕНСАТОРА ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-charging');
         const canvas = document.getElementById('canvas-charging');
@@ -1251,7 +1312,7 @@
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1291,14 +1352,14 @@
         function makeLabel(text, color, yPos) {
             const div = document.createElement('div');
             div.textContent = text; div.style.color = color; div.style.fontSize = '2rem'; div.style.fontWeight = 'bold';
-            const lbl = new CSS2DObject(div); lbl.position.set(-3.5, yPos, 0); return lbl;
+            const lbl = new THREE.CSS2DObject(div); lbl.position.set(-3.5, yPos, 0); return lbl;
         }
         group.add(makeLabel('+', '#ffcccc', 2.5));
         group.add(makeLabel('−', '#ccccff', -2.5));
 
         // Электроны (синие частицы)
         const electronGeo = new THREE.SphereGeometry(0.12, 8, 8);
-        const electronMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        const electronMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x331100 });
         const electrons = [];
 
         // Создаем много частиц для имитации заряда
@@ -1352,7 +1413,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1392,11 +1453,7 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 2: ЭНЕРГИЯ И ПОЛЕ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-energy');
         const canvas = document.getElementById('canvas-energy');
@@ -1410,7 +1467,7 @@
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1450,7 +1507,7 @@
         function makeLabel(text, color, yPos) {
             const div = document.createElement('div');
             div.textContent = text; div.style.color = color; div.style.fontSize = '2rem'; div.style.fontWeight = 'bold';
-            const lbl = new CSS2DObject(div); lbl.position.set(-3.5, yPos, 0); return lbl;
+            const lbl = new THREE.CSS2DObject(div); lbl.position.set(-3.5, yPos, 0); return lbl;
         }
         group.add(makeLabel('+', '#ffcccc', 3));
         group.add(makeLabel('−', '#ccccff', -3));
@@ -1513,7 +1570,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1531,11 +1588,7 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 3: ЦЕПЬ (С ПРОВОДАМИ) ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-connection');
         const canvas = document.getElementById('canvas-connection');
@@ -1548,7 +1601,7 @@
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1613,7 +1666,7 @@
         const vDiv = document.createElement('div');
         vDiv.textContent = 'V';
         vDiv.style.color = '#333'; vDiv.style.fontSize = '2rem'; vDiv.style.fontWeight = 'bold';
-        const vLabel = new CSS2DObject(vDiv);
+        const vLabel = new THREE.CSS2DObject(vDiv);
         vLabel.position.set(0, 0, 0.3); voltGroup.add(vLabel);
         
         const arrowGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0)]);
@@ -1829,7 +1882,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();

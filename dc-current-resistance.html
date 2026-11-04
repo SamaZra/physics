@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -134,6 +134,18 @@
             h1{font-size:1.1rem;}
             .section-title{font-size:0.95rem;}
         }
+                .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -146,7 +158,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: false  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: false }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(Math.min(q.pixelRatio, 1.5));
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
     <style id="titles-center-fix">
         .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
         .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
@@ -289,6 +343,10 @@
                 <div class="formula-block">
                     <span class="f">$I = \dfrac{\Delta q}{\Delta t}$</span>
                     <span class="f-label">— сила тока (Ампер, А)</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Сила тока — это скорость переноса заряда. Если за время $\Delta t$ через сечение прошёл заряд $\Delta q$, то в среднем за 1 секунду проходит заряд $\Delta q / \Delta t$. Это и есть сила тока. Единица измерения 1 Ампер означает, что за 1 секунду через сечение проходит 1 Кулон заряда (1 А = 1 Кл/с).
+                    </div>
                 </div>
                 <p>Если ток постоянный, то $I = \dfrac{q}{t}$. Для переменного тока используют мгновенное значение.</p>
                 <p><strong>Постоянный ток</strong> — ток, сила и направление которого не меняются со временем.</p>
@@ -310,6 +368,10 @@
                 <div class="formula-block">
                     <span class="f">$I = \dfrac{U}{R}$</span>
                     <span class="f-label">— закон Ома для участка цепи</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Немецкий физик Георг Ом экспериментально установил: сила тока в проводнике прямо пропорциональна напряжению на его концах ($I \sim U$) и обратно пропорциональна его сопротивлению ($I \sim 1/R$). Объединяя эти две зависимости через коэффициент пропорциональности, мы получаем формулу $I = U/R$. Сопротивление $R$ показывает, насколько сильно проводник мешает протеканию тока.
+                    </div>
                 </div>
                 <p>где $U$ — напряжение (В), $R$ — сопротивление (Ом).</p>
                 <p>Из этой формулы следуют два важных следствия:</p>
@@ -334,6 +396,7 @@
                     <span class="f">$I = \dfrac{1}{R} \cdot U$</span>
                     <span class="f-label">— уравнение прямой: тангенс угла наклона равен $1/R$</span>
                 </div>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:8px;">*На графиках ВАХ по вертикальной оси обычно откладывают силу тока \(I\) (А), а по горизонтальной — напряжение \(U\) (В). Тогда наклон прямой к оси \(U\) равен \(1/R\).*</p>
                 <p><strong>Принцип:</strong> чем <strong>больше сопротивление</strong> $R$, тем <strong>меньше наклон</strong> прямой (тем меньше ток при том же напряжении). По любой точке графика (кроме начала координат) можно найти сопротивление:</p>
                 <div class="formula-block">
                     <span class="f">$R = \dfrac{U}{I}$</span>
@@ -438,22 +501,22 @@
                         <span class="control-value" id="cur-value">10</span>
                     </div>
                     <button class="btn-reset" id="cur-reset">⟳ Сброс</button>
-                    <span class="control-label">⬤ Меняйте напряжение — скорость электронов будет меняться</span>
+                    <span class="control-label">⬤ Меняйте напряжение — скорость заряженных частиц будет меняться</span>
                 </div>
                 <div class="def-card">
                     <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
-                    <p>Перед вами проводник (труба), по которому движутся электроны (синие шарики). Это и есть электрический ток.</p>
+                    <p>Перед вами проводник (труба), по которому движется электрический ток (желтые шарики). Исторически за направление тока принято движение положительных зарядов, хотя в металлах реально движутся электроны (от минуса к плюсу).</p>
 
-                    <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Напряжение U»</strong><br>Напряжение — это «толчок», который заставляет электроны двигаться. Чем больше напряжение, тем быстрее летят электроны.</p>
+                    <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Напряжение U»</strong><br>Напряжение — это «толчок», который заставляет заряженные частицы двигаться. Чем больше напряжение, тем быстрее они летят.</p>
                     <ul>
                         <li>Обратите внимание на цифру «Сила тока I». По закону Ома \(I = \frac{U}{R}\), где сопротивление \(R\) фиксировано (условно 5 Ом).</li>
                         <li>Если вы увеличите напряжение в 2 раза, сила тока тоже вырастет в 2 раза.</li>
                     </ul>
 
-                    <p style="margin-top:12px;"><strong>2. Что такое сила тока?</strong><br>Сила тока — это количество зарядов, проходящих через сечение проводника за секунду. Чем быстрее движутся электроны, тем больше зарядов успевает пройти, тем выше сила тока.</p>
+                    <p style="margin-top:12px;"><strong>2. Что такое сила тока?</strong><br>Сила тока — это количество зарядов, проходящих через сечение проводника за секунду. Чем быстрее движутся заряженные частицы, тем больше зарядов успевает пройти, тем выше сила тока.</p>
 
                     <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
-                        <strong>💡 Вывод:</strong> Напряжение создаёт электрическое поле, которое разгоняет электроны. Сила тока прямо пропорциональна напряжению (закон Ома). Если нет напряжения — нет и тока (электроны движутся хаотично).
+                        <strong>💡 Вывод:</strong> Напряжение создаёт электрическое поле, которое разгоняет заряженные частицы. Сила тока прямо пропорциональна напряжению (закон Ома). Если напряжения нет, заряженные частицы движутся хаотично, и направленного тока нет.
                     </p>
                 </div>
             </div>
@@ -479,18 +542,18 @@
                 </div>
                 <div class="def-card">
                     <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
-                    <p>Перед вами кристаллическая решётка металла (ионы) и свободные электроны, которые через неё движутся.</p>
+                    <p>Перед вами кристаллическая решётка металла (ионы) и свободные заряженные частицы, которые через неё движутся.</p>
 
                     <p style="margin-top:12px;"><strong>1. Двигайте ползунок «Температура T»</strong><br>При нагревании ионы начинают <strong>колебаться сильнее</strong> (это видно по их амплитуде).</p>
                     <ul>
-                        <li>Чем сильнее колеблются ионы, тем чаще электроны сталкиваются с ними, тем труднее им пробираться сквозь решётку.</li>
+                        <li>Чем сильнее колеблются ионы, тем чаще заряженные частицы сталкиваются с ними, тем труднее им пробираться сквозь решётку.</li>
                         <li>Сопротивление растёт: \(R = R_0(1 + \alpha \Delta T)\). В правом верхнем углу видно, как увеличивается значение \(R\).</li>
                     </ul>
 
-                    <p style="margin-top:12px;"><strong>2. Сверхпроводимость</strong><br>Если бы мы могли охладить металл до очень низких температур (около -273 °C), колебания ионов почти прекратились бы, и сопротивление упало бы до нуля. Это явление называется сверхпроводимостью.</p>
+                    <p style="margin-top:12px;"><strong>2. Сверхпроводимость</strong><br>При очень низких температурах (близких к абсолютному нулю) колебания ионов почти прекращаются, и у некоторых материалов сопротивление резко падает до нуля. Это явление называется сверхпроводимостью.</p>
 
                     <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
-                        <strong>💡 Вывод:</strong> Сопротивление металла зависит от температуры. При нагревании оно растёт, потому что электронам труднее преодолевать усиливающиеся колебания ионов решётки. Это важно учитывать при работе с проводами под нагрузкой (они греются и их сопротивление меняется).
+                        <strong>💡 Вывод:</strong> Сопротивление металла зависит от температуры. При нагревании оно растёт, потому что заряженным частицам труднее преодолевать усиливающиеся колебания ионов решётки. Это важно учитывать при работе с проводами под нагрузкой (они греются и их сопротивление меняется).
                     </p>
                 </div>
             </div>
@@ -525,7 +588,7 @@
                     <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
                     <p>Перед вами электрическая цепь: источник тока (батарея), ключ, лампочка, резистор, амперметр (последовательно) и вольтметр (параллельно резистору).</p>
 
-                    <p style="margin-top:12px;"><strong>1. Включите ключ кнопкой «Выключить/Включить»</strong><br>При включении по проводам бегут электроны, лампочка загорается, приборы показывают значения.</p>
+                    <p style="margin-top:12px;"><strong>1. Включите ключ кнопкой «Выключить/Включить»</strong><br>При включении по проводам бегут заряженные частицы (показан электрический ток), лампочка загорается, приборы показывают значения.</p>
                     <ul>
                         <li>Амперметр показывает силу тока \(I\) в цепи.</li>
                         <li>Вольтметр показывает напряжение \(U_R\) на резисторе.</li>
@@ -982,13 +1045,20 @@
 <script>
     function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
 
-    function switchModel(model) {
+        function switchModel(model) {
         document.querySelectorAll('.model-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.model === model);
         });
-        document.getElementById('model-current').style.display = model === 'current' ? 'block' : 'none';
-        document.getElementById('model-resistance').style.display = model === 'resistance' ? 'block' : 'none';
-        document.getElementById('model-circuit').style.display = model === 'circuit' ? 'block' : 'none';
+
+        const mCurrent = document.getElementById('model-current');
+        const mRes = document.getElementById('model-resistance');
+        const mCirc = document.getElementById('model-circuit');
+
+        mCurrent.style.display = model === 'current' ? 'block' : 'none';
+        mRes.style.display = model === 'resistance' ? 'block' : 'none';
+        mCirc.style.display = model === 'circuit' ? 'block' : 'none';
+
+        // Даем браузеру время применить display, потом обновляем размеры
         setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
     }
 
@@ -996,15 +1066,13 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 1: ЭЛЕКТРИЧЕСКИЙ ТОК ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-current');
         const canvas = document.getElementById('canvas-current');
         if (!container || !canvas) return;
-
+        let isActive = true;
         const scene = new THREE.Scene();
         scene.background = null;
         const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
@@ -1036,7 +1104,7 @@
 
         const pipeGeo = new THREE.CylinderGeometry(1.5, 1.5, 10, 32, 1, true);
         const pipeMat = new THREE.MeshStandardMaterial({
-            color: 0x8ba5b8, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false
+            color: 0x8ba5b8, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity, side: THREE.DoubleSide, depthWrite: false
         });
         const pipe = new THREE.Mesh(pipeGeo, pipeMat);
         pipe.rotation.z = Math.PI / 2;
@@ -1063,7 +1131,7 @@
         const electrons = [];
         const N = 60;
         const eGeo = new THREE.SphereGeometry(0.12, 8, 8);
-        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        const eMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x331100 });
 
         for (let i = 0; i < N; i++) {
             const e = new THREE.Mesh(eGeo, eMat);
@@ -1104,7 +1172,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1113,6 +1181,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
+            if (!isActive) return;
             controls.update();
             electrons.forEach(e => {
                 e.mesh.position.x += e.speed;
@@ -1125,19 +1194,22 @@
             renderer.render(scene, camera);
         }
         animate();
+                // Слушаем, когда вкладка скрывается/показывается
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { isActive = entry.isIntersecting; });
+        });
+        observer.observe(container);
     })();
 </script>
 
 <!-- ===== МОДЕЛЬ 2: НАГРЕВ И СОПРОТИВЛЕНИЕ (как в исходнике) ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-resistance');
         const canvas = document.getElementById('canvas-resistance');
         if (!container || !canvas) return;
-
+let isActive = true;
         const scene = new THREE.Scene();
         scene.background = null;
         const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
@@ -1170,7 +1242,7 @@
         // Кристаллическая решётка (ионы)
         const ions = [];
         const N_IONS = 30;
-        const ionGeo = new THREE.SphereGeometry(0.25, 16, 16);
+        const ionGeo = new THREE.SphereGeometry(0.25, window.qualitySettings3D.segments, window.qualitySettings3D.segments);
         const ionMat = new THREE.MeshStandardMaterial({ color: 0xff6644, emissive: 0x441111 });
 
         for (let i = 0; i < N_IONS; i++) {
@@ -1191,7 +1263,7 @@
         const electrons = [];
         const N_E = 20;
         const eGeo = new THREE.SphereGeometry(0.1, 8, 8);
-        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        const eMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x331100 });
 
         for (let i = 0; i < N_E; i++) {
             const e = new THREE.Mesh(eGeo, eMat);
@@ -1234,7 +1306,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1243,6 +1315,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
+            if (!isActive) return;
             controls.update();
             const time = Date.now() * 0.005;
 
@@ -1263,19 +1336,22 @@
             renderer.render(scene, camera);
         }
         animate();
+                // Слушаем, когда вкладка скрывается/показывается
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { isActive = entry.isIntersecting; });
+        });
+        observer.observe(container);
     })();
 </script>
 
 <!-- ===== МОДЕЛЬ 3: ЭЛЕКТРИЧЕСКАЯ ЦЕПЬ (с ярким свечением лампы) ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-circuit');
         const canvas = document.getElementById('canvas-circuit');
         if (!container || !canvas) return;
-
+let isActive = true;
         const scene = new THREE.Scene();
         scene.background = null;
         const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
@@ -1355,8 +1431,8 @@
         );
         lampGroup.add(lampBase);
         const lampBulb = new THREE.Mesh(
-            new THREE.SphereGeometry(0.55, 16, 16),
-            new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0x000000, transparent: true, opacity: 0.85 })
+            new THREE.SphereGeometry(0.55, window.qualitySettings3D.segments, window.qualitySettings3D.segments),
+            new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0x000000, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity })
         );
         lampBulb.position.set(0, 0.7, 0);
         lampGroup.add(lampBulb);
@@ -1476,7 +1552,7 @@
         const electrons = [];
         const N_E = 40;
         const eGeo = new THREE.SphereGeometry(0.1, 8, 8);
-        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        const eMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x331100 });
 
         const perimeter = [];
         const corners = [
@@ -1589,7 +1665,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 1, 0);
         controls.update();
@@ -1600,6 +1676,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
+            if (!isActive) return;
             controls.update();
             time += 0.016;
 
@@ -1624,6 +1701,11 @@
             renderer.render(scene, camera);
         }
         animate();
+                // Слушаем, когда вкладка скрывается/показывается
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { isActive = entry.isIntersecting; });
+        });
+        observer.observe(container);
     })();
 </script>
 

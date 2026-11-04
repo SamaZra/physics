@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -94,7 +94,49 @@
         MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
 .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
@@ -169,7 +211,7 @@ h1, .page-title, .file-title, .title { text-align: center !important; }
         <div class="section-content">
             <div class="def-card">
                 <p><strong>Цель работы:</strong> освоить прием определения относительной влажности воздуха, основанный на использовании психрометра.</p>
-                <p><strong>Приборы и материалы:</strong> Психрометр (виртуальная модель), психрометрическая таблица.</p>
+                <p><strong>Приборы и материалы:</strong> Приборы и материалы: Психрометр (виртуальная модель, <strong>(цена деления шкалы термометров 0,1 °C)</strong>, психрометрическая таблица.</p>
             </div>
         </div>
     </div>
@@ -188,7 +230,26 @@ h1, .page-title, .file-title, .title { text-align: center !important; }
                     <span class="f">$\varphi = \frac{\rho_a}{\rho_0} \cdot 100\%$</span>
                 </div>
                 <p>Для жилых помещений нормальной влажностью считается относительная влажность, равная <strong>40–60%</strong>.</p>
-                <p><strong>Психрометр</strong> состоит из двух термометров: сухого и увлажненного. На шарике увлажненного термометра закреплен фитиль, конец которого опущен в чашечку с водой. Вода, испаряясь с фитиля, забирает от термометра тепло, поэтому показания увлажненного термометра ниже, чем у сухого. По показанию сухого и разности показаний сухого и увлажненного термометров с помощью психрометрической таблицы находится относительная влажность воздуха.</p>
+                <p><strong>Испарение и охлаждение.</strong> Испарение — это переход жидкости в газообразное состояние. Для того чтобы молекулы воды оторвались от жидкости и стали паром, им нужно преодолеть силы притяжения. Эту энергию они забирают из окружающей среды. Поэтому испарение всегда сопровождается <strong>поглощением теплоты</strong> (является эндотермическим процессом). Из-за этого жидкость при испарении охлаждается.</p>
+
+                <p><strong>Психрометр</strong> состоит из двух термометров: сухого и увлажненного. Сухой термометр показывает температуру окружающего воздуха. На шарике увлажненного термометра закреплен фитиль, конец которого опущен в чашечку с водой. Вода с фитиля постоянно испаряется. Так как испарение забирает тепло, шарик увлажненного термометра охлаждается, и его показания становятся <strong>ниже</strong>, чем у сухого. Чем суше воздух, тем быстрее идет испарение и тем сильнее охлаждается влажный термометр (разность температур больше). Если воздух насыщен влагой (влажность 100%), вода испаряться не будет, и показания обоих термометров сравняются. По показанию сухого и разности показаний сухого и увлажненного термометров с помощью психрометрической таблицы находится относительная влажность воздуха.</p>
+                <p>Температура измеряется термометром с абсолютной погрешностью, равной половине цены деления:</p>
+                <div class="formula-block">
+                    <span class="f">$\Delta t_{\text{сух}} = \Delta t_{\text{вл}} = \frac{C}{2} = 0{,}05\ ^\circ\text{C}$</span>
+                </div>
+                <p>Разность температур $\Delta t = t_{\text{сух}} - t_{\text{вл}}$ — это результат вычитания двух величин, поэтому их абсолютные погрешности складываются:</p>
+                <div class="formula-block">
+                    <span class="f">$\Delta(\Delta t) = \Delta t_{\text{сух}} + \Delta t_{\text{вл}} = C = 0{,}1\ ^\circ\text{C}$</span>
+                </div>
+                <p>Относительная погрешность разности температур:</p>
+                <div class="formula-block">
+                    <span class="f">$\varepsilon_{\Delta t} = \frac{\Delta(\Delta t)}{\Delta t} \cdot 100\%$</span>
+                </div>
+                <p>Влажность находится по таблице, шаг которой $\pm 1\%$. Итоговая абсолютная погрешность влажности:</p>
+                <div class="formula-block">
+                    <span class="f">$\Delta\varphi = \varphi \cdot \frac{\varepsilon_{\Delta t}}{100\%} + 1\%$</span>
+                </div>
+                <p>Результат записывается в виде $\varphi = (\varphi \pm \Delta\varphi)\ \%$.</p>
             </div>
         </div>
     </div>
@@ -198,6 +259,7 @@ h1, .page-title, .file-title, .title { text-align: center !important; }
         <div class="section-content">
             <div class="def-card">
                 <p><strong>Задание 1.</strong> Ознакомьтесь с устройством психрометра на 3D-модели ниже. Вращайте модель пальцем или мышкой.</p>
+                <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:8px;">💡 <em>Обратите внимание на шкалы термометров: между соседними короткими штрихами — 0,1 °C. Это и есть цена деления $C$ для расчёта погрешности.</em></p>
 
                 <div class="model-container" id="container-psychro">
                     <canvas id="canvas-psychro" class="model-canvas"></canvas>
@@ -231,6 +293,12 @@ h1, .page-title, .file-title, .title { text-align: center !important; }
                     <p>$\Delta t = t_{сухого} - t_{влажного}$</p>
                     <p>$\Delta t$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> °C − <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> °C = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> °C.</p>
                     <p>5. По психрометрической таблице определяем влажность воздуха $\varphi$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> %.</p>
+                    <p style="margin-top:10px;"><strong>6. Расчет погрешностей:</strong></p>
+                    <p>Абсолютная погрешность температуры: $\Delta t_{\text{сух}} = \Delta t_{\text{вл}} = \frac{C}{2}$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> °C.</p>
+                    <p>Абсолютная погрешность разности температур: $\Delta(\Delta t) = \Delta t_{\text{сух}} + \Delta t_{\text{вл}}$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> °C.</p>
+                    <p>Относительная погрешность разности температур: $\varepsilon_{\Delta t} = \frac{\Delta(\Delta t)}{\Delta t} \cdot 100\%$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> %.</p>
+                    <p>Абсолютная погрешность влажности: $\Delta\varphi = \varphi \cdot \frac{\varepsilon_{\Delta t}}{100\%} + 1\%$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> %.</p>
+                    <p>7. Итоговый результат: $\varphi = (\varphi \pm \Delta\varphi)\ \%$ = (<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> ± <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span>) %.</p>
                 </div>
 
                 <p style="margin-top:16px;"><strong>Задание 3.</strong> Начертите в тетради таблицу результатов измерений. Запишите туда показания приборов с экрана, а разность температур и влажность посчитайте и впишите сами.</p>
@@ -273,7 +341,7 @@ h1, .page-title, .file-title, .title { text-align: center !important; }
             <div class="def-card">
                 <p><strong>Задание 4. Сделайте вывод.</strong> В тетради напишите:</p>
                 <ul>
-                    <li>В ходе лабораторной работы определили относительную влажность воздуха в кабинете. Она равна <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> %.</li>
+                    <li>В ходе лабораторной работы определили относительную влажность воздуха в кабинете. С учетом погрешности она равна: &phi; = (<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> &plusmn; <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span>) %.</li>
                     <li>Сравните полученный результат с нормой (40–60%). Это нормальная, повышенная или пониженная влажность?</li>
                 </ul>
             </div>
@@ -358,10 +426,7 @@ h1, .page-title, .file-title, .title { text-align: center !important; }
 </script>
 
 <!-- 3D МОДЕЛЬ ПСИХРОМЕТРА -->
-<script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-psychro');
         const canvas = document.getElementById('canvas-psychro');
@@ -402,63 +467,107 @@ h1, .page-title, .file-title, .title { text-align: center !important; }
         body.position.set(0, 0, -0.5);
         group.add(body);
 
-        // Функция создания термометра
-        function createThermometer(x, labelText) {
+                // ===== Функция создания термометра с креплениями =====
+        function createThermometer(x) {
             const g = new THREE.Group();
             g.position.set(x, 0, 0);
-            
+
             // Стеклянная трубка
             const glassGeo = new THREE.CylinderGeometry(0.4, 0.4, 8, 16);
-            const glassMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, transparent: true, opacity: 0.5, roughness: 0.1 });
+            const glassMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity, roughness: 0.1 });
             const glass = new THREE.Mesh(glassGeo, glassMat);
             g.add(glass);
-            
-            // Резервуар с жидкостью
-            const bulbGeo = new THREE.SphereGeometry(0.6, 16, 16);
+
+            // Резервуар (красный шарик)
+            const bulbGeo = new THREE.SphereGeometry(0.6, window.qualitySettings3D.segments, window.qualitySettings3D.segments);
             const bulbMat = new THREE.MeshStandardMaterial({ color: 0xff3333 });
             const bulb = new THREE.Mesh(bulbGeo, bulbMat);
             bulb.position.y = -4;
             g.add(bulb);
-            
-            // Шкала с цифрами
+
+            // Шкала
             const scaleGroup = new THREE.Group();
             for (let i = -3; i <= 3; i++) {
-                const lineGeo = new THREE.BoxGeometry(0.8, 0.05, 0.1);
-                const lineMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                const line = new THREE.Mesh(lineGeo, lineMat);
-                line.position.set(0, i * 1.2, 0.4);
-                if (i % 2 === 0) line.scale.x = 1.5;
-                scaleGroup.add(line);
+                const majorGeo = new THREE.BoxGeometry(1.2, 0.05, 0.1);
+                const majorMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const major = new THREE.Mesh(majorGeo, majorMat);
+                major.position.set(0, i * 1.2, 0.41);
+                scaleGroup.add(major);
+                if (i < 3) {
+                    for (let k = 1; k <= 5; k++) {
+                        const minorGeo = new THREE.BoxGeometry(0.6, 0.03, 0.1);
+                        const minorMat = new THREE.MeshBasicMaterial({ color: 0x444444 });
+                        const minor = new THREE.Mesh(minorGeo, minorMat);
+                        minor.position.set(0, i * 1.2 + k * 0.2, 0.41);
+                        scaleGroup.add(minor);
+                    }
+                }
             }
             g.add(scaleGroup);
+
+            // Металлические держатели (хомуты)
+            const clampGeo = new THREE.BoxGeometry(0.6, 0.15, 0.8);
+            const clampMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.6, roughness: 0.4 });
+
+            const clampTop = new THREE.Mesh(clampGeo, clampMat);
+            clampTop.position.set(0, 2.5, -0.2);
+            g.add(clampTop);
+
+            const clampBottom = new THREE.Mesh(clampGeo, clampMat);
+            clampBottom.position.set(0, -2.5, -0.2);
+            g.add(clampBottom);
+
             return g;
         }
 
-        const dryThermometer = createThermometer(-2, 'dry');
+        const dryThermometer = createThermometer(-2);
         group.add(dryThermometer);
-        const wetThermometer = createThermometer(2, 'wet');
+        const wetThermometer = createThermometer(2);
         group.add(wetThermometer);
 
-        // Марля и чашечка
-        const fabricGeo = new THREE.CylinderGeometry(0.45, 0.45, 2, 16);
-        const fabricMat = new THREE.MeshStandardMaterial({ color: 0x88ccff, roughness: 1 });
+                // ===== Полка для чашечки (темный металл) =====
+        const shelfGeo = new THREE.BoxGeometry(2.2, 0.2, 1.5);
+        // Делаем полку темно-серой, чтобы она контрастировала с белым фоном
+        const shelfMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.7, metalness: 0.4 });
+        const shelf = new THREE.Mesh(shelfGeo, shelfMat);
+        shelf.position.set(2, -4.8, -0.1);
+        group.add(shelf);
+
+        // ===== Марля (фитиль) =====
+        const fabricGeo = new THREE.CylinderGeometry(0.42, 0.42, 2.5, 16);
+        // Марлю сделаем чуть более плотной и заметной
+        const fabricMat = new THREE.MeshStandardMaterial({ color: 0x66bbff, roughness: 1 });
         const fabric = new THREE.Mesh(fabricGeo, fabricMat);
-        fabric.position.set(2, -3.2, 0);
+        fabric.position.set(2, -3.5, 0);
         group.add(fabric);
 
-        const cupGeo = new THREE.CylinderGeometry(1.2, 0.8, 1.5, 16);
-        const cupMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, transparent: true, opacity: 0.8 });
+        // ===== Чашечка с водой (стеклянная, голубоватая) =====
+        // Увеличиваем размеры чашки (радиус и высоту), чтобы она выглядела солиднее
+        const cupGeo = new THREE.CylinderGeometry(1.0, 0.8, 1.4, 16);
+        const cupMat = new THREE.MeshPhysicalMaterial({
+            color: 0xaaddff, // Голубоватый оттенок стекла
+            transparent: true,
+            opacity: 0.4, // Полупрозрачная
+            roughness: 0.1, // Гладкая, как стекло
+            metalness: 0.1,
+            clearcoat: 1.0 // Эффект блика на стекле
+        });
         const cup = new THREE.Mesh(cupGeo, cupMat);
-        cup.position.set(2, -4.5, 0);
+        cup.position.set(2, -4.1, 0);
         group.add(cup);
 
-        const waterGeo = new THREE.CylinderGeometry(1.1, 0.8, 1, 16);
-        const waterMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, transparent: true, opacity: 0.7 });
+        // ===== Вода внутри =====
+        const waterGeo = new THREE.CylinderGeometry(0.9, 0.7, 0.9, 16);
+        const waterMat = new THREE.MeshStandardMaterial({
+            color: 0x2288ff, // Насыщенный синий, чтобы выделялась
+            transparent: true,
+            opacity: 0.7
+        });
         const water = new THREE.Mesh(waterGeo, waterMat);
-        water.position.set(2, -4.5, 0);
+        water.position.set(2, -4.2, 0);
         group.add(water);
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.enableZoom = false;

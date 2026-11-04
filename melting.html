@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -76,13 +76,13 @@
         .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
         .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
         .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
-        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;flex-shrink:0;}
         .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
         .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:150px;}
         .info-display div{margin:2px 0;}
         .info-display .val{font-weight:700;color:var(--special-border);}
         .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
-        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;flex-shrink:0;}
         .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
         .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
         .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
@@ -98,7 +98,7 @@
         .task-given-find .find{color:var(--find-color);}
         .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
         .task-given-find mjx-container{font-size:1.1rem !important;}
-        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
         .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
         .task-solution{display:none;margin-top:12px;}
         .task-solution.open{display:block;}
@@ -111,6 +111,36 @@
         mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
         .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
         .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+
+        /* Фиксы для кнопок в 3D */
+        .controls-panel button, .btn-toggle, .btn-reset {
+            position: relative !important;
+            overflow: visible !important;
+            z-index: 10 !important;
+            touch-action: manipulation !important;
+        }
+        .controls-panel button::after, .controls-panel button .ripple, .btn-toggle .ripple, .btn-reset .ripple {
+            display: none !important;
+        }
+        .controls-panel button:active {
+            transform: scale(0.95) !important;
+            transition: transform 0.05s !important;
+        }
+
+        /* Стили для скрытых выводов формул */
+        .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
+
         @media(max-width:700px){
             .model-container{min-height:320px;}
             .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
@@ -143,616 +173,142 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
-<style id="titles-center-fix">
-/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
-.section-title {
-    justify-content: center !important;
-    text-align: center !important;
-    position: relative !important;
-    padding-left: 16px !important;
-    padding-right: 28px !important;
-}
-.section-title::after {
-    position: absolute !important;
-    right: 8px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    margin-left: 0 !important;
-}
-.section.collapsed .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-/* Названия файлов / страниц — по центру */
-h1, .page-title, .file-title, .title {
-    text-align: center !important;
-}
-</style>
-<style id="section-gradient-fix">
-/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
-/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script>
+        let quality3D = 'high';
+        if (window.Android && window.Android.getQuality3D) {
+            quality3D = window.Android.getQuality3D();
+        } else {
+            const saved = localStorage.getItem('quality3d');
+            if (saved) quality3D = saved;
+        }
+        window.quality3D = quality3D;
 
-.section { position: relative; }
+        window.qualitySettings = {
+            low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+            medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+            high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+        };
+        window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
 
-/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
-
-/* Закрыт: градиента нет */
-.section.collapsed > .section-title {
-    background-image: none;
-    transition: background-image 0.35s ease;
-}
-
-/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
-.section.collapsed > .section-title:hover {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Открыт: тот же градиент постоянно */
-.section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Светлая тема — цвет из --special-border (#d97706) */
-:root.light-mode .section.collapsed > .section-title:hover,
-:root.light-mode .section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(217, 119, 6, 0.18) 0%,
-        rgba(217, 119, 6, 0.06) 45%,
-        rgba(217, 119, 6, 0.00) 100%);
-}
-
-/* ---------- СТРЕЛКА ---------- */
-
-/* Закрыт: светящаяся синяя */
-.section.collapsed > .section-title::after {
-    color: var(--accent, #3b82f6) !important;
-    text-shadow:
-        0 0 6px rgba(59, 130, 246, 0.85),
-        0 0 14px rgba(59, 130, 246, 0.55);
-    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
-    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
-}
-
-/* Открыт: свечение убираем, стрелка обычная */
-.section:not(.collapsed) > .section-title::after {
-    color: var(--text-secondary, #8ba5b8) !important;
-    text-shadow: none !important;
-    filter: none !important;
-}
-
-/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
-.section.collapsed > .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-.section:not(.collapsed) > .section-title::after {
-    transform: translateY(-50%) rotate(0deg) !important;
-}
-
-/* Светлая тема: синий чуть темнее, свечение мягче */
-:root.light-mode .section.collapsed > .section-title::after {
-    color: var(--accent, #2563eb) !important;
-    text-shadow:
-        0 0 6px rgba(37, 99, 235, 0.6),
-        0 0 12px rgba(37, 99, 235, 0.35);
-    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
-}
-</style>
-<style id="modern-visual-fix">
-/* ==== 7. Плавный скролл + отступ у заголовков ==== */
-html { scroll-behavior: smooth; }
-.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
-
-/* ==== 8. Радиальный градиент на фоне ==== */
-body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
-        var(--bg) !important;
-}
-:root.light-mode body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
-        var(--bg) !important;
-}
-
-/* ==== 3. «Стеклянная» шапка ==== */
-@media (prefers-reduced-motion: no-preference) {
-    .header {
-        background: rgba(30, 53, 69, 0.72) !important;
-        backdrop-filter: blur(14px) saturate(140%);
-        -webkit-backdrop-filter: blur(14px) saturate(140%);
-        border-bottom: 1px solid var(--border);
-    }
-    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
-}
-
-/* ==== 5. Скелетоны для формул ==== */
-.skeleton {
-    display: inline-block;
-    min-width: 60px;
-    height: 1.1em;
-    vertical-align: middle;
-    border-radius: 6px;
-    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
-    background-size: 200% 100%;
-    animation: shimmerSk 1.2s infinite linear;
-}
-@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
-
-/* ==== 6. Чипы категорий в поиске ==== */
-.search-result-category {
-    display: inline-block;
-    padding: 2px 10px;
-    margin-top: 4px;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    color: #fff;
-    background: var(--accent, #3b82f6);
-}
-.search-result-category.cat-mech  { background: #3b82f6; }
-.search-result-category.cat-thermo{ background: #f59e0b; }
-.search-result-category.cat-elec  { background: #eab308; }
-.search-result-category.cat-other { background: #64748b; }
-
-/* ==== 4. Нижняя навигация ==== */
-.bottom-nav {
-    position: fixed;
-    left: 50%;
-    bottom: 14px;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 22px;
-    background: rgba(30, 53, 69, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
-    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
-    z-index: 900;
-    transition: background 0.3s, border 0.3s;
-}
-:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
-.bottom-nav a, .bottom-nav button {
-    display: flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px; border-radius: 14px;
-    border: none; background: transparent;
-    color: var(--text-secondary); font-size: 22px;
-    cursor: pointer; text-decoration: none;
-    transition: all 0.2s;
-}
-.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
-    background: rgba(59,130,246,0.15);
-    color: var(--accent);
-    transform: translateY(-2px);
-}
-body { padding-bottom: 78px; }
-
-/* ==== 10. Круг смены темы ==== */
-.theme-circle {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    background: var(--bg);
-    transform: scale(0);
-    opacity: 0.95;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
-}
-.theme-circle.expand { transform: scale(1); opacity: 0; }
-
-/* ==== 2. Ripple при тапе ==== */
-.ripple-host { position: relative !important; overflow: hidden !important; }
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(59,130,246,0.35);
-    transform: scale(0);
-    animation: rippleAnim 0.6s ease-out forwards;
-    pointer-events: none;
-    z-index: 0;
-}
-@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
-:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
-</style>
-<style id="search-clean-fix">
-/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
-.search-result-icon {
-    display: none !important;
-}
-
-/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
-.search-results {
-    scrollbar-width: none;          /* Firefox */
-    -ms-overflow-style: none;       /* IE/Edge */
-}
-.search-results::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-}
-
-/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
-body::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-}
-body {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-</style>
-<style id="nav-back-hide-index">
-/* На главной кнопка «Назад» не нужна */
-body.is-index .nav-back-btn { display: none !important; }
-</style>
-<style id="bottom-nav-autohide">
-/* Автоскрытие нижней панели при скролле вниз */
-.bottom-nav {
-    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
-}
-.bottom-nav.nav-hidden {
-    transform: translate(-50%, 120%);
-    opacity: 0;
-    pointer-events: none;
-}
-/* На главной панель всегда видна */
-body.is-index .bottom-nav.nav-hidden {
-    transform: translate(-50%, 0);
-    opacity: 1;
-    pointer-events: auto;
-}
-</style>
-<style id="fav-nav-yellow">
-/* Избранное в нижней панели — жёлтое выделение, когда активно */
-.bottom-nav a[href="favorites.html"].active,
-.bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(250, 204, 21, 0.18) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover,
-.bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(250, 204, 21, 0.28) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(234, 179, 8, 0.18) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(234, 179, 8, 0.28) !important;
-    color: #92400e !important;
-}
-/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
-
-</style>
-<style id="nav-order-fix">
-/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
-.bottom-nav { display: flex; align-items: center; }
-.bottom-nav .nav-back-btn { order: 1; }
-.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
-.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
-.bottom-nav a[href="favorites.html"] { order: 4; }
-
-/* Звезда активна — жёлтая */
-.bottom-nav a[href="favorites.html"].active {
-    background: rgba(250, 204, 21, 0.20) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(250, 204, 21, 0.30) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active {
-    background: rgba(234, 179, 8, 0.20) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(234, 179, 8, 0.30) !important;
-    color: #92400e !important;
-}
-</style>
-<style id="unified-buttons">
-/* ==== Единый стиль кнопок ==== */
-
-/* База для всех кнопок */
-.btn-primary,
-.btn-secondary,
-.btn-danger,
-.show-solution-btn,
-.btn-reset,
-.model-tab,
-.clear-all-btn,
-.search-clear,
-.back-link,
-.fullscreen-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 8px 18px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: inherit;
-    line-height: 1.2;
-    border: 1px solid transparent;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s, border-color 0.2s,
-                box-shadow 0.2s, transform 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    white-space: nowrap;
-}
-
-/* Hover / active — общий отклик */
-.btn-primary:hover,
-.btn-secondary:hover,
-.btn-danger:hover,
-.show-solution-btn:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover,
-.back-link:hover,
-.fullscreen-btn:hover {
-    transform: translateY(-1px);
-}
-.btn-primary:active,
-.btn-secondary:active,
-.btn-danger:active,
-.show-solution-btn:active,
-.btn-reset:active,
-.model-tab:active,
-.clear-all-btn:active,
-.back-link:active,
-.fullscreen-btn:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* ==== PRIMARY (синий акцент) ==== */
-.btn-primary,
-.show-solution-btn,
-.back-link {
-    background: var(--accent, #3b82f6);
-    color: #fff;
-    border-color: var(--accent, #3b82f6);
-}
-.btn-primary:hover,
-.show-solution-btn:hover,
-.back-link:hover {
-    background: var(--accent-hover, #60a5fa);
-    border-color: var(--accent-hover, #60a5fa);
-    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
-}
-:root.light-mode .btn-primary,
-:root.light-mode .show-solution-btn,
-:root.light-mode .back-link {
-    background: var(--accent, #2563eb);
-    border-color: var(--accent, #2563eb);
-}
-:root.light-mode .btn-primary:hover,
-:root.light-mode .show-solution-btn:hover,
-:root.light-mode .back-link:hover {
-    background: var(--accent-hover, #3b82f6);
-    border-color: var(--accent-hover, #3b82f6);
-}
-
-/* ==== SECONDARY (нейтральный) ==== */
-.btn-secondary,
-.btn-reset,
-.model-tab,
-.clear-all-btn {
-    background: var(--menu-item-hover, #233e50);
-    color: var(--text, #fff);
-    border-color: var(--border, rgba(59,130,246,0.15));
-}
-.btn-secondary:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover {
-    background: var(--group-header-bg, #1a3a5a);
-    border-color: var(--accent, #3b82f6);
-    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
-}
-:root.light-mode .btn-secondary,
-:root.light-mode .btn-reset,
-:root.light-mode .model-tab,
-:root.light-mode .clear-all-btn {
-    background: var(--menu-item-hover, #f0f4fa);
-    color: var(--text, #1a2a3f);
-}
-
-/* Активный таб — как primary */
-.model-tab.active {
-    background: var(--accent, #3b82f6) !important;
-    color: #fff !important;
-    border-color: var(--accent, #3b82f6) !important;
-    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
-}
-.model-tab.active:hover {
-    background: var(--accent-hover, #60a5fa) !important;
-    border-color: var(--accent-hover, #60a5fa) !important;
-}
-
-/* ==== DANGER (красный) ==== */
-.btn-danger,
-.clear-all-btn.danger,
-.clear-all-btn:hover {
-    background: #ef4444 !important;
-    color: #fff !important;
-    border-color: #ef4444 !important;
-}
-.btn-danger:hover,
-.clear-all-btn.danger:hover,
-.clear-all-btn:hover {
-    background: #dc2626 !important;
-    border-color: #dc2626 !important;
-    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
-}
-
-/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
-.search-clear {
-    background: transparent;
-    border: none;
-    padding: 6px 10px;
-    min-height: auto;
-    color: var(--text-secondary, #8ba5b8);
-    border-radius: 50%;
-}
-.search-clear:hover {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--accent, #3b82f6);
-    transform: none;
-}
-
-/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
-.fullscreen-btn {
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.25);
-    font-size: 20px;
-}
-.fullscreen-btn:hover {
-    background: var(--accent, #3b82f6);
-    border-color: var(--accent, #3b82f6);
-}
-
-/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
-.remove-fav {
-    border-radius: 50%;
-    min-height: 32px;
-    min-width: 32px;
-    padding: 4px 8px;
-}
-.remove-fav:hover {
-    background: rgba(239, 68, 68, 0.15) !important;
-    color: #ef4444 !important;
-}
-
-/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
-.btn-link {
-    background: transparent;
-    border: none;
-    color: var(--accent, #3b82f6);
-    padding: 0;
-    min-height: auto;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-.btn-link:hover {
-    color: var(--accent-hover, #60a5fa);
-    transform: none;
-    box-shadow: none;
-}
-</style>
-<style id="page-fade-in">
-/* ==== Плавное появление страницы (fade-in) ==== */
-
-/* Мягкий вход всей страницы */
-body {
-    animation: pageFade 0.3s ease-out;
-}
-@keyframes pageFade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Контент чуть «подъезжает» снизу */
-.container,
-.main-content {
-    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-}
-@keyframes pageFadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Если в системе включено «уменьшить движение» — анимации отключаем */
-@media (prefers-reduced-motion: reduce) {
-    body,
-    .container,
-    .main-content {
-        animation: none !important;
-    }
-}
-</style>
-<style id="share-btn-right">
-/* Прижимаем кнопку «Поделиться» к правому краю панели */
-.bottom-nav button[title="Поделиться"] {
-    order: 99 !important;
-    margin-left: auto !important;
-}
-</style>
-<style id="no-tap-highlight">
-/* Убираем системный голубой/серый прямоугольник при тапе */
-* {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-}
-a, button, div, span, label, input, textarea, select {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-}
-</style>
-<style id="no-tap-highlight-accordion">
-/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
-.section-title,
-.group-header,
-.menu-item,
-.submenu-item,
-.model-tab,
-.search-result-item {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-    user-select: none;
-    -webkit-user-select: none;
-    cursor: pointer;
-}
-
-/* Лёгкий отклик при нажатии (вместо системного квадратика) */
-.section-title:active,
-.group-header:active {
-    transform: scale(0.99);
-    transition: transform 0.1s;
-}
-</style>
-<style id="fix-nav-bounce">
-    /* Отключаем сдвиги и пружины у кнопок нижней панели */
-    .bottom-nav a, .bottom-nav button {
-        transform: none !important;
-        transition: background 0.2s ease, color 0.2s ease !important;
-    }
-    .bottom-nav a:active, .bottom-nav button:active, 
-    .bottom-nav a:focus, .bottom-nav button:focus {
-        transform: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-    }
-</style>
+        (function() {
+            if (!window.THREE) return;
+            const OriginalRenderer = THREE.WebGLRenderer;
+            THREE.WebGLRenderer = function(params) {
+                const r = new OriginalRenderer(params);
+                const q = window.qualitySettings3D || {};
+                if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+                if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+                return r;
+            };
+        })();
+    </script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech { background: #3b82f6; } .search-result-category.cat-thermo{ background: #f59e0b; } .search-result-category.cat-elec { background: #eab308; } .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index">body.is-index .nav-back-btn { display: none !important; }</style>
+    <style id="bottom-nav-autohide">.bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; } .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; } body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }</style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; } .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; } .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; } .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right">.bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; }</style>
+    <style id="no-tap-highlight">* { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; } a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }</style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -774,6 +330,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$Q = \lambda m$</span>
                     <span class="f-label">— теплота плавления / кристаллизации</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Удельная теплота плавления $\lambda$ показывает, сколько энергии нужно, чтобы расплавить 1 кг вещества при температуре плавления. Значит, для массы $m$ потребуется в $m$ раз больше энергии: $Q = \lambda m$. При кристаллизации такая же энергия выделяется.
+                    </div>
                 </div>
                 <p>где:</p>
                 <ul>
@@ -812,12 +372,20 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$Q_{общ} = c_1 m (t_{пл} - t_1) + \lambda m + c_2 m (t_2 - t_{пл})$</span>
                     <span class="f-label">— нагрев твёрдого, плавление, нагрев жидкости</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Процесс состоит из трёх этапов. 1) Нагрев твёрдого тела от $t_1$ до $t_{пл}$: $Q_1 = c_1 m (t_{пл} - t_1)$. 2) Плавление при постоянной температуре: $Q_2 = \lambda m$. 3) Нагрев жидкости от $t_{пл}$ до $t_2$: $Q_3 = c_2 m (t_2 - t_{пл})$. Общая теплота — сумма всех трёх: $Q_{общ} = Q_1 + Q_2 + Q_3$.
+                    </div>
                 </div>
                 <p>где $c_1$ и $c_2$ — удельные теплоёмкости твёрдого тела и жидкости соответственно.</p>
                 <p><strong>Уравнение теплового баланса:</strong> при теплообмене количество теплоты, отданное одними телами, равно количеству теплоты, полученному другими:</p>
                 <div class="formula-block">
                     <span class="f">$Q_{отд} = Q_{пол}$</span>
                     <span class="f-label">— уравнение теплового баланса</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        В замкнутой системе при теплообмене энергия не исчезает и не появляется. Сколько теплоты отдают более горячие тела при остывании и фазовых переходах, столько же получают более холодные тела на нагрев и плавление. Отсюда $Q_{отд} = Q_{пол}$.
+                    </div>
                 </div>
             </div>
         </div>
@@ -849,12 +417,18 @@ a, button, div, span, label, input, textarea, select {
                         <input type="range" id="phase-temp-slider" min="-20" max="20" step="1" value="-20">
                         <span class="control-value" id="phase-temp-val">-20</span>
                     </div>
+                    <!-- ДОБАВЛЕН ПОЛЗУНОК ПЛАВЛЕНИЯ -->
+                    <div class="control-group" id="phase-melt-group" style="display:none;">
+                        <label>Доля расплава</label>
+                        <input type="range" id="phase-melt-slider" min="0" max="1" step="0.01" value="0">
+                        <span class="control-value" id="phase-melt-val">0%</span>
+                    </div>
                     <button class="btn-reset" id="phase-reset">⟳ Сброс</button>
                     <span class="control-label">⬤ Нагревайте лёд, чтобы расплавить его</span>
                 </div>
                 <div class="def-card">
                     <p><strong>Модель фазового перехода.</strong> Внизу — лёд (молекулы в решётке), при нагреве до 0 °C начинается плавление.</p>
-                    <p><span class="important">От 0 °C до 0 °C (пока плавится):</span> температура не меняется, но структура разрушается.</p>
+                    <p><span class="important">При 0 °C:</span> появляется ползунок «Доля расплава». Двигайте его — молекулы плавно вылетают из решётки.</p>
                     <p>После полного плавления вода начинает нагреваться дальше.</p>
                 </div>
             </div>
@@ -901,9 +475,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
                 <div id="sol1" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Формула: $Q = \lambda m$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 3{,}4 \cdot 10^5 \cdot 2 = 6{,}8 \cdot 10^5 \text{ Дж} = 680 \text{ кДж}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Плавление льда требует большого количества энергии.</div>
@@ -917,9 +491,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
                 <div id="sol2" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ кг, $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ кг, $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $Q$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> $Q = \lambda m$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 3{,}4 \cdot 10^5 \cdot 0{,}5 = 1{,}7 \cdot 10^5 \text{ Дж} = 170 \text{ кДж}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> При кристаллизации теплота выделяется, а не поглощается.</div>
@@ -933,9 +507,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
                 <div id="sol3" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 1$ кг, $t_1 = -10$ °C, $t_2 = 0$ °C, $c_л = 2100$ Дж/(кг·°C), $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 1$ кг, $t_1 = -10$ °C, $t_2 = 0$ °C, $c_л = 2100$ Дж/(кг·°C), $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1 (нагрев).</strong> $Q_1 = c_л m (t_2 - t_1) = 2100 \cdot 1 \cdot 10 = 21000$ Дж.</div>
                     <div class="step"><strong>Шаг 2 (плавление).</strong> $Q_2 = \lambda m = 3{,}4 \cdot 10^5 \cdot 1 = 340000$ Дж.</div>
                     <div class="step"><strong>Шаг 3 (всего).</strong> $Q_{общ} = 21000 + 340000 = 361000$ Дж = $361$ кДж.</div>
@@ -950,9 +524,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
                 <div id="sol4" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $t_1 = -20$ °C, $t_{пл} = 0$ °C, $t_2 = 20$ °C</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $t_1 = -20$ °C, $t_{пл} = 0$ °C, $t_2 = 20$ °C</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $Q_{общ}$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1 (нагрев льда).</strong> $Q_1 = 2100 \cdot 2 \cdot 20 = 84000$ Дж.</div>
                     <div class="step"><strong>Шаг 2 (плавление).</strong> $Q_2 = 3{,}4 \cdot 10^5 \cdot 2 = 680000$ Дж.</div>
                     <div class="step"><strong>Шаг 3 (нагрев воды).</strong> $Q_3 = 4200 \cdot 2 \cdot 20 = 168000$ Дж.</div>
@@ -968,9 +542,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
                 <div id="sol5" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $Q = 1{,}7 \cdot 10^6$ Дж, $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $Q = 1{,}7 \cdot 10^6$ Дж, $\lambda = 3{,}4 \cdot 10^5$ Дж/кг</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Из $Q = \lambda m$ выразим $m = \dfrac{Q}{\lambda}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = \dfrac{1{,}7 \cdot 10^6}{3{,}4 \cdot 10^5} = 5 \text{ кг}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> 5 кг льда — это довольно много, и для этого нужно много энергии.</div>
@@ -984,9 +558,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
                 <div id="sol6" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $t_1 = 40$ °C, $m_2 = 0{,}5$ кг</div>
-                    <div class="find"><strong>🔍 Найти:</strong> растает ли весь лёд?</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m_1 = 2$ кг, $t_1 = 40$ °C, $m_2 = 0{,}5$ кг</div>
+                        <div class="find"><strong>🔍 Найти:</strong> растает ли весь лёд?</div>
+                    </div>
                     <div class="step"><strong>Шаг 1 (теплота от воды).</strong> При остывании до 0 °C вода отдаст $Q_{отд} = 4200 \cdot 2 \cdot 40 = 336000$ Дж.</div>
                     <div class="step"><strong>Шаг 2 (теплота на плавление).</strong> Для плавления всего льда нужно $Q_{пл} = 3{,}4 \cdot 10^5 \cdot 0{,}5 = 170000$ Дж.</div>
                     <div class="step"><strong>Шаг 3.</strong> Так как $Q_{отд} > Q_{пл}$ (336 кДж > 170 кДж), льда хватит теплоты, чтобы растаять полностью.</div>
@@ -1001,9 +575,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
                 <div id="sol7" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $t_1 = 50$ °C, $m_2 = 0{,}2$ кг</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $t_{кон}$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $t_1 = 50$ °C, $m_2 = 0{,}2$ кг</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $t_{кон}$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1 (плавление).</strong> На плавление льда нужно $Q_{пл} = 3{,}4 \cdot 10^5 \cdot 0{,}2 = 68000$ Дж.</div>
                     <div class="step"><strong>Шаг 2 (теплота воды).</strong> Если вода остынет до 0 °C, отдаст $Q_{отд} = 4200 \cdot 1 \cdot 50 = 210000$ Дж. Этого хватит с запасом.</div>
                     <div class="step"><strong>Шаг 3.</strong> Значит, лёд растает, и смесь нагреется до $t_{кон}$. Уравнение: $4200 \cdot 1 \cdot (50 - t_{кон}) = 68000 + 4200 \cdot 0{,}2 \cdot t_{кон}$.</div>
@@ -1019,9 +593,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
                 <div id="sol8" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}4$ кг, $Q = 4{,}8 \cdot 10^4$ Дж</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\lambda$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 0{,}4$ кг, $Q = 4{,}8 \cdot 10^4$ Дж</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\lambda$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Из $Q = \lambda m$ выразим $\lambda = \dfrac{Q}{m}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$\lambda = \dfrac{4{,}8 \cdot 10^4}{0{,}4} = 1{,}2 \cdot 10^5 \text{ Дж/кг}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Это значение близко к удельной теплоте плавления некоторых металлов (например, олова).</div>
@@ -1035,9 +609,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
                 <div id="sol9" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $t_1 = 20$ °C, $m_2 = 0{,}1$ кг, $t_2 = 100$ °C</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $t_{кон}$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m_1 = 1$ кг, $t_1 = 20$ °C, $m_2 = 0{,}1$ кг, $t_2 = 100$ °C</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $t_{кон}$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1 (конденсация).</strong> $Q_{конд} = 2{,}3 \cdot 10^6 \cdot 0{,}1 = 230000$ Дж.</div>
                     <div class="step"><strong>Шаг 2 (остывание сконденсированной воды).</strong> $Q_{ост} = 4200 \cdot 0{,}1 \cdot (100 - t_{кон}) = 420(100 - t_{кон})$.</div>
                     <div class="step"><strong>Шаг 3 (нагрев холодной воды).</strong> $Q_{нагр} = 4200 \cdot 1 \cdot (t_{кон} - 20) = 4200(t_{кон} - 20)$.</div>
@@ -1054,9 +628,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
                 <div id="sol10" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $Q = 1{,}7 \cdot 10^6$ Дж</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $Q = 1{,}7 \cdot 10^6$ Дж</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Из $Q = \lambda m$ выразим $m = \dfrac{Q}{\lambda}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = \dfrac{1{,}7 \cdot 10^6}{3{,}4 \cdot 10^5} = 5 \text{ кг}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Удельная теплота плавления льда 340 кДж/кг. 1,7 МДж / 340 кДж/кг = 5 кг.</div>
@@ -1181,12 +755,30 @@ a, button, div, span, label, input, textarea, select {
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    // Безопасная проверка темы
+    (function(){
+        if(localStorage.getItem('physicsTheme')==='light' || localStorage.getItem('mathTheme')==='light'){
+            document.documentElement.classList.add('light-mode');
+            var btn = document.getElementById('themeBtn');
+            if (btn) btn.textContent = '☀️';
+        }
+    })();
 
-    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть решение';
+        }
+    }
 
-
+    let activeModel = 'phase';
     function switchModel(model) {
+        activeModel = model;
         document.querySelectorAll('.model-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.model === model);
         });
@@ -1197,10 +789,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 1: ФАЗОВЫЙ ПЕРЕХОД ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-phase');
         const canvas = document.getElementById('canvas-phase');
@@ -1237,7 +826,7 @@ a, button, div, span, label, input, textarea, select {
 
         const molGeo = new THREE.SphereGeometry(0.15, 12, 12);
         const molMatSolid = new THREE.MeshStandardMaterial({ color: 0x66ccff, emissive: 0x224466, roughness: 0.4 });
-        const molMatLiquid = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x002244, transparent: true, opacity: 0.8 });
+        const molMatLiquid = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x002244, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity });
 
         const molecules = [];
         const N_MOLS = 64;
@@ -1256,6 +845,7 @@ a, button, div, span, label, input, textarea, select {
                     molecules.push({
                         mesh: m,
                         solidPos: new THREE.Vector3(px, py, pz),
+                        liquidPos: new THREE.Vector3(px, py, pz), // для плавного перехода
                         liquidVel: new THREE.Vector3((Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.05),
                         angle: Math.random() * Math.PI * 2
                     });
@@ -1264,10 +854,14 @@ a, button, div, span, label, input, textarea, select {
         }
 
         let temp = -20;
+        let meltFraction = 0; // 0 - твёрдое, 1 - полностью жидкое
         const tempSlider = document.getElementById('phase-temp-slider');
         const tempVal = document.getElementById('phase-temp-val');
         const tempDisplay = document.getElementById('phase-temp');
         const stateDisplay = document.getElementById('phase-state');
+        const meltGroup = document.getElementById('phase-melt-group');
+        const meltSlider = document.getElementById('phase-melt-slider');
+        const meltVal = document.getElementById('phase-melt-val');
 
         function updateTemp() {
             temp = parseFloat(tempSlider.value);
@@ -1276,25 +870,35 @@ a, button, div, span, label, input, textarea, select {
 
             if (temp < 0) {
                 stateDisplay.textContent = 'Твёрдое';
-                molecules.forEach(m => {
-                    m.mesh.material = molMatSolid;
-                });
+                meltGroup.style.display = 'none';
+                meltFraction = 0;
+                molecules.forEach(m => { m.mesh.material = molMatSolid; });
             } else if (temp === 0) {
-                stateDisplay.textContent = 'Плавление';
-                molecules.forEach(m => {
-                    m.mesh.material = molMatLiquid;
-                });
+                meltGroup.style.display = 'flex';
+                stateDisplay.textContent = 'Плавление (' + Math.round(meltFraction * 100) + '%)';
+                molecules.forEach(m => { m.mesh.material = molMatLiquid; });
             } else {
                 stateDisplay.textContent = 'Жидкое';
-                molecules.forEach(m => {
-                    m.mesh.material = molMatLiquid;
-                });
+                meltGroup.style.display = 'none';
+                meltFraction = 1;
+                molecules.forEach(m => { m.mesh.material = molMatLiquid; });
             }
         }
 
-        tempSlider.addEventListener('input', updateTemp);
+        tempSlider.addEventListener('input', () => {
+            if (parseFloat(tempSlider.value) !== 0) { meltSlider.value = 0; meltFraction = 0; meltVal.textContent = '0%'; }
+            updateTemp();
+        });
+        meltSlider.addEventListener('input', () => {
+            meltFraction = parseFloat(meltSlider.value);
+            meltVal.textContent = Math.round(meltFraction * 100) + '%';
+            updateTemp();
+        });
         document.getElementById('phase-reset').addEventListener('click', () => {
             tempSlider.value = -20;
+            meltSlider.value = 0;
+            meltFraction = 0;
+            meltVal.textContent = '0%';
             updateTemp();
         });
 
@@ -1304,7 +908,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1313,35 +917,49 @@ a, button, div, span, label, input, textarea, select {
 
         function animate() {
             requestAnimationFrame(animate);
-            controls.update();
+            if (activeModel !== 'phase') return;
 
+            controls.update();
             const t = Date.now() * 0.001;
 
-            molecules.forEach(m => {
-                if (temp < 0) {
-                    // Кристаллическая решётка: колеблются около узлов
-                    const jitter = 0.05;
-                    m.mesh.position.x = m.solidPos.x + Math.sin(t + m.angle) * jitter;
-                    m.mesh.position.y = m.solidPos.y + Math.cos(t * 1.3 + m.angle) * jitter;
-                    m.mesh.position.z = m.solidPos.z + Math.sin(t * 0.8 + m.angle) * jitter;
-                } else if (temp === 0) {
-                    // Плавление: переходное состояние (частично колеблются, частично движутся)
-                    const jitter = 0.15;
-                    m.mesh.position.x = m.solidPos.x + Math.sin(t * 2 + m.angle) * jitter;
-                    m.mesh.position.y = m.solidPos.y + Math.cos(t * 2.5 + m.angle) * jitter;
-                    m.mesh.position.z = m.solidPos.z + Math.sin(t * 1.5 + m.angle) * jitter;
-                } else {
-                    // Жидкость: свободное движение
-                    const speed = 0.02 + (temp / 20) * 0.03;
-                    m.mesh.position.x += m.liquidVel.x * speed;
-                    m.mesh.position.y += m.liquidVel.y * speed;
-                    m.mesh.position.z += m.liquidVel.z * speed;
+            // Автоматическое плавление при 0 °C, если пользователь не трогает ползунок
+            if (temp === 0 && meltFraction < 1) {
+                // Плавное увеличение доли расплава
+                meltFraction = Math.min(1, meltFraction + 0.005);
+                meltSlider.value = meltFraction;
+                meltVal.textContent = Math.round(meltFraction * 100) + '%';
+                stateDisplay.textContent = 'Плавление (' + Math.round(meltFraction * 100) + '%)';
+            }
 
-                    // Ограничим движение в кубе
-                    if (Math.abs(m.mesh.position.x) > 1.5) m.liquidVel.x *= -1;
-                    if (Math.abs(m.mesh.position.y) > 1.5) m.liquidVel.y *= -1;
-                    if (Math.abs(m.mesh.position.z) > 1.5) m.liquidVel.z *= -1;
-                }
+            molecules.forEach(m => {
+                // 1. Положение в решётке (с колебаниями)
+                const jitter = 0.05;
+                const solidX = m.solidPos.x + Math.sin(t + m.angle) * jitter;
+                const solidY = m.solidPos.y + Math.cos(t * 1.3 + m.angle) * jitter;
+                const solidZ = m.solidPos.z + Math.sin(t * 0.8 + m.angle) * jitter;
+
+                // 2. Свободное положение (с полётом)
+                const speed = 0.02 + Math.max(0, temp / 20) * 0.03;
+                m.liquidPos.x += m.liquidVel.x * speed;
+                m.liquidPos.y += m.liquidVel.y * speed;
+                m.liquidPos.z += m.liquidVel.z * speed;
+                if (Math.abs(m.liquidPos.x) > 1.5) m.liquidVel.x *= -1;
+                if (Math.abs(m.liquidPos.y) > 1.5) m.liquidVel.y *= -1;
+                if (Math.abs(m.liquidPos.z) > 1.5) m.liquidVel.z *= -1;
+
+                // 3. Смешиваем: чем больше meltFraction, тем ближе к жидкости
+                let blend = 0;
+                if (temp < 0) blend = 0;
+                else if (temp === 0) blend = meltFraction;
+                else blend = 1;
+
+                m.mesh.position.x = solidX * (1 - blend) + m.liquidPos.x * blend;
+                m.mesh.position.y = solidY * (1 - blend) + m.liquidPos.y * blend;
+                m.mesh.position.z = solidZ * (1 - blend) + m.liquidPos.z * blend;
+
+                // Небольшое увеличение размера при плавлении
+                const scale = 1 + blend * 0.2;
+                m.mesh.scale.set(scale, scale, scale);
             });
 
             renderer.render(scene, camera);
@@ -1351,7 +969,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 2: ГРАФИК ПЛАВЛЕНИЯ ===== -->
-<script type="module">
+<script>
     (function() {
         const container = document.getElementById('container-graph');
         const canvas = document.getElementById('canvas-graph');
@@ -1379,7 +997,6 @@ a, button, div, span, label, input, textarea, select {
 
         let timeVal_ = 0;
 
-        // Настройки графика
         const graphConfig = {
             paddingLeft: 60,
             paddingBottom: 50,
@@ -1392,13 +1009,10 @@ a, button, div, span, label, input, textarea, select {
 
         function getTempByTime(t) {
             if (t < 20) {
-                // Нагрев льда от -20 до 0 (t от 0 до 20)
                 return -20 + (t / 20) * 20;
             } else if (t < 60) {
-                // Плавление (t от 20 до 60)
                 return 0;
             } else {
-                // Нагрев воды от 0 до 100 (t от 60 до 100)
                 return ((t - 60) / 40) * 100;
             }
         }
@@ -1416,18 +1030,14 @@ a, button, div, span, label, input, textarea, select {
             const lineColor = isDark ? 'rgba(245, 158, 11, 0.3)' : 'rgba(217, 119, 6, 0.3)';
             const mainLineColor = isDark ? '#f59e0b' : '#d97706';
 
-            // Оси
             ctx.beginPath();
             ctx.strokeStyle = textColor;
             ctx.lineWidth = 2;
-            // Ось Y
             ctx.moveTo(graphConfig.paddingLeft, graphConfig.paddingTop);
             ctx.lineTo(graphConfig.paddingLeft, h - graphConfig.paddingBottom);
-            // Ось X
             ctx.lineTo(w - graphConfig.paddingRight, h - graphConfig.paddingBottom);
             ctx.stroke();
 
-            // Сетка и подписи осей Y
             ctx.textAlign = 'right';
             ctx.textBaseline = 'middle';
             ctx.font = '12px sans-serif';
@@ -1444,7 +1054,6 @@ a, button, div, span, label, input, textarea, select {
                 ctx.fillText(temp + '°C', graphConfig.paddingLeft - 10, y);
             }
 
-            // Подписи осей X
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
             for (let time = 0; time <= graphConfig.totalTime; time += 20) {
@@ -1456,7 +1065,6 @@ a, button, div, span, label, input, textarea, select {
                 ctx.fillText(time + ' с', x, h - graphConfig.paddingBottom + 10);
             }
 
-            // Отрисовка графика до текущего времени
             ctx.beginPath();
             ctx.strokeStyle = mainLineColor;
             ctx.lineWidth = 3;
@@ -1476,7 +1084,6 @@ a, button, div, span, label, input, textarea, select {
             }
             ctx.stroke();
 
-            // Точка на графике
             if (timeVal_ > 0) {
                 const temp = getTempByTime(timeVal_);
                 const x = graphConfig.paddingLeft + (timeVal_ / graphConfig.totalTime) * gW;
@@ -1520,8 +1127,14 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        // При смене темы перерисовать
-        window.addEventListener('themeChange', draw);
+        // Следим за сменой темы для перерисовки графика
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') draw();
+            });
+        });
+        observer.observe(document.documentElement, { attributes: true });
+
         update();
     })();
 </script>
@@ -1552,164 +1165,128 @@ a, button, div, span, label, input, textarea, select {
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
     </button>
-    </nav>
+</nav>
 <script>
-/* ==== 5. Скелетоны для формул MathJax ==== */
-(function(){
-    function addSkeletons(){
-        document.querySelectorAll('.formula-block').forEach(function(el){
-            if (el.querySelector('mjx-container')) return;
-            if (el.dataset.sk) return;
-            el.dataset.sk = '1';
-            var s = document.createElement('span');
-            s.className = 'skeleton';
-            s.style.width = (60 + Math.random()*80) + 'px';
-            el.appendChild(s);
-        });
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
-    else addSkeletons();
-    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
-})();
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
 
-/* ==== 6. Чипы категорий в результатах поиска ==== */
-(function(){
-    function classify(cat){
-        var c = (cat||'').toLowerCase();
-        if (c.indexOf('механик') >= 0) return 'cat-mech';
-        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
-        if (c.indexOf('электр') >= 0) return 'cat-elec';
-        return 'cat-other';
-    }
-    function decorate(){
-        document.querySelectorAll('.search-result-category').forEach(function(el){
-            if (el.dataset.chip) return;
-            el.dataset.chip = '1';
-            el.classList.add(classify(el.textContent));
-        });
-    }
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            decorate();
-        };
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
-    else decorate();
-})();
+    (function(){
+        function classify(cat){
+            var c = (cat||'').toLowerCase();
+            if (c.indexOf('механик') >= 0) return 'cat-mech';
+            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+            if (c.indexOf('электр') >= 0) return 'cat-elec';
+            return 'cat-other';
+        }
+        function decorate(){
+            document.querySelectorAll('.search-result-category').forEach(function(el){
+                if (el.dataset.chip) return;
+                el.dataset.chip = '1';
+                el.classList.add(classify(el.textContent));
+            });
+        }
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                decorate();
+            };
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+        else decorate();
+    })();
 
-/* ==== 10. Анимация смены темы «как на iPhone» ==== */
-(function(){
-    function animateThemeChange(x, y){
-        var circle = document.createElement('div');
-        circle.className = 'theme-circle';
-        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
-        circle.style.width = circle.style.height = (maxR*2) + 'px';
-        circle.style.left = (x - maxR) + 'px';
-        circle.style.top  = (y - maxR) + 'px';
-        document.body.appendChild(circle);
-        requestAnimationFrame(function(){ circle.classList.add('expand'); });
-        setTimeout(function(){ circle.remove(); }, 700);
-    }
-    document.addEventListener('click', function(e){
-        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
-        if (!t) return;
-        var r = t.getBoundingClientRect();
-        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
-    }, true);
-})();
+    (function(){
+        function animateThemeChange(x, y){
+            var circle = document.createElement('div');
+            circle.className = 'theme-circle';
+            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+            circle.style.width = circle.style.height = (maxR*2) + 'px';
+            circle.style.left = (x - maxR) + 'px';
+            circle.style.top  = (y - maxR) + 'px';
+            document.body.appendChild(circle);
+            requestAnimationFrame(function(){ circle.classList.add('expand'); });
+            setTimeout(function(){ circle.remove(); }, 700);
+        }
+        document.addEventListener('click', function(e){
+            var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+            if (!t) return;
+            var r = t.getBoundingClientRect();
+            animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+        }, true);
+    })();
 
-/* ==== 2. Ripple при тапе ==== */
-(function(){
-    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
-    function bind(el){
-        if (el.dataset.rippleBound) return;
-        el.dataset.rippleBound = '1';
-        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
-        el.addEventListener('pointerdown', function(e){
-            var rect = el.getBoundingClientRect();
-            var size = Math.max(rect.width, rect.height);
-            var r = document.createElement('span');
-            r.className = 'ripple';
-            r.style.width = r.style.height = size + 'px';
-            r.style.left = (e.clientX - rect.left - size/2) + 'px';
-            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
-            el.appendChild(r);
-            setTimeout(function(){ r.remove(); }, 650);
-        });
-    }
-    function bindAll(){
-        document.querySelectorAll(sel).forEach(bind);
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
-    else bindAll();
-    /* Перепривязка после поиска */
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            setTimeout(bindAll, 30);
-        };
-    }
-})();
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){
+            document.querySelectorAll(sel).forEach(bind);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                setTimeout(bindAll, 30);
+            };
+        }
+    })();
 </script>
 <script src="search-overlay.js"></script>
-<!-- bottom-nav-autohide-script -->
 <script>
-/* Автоскрытие нижней панели при скролле */
-(function(){
-    var nav = document.querySelector('.bottom-nav');
-    if (!nav) return;
-    var lastY = window.scrollY;
-    var threshold = 8;
-    var ticking = false;
-    function onScroll(){
-        var y = window.scrollY;
-        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
-        if (y > lastY && y > 80) {
-            nav.classList.add('nav-hidden');
-        } else {
-            nav.classList.remove('nav-hidden');
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 8;
+        var ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
         }
-        lastY = y;
-        ticking = false;
-    }
-    window.addEventListener('scroll', function(){
-        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
-    }, { passive: true });
-})();
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
 </script>
 <script src="page-search.js"></script>
 <script src="physics-data.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

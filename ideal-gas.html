@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -125,6 +125,20 @@
             h1{font-size:1.1rem;}
             .section-title{font-size:0.95rem;}
         }
+
+        /* ==== СПОЙЛЕРЫ ВЫВОДОВ ФОРМУЛ ==== */
+        .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -137,7 +151,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
 .section-title {
@@ -769,7 +825,7 @@ a, button, div, span, label, input, textarea, select {
                 <ul>
                     <li>масса молекулы $m_0$;</li>
                     <li>концентрация $n$ — число молекул в единице объёма;</li>
-                    <li>средняя квадратичная скорость $\bar{v} = \sqrt{\dfrac{v_1^2 + v_2^2 + \dots + v_N^2}{N}}$.</li>
+                    <li>средняя квадратичная скорость $v_{ср.кв} = \sqrt{\dfrac{v_1^2 + v_2^2 + \dots + v_N^2}{N}}$.</li>
                 </ul>
                 <p><strong>Давление газа</strong> с точки зрения МКТ — результат ударов молекул о стенки сосуда. Чем чаще удары и чем они сильнее, тем больше давление.</p>
             </div>
@@ -785,6 +841,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$p = \dfrac{1}{3} m_0 n \bar{v}^2$</span>
                     <span class="f-label">— основное уравнение МКТ</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Давление газа — результат ударов молекул о стенку. При упругом ударе молекула массой $m_0$, летящая со скоростью $v_x$ перпендикулярно стенке, передаёт ей импульс $2m_0v_x$. За время $\Delta t$ о площадку $S$ ударяется число молекул, равное $\frac{1}{2}nS v_x \Delta t$ (половина летит к стенке). Суммарный импульс, переданный стенке, даёт силу, а сила, делённая на площадь, — давление. Усреднение по всем направлениям (по трём осям) даёт $p = \frac{1}{3}m_0 n \overline{v^2}$.
+                    </div>
                 </div>
                 <p>где:</p>
                 <ul>
@@ -803,6 +863,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$\bar{E}_k = \dfrac{3}{2} k T$</span>
                     <span class="f-label">— средняя кинетическая энергия молекулы</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Из основного уравнения МКТ $p = \frac{1}{3}m_0 n \overline{v^2} = \frac{2}{3}n \cdot \frac{m_0\overline{v^2}}{2} = \frac{2}{3}n\bar{E}_k$. С другой стороны, из опыта известно $p = nkT$. Приравниваем: $\frac{2}{3}n\bar{E}_k = nkT$, откуда $\bar{E}_k = \frac{3}{2}kT$. Температура — мера средней кинетической энергии поступательного движения молекул.
+                    </div>
                 </div>
                 <p>где $k = 1{,}38 \cdot 10^{-23}$ Дж/К — <span class="important">постоянная Больцмана</span>, $T$ — абсолютная температура.</p>
                 <p><strong>Средняя квадратичная скорость</strong> молекул:</p>
@@ -837,6 +901,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$p = nkT$</span>
                     <span class="f-label">— связь давления с температурой и концентрацией</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Подставляем $\bar{E}_k = \frac{3}{2}kT$ в $p = \frac{2}{3}n\bar{E}_k$: $p = \frac{2}{3}n \cdot \frac{3}{2}kT = nkT$. Это уравнение связывает макроскопическое давление с микроскопическими параметрами: концентрацией $n$ и температурой $T$. Постоянная Больцмана $k = R/N_A$ — «мостик» между микро- и макромиром.
+                    </div>
                 </div>
                 <p><strong>Важно:</strong> температура — величина, одинаковая для всех молекул газа в состоянии теплового равновесия, независимо от их массы. Более массивные молекулы движутся медленнее, но их средняя кинетическая энергия такая же, как у лёгких молекул.</p>
             </div>
@@ -1241,9 +1309,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- 3D-модель идеального газа -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-ideal');
@@ -1358,7 +1424,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();

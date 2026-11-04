@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -114,12 +114,66 @@
         .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
         .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
         .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+            .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
     <style id="titles-center-fix">
         .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
         .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
@@ -151,9 +205,13 @@
         <div class="section-content">
             <div class="def-card">
                 <p><strong>Работа тока</strong> — это работа электрического поля по перемещению зарядов по проводнику. Она показывает, сколько энергии электрическое поле передало участку цепи.</p>
-                <div class="formula-block">
+                                <div class="formula-block">
                     <span class="f">$A = U \cdot I \cdot t$</span>
                     <span class="f-label">— работа электрического тока (Дж)</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Напряжение $U$ — это работа электрического поля по переносу единичного заряда ($U = A/q$). Значит, при переносе заряда $q$ поле совершает работу $A = U \cdot q$. Сила тока $I = q/t$, откуда заряд $q = I \cdot t$. Подставляем заряд в формулу работы: $A = U \cdot (I \cdot t)$.
+                    </div>
                 </div>
                 <p>где $U$ — напряжение (В), $I$ — сила тока (А), $t$ — время (с).</p>
                 <p>Используя закон Ома $I = U / R$, работу можно записать через другие величины:</p>
@@ -192,8 +250,12 @@
                 <div class="formula-block">
                     <span class="f">$Q = I^2 R t$</span>
                     <span class="f-label">— количество теплоты (Дж)</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Если вся работа тока идёт на нагрев проводника, то $Q = A = U \cdot I \cdot t$. По закону Ома для участка цепи напряжение $U = I \cdot R$. Подставляем это в формулу: $Q = (I \cdot R) \cdot I \cdot t = I^2 \cdot R \cdot t$. Также можно выразить через напряжение: $Q = \frac{U^2}{R} t$.
+                    </div>
                 </div>
-                <p>Если вся работа тока идёт на нагревание проводника (как в нагревательных приборах), то $Q = A$.</p>
+                <p>Если вся работа тока идёт на нагревание проводника (как в нагревательных приборах), то $Q = A$. Идеальный нагреватель всю работу переводит в тепло. В реальности часть энергии может уходить в окружающую среду или излучаться в виде света (как в лампе накаливания)</p>
                 <p><strong>Применение:</strong> на этом законе основана работа ламп накаливания, утюгов, обогревателей, а также расчёт потерь в линиях электропередач.</p>
             </div>
         </div>
@@ -406,7 +468,7 @@
                     <div class="step">Шаг 1. При параллельном соединении $U_1 = U_2 = U$.</div>
                     <div class="step">Шаг 2. $P_1 = U^2 / R_1$, $P_2 = U^2 / R_2$.</div>
                     <div class="step">Шаг 3. $P_1 / P_2 = R_2 / R_1 = 200 / 100 = 2$.</div>
-                    <div class="step explanation">Меньшее сопротивление потребляет больше мощности.</div>
+                    <div class="step explanation">При параллельном соединении напряжение на лампах одинаковое, поэтому мощность обратно пропорциональна сопротивлению (\(P = U^2/R\)). Меньшее сопротивление — больше мощность.</div>
                     <div class="answer">✅ Ответ: первая лампа в 2 раза мощнее</div>
                 </div>
             </div>
@@ -522,7 +584,7 @@
                 </div>
             </div>
         </div>
-
+    </div>
     <div class="back-link-wrapper">
         <a href="electrodynamics.html" class="back-link">← Назад</a>
     </div>
@@ -565,9 +627,7 @@
 </script>
 
 <!-- МОДЕЛЬ 1: МОЩНОСТЬ -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-power');
@@ -601,8 +661,15 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        const bulbGeo = new THREE.SphereGeometry(1.5, 32, 32);
-        const bulbMat = new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0x000000, transparent: true, opacity: 0.85 });
+        const bulbGeo = new THREE.SphereGeometry(1.5, window.qualitySettings3D.segments, window.qualitySettings3D.segments);
+        const bulbMat = new THREE.MeshStandardMaterial({
+            color: 0xeeeeee,
+            emissive: 0xffdd44,
+            emissiveIntensity: 0,
+            transparent: true,
+            opacity: 0.85,
+            roughness: 0.1
+        });
         const bulb = new THREE.Mesh(bulbGeo, bulbMat);
         bulb.position.set(0, 2, 0);
         group.add(bulb);
@@ -665,9 +732,11 @@
             const intensity = Math.min(P / 100, 2.0);
             const colorVal = Math.min(intensity, 1);
 
-            bulbMat.emissive.setRGB(1, 0.85, 0.3);
-            bulbMat.emissiveIntensity = intensity * 4;
-            bulbMat.color.setRGB(0.4 + colorVal * 0.6, 0.4 + colorVal * 0.5, 0.4 + colorVal * 0.1);
+            bulbMat.emissiveIntensity = intensity * 6;
+            const r = 1.0;
+            const g = 1.0 - Math.min(intensity, 1) * 0.15;
+            const b = 1.0 - Math.min(intensity, 1) * 0.7;
+            bulbMat.color.setRGB(r, g, b);
 
             light.intensity = intensity * 8;
 
@@ -689,7 +758,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 1.5, 0);
         controls.update();
@@ -706,9 +775,7 @@
 </script>
 
 <!-- МОДЕЛЬ 2: ДЖОУЛЬ-ЛЕНЦ -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-joule');
@@ -786,7 +853,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();

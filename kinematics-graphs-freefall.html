@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -523,6 +523,18 @@
             .speed-display .m span { font-size: 0.7rem; }
             .freefall-legend { font-size: 0.45rem; padding: 2px 8px; gap: 6px; }
         }
+                .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -535,7 +547,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
 .section-title {
@@ -1177,8 +1231,16 @@ a, button, div, span, label, input, textarea, select {
                 <span class="f-label">— скорость в момент времени $t$</span>
                 <span class="f">$S = v_0 t + \frac{at^2}{2}$</span>
                 <span class="f-label">— перемещение за время $t$</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Перемещение при равноускоренном движении — это площадь под графиком $v(t)$. График $v(t)$ — прямая от $v_0$ до $v = v_0 + at$. Площадь под ней — трапеция с основаниями $v_0$ и $v_0 + at$ и высотой $t$: $S = \frac{v_0 + (v_0 + at)}{2} \cdot t = v_0 t + \frac{at^2}{2}$.
+                </div>
                 <span class="f">$v^2 - v_0^2 = 2aS$</span>
                 <span class="f-label">— связь скорости и перемещения</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Из $v = v_0 + at$ выразим время: $t = \frac{v - v_0}{a}$. Подставим в $S = v_0 t + \frac{at^2}{2}$: $S = v_0 \cdot \frac{v - v_0}{a} + \frac{a}{2} \cdot \left(\frac{v - v_0}{a}\right)^2 = \frac{v_0(v - v_0)}{a} + \frac{(v - v_0)^2}{2a}$. Приведём к общему знаменателю $2a$: $S = \frac{2v_0(v - v_0) + (v - v_0)^2}{2a} = \frac{(v - v_0)(2v_0 + v - v_0)}{2a} = \frac{(v - v_0)(v + v_0)}{2a} = \frac{v^2 - v_0^2}{2a}$. Отсюда $v^2 - v_0^2 = 2aS$.
+                </div>
             </div>
 
             <div class="def-card">
@@ -1227,13 +1289,18 @@ a, button, div, span, label, input, textarea, select {
                 </div>
                 <div class="control-group">
                     <label>$v_0$ (м/с)</label>
-                    <input type="range" id="graph-v0" min="0" max="5" step="0.1" value="0.5">
+                    <input type="range" id="graph-v0" min="-5" max="5" step="0.1" value="0.5">
                     <span class="control-value" id="graph-v0-value">0.5</span>
                 </div>
-                <span class="control-label">⬤ Площадь под графиком = перемещение</span>
+                <button class="btn-play" id="graph-preset-uniform">Равномерное</button>
+                <button class="btn-play" id="graph-preset-accel">Разгон</button>
+                <button class="btn-play" id="graph-preset-brake">Торможение</button>
+                <button class="btn-play" id="graph-preset-back">Назад</button>
+                <button class="btn-play" id="graph-preset-back-brake">Назад + торм.</button>
+                <span class="control-label">⬤ Площадь под графиком = перемещение (с учётом знака)</span>
             </div>
             <div class="def-card">
-                <p><span class="important">Как читать график:</span> Ось X — время ($t$), ось Y — скорость ($v$). <span class="important">Закрашенная область</span> под графиком = перемещение. Двигайте ползунки.</p>
+                <p><span class="important">Как читать график:</span> Ось X — время ($t$), ось Y — скорость ($v$). <span class="important">Закрашенная область</span> под графиком = перемещение. Если график ниже оси $t$ (скорость отрицательна) — тело движется <strong>назад</strong>, и перемещение отрицательно (на графике выделяется синим). Двигайте ползунки или используйте кнопки-пресеты.</p>
             </div>
         </div>
     </div>
@@ -1253,6 +1320,10 @@ a, button, div, span, label, input, textarea, select {
                 <span class="f-label">— скорость в момент времени $t$</span>
                 <span class="f">$h = \frac{gt^2}{2}$</span>
                 <span class="f-label">— высота падения за время $t$</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Свободное падение — частный случай равноускоренного движения с $a = g$ и $v_0 = 0$ (если тело отпустили без начальной скорости). Подставляем в $S = v_0 t + \frac{at^2}{2}$: $h = 0 \cdot t + \frac{gt^2}{2} = \frac{gt^2}{2}$.
+                </div>
                 <span class="f">$v^2 = 2gh$</span>
                 <span class="f-label">— связь скорости и высоты</span>
                 <span class="f">$t = \sqrt{\frac{2h}{g}}$</span>
@@ -1316,7 +1387,7 @@ a, button, div, span, label, input, textarea, select {
             </div>
             <div class="def-card">
                 <p><span class="important">Нажмите «Пуск»</span> — тело начнёт падать.</p>
-                <p><span class="important">Меняйте массу — размер шара меняется, но скорость падения остаётся той же!</span> Это демонстрация опыта Галилея: все тела падают с одинаковым ускорением независимо от массы.</p>
+                <p><span class="important">Меняйте массу — размер шара меняется, но скорость падения остаётся той же!</span> Это демонстрация опыта Галилея: в отсутствие сопротивления воздуха все тела падают с одинаковым ускорением независимо от массы. В реальности лёгкие тела (перо, лист бумаги) падают медленнее из-за сопротивления воздуха — это не нарушает закон, а означает, что сила сопротивления сравнима с силой тяжести.</p>
             </div>
         </div>
     </div>
@@ -1507,7 +1578,7 @@ a, button, div, span, label, input, textarea, select {
                 </div>
                     <div class="step"><strong>Шаг 1.</strong> $v_{ср} = \frac{S_{общ}}{t_{общ}} = \frac{2v_1v_2}{v_1 + v_2}$</div>
                     <div class="step"><strong>Шаг 2.</strong> $v_{ср} = \frac{2 \cdot 60 \cdot 40}{100} = 48$ км/ч</div>
-                    <div class="step explanation"><strong>Важно!</strong> Средняя скорость не равна среднему арифметическому ($50$ км/ч). Она всегда ближе к меньшей скорости.</div>
+                    <div class="step explanation"><strong>Важно!</strong> Средняя скорость не равна среднему арифметическому ($50$ км/ч). При <strong>равных отрезках пути</strong> она вычисляется как среднее гармоническое и всегда <strong>меньше</strong> среднего арифметического — то есть ближе к меньшей скорости. Если бы равными были <strong>отрезки времени</strong>, средняя была бы равна среднему арифметическому.</div>
                     <div class="answer">✅ Ответ: $v_{ср} = 48$ км/ч</div>
                 </div>
             </div>
@@ -1571,15 +1642,181 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol15')">📖 Показать решение</button>
                 <div id="sol15" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $v_0 = 25$ м/с, $h = 20$ м, $g = 9.8$ м/с²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $t$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $v_0 = 25$ м/с, $h = 20$ м, $g = 9.8$ м/с²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $t$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> $h = v_0 t - \frac{gt^2}{2} \Rightarrow 20 = 25t - 4.9t^2$</div>
                     <div class="step"><strong>Шаг 2.</strong> $4.9t^2 - 25t + 20 = 0$</div>
                     <div class="step"><strong>Шаг 3.</strong> $t = \frac{25 \pm \sqrt{625 - 392}}{9.8} = \frac{25 \pm 15.26}{9.8}$</div>
                     <div class="step"><strong>Шаг 4.</strong> $t_1 \approx 0.99$ с, $t_2 \approx 4.11$ с</div>
                     <div class="step explanation"><strong>Пояснение:</strong> Два корня — мяч на высоте 20 м дважды: при подъёме и при падении. $h_{max} = \frac{v_0^2}{2g} \approx 31.9$ м, поэтому 20 м достигается дважды.</div>
                     <div class="answer">✅ Ответ: $t_1 \approx 0.99$ с, $t_2 \approx 4.11$ с</div>
+                </div>
+            </div>
+
+            <!-- Задача 16 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 16. Анализ графика: ускорение, характер движения, путь</div>
+                <div class="task-condition"><strong>Условие:</strong> По графику $v(t)$: прямая проходит через точки $(0, 2)$ и $(4, 10)$. Определите: а) начальную скорость $v_0$; б) ускорение $a$; в) характер движения; г) перемещение $S$ за 4 с.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol16')">📖 Показать решение</button>
+                <div id="sol16" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $(0, 2)$, $(4, 10)$</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $v_0$, $a$, характер движения, $S$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $v_0 = 2$ м/с (значение при $t = 0$).</div>
+                    <div class="step"><strong>Шаг 2.</strong> $a = \frac{\Delta v}{\Delta t} = \frac{10 - 2}{4 - 0} = 2$ м/с².</div>
+                    <div class="step"><strong>Шаг 3.</strong> $a > 0$, скорость растёт → <strong>равноускоренное</strong> движение (разгон).</div>
+                    <div class="step"><strong>Шаг 4.</strong> $S$ = площадь трапеции: $S = \frac{v_0 + v}{2} \cdot t = \frac{2 + 10}{2} \cdot 4 = 24$ м.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> График — прямая с положительным наклоном. Наклон $= a$. Площадь под графиком $= S$.</div>
+                    <div class="answer">✅ Ответ: $v_0 = 2$ м/с, $a = 2$ м/с², равноускоренное, $S = 24$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 17 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 17. График с отрицательной скоростью (движение назад)</div>
+                <div class="task-condition"><strong>Условие:</strong> По графику $v(t)$: прямая проходит через точки $(0, -3)$ и $(4, -11)$. Определите: а) $v_0$; б) $a$; в) характер движения; г) перемещение $S$ за 4 с.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol17')">📖 Показать решение</button>
+                <div id="sol17" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $(0, -3)$, $(4, -11)$</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $v_0$, $a$, характер движения, $S$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $v_0 = -3$ м/с. Скорость отрицательна — тело движется <strong>назад</strong> (в отрицательном направлении).</div>
+                    <div class="step"><strong>Шаг 2.</strong> $a = \frac{-11 - (-3)}{4 - 0} = \frac{-8}{4} = -2$ м/с².</div>
+                    <div class="step"><strong>Шаг 3.</strong> $v < 0$ и $a < 0$ — скорость и ускорение направлены в одну сторону (отрицательную). Тело <strong>разгоняется назад</strong>.</div>
+                    <div class="step"><strong>Шаг 4.</strong> $S$ = площадь трапеции (с учётом знака): $S = \frac{v_0 + v}{2} \cdot t = \frac{-3 + (-11)}{2} \cdot 4 = -7 \cdot 4 = -28$ м. Знак «минус» — перемещение направлено назад.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Если график ниже оси $t$, площадь считается отрицательной. Модуль перемещения — 28 м, но направление — противоположное положительному.</div>
+                    <div class="answer">✅ Ответ: $v_0 = -3$ м/с, $a = -2$ м/с², разгон назад, $S = -28$ м</div>
+                </div>
+            </div>
+
+            <!-- Задача 18 -->
+            <div class="task-block">
+                <div class="task-title">📘 Задача 18. График: смена направления движения</div>
+                <div class="task-condition"><strong>Условие:</strong> По графику $v(t)$: прямая проходит через $(0, 6)$ и $(4, -2)$. Определите: а) $v_0$; б) $a$; в) в какой момент тело остановилось; г) путь и перемещение за 4 с.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol18')">📖 Показать решение</button>
+                <div id="sol18" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $(0, 6)$, $(4, -2)$</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $v_0$, $a$, $t_{ост}$, путь, перемещение</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $v_0 = 6$ м/с.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $a = \frac{-2 - 6}{4 - 0} = \frac{-8}{4} = -2$ м/с².</div>
+                    <div class="step"><strong>Шаг 3.</strong> Тело остановится, когда $v = 0$: $0 = 6 - 2t \Rightarrow t = 3$ с.</div>
+                    <div class="step"><strong>Шаг 4.</strong> <strong>Перемещение</strong> за 4 с — площадь с учётом знака: $S = \frac{v_0 + v}{2} \cdot t = \frac{6 + (-2)}{2} \cdot 4 = 2 \cdot 4 = 8$ м.</div>
+                    <div class="step"><strong>Шаг 5.</strong> <strong>Путь</strong> — сумма модулей площадей: до остановки (0…3 с) тело прошло $S_1 = \frac{1}{2} \cdot 3 \cdot 6 = 9$ м; после остановки (3…4 с) — $S_2 = \frac{1}{2} \cdot 1 \cdot 2 = 1$ м. Путь $L = 9 + 1 = 10$ м.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Перемещение $\ne$ путь, когда тело меняет направление. Перемещение — площадь с учётом знака (8 м), путь — сумма модулей (10 м).</div>
+                    <div class="answer">✅ Ответ: $v_0 = 6$ м/с, $a = -2$ м/с², остановка при $t = 3$ с, путь $L = 10$ м, перемещение $S = 8$ м</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> За $t = 8$ с скорость тела увеличилась с $v_0 = 3$ м/с до $v = 19$ м/с. Найдите ускорение.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $a = \frac{v - v_0}{t}$.</div>
+                    <div class="answer">✅ Ответ: $a = \frac{19 - 3}{8} = 2$ м/с²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело из покоя движется с $a = 3$ м/с². Какой путь за $t = 4$ с?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $S = \frac{at^2}{2}$ при $v_0 = 0$.</div>
+                    <div class="answer">✅ Ответ: $S = \frac{3 \cdot 16}{2} = 24$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Камень падает с высоты $h = 80$ м. Найдите время падения ($g = 9.8$ м/с²).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $t = \sqrt{\frac{2h}{g}}$.</div>
+                    <div class="answer">✅ Ответ: $t = \sqrt{\frac{160}{9.8}} \approx 4.04$ с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Тело брошено вверх со скоростью $v_0 = 30$ м/с. Найдите максимальную высоту ($g = 9.8$ м/с²).</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $h_{max} = \frac{v_0^2}{2g}$.</div>
+                    <div class="answer">✅ Ответ: $h_{max} = \frac{900}{19.6} \approx 45.9$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Автомобиль тормозит с $v_0 = 54$ км/ч до остановки с $a = 3$ м/с². Найдите тормозной путь.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Переведите скорость в м/с: $54$ км/ч $= 15$ м/с. $S = \frac{v_0^2}{2a}$.</div>
+                    <div class="answer">✅ Ответ: $S = \frac{225}{6} = 37.5$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6. График: ускорение и характер движения</div>
+                <div class="task-condition"><strong>Условие:</strong> По графику $v(t)$: прямая через $(0, 1)$ и $(3, 7)$. Найдите $v_0$, $a$ и характер движения.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $v_0$ — значение при $t = 0$. $a = \frac{\Delta v}{\Delta t}$. Знак $a$ и $v$ определяют характер движения.</div>
+                    <div class="answer">✅ Ответ: $v_0 = 1$ м/с, $a = \frac{7 - 1}{3} = 2$ м/с². $v > 0$, $a > 0$ — равноускоренное движение (разгон).</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7. График: путь и перемещение</div>
+                <div class="task-condition"><strong>Условие:</strong> По графику $v(t)$: прямая через $(0, 4)$ и $(2, 0)$. Найдите перемещение и путь за 2 с.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> График — треугольник над осью $t$. Площадь $= \frac{1}{2} \cdot 2 \cdot 4 = 4$ м. Тело не меняло направления, поэтому путь = перемещение.</div>
+                    <div class="answer">✅ Ответ: $S = L = 4$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8. График с отрицательной скоростью</div>
+                <div class="task-condition"><strong>Условие:</strong> По графику $v(t)$: прямая через $(0, -2)$ и $(4, -10)$. Найдите $v_0$, $a$, характер движения и перемещение.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $v_0 = -2$ м/с. $a = \frac{-10 - (-2)}{4} = -2$ м/с². $v < 0$, $a < 0$ — разгон назад. $S = \frac{v_0 + v}{2} \cdot t$.</div>
+                    <div class="answer">✅ Ответ: $v_0 = -2$ м/с, $a = -2$ м/с², разгон назад, $S = \frac{-2 + (-10)}{2} \cdot 4 = -24$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9. График: смена направления</div>
+                <div class="task-condition"><strong>Условие:</strong> По графику $v(t)$: прямая через $(0, 8)$ и $(4, -4)$. Найдите момент остановки, путь и перемещение за 4 с.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> $a = \frac{-4 - 8}{4} = -3$ м/с². Остановка: $0 = 8 - 3t \Rightarrow t = 8/3 \approx 2.67$ с. Перемещение — площадь с учётом знака: $S = \frac{8 + (-4)}{2} \cdot 4 = 8$ м. Путь — сумма модулей: $L_1 = \frac{1}{2} \cdot \frac{8}{3} \cdot 8 \approx 10.67$ м, $L_2 = \frac{1}{2} \cdot \frac{4}{3} \cdot 4 \approx 2.67$ м, $L \approx 13.33$ м.</div>
+                    <div class="answer">✅ Ответ: $t_{ост} \approx 2.67$ с, $S = 8$ м, $L \approx 13.3$ м</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10. Средняя скорость</div>
+                <div class="task-condition"><strong>Условие:</strong> Первую половину пути тело прошло со скоростью $v_1 = 80$ км/ч, вторую — со скоростью $v_2 = 20$ км/ч. Найдите среднюю скорость.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> При равных отрезках пути $v_{ср} = \frac{2v_1v_2}{v_1 + v_2}$.</div>
+                    <div class="answer">✅ Ответ: $v_{ср} = \frac{2 \cdot 80 \cdot 20}{100} = 32$ км/ч</div>
                 </div>
             </div>
 
@@ -1594,16 +1831,18 @@ a, button, div, span, label, input, textarea, select {
 <script>
     function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
     
-    (function(){if(localStorage.getItem('mathTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    (function(){
+    if(localStorage.getItem('mathTheme')==='light'){
+        document.documentElement.classList.add('light-mode');
+        var btn = document.getElementById('themeBtn');
+        if (btn) btn.textContent = '☀️';
+    }
+})();
     
 </script>
 
 <!-- 3D-модель 1: Графики -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-graphs');
         const canvas = document.getElementById('canvas-graphs');
@@ -1612,10 +1851,10 @@ a, button, div, span, label, input, textarea, select {
         const scene = new THREE.Scene();
         scene.background = null;
         const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-        camera.position.set(0.5, 0.5, 8);
+        camera.position.set(0, 0, 10); // Камера смотрит ровно в центр
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1623,18 +1862,18 @@ a, button, div, span, label, input, textarea, select {
         container.style.position = 'relative';
         container.appendChild(labelRenderer.domElement);
 
-        function makeLabel(text, color, pos, fs = '0.7rem') {
+        function makeLabel(text, color, pos, fs = '1rem') {
             const div = document.createElement('div');
             div.textContent = text;
-            div.style.color = color;
+            if (color === '#ffffff' || color === '#888888') {
+                div.style.color = 'var(--text)'; // Адаптация под тему
+            } else {
+                div.style.color = color;
+            }
             div.style.fontSize = fs;
             div.style.fontWeight = 'bold';
             div.style.fontFamily = "'Segoe UI', sans-serif";
-            div.style.background = 'transparent';
-            div.style.padding = '0';
-            div.style.border = 'none';
-            div.style.borderRadius = '0';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -1670,9 +1909,10 @@ a, button, div, span, label, input, textarea, select {
         const v0Value = document.getElementById('graph-v0-value');
         const areaValue = document.getElementById('graph-area-value');
 
-        const AXIS_LEFT = -6.0;
-        const AXIS_RIGHT = 2.0;
-        const AXIS_BOTTOM = -1.5;
+        // Настройки осей
+        const AXIS_LEFT = -5.0;
+        const AXIS_RIGHT = 5.0;
+        const AXIS_BOTTOM = -3.0;
         const AXIS_TOP = 3.0;
 
         let graphElements = [];
@@ -1682,33 +1922,33 @@ a, button, div, span, label, input, textarea, select {
             graphElements = [];
         }
 
-        function createAxes() {
-            const g = new THREE.Group();
-            g.add(new THREE.Line(
-                new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM, 0),
-                    new THREE.Vector3(AXIS_RIGHT, AXIS_BOTTOM, 0)
-                ]),
-                new THREE.LineBasicMaterial({ color: 0x888888 })
-            ));
-            g.add(new THREE.Line(
-                new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM, 0),
-                    new THREE.Vector3(AXIS_LEFT, AXIS_TOP, 0)
-                ]),
-                new THREE.LineBasicMaterial({ color: 0x888888 })
-            ));
-            return g;
-        }
-        const axes = createAxes();
-        group.add(axes);
+        // Создаем статичные оси и подписи один раз
+        const axesGroup = new THREE.Group();
 
-        const labelT = makeLabel('t (с)', '#ffffff', new THREE.Vector3(AXIS_RIGHT + 0.4, AXIS_BOTTOM - 0.2, 0), '0.6rem');
-        const labelV = makeLabel('v (м/с)', '#ffffff', new THREE.Vector3(AXIS_LEFT - 0.5, AXIS_TOP + 0.2, 0), '0.6rem');
-        const label0 = makeLabel('0', '#888888', new THREE.Vector3(AXIS_LEFT - 0.2, AXIS_BOTTOM - 0.2, 0), '0.5rem');
-        group.add(labelT);
-        group.add(labelV);
-        group.add(label0);
+        // Вертикальная ось (v)
+        axesGroup.add(new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM, 0),
+                new THREE.Vector3(AXIS_LEFT, AXIS_TOP, 0)
+            ]),
+            new THREE.LineBasicMaterial({ color: 0x888888 })
+        ));
+
+        // Горизонтальная ось (t) на уровне v=0
+        axesGroup.add(new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(AXIS_LEFT, 0, 0),
+                new THREE.Vector3(AXIS_RIGHT, 0, 0)
+            ]),
+            new THREE.LineBasicMaterial({ color: 0x888888 })
+        ));
+
+        // Подписи осей
+        axesGroup.add(makeLabel('v (м/с)', '#ffffff', new THREE.Vector3(AXIS_LEFT - 0.5, AXIS_TOP, 0), '1rem'));
+        axesGroup.add(makeLabel('t (с)', '#ffffff', new THREE.Vector3(AXIS_RIGHT + 0.5, 0, 0), '1rem'));
+        axesGroup.add(makeLabel('0', '#888888', new THREE.Vector3(AXIS_LEFT - 0.3, -0.2, 0), '0.8rem'));
+
+        group.add(axesGroup);
 
         function buildGraph() {
             clearGraph();
@@ -1716,13 +1956,15 @@ a, button, div, span, label, input, textarea, select {
             const t = parseFloat(timeSlider.value);
             const a = parseFloat(accelSlider.value);
             const v0 = parseFloat(v0Slider.value);
+
             timeValue.textContent = t.toFixed(1);
             accelValue.textContent = a.toFixed(1);
             v0Value.textContent = v0.toFixed(1);
 
             const SCALE_X = 0.8;
-            const SCALE_Y = 0.5;
+            const SCALE_Y = 0.6;
 
+            // Линия графика
             const pts = [];
             const steps = 100;
             const maxT = 6;
@@ -1730,76 +1972,67 @@ a, button, div, span, label, input, textarea, select {
                 const ti = (i / steps) * maxT;
                 const vi = v0 + a * ti;
                 const x = AXIS_LEFT + ti * SCALE_X;
-                const y = AXIS_BOTTOM + vi * SCALE_Y;
+                const y = 0 + vi * SCALE_Y;
                 pts.push(new THREE.Vector3(x, y, 0));
             }
             const geo = new THREE.BufferGeometry().setFromPoints(pts);
             const graphLine = new THREE.Line(
                 geo,
-                new THREE.LineBasicMaterial({ color: 0xff2222, linewidth: 3 })
+                new THREE.LineBasicMaterial({ color: 0xff2222 })
             );
             graphElements.push(graphLine);
 
+            // Площадь под графиком
             const tScaled = t * SCALE_X;
             const vEnd = v0 + a * t;
             const vStartScaled = v0 * SCALE_Y;
             const vEndScaled = vEnd * SCALE_Y;
 
             const vertices = new Float32Array([
-                AXIS_LEFT, AXIS_BOTTOM + vStartScaled, 0,
-                AXIS_LEFT + tScaled, AXIS_BOTTOM + vEndScaled, 0,
-                AXIS_LEFT + tScaled, AXIS_BOTTOM, 0,
-                AXIS_LEFT, AXIS_BOTTOM, 0
+                AXIS_LEFT, vStartScaled, 0,
+                AXIS_LEFT + tScaled, vEndScaled, 0,
+                AXIS_LEFT + tScaled, 0, 0,
+                AXIS_LEFT, 0, 0
             ]);
             const triGeo = new THREE.BufferGeometry();
             triGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             triGeo.setIndex([0, 1, 2, 0, 2, 3]);
-            triGeo.computeVertexNormals();
+
+            const areaVal = v0 * t + (a * t * t) / 2;
+            const areaColor = areaVal >= 0 ? 0xff2222 : 0x2222ff;
 
             const areaMat = new THREE.MeshBasicMaterial({
-                color: 0xff2222,
+                color: areaColor,
                 transparent: true,
                 opacity: 0.15,
                 side: THREE.DoubleSide
             });
-            const areaMesh = new THREE.Mesh(triGeo, areaMat);
-            graphElements.push(areaMesh);
+            graphElements.push(new THREE.Mesh(triGeo, areaMat));
 
-            const contourPts = [
-                new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM + vStartScaled, 0),
-                new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM + vEndScaled, 0),
-                new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM, 0),
-                new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM, 0)
-            ];
-            const contourGeo = new THREE.BufferGeometry().setFromPoints(contourPts);
-            const contourLine = new THREE.Line(contourGeo, new THREE.LineBasicMaterial({ color: 0xff2222, transparent: true, opacity: 0.3 }));
-            graphElements.push(contourLine);
+            // Подпись площади со знаком
+            const sign = areaVal >= 0 ? '' : '−';
+            areaValue.textContent = `S = ${sign}${Math.abs(areaVal).toFixed(1)} м`;
 
-            const areaVal = v0 * t + (a * t * t) / 2;
-            areaValue.textContent = `S = ${areaVal.toFixed(1)} м`;
-
-            const dotMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.12 });
+            // Точка на конце
             const dotGeo = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM + vEndScaled, 0)
+                new THREE.Vector3(AXIS_LEFT + tScaled, vEndScaled, 0)
             ]);
-            const dot = new THREE.Points(dotGeo, dotMat);
-            graphElements.push(dot);
+            graphElements.push(new THREE.Points(dotGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 })));
 
-            const dashMat = new THREE.LineDashedMaterial({ color: 0x888888, dashSize: 0.04, gapSize: 0.04 });
+            // Пунктир от точки до оси t
             const dashLine = new THREE.Line(
                 new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM, 0),
-                    new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM + vEndScaled, 0)
+                    new THREE.Vector3(AXIS_LEFT + tScaled, 0, 0),
+                    new THREE.Vector3(AXIS_LEFT + tScaled, vEndScaled, 0)
                 ]),
-                dashMat
+                new THREE.LineDashedMaterial({ color: 0x888888, dashSize: 0.05, gapSize: 0.05 })
             );
             dashLine.computeLineDistances();
             graphElements.push(dashLine);
 
-            const labelTval = makeLabel(`${t.toFixed(1)}с`, '#888888', new THREE.Vector3(AXIS_LEFT + tScaled, AXIS_BOTTOM - 0.25, 0), '0.5rem');
-            graphElements.push(labelTval);
-            const labelVval = makeLabel(`${vEnd.toFixed(1)}м/с`, '#888888', new THREE.Vector3(AXIS_LEFT - 0.4, AXIS_BOTTOM + vEndScaled, 0), '0.5rem');
-            graphElements.push(labelVval);
+            // Подписи значений
+            graphElements.push(makeLabel(`${t.toFixed(1)}с`, '#888888', new THREE.Vector3(AXIS_LEFT + tScaled, -0.3, 0), '0.9rem'));
+            graphElements.push(makeLabel(`${vEnd.toFixed(1)}м/с`, '#888888', new THREE.Vector3(AXIS_LEFT - 0.7, vEndScaled, 0), '0.9rem'));
 
             graphElements.forEach(el => group.add(el));
         }
@@ -1808,31 +2041,36 @@ a, button, div, span, label, input, textarea, select {
         accelSlider.addEventListener('input', buildGraph);
         v0Slider.addEventListener('input', buildGraph);
 
+        function setPreset(t, a, v0) {
+            timeSlider.value = t;
+            accelSlider.value = a;
+            v0Slider.value = v0;
+            buildGraph();
+        }
+
+        document.getElementById('graph-preset-uniform').addEventListener('click', () => setPreset(3, 0, 3));
+        document.getElementById('graph-preset-accel').addEventListener('click', () => setPreset(3, 1.5, 0));
+        document.getElementById('graph-preset-brake').addEventListener('click', () => setPreset(3, -1.5, 4));
+        document.getElementById('graph-preset-back').addEventListener('click', () => setPreset(3, 0, -3));
+        document.getElementById('graph-preset-back-brake').addEventListener('click', () => setPreset(3, 1.5, -4));
+
         document.getElementById('fs-graphs').addEventListener('click', async () => {
             if (!document.fullscreenElement) {
                 await container.requestFullscreen();
-                if (screen.orientation && screen.orientation.lock) {
-                    try { await screen.orientation.lock('portrait'); } catch(e) {}
-                }
             } else {
                 await document.exitFullscreen();
-                if (screen.orientation && screen.orientation.unlock) {
-                    try { screen.orientation.unlock(); } catch(e) {}
-                }
             }
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.target.set(AXIS_LEFT + 2, 0.5, 0);
-        controls.update();
+        // Отключаем вращение
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enabled = false;
 
         buildGraph();
 
         function animate() {
             requestAnimationFrame(animate);
-            controls.update();
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
         }
@@ -1841,11 +2079,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- 3D-модель 2: Свободное падение с массой -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-freefall');
         const canvas = document.getElementById('canvas-freefall');
@@ -1857,7 +2091,7 @@ a, button, div, span, label, input, textarea, select {
         camera.position.set(3.5, 1.0, 5);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1879,7 +2113,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.padding = '0';
             div.style.border = 'none';
             div.style.borderRadius = '0';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -2117,28 +2351,29 @@ a, button, div, span, label, input, textarea, select {
 
             const size = sphere.geometry.parameters.radius || 0.3;
             const scaleH = h / 60;
-            const accel = g / 60;
-            const speedMultiplier = 1.8;
 
-            const yPos = GROUND_Y + size + scaleH - (accel * dt * dt * speedMultiplier) / 2;
-            const v = accel * dt * speedMultiplier;
+            // Реальная физика: y(t) = h - g*t^2/2, v(t) = g*t
+            const realDrop = 0.5 * g * dt * dt;
+            const realY = h - realDrop;
+            const vReal = g * dt;
 
-            if (yPos <= GROUND_Y + size) {
+            const metersToScene = scaleH / h;
+            const yPos = GROUND_Y + size + realY * metersToScene;
+
+            if (realY <= 0) {
                 sphere.position.y = GROUND_Y + size;
                 animating = false;
                 playBtn.textContent = '▶ Пуск';
-                const vFinal = Math.sqrt(2 * g * h);
-                speedDisplay.textContent = vFinal.toFixed(1);
-                timeDisplay.textContent = dt.toFixed(2);
+                speedDisplay.textContent = Math.sqrt(2 * g * h).toFixed(1);
+                timeDisplay.textContent = Math.sqrt(2 * h / g).toFixed(2);
                 return;
             }
 
             sphere.position.y = yPos;
             shadow.position.y = GROUND_Y + 0.02;
-            const heightRatio = (sphere.position.y - GROUND_Y) / (scaleH);
-            shadow.material.opacity = 0.1 + 0.2 * (1 - Math.min(1, heightRatio));
+            shadow.material.opacity = 0.1 + 0.2 * (1 - Math.min(1, realY / h));
 
-            speedDisplay.textContent = v.toFixed(1);
+            speedDisplay.textContent = vReal.toFixed(1);
             timeDisplay.textContent = dt.toFixed(2);
         }
 
@@ -2175,7 +2410,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, GROUND_Y + 0.5, 0);
         controls.update();

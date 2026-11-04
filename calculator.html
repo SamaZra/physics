@@ -408,7 +408,83 @@
         }
 
         .back-link:hover { background: var(--accent-strong); }
+        /* Стили для модального окна инструкции */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
 
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+            color: var(--accent);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .modal-content h3 {
+            margin-top: 16px;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        .modal-content p, .modal-content li {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .modal-content ul {
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        .modal-content code {
+            background: var(--history-bg);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: monospace;
+            color: var(--accent);
+        }
+
+        .modal-close-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-close-btn:hover { background: var(--accent-strong); }
         @media (max-width: 550px) {
             body { padding: 8px; }
             .buttons { gap: 6px; }
@@ -460,7 +536,7 @@
                 <button class="angle-btn active" onclick="setAngleMode('deg', event)">Deg</button>
                 <button class="angle-btn" onclick="setAngleMode('rad', event)">Rad</button>
             </div>
-            <div style="width: 40px;"></div>
+            <button class="angle-btn" style="background:var(--btn-bg); border:1px solid var(--border); padding: 6px 12px;" onclick="document.getElementById('instructionModal').classList.add('active')">ℹ️ Инструкция</button>
         </div>
 
         <div class="constants-panel">
@@ -582,7 +658,7 @@
     const engineerButtons = [
         'sin', 'cos', 'tg', '^', 'C',
         'asin', 'acos', 'atan', '(', ')',
-        'ln', 'log', '√', '×10^', '⌫',
+        'ln', 'lg', '√', '×10^', '⌫',
         'exp', 'x²', '7', '8', '9',
         '4', '5', '6', '*', '/',
         '1', '2', '3', '-', '=',
@@ -604,24 +680,34 @@
         } catch(e) { result = 'Ошибка'; updateDisplay(); }
     }
 
-    function prepareForEval(expr) {
+        function prepareForEval(expr) {
         let evalExpr = expr
             .replace(/×/g, '*').replace(/÷/g, '/')
             .replace(/\^/g, '**')
-            .replace(/sin\(/g, 'Math.sin(').replace(/cos\(/g, 'Math.cos(').replace(/tg\(/g, 'Math.tan(')
-            .replace(/asin\(/g, 'Math.asin(').replace(/acos\(/g, 'Math.acos(').replace(/atan\(/g, 'Math.atan(')
-            .replace(/ln\(/g, 'Math.log(').replace(/log\(/g, 'Math.log10(')
-            .replace(/sqrt\(/g, 'Math.sqrt(').replace(/abs\(/g, 'Math.abs(')
+            .replace(/sin\(/g, 'Math.sin(')
+            .replace(/cos\(/g, 'Math.cos(')
+            .replace(/tg\(/g, 'Math.tan(')
+            .replace(/asin\(/g, 'Math.asin(')
+            .replace(/acos\(/g, 'Math.acos(')
+            .replace(/atan\(/g, 'Math.atan(')
+            .replace(/ln\(/g, 'Math.log(')
+            .replace(/lg\(/g, 'Math.log10(')
+            .replace(/sqrt\(/g, 'Math.sqrt(')
+            .replace(/abs\(/g, 'Math.abs(')
             .replace(/exp\(/g, 'Math.exp(')
-            .replace(/PI/g, Math.PI).replace(/E/g, Math.E);
+            .replace(/PI/g, Math.PI)
+            .replace(/(?<![A-Za-z])E(?![A-Za-z])/g, Math.E); // Защита от замены буквы E в словах
 
         if (angleUnit === 'deg') {
-            evalExpr = evalExpr.replace(/Math\.sin\(([^)]+)\)/g, 'Math.sin(($1) * Math.PI / 180)')
-                .replace(/Math\.cos\(([^)]+)\)/g, 'Math.cos(($1) * Math.PI / 180)')
-                .replace(/Math\.tan\(([^)]+)\)/g, 'Math.tan(($1) * Math.PI / 180)')
-                .replace(/Math\.asin\(([^)]+)\)/g, 'Math.asin($1) * 180 / Math.PI')
-                .replace(/Math\.acos\(([^)]+)\)/g, 'Math.acos($1) * 180 / Math.PI')
-                .replace(/Math\.atan\(([^)]+)\)/g, 'Math.atan($1) * 180 / Math.PI');
+            // Используем [\s\S]+? вместо [^)]+? — это позволяет захватывать вложенные скобки
+            evalExpr = evalExpr
+                .replace(/Math\.sin\(([\s\S]+?)\)/g, 'Math.sin(($1) * Math.PI / 180)')
+                .replace(/Math\.cos\(([\s\S]+?)\)/g, 'Math.cos(($1) * Math.PI / 180)')
+                // Добавляем округление, чтобы tg(45) давало ровно 1, а не 0.9999999999
+                .replace(/Math\.tan\(([\s\S]+?)\)/g, 'Math.round(Math.tan(($1) * Math.PI / 180) * 10000000000) / 10000000000')
+                .replace(/Math\.asin\(([\s\S]+?)\)/g, 'Math.asin($1) * 180 / Math.PI')
+                .replace(/Math\.acos\(([\s\S]+?)\)/g, 'Math.acos($1) * 180 / Math.PI')
+                .replace(/Math\.atan\(([\s\S]+?)\)/g, 'Math.atan($1) * 180 / Math.PI');
         }
         return evalExpr;
     }
@@ -649,10 +735,10 @@
                 button.onclick = calculate; button.classList.add('btn-equals');
             } else if (btn === '(' || btn === ')') {
                 button.onclick = () => addOperator(btn); button.classList.add('btn-func');
-            } else if (['sin', 'cos', 'asin', 'acos', 'atan', 'ln', 'log'].includes(btn)) {
+            } else if (['sin', 'cos', 'asin', 'acos', 'atan', 'ln', 'lg'].includes(btn)) {
                 button.onclick = () => addFunction(btn); button.classList.add('btn-func');
             } else if (btn === 'tg') {
-                button.onclick = () => addFunction('tan'); button.classList.add('btn-func');
+                button.onclick = () => addFunction('tg'); button.classList.add('btn-func');
             } else if (btn === '√') {
                 button.onclick = () => addFunction('sqrt'); button.classList.add('btn-func');
             } else if (btn === 'x²') {
@@ -789,7 +875,59 @@
         if (e.key === '^') addOperator('^');
     });
 </script>
+<!-- Модальное окно инструкции -->
+<div class="modal-overlay" id="instructionModal">
+    <div class="modal-content">
+        <h2>📖 Как пользоваться калькулятором</h2>
 
+        <h3>1. Режимы работы (Обычный / Инженерный)</h3>
+        <p>В <strong>Обычном</strong> режиме доступны базовые действия: сложение, вычитание, умножение, деление, проценты и смена знака.</p>
+        <p>В <strong>Инженерном</strong> режиме открываются тригонометрия, логарифмы, корни, возведение в степень и факториал.</p>
+
+        <h3>2. Тригонометрия (sin, cos, tg)</h3>
+        <p>Сначала переключите режим в <strong>Инженерный</strong>. Обратите внимание на кнопки <code>Deg</code> и <code>Rad</code> вверху:</p>
+        <ul>
+            <li><code>Deg</code> — градусы (например, <code>sin(30)</code> = 0.5).</li>
+            <li><code>Rad</code> — радианы (например, <code>sin(π/2)</code> = 1).</li>
+        </ul>
+        <p><strong>Как посчитать синус:</strong></p>
+        <ul>
+            <li>Нажмите <code>sin</code>.</li>
+            <li>Введите число (например, <code>30</code>).</li>
+            <li>Нажмите <code>)</code>, чтобы закрыть скобку.</li>
+            <li>Нажмите <code>=</code>.</li>
+        </ul>
+
+        <h3>3. Логарифмы (ln, lg)</h3>
+        <ul>
+            <li><code>ln</code> — натуральный логарифм (по основанию e). Пример: <code>ln(e)</code> = 1.</li>
+            <li><code>lg</code> — десятичный логарифм (по основанию 10). Пример: <code>lg(100)</code> = 2.</li>
+        </ul>
+        <p>Порядок нажатия такой же: кнопка функции → число → <code>)</code> → <code>=</code>.</p>
+
+        <h3>4. Умножение на 10 в степени (×10^)</h3>
+        <p>Это быстрый способ записать числа в стандартном виде (например, 3×10⁸). Нажмите кнопку <code>×10^</code>, и в выражение добавится <code>*10^</code>.</p>
+        <p><strong>Пример:</strong> чтобы ввести 5×10³, нажмите <code>5</code> → <code>×10^</code> → <code>3</code> → <code>=</code>. Получится 5000.</p>
+
+        <h3>5. Степени и корни</h3>
+        <ul>
+            <li><code>x²</code> — возводит текущее число в квадрат.</li>
+            <li><code>^</code> — возводит в любую степень. Пример: <code>2^3</code> = 8.</li>
+            <li><code>√</code> — квадратный корень. Пример: <code>√(9)</code> = 3.</li>
+        </ul>
+
+        <h3>6. Константы (вверху)</h3>
+        <p>Кнопки <code>c</code>, <code>g</code>, <code>h</code> и другие автоматически подставляют точные значения физических постоянных. Например, нажатие <code>g</code> добавит в строку <code>9.81</code>.</p>
+
+        <h3>7. Факториал (!) и обратное число (1/x)</h3>
+        <ul>
+            <li><code>!</code> — факториал. Пример: введите <code>5</code>, нажмите <code>!</code>, получите 120.</li>
+            <li><code>1/x</code> — обратное число. Пример: введите <code>4</code>, нажмите <code>1/x</code>, получите 0.25.</li>
+        </ul>
+
+        <button class="modal-close-btn" onclick="document.getElementById('instructionModal').classList.remove('active')">Понятно, закрыть</button>
+    </div>
+</div>
 <script src="favorites.js"></script>
 <script src="theme.js"></script>
 </body>

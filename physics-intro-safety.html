@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -57,10 +57,6 @@
 
         body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
         .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
-
-        
-
-        
 
         h1{font-size:1.5rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;}
         .section{margin-bottom:14px;}
@@ -124,7 +120,6 @@
         }
         .fullscreen-btn:hover { background: var(--special-border); transform: scale(1.05); }
 
-        /* Кнопка "Назад" по центру */
         .back-link-wrapper {
             display: flex;
             justify-content: center;
@@ -208,6 +203,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         .show-solution-btn:hover { transform: scale(1.03); opacity: 0.9; }
 
@@ -262,10 +258,6 @@
             margin-top: 10px;
         }
 
-        
-        
-        
-
         .note-box {
             background: var(--info-bg);
             border-left: 4px solid var(--special-border);
@@ -297,6 +289,33 @@
             border-radius: 0;
         }
 
+        .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
+
+        .controls-panel button, .btn-action, .btn-reset {
+            position: relative !important;
+            overflow: visible !important;
+            z-index: 10 !important;
+            touch-action: manipulation !important;
+        }
+        .controls-panel button::after, .controls-panel button .ripple, .btn-action .ripple, .btn-reset .ripple {
+            display: none !important;
+        }
+        .controls-panel button:active {
+            transform: scale(0.95) !important;
+            transition: transform 0.05s !important;
+        }
+
         @media(max-width:700px){
             .model-container { min-height: 380px; }
             .fullscreen-btn { width: 38px; height: 38px; font-size: 18px; bottom: 12px; right: 12px; }
@@ -325,616 +344,142 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
-<style id="titles-center-fix">
-/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
-.section-title {
-    justify-content: center !important;
-    text-align: center !important;
-    position: relative !important;
-    padding-left: 16px !important;
-    padding-right: 28px !important;
-}
-.section-title::after {
-    position: absolute !important;
-    right: 8px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    margin-left: 0 !important;
-}
-.section.collapsed .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-/* Названия файлов / страниц — по центру */
-h1, .page-title, .file-title, .title {
-    text-align: center !important;
-}
-</style>
-<style id="section-gradient-fix">
-/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
-/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script>
+        let quality3D = 'high';
+        if (window.Android && window.Android.getQuality3D) {
+            quality3D = window.Android.getQuality3D();
+        } else {
+            const saved = localStorage.getItem('quality3d');
+            if (saved) quality3D = saved;
+        }
+        window.quality3D = quality3D;
 
-.section { position: relative; }
+        window.qualitySettings = {
+            low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+            medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+            high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+        };
+        window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
 
-/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
-
-/* Закрыт: градиента нет */
-.section.collapsed > .section-title {
-    background-image: none;
-    transition: background-image 0.35s ease;
-}
-
-/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
-.section.collapsed > .section-title:hover {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Открыт: тот же градиент постоянно */
-.section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Светлая тема — цвет из --special-border (#d97706) */
-:root.light-mode .section.collapsed > .section-title:hover,
-:root.light-mode .section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(217, 119, 6, 0.18) 0%,
-        rgba(217, 119, 6, 0.06) 45%,
-        rgba(217, 119, 6, 0.00) 100%);
-}
-
-/* ---------- СТРЕЛКА ---------- */
-
-/* Закрыт: светящаяся синяя */
-.section.collapsed > .section-title::after {
-    color: var(--accent, #3b82f6) !important;
-    text-shadow:
-        0 0 6px rgba(59, 130, 246, 0.85),
-        0 0 14px rgba(59, 130, 246, 0.55);
-    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
-    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
-}
-
-/* Открыт: свечение убираем, стрелка обычная */
-.section:not(.collapsed) > .section-title::after {
-    color: var(--text-secondary, #8ba5b8) !important;
-    text-shadow: none !important;
-    filter: none !important;
-}
-
-/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
-.section.collapsed > .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-.section:not(.collapsed) > .section-title::after {
-    transform: translateY(-50%) rotate(0deg) !important;
-}
-
-/* Светлая тема: синий чуть темнее, свечение мягче */
-:root.light-mode .section.collapsed > .section-title::after {
-    color: var(--accent, #2563eb) !important;
-    text-shadow:
-        0 0 6px rgba(37, 99, 235, 0.6),
-        0 0 12px rgba(37, 99, 235, 0.35);
-    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
-}
-</style>
-<style id="modern-visual-fix">
-/* ==== 7. Плавный скролл + отступ у заголовков ==== */
-html { scroll-behavior: smooth; }
-.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
-
-/* ==== 8. Радиальный градиент на фоне ==== */
-body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
-        var(--bg) !important;
-}
-:root.light-mode body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
-        var(--bg) !important;
-}
-
-/* ==== 3. «Стеклянная» шапка ==== */
-@media (prefers-reduced-motion: no-preference) {
-    .header {
-        background: rgba(30, 53, 69, 0.72) !important;
-        backdrop-filter: blur(14px) saturate(140%);
-        -webkit-backdrop-filter: blur(14px) saturate(140%);
-        border-bottom: 1px solid var(--border);
-    }
-    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
-}
-
-/* ==== 5. Скелетоны для формул ==== */
-.skeleton {
-    display: inline-block;
-    min-width: 60px;
-    height: 1.1em;
-    vertical-align: middle;
-    border-radius: 6px;
-    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
-    background-size: 200% 100%;
-    animation: shimmerSk 1.2s infinite linear;
-}
-@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
-
-/* ==== 6. Чипы категорий в поиске ==== */
-.search-result-category {
-    display: inline-block;
-    padding: 2px 10px;
-    margin-top: 4px;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    color: #fff;
-    background: var(--accent, #3b82f6);
-}
-.search-result-category.cat-mech  { background: #3b82f6; }
-.search-result-category.cat-thermo{ background: #f59e0b; }
-.search-result-category.cat-elec  { background: #eab308; }
-.search-result-category.cat-other { background: #64748b; }
-
-/* ==== 4. Нижняя навигация ==== */
-.bottom-nav {
-    position: fixed;
-    left: 50%;
-    bottom: 14px;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 22px;
-    background: rgba(30, 53, 69, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
-    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
-    z-index: 900;
-    transition: background 0.3s, border 0.3s;
-}
-:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
-.bottom-nav a, .bottom-nav button {
-    display: flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px; border-radius: 14px;
-    border: none; background: transparent;
-    color: var(--text-secondary); font-size: 22px;
-    cursor: pointer; text-decoration: none;
-    transition: all 0.2s;
-}
-.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
-    background: rgba(59,130,246,0.15);
-    color: var(--accent);
-    transform: translateY(-2px);
-}
-body { padding-bottom: 78px; }
-
-/* ==== 10. Круг смены темы ==== */
-.theme-circle {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    background: var(--bg);
-    transform: scale(0);
-    opacity: 0.95;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
-}
-.theme-circle.expand { transform: scale(1); opacity: 0; }
-
-/* ==== 2. Ripple при тапе ==== */
-.ripple-host { position: relative !important; overflow: hidden !important; }
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(59,130,246,0.35);
-    transform: scale(0);
-    animation: rippleAnim 0.6s ease-out forwards;
-    pointer-events: none;
-    z-index: 0;
-}
-@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
-:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
-</style>
-<style id="search-clean-fix">
-/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
-.search-result-icon {
-    display: none !important;
-}
-
-/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
-.search-results {
-    scrollbar-width: none;          /* Firefox */
-    -ms-overflow-style: none;       /* IE/Edge */
-}
-.search-results::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-}
-
-/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
-body::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-}
-body {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-</style>
-<style id="nav-back-hide-index">
-/* На главной кнопка «Назад» не нужна */
-body.is-index .nav-back-btn { display: none !important; }
-</style>
-<style id="bottom-nav-autohide">
-/* Автоскрытие нижней панели при скролле вниз */
-.bottom-nav {
-    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
-}
-.bottom-nav.nav-hidden {
-    transform: translate(-50%, 120%);
-    opacity: 0;
-    pointer-events: none;
-}
-/* На главной панель всегда видна */
-body.is-index .bottom-nav.nav-hidden {
-    transform: translate(-50%, 0);
-    opacity: 1;
-    pointer-events: auto;
-}
-</style>
-<style id="fav-nav-yellow">
-/* Избранное в нижней панели — жёлтое выделение, когда активно */
-.bottom-nav a[href="favorites.html"].active,
-.bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(250, 204, 21, 0.18) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover,
-.bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(250, 204, 21, 0.28) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(234, 179, 8, 0.18) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(234, 179, 8, 0.28) !important;
-    color: #92400e !important;
-}
-/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
-
-</style>
-<style id="nav-order-fix">
-/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
-.bottom-nav { display: flex; align-items: center; }
-.bottom-nav .nav-back-btn { order: 1; }
-.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
-.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
-.bottom-nav a[href="favorites.html"] { order: 4; }
-
-/* Звезда активна — жёлтая */
-.bottom-nav a[href="favorites.html"].active {
-    background: rgba(250, 204, 21, 0.20) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(250, 204, 21, 0.30) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active {
-    background: rgba(234, 179, 8, 0.20) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(234, 179, 8, 0.30) !important;
-    color: #92400e !important;
-}
-</style>
-<style id="unified-buttons">
-/* ==== Единый стиль кнопок ==== */
-
-/* База для всех кнопок */
-.btn-primary,
-.btn-secondary,
-.btn-danger,
-.show-solution-btn,
-.btn-reset,
-.model-tab,
-.clear-all-btn,
-.search-clear,
-.back-link,
-.fullscreen-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 8px 18px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: inherit;
-    line-height: 1.2;
-    border: 1px solid transparent;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s, border-color 0.2s,
-                box-shadow 0.2s, transform 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    white-space: nowrap;
-}
-
-/* Hover / active — общий отклик */
-.btn-primary:hover,
-.btn-secondary:hover,
-.btn-danger:hover,
-.show-solution-btn:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover,
-.back-link:hover,
-.fullscreen-btn:hover {
-    transform: translateY(-1px);
-}
-.btn-primary:active,
-.btn-secondary:active,
-.btn-danger:active,
-.show-solution-btn:active,
-.btn-reset:active,
-.model-tab:active,
-.clear-all-btn:active,
-.back-link:active,
-.fullscreen-btn:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* ==== PRIMARY (синий акцент) ==== */
-.btn-primary,
-.show-solution-btn,
-.back-link {
-    background: var(--accent, #3b82f6);
-    color: #fff;
-    border-color: var(--accent, #3b82f6);
-}
-.btn-primary:hover,
-.show-solution-btn:hover,
-.back-link:hover {
-    background: var(--accent-hover, #60a5fa);
-    border-color: var(--accent-hover, #60a5fa);
-    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
-}
-:root.light-mode .btn-primary,
-:root.light-mode .show-solution-btn,
-:root.light-mode .back-link {
-    background: var(--accent, #2563eb);
-    border-color: var(--accent, #2563eb);
-}
-:root.light-mode .btn-primary:hover,
-:root.light-mode .show-solution-btn:hover,
-:root.light-mode .back-link:hover {
-    background: var(--accent-hover, #3b82f6);
-    border-color: var(--accent-hover, #3b82f6);
-}
-
-/* ==== SECONDARY (нейтральный) ==== */
-.btn-secondary,
-.btn-reset,
-.model-tab,
-.clear-all-btn {
-    background: var(--menu-item-hover, #233e50);
-    color: var(--text, #fff);
-    border-color: var(--border, rgba(59,130,246,0.15));
-}
-.btn-secondary:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover {
-    background: var(--group-header-bg, #1a3a5a);
-    border-color: var(--accent, #3b82f6);
-    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
-}
-:root.light-mode .btn-secondary,
-:root.light-mode .btn-reset,
-:root.light-mode .model-tab,
-:root.light-mode .clear-all-btn {
-    background: var(--menu-item-hover, #f0f4fa);
-    color: var(--text, #1a2a3f);
-}
-
-/* Активный таб — как primary */
-.model-tab.active {
-    background: var(--accent, #3b82f6) !important;
-    color: #fff !important;
-    border-color: var(--accent, #3b82f6) !important;
-    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
-}
-.model-tab.active:hover {
-    background: var(--accent-hover, #60a5fa) !important;
-    border-color: var(--accent-hover, #60a5fa) !important;
-}
-
-/* ==== DANGER (красный) ==== */
-.btn-danger,
-.clear-all-btn.danger,
-.clear-all-btn:hover {
-    background: #ef4444 !important;
-    color: #fff !important;
-    border-color: #ef4444 !important;
-}
-.btn-danger:hover,
-.clear-all-btn.danger:hover,
-.clear-all-btn:hover {
-    background: #dc2626 !important;
-    border-color: #dc2626 !important;
-    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
-}
-
-/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
-.search-clear {
-    background: transparent;
-    border: none;
-    padding: 6px 10px;
-    min-height: auto;
-    color: var(--text-secondary, #8ba5b8);
-    border-radius: 50%;
-}
-.search-clear:hover {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--accent, #3b82f6);
-    transform: none;
-}
-
-/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
-.fullscreen-btn {
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.25);
-    font-size: 20px;
-}
-.fullscreen-btn:hover {
-    background: var(--accent, #3b82f6);
-    border-color: var(--accent, #3b82f6);
-}
-
-/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
-.remove-fav {
-    border-radius: 50%;
-    min-height: 32px;
-    min-width: 32px;
-    padding: 4px 8px;
-}
-.remove-fav:hover {
-    background: rgba(239, 68, 68, 0.15) !important;
-    color: #ef4444 !important;
-}
-
-/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
-.btn-link {
-    background: transparent;
-    border: none;
-    color: var(--accent, #3b82f6);
-    padding: 0;
-    min-height: auto;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-.btn-link:hover {
-    color: var(--accent-hover, #60a5fa);
-    transform: none;
-    box-shadow: none;
-}
-</style>
-<style id="page-fade-in">
-/* ==== Плавное появление страницы (fade-in) ==== */
-
-/* Мягкий вход всей страницы */
-body {
-    animation: pageFade 0.3s ease-out;
-}
-@keyframes pageFade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Контент чуть «подъезжает» снизу */
-.container,
-.main-content {
-    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-}
-@keyframes pageFadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Если в системе включено «уменьшить движение» — анимации отключаем */
-@media (prefers-reduced-motion: reduce) {
-    body,
-    .container,
-    .main-content {
-        animation: none !important;
-    }
-}
-</style>
-<style id="share-btn-right">
-/* Прижимаем кнопку «Поделиться» к правому краю панели */
-.bottom-nav button[title="Поделиться"] {
-    order: 99 !important;
-    margin-left: auto !important;
-}
-</style>
-<style id="no-tap-highlight">
-/* Убираем системный голубой/серый прямоугольник при тапе */
-* {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-}
-a, button, div, span, label, input, textarea, select {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-}
-</style>
-<style id="no-tap-highlight-accordion">
-/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
-.section-title,
-.group-header,
-.menu-item,
-.submenu-item,
-.model-tab,
-.search-result-item {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-    user-select: none;
-    -webkit-user-select: none;
-    cursor: pointer;
-}
-
-/* Лёгкий отклик при нажатии (вместо системного квадратика) */
-.section-title:active,
-.group-header:active {
-    transform: scale(0.99);
-    transition: transform 0.1s;
-}
-</style>
-<style id="fix-nav-bounce">
-    /* Отключаем сдвиги и пружины у кнопок нижней панели */
-    .bottom-nav a, .bottom-nav button {
-        transform: none !important;
-        transition: background 0.2s ease, color 0.2s ease !important;
-    }
-    .bottom-nav a:active, .bottom-nav button:active, 
-    .bottom-nav a:focus, .bottom-nav button:focus {
-        transform: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-    }
-</style>
+        (function() {
+            if (!window.THREE) return;
+            const OriginalRenderer = THREE.WebGLRenderer;
+            THREE.WebGLRenderer = function(params) {
+                const r = new OriginalRenderer(params);
+                const q = window.qualitySettings3D || {};
+                if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+                if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+                return r;
+            };
+        })();
+    </script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech { background: #3b82f6; } .search-result-category.cat-thermo{ background: #f59e0b; } .search-result-category.cat-elec { background: #eab308; } .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index">body.is-index .nav-back-btn { display: none !important; }</style>
+    <style id="bottom-nav-autohide">.bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; } .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; } body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }</style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; } .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; } .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; } .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right">.bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; }</style>
+    <style id="no-tap-highlight">* { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; } a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }</style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -1066,9 +611,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
                 <div id="sol1" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $v = 108$ км/ч</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $v$ (м/с)</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $v = 108$ км/ч</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $v$ (м/с)</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> 1 км = 1000 м, 1 ч = 3600 с.</div>
                     <div class="step"><strong>Шаг 2.</strong> Подставляем в формулу перевода:<br><span class="formula">$v = 108 \cdot \frac{1000}{3600} \text{ м/с}$</span></div>
                     <div class="step"><strong>Шаг 3.</strong> Сокращаем: $\frac{1000}{3600} = \frac{5}{18}$.<br><span class="formula">$v = 108 \cdot \frac{5}{18} = 30 \text{ м/с}$</span></div>
@@ -1084,9 +629,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
                 <div id="sol2" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $v = 340$ м/с</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $v$ (км/ч)</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $v = 340$ м/с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $v$ (км/ч)</div>
+                    </div>
                     <div class="step"><span class="formula">$v = 340 \cdot \frac{3600}{1000} = 340 \cdot 3,6 = 1224 \text{ км/ч}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Чтобы перевести м/с в км/ч, нужно число умножить на 3,6.</div>
                     <div class="answer">✅ Ответ: $1224$ км/ч</div>
@@ -1100,9 +645,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
                 <div id="sol3" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 780$ г $= 0,78$ кг, $V = 100$ см³ $= 0,0001$ м³</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\rho$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 780$ г $= 0,78$ кг, $V = 100$ см³ $= 0,0001$ м³</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\rho$</div>
+                    </div>
                     <div class="step"><strong>Формула плотности:</strong> $\rho = \frac{m}{V}$ (эту формулу ученики знают из курса 7 класса).</div>
                     <div class="step"><span class="formula">$\rho = \frac{0,78}{0,0001} = 7800 \text{ кг/м}^3$</span></div>
                     <div class="answer">✅ Ответ: $7800$ кг/м³</div>
@@ -1161,9 +706,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
                 <div id="sol7" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $S = 18$ м²</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $S$ (см²)</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $S = 18$ м²</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $S$ (см²)</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> 1 м = 100 см, значит 1 м² = 100² = 10000 см².</div>
                     <div class="step"><span class="formula">$S = 18 \cdot 10000 = 180000 \text{ см}^2$</span></div>
                     <div class="answer">✅ Ответ: $180 000$ см²</div>
@@ -1177,9 +722,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
                 <div id="sol8" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $v = 300 000$ км/с</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $v$ (м/с)</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $v = 300 000$ км/с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $v$ (м/с)</div>
+                    </div>
                     <div class="step"><span class="formula">$v = 300000 \cdot 1000 = 300000000 \text{ м/с} = 3 \cdot 10^8 \text{ м/с}$</span></div>
                     <div class="answer">✅ Ответ: $3 \cdot 10^8$ м/с</div>
                 </div>
@@ -1192,9 +737,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
                 <div id="sol9" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $t = 2,5$ ч</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $t$ (с)</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $t = 2,5$ ч</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $t$ (с)</div>
+                    </div>
                     <div class="step"><span class="formula">$t = 2,5 \cdot 3600 = 9000 \text{ с}$</span></div>
                     <div class="answer">✅ Ответ: $9000$ с</div>
                 </div>
@@ -1220,9 +765,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol11')">📖 Показать решение</button>
                 <div id="sol11" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 250$ г</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $m$ (кг)</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 250$ г</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $m$ (кг)</div>
+                    </div>
                     <div class="step"><span class="formula">$m = 250 \cdot 0,001 = 0,25 \text{ кг}$</span></div>
                     <div class="answer">✅ Ответ: $0,25$ кг</div>
                 </div>
@@ -1240,8 +785,6 @@ a, button, div, span, label, input, textarea, select {
                     <div class="answer">✅ Ответ: закон</div>
                 </div>
             </div>
-
-            <!-- НОВЫЕ ЗАДАЧИ 13-17 на определение этапов научного метода -->
 
             <!-- Задача 13 -->
             <div class="task-block">
@@ -1311,6 +854,114 @@ a, button, div, span, label, input, textarea, select {
         </div>
     </div>
 
+    <!-- ===== ЗАДАЧИ ДЛЯ САМОСТОЯТЕЛЬНОЙ РАБОТЫ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Задачи для самостоятельной работы (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-1</div>
+                <div class="task-condition"><strong>Условие:</strong> Автомобиль движется со скоростью $v = 144$ км/ч. Выразите эту скорость в метрах в секунду.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr1')">💡 Подсказка и ответ</button>
+                <div id="sr1" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Умножьте на $\frac{5}{18}$.</div>
+                    <div class="answer">✅ Ответ: $144 \cdot \frac{5}{18} = 40$ м/с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-2</div>
+                <div class="task-condition"><strong>Условие:</strong> Скорость пули составляет $800$ м/с. Представьте эту скорость в километрах в час.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr2')">💡 Подсказка и ответ</button>
+                <div id="sr2" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Умножьте на 3,6.</div>
+                    <div class="answer">✅ Ответ: $800 \cdot 3.6 = 2880$ км/ч</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-3</div>
+                <div class="task-condition"><strong>Условие:</strong> Учёный заметил, что лёд тает быстрее в тёплой воде, и выдвинул предположение: «Скорость таяния зависит от температуры окружающей среды». Какой этап научного познания он прошёл?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr3')">💡 Подсказка и ответ</button>
+                <div id="sr3" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Он сначала наблюдал, потом выдвинул предположение.</div>
+                    <div class="answer">✅ Ответ: выдвинул гипотезу</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-4</div>
+                <div class="task-condition"><strong>Условие:</strong> Группа учёных провела серию опытов, чтобы проверить, как сила тока зависит от напряжения. Они меняли напряжение и измеряли силу тока, записывая данные. Как называется эта деятельность?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr4')">💡 Подсказка и ответ</button>
+                <div id="sr4" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Они активно вмешивались в процесс, меняя условия.</div>
+                    <div class="answer">✅ Ответ: эксперимент</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-5</div>
+                <div class="task-condition"><strong>Условие:</strong> Площадь стола равна $S = 1{,}5$ м². Переведите это значение в квадратные сантиметры.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr5')">💡 Подсказка и ответ</button>
+                <div id="sr5" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> 1 м² = 10 000 см².</div>
+                    <div class="answer">✅ Ответ: $1.5 \cdot 10000 = 15000$ см²</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-6</div>
+                <div class="task-condition"><strong>Условие:</strong> Скорость света в вакууме равна $3 \cdot 10^8$ м/с. Запишите эту скорость в километрах в секунду.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr6')">💡 Подсказка и ответ</button>
+                <div id="sr6" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Разделите на 1000.</div>
+                    <div class="answer">✅ Ответ: $3 \cdot 10^8 / 1000 = 3 \cdot 10^5$ км/с = $300 000$ км/с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-7</div>
+                <div class="task-condition"><strong>Условие:</strong> Урок длится 45 минут. Выразите это время в секундах.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr7')">💡 Подсказка и ответ</button>
+                <div id="sr7" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> 1 минута = 60 секунд.</div>
+                    <div class="answer">✅ Ответ: $45 \cdot 60 = 2700$ с</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-8</div>
+                <div class="task-condition"><strong>Условие:</strong> Масса яблока равна $m = 150$ г. Переведите эту массу в килограммы.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr8')">💡 Подсказка и ответ</button>
+                <div id="sr8" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> 1 г = 0,001 кг.</div>
+                    <div class="answer">✅ Ответ: $150 \cdot 0.001 = 0.15$ кг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-9</div>
+                <div class="task-condition"><strong>Условие:</strong> Учёный в течение многих лет наблюдал за звёздами, фиксируя их положение. На основе этих наблюдений он сформулировал математическую формулу, описывающую движение планет. Как называется эта формула с точки зрения научного метода?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr9')">💡 Подсказка и ответ</button>
+                <div id="sr9" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Формула, подтверждённая наблюдениями и описывающая закономерность — это <strong>закон</strong>.</div>
+                    <div class="answer">✅ Ответ: закон</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📗 Задача СР-10</div>
+                <div class="task-condition"><strong>Условие:</strong> Объясните, почему в кабинете физики нельзя включать электроприборы без разрешения учителя.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('sr10')">💡 Подсказка и ответ</button>
+                <div id="sr10" class="task-solution">
+                    <div class="step explanation"><strong>Подсказка:</strong> Вспомните правила ТБ при работе с электричеством.</div>
+                    <div class="answer">✅ Ответ: Потому что неумелое обращение с электроприборами может привести к короткому замыканию, поражению электрическим током или пожару.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div class="note-box">
         <strong>📌 Запомните:</strong><br>
         1 км/ч = $\frac{1000}{3600}$ м/с = $\frac{5}{18}$ м/с ≈ 0,278 м/с<br>
@@ -1327,18 +978,30 @@ a, button, div, span, label, input, textarea, select {
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
-    
-    (function(){if(localStorage.getItem('mathTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
-    
+    // Безопасная проверка темы
+    (function(){
+        if(localStorage.getItem('mathTheme')==='light' || localStorage.getItem('physicsTheme')==='light'){
+            document.documentElement.classList.add('light-mode');
+            var btn = document.getElementById('themeBtn');
+            if (btn) btn.textContent = '☀️';
+        }
+    })();
+
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть решение';
+        }
+    }
 </script>
 
 <!-- 3D-модель: Научный метод (5 этапов: Наблюдение → Гипотеза → Эксперимент → Теория → Закон) -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     const container = document.getElementById('container-method');
     const canvas = document.getElementById('canvas-method');
     if (container && canvas) {
@@ -1348,7 +1011,7 @@ a, button, div, span, label, input, textarea, select {
         camera.position.set(5, 4, 8);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1356,31 +1019,20 @@ a, button, div, span, label, input, textarea, select {
         container.style.position = 'relative';
         container.appendChild(labelRenderer.domElement);
 
-        function getLabelBg() {
-            const isLight = document.documentElement.classList.contains('light-mode');
-            return isLight ? 'rgba(255,255,255,0.92)' : 'rgba(10,15,26,0.88)';
-        }
-
-        function getLabelColor() {
-            const isLight = document.documentElement.classList.contains('light-mode');
-            return isLight ? '#1a2a3f' : '#ffffff';
-        }
-
         function makeLabel(text, color, pos, fs = '0.85rem') {
             const div = document.createElement('div');
             div.textContent = text;
-            div.style.color = getLabelColor();
+            div.style.color = 'var(--text)'; // Адаптивный цвет через CSS-переменную
             div.style.fontSize = fs;
             div.style.fontWeight = 'bold';
             div.style.fontFamily = "'Segoe UI', sans-serif";
-            div.style.background = getLabelBg();
+            div.style.background = 'var(--label-bg)'; // Адаптивный фон
             div.style.padding = '4px 12px';
             div.style.borderRadius = '20px';
             div.style.border = '2px solid ' + color;
             div.style.backdropFilter = 'blur(4px)';
-            div.style.transition = 'background 0.3s ease, color 0.3s ease';
             div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.copy(pos);
             return lbl;
         }
@@ -1413,7 +1065,6 @@ a, button, div, span, label, input, textarea, select {
 
         const group = new THREE.Group();
 
-        // ===== 5 точек: Наблюдение, Гипотеза, Эксперимент, Теория, Закон =====
         const o    = new THREE.Vector3(0, 0, 0);
         const obs  = new THREE.Vector3(0, 0, 2.0);
         const hyp  = new THREE.Vector3(2.0, 0, 0.8);
@@ -1434,19 +1085,19 @@ a, button, div, span, label, input, textarea, select {
         group.add(createLine(o, law, 0xaa66ff));
 
         const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x224466 });
-        const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.12, window.qualitySettings3D.segments, window.qualitySettings3D.segments), sphereMat);
         s1.position.copy(obs);
         group.add(s1);
-        const s2 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        const s2 = new THREE.Mesh(new THREE.SphereGeometry(0.12, window.qualitySettings3D.segments, window.qualitySettings3D.segments), sphereMat);
         s2.position.copy(hyp);
         group.add(s2);
-        const s3 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        const s3 = new THREE.Mesh(new THREE.SphereGeometry(0.12, window.qualitySettings3D.segments, window.qualitySettings3D.segments), sphereMat);
         s3.position.copy(exp);
         group.add(s3);
-        const s4 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        const s4 = new THREE.Mesh(new THREE.SphereGeometry(0.12, window.qualitySettings3D.segments, window.qualitySettings3D.segments), sphereMat);
         s4.position.copy(theo);
         group.add(s4);
-        const s5 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), sphereMat);
+        const s5 = new THREE.Mesh(new THREE.SphereGeometry(0.12, window.qualitySettings3D.segments, window.qualitySettings3D.segments), sphereMat);
         s5.position.copy(law);
         group.add(s5);
 
@@ -1470,7 +1121,7 @@ a, button, div, span, label, input, textarea, select {
             dir.normalize();
             const cone = new THREE.Mesh(
                 new THREE.ConeGeometry(0.05, 0.12, 8),
-                new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: 0.5 })
+                new THREE.MeshStandardMaterial({ color: col, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity })
             );
             cone.position.copy(to.clone().add(dir.clone().multiplyScalar(-0.06)));
             cone.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
@@ -1478,7 +1129,6 @@ a, button, div, span, label, input, textarea, select {
             return g;
         }
 
-        // Стрелки: цепочка этапов + связь Закона с Наблюдением (обратная связь)
         group.add(createArrow(obs, hyp, 0xffaa00));
         group.add(createArrow(hyp, exp, 0xff66aa));
         group.add(createArrow(exp, theo, 0x66aaff));
@@ -1487,9 +1137,9 @@ a, button, div, span, label, input, textarea, select {
 
         scene.add(group);
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.target.set(0.8, 1.0, 0.8);
+        controls.target.set(1, 1, 1); // смотрим в центр
         controls.update();
 
         document.getElementById('fs-method').addEventListener('click', async () => {
@@ -1506,16 +1156,6 @@ a, button, div, span, label, input, textarea, select {
             }
             updateSize();
         });
-
-        const themeObserver = new MutationObserver(() => {
-            const bg = getLabelBg();
-            const color = getLabelColor();
-            document.querySelectorAll('#container-method .css2d-object div').forEach(el => {
-                el.style.background = bg;
-                el.style.color = color;
-            });
-        });
-        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
         function animate() {
             requestAnimationFrame(animate);
@@ -1553,164 +1193,132 @@ a, button, div, span, label, input, textarea, select {
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
     </button>
-    </nav>
+</nav>
 <script>
-/* ==== 5. Скелетоны для формул MathJax ==== */
-(function(){
-    function addSkeletons(){
-        document.querySelectorAll('.formula-block').forEach(function(el){
-            if (el.querySelector('mjx-container')) return;
-            if (el.dataset.sk) return;
-            el.dataset.sk = '1';
-            var s = document.createElement('span');
-            s.className = 'skeleton';
-            s.style.width = (60 + Math.random()*80) + 'px';
-            el.appendChild(s);
-        });
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
-    else addSkeletons();
-    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
-})();
+    /* ==== 5. Скелетоны для формул MathJax ==== */
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
 
-/* ==== 6. Чипы категорий в результатах поиска ==== */
-(function(){
-    function classify(cat){
-        var c = (cat||'').toLowerCase();
-        if (c.indexOf('механик') >= 0) return 'cat-mech';
-        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
-        if (c.indexOf('электр') >= 0) return 'cat-elec';
-        return 'cat-other';
-    }
-    function decorate(){
-        document.querySelectorAll('.search-result-category').forEach(function(el){
-            if (el.dataset.chip) return;
-            el.dataset.chip = '1';
-            el.classList.add(classify(el.textContent));
-        });
-    }
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            decorate();
-        };
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
-    else decorate();
-})();
+    /* ==== 6. Чипы категорий в результатах поиска ==== */
+    (function(){
+        function classify(cat){
+            var c = (cat||'').toLowerCase();
+            if (c.indexOf('механик') >= 0) return 'cat-mech';
+            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+            if (c.indexOf('электр') >= 0) return 'cat-elec';
+            return 'cat-other';
+        }
+        function decorate(){
+            document.querySelectorAll('.search-result-category').forEach(function(el){
+                if (el.dataset.chip) return;
+                el.dataset.chip = '1';
+                el.classList.add(classify(el.textContent));
+            });
+        }
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                decorate();
+            };
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+        else decorate();
+    })();
 
-/* ==== 10. Анимация смены темы «как на iPhone» ==== */
-(function(){
-    function animateThemeChange(x, y){
-        var circle = document.createElement('div');
-        circle.className = 'theme-circle';
-        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
-        circle.style.width = circle.style.height = (maxR*2) + 'px';
-        circle.style.left = (x - maxR) + 'px';
-        circle.style.top  = (y - maxR) + 'px';
-        document.body.appendChild(circle);
-        requestAnimationFrame(function(){ circle.classList.add('expand'); });
-        setTimeout(function(){ circle.remove(); }, 700);
-    }
-    document.addEventListener('click', function(e){
-        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
-        if (!t) return;
-        var r = t.getBoundingClientRect();
-        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
-    }, true);
-})();
+    /* ==== 10. Анимация смены темы «как на iPhone» ==== */
+    (function(){
+        function animateThemeChange(x, y){
+            var circle = document.createElement('div');
+            circle.className = 'theme-circle';
+            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+            circle.style.width = circle.style.height = (maxR*2) + 'px';
+            circle.style.left = (x - maxR) + 'px';
+            circle.style.top  = (y - maxR) + 'px';
+            document.body.appendChild(circle);
+            requestAnimationFrame(function(){ circle.classList.add('expand'); });
+            setTimeout(function(){ circle.remove(); }, 700);
+        }
+        document.addEventListener('click', function(e){
+            var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+            if (!t) return;
+            var r = t.getBoundingClientRect();
+            animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+        }, true);
+    })();
 
-/* ==== 2. Ripple при тапе ==== */
-(function(){
-    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
-    function bind(el){
-        if (el.dataset.rippleBound) return;
-        el.dataset.rippleBound = '1';
-        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
-        el.addEventListener('pointerdown', function(e){
-            var rect = el.getBoundingClientRect();
-            var size = Math.max(rect.width, rect.height);
-            var r = document.createElement('span');
-            r.className = 'ripple';
-            r.style.width = r.style.height = size + 'px';
-            r.style.left = (e.clientX - rect.left - size/2) + 'px';
-            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
-            el.appendChild(r);
-            setTimeout(function(){ r.remove(); }, 650);
-        });
-    }
-    function bindAll(){
-        document.querySelectorAll(sel).forEach(bind);
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
-    else bindAll();
-    /* Перепривязка после поиска */
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            setTimeout(bindAll, 30);
-        };
-    }
-})();
+    /* ==== 2. Ripple при тапе ==== */
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){
+            document.querySelectorAll(sel).forEach(bind);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                setTimeout(bindAll, 30);
+            };
+        }
+    })();
 </script>
 <script src="search-overlay.js"></script>
-<!-- bottom-nav-autohide-script -->
 <script>
-/* Автоскрытие нижней панели при скролле */
-(function(){
-    var nav = document.querySelector('.bottom-nav');
-    if (!nav) return;
-    var lastY = window.scrollY;
-    var threshold = 8;
-    var ticking = false;
-    function onScroll(){
-        var y = window.scrollY;
-        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
-        if (y > lastY && y > 80) {
-            nav.classList.add('nav-hidden');
-        } else {
-            nav.classList.remove('nav-hidden');
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 8;
+        var ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
         }
-        lastY = y;
-        ticking = false;
-    }
-    window.addEventListener('scroll', function(){
-        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
-    }, { passive: true });
-})();
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
 </script>
 <script src="page-search.js"></script>
 <script src="physics-data.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

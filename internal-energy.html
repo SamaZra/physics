@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -125,6 +125,18 @@
             h1{font-size:1.1rem;}
             .section-title{font-size:0.95rem;}
         }
+        .derivation-btn {
+    background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+    font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+    margin-top: 8px; transition: all 0.2s; display: inline-block;
+}
+.derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+.derivation-content {
+    display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+    border-left: 3px solid var(--text-secondary); border-radius: 8px;
+    font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+}
+.derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -137,7 +149,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
 .section-title {
@@ -765,11 +819,19 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$U = N \cdot \bar{E}_k = \dfrac{3}{2}NkT$</span>
                     <span class="f-label">— внутренняя энергия через число молекул</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Средняя кинетическая энергия одной молекулы идеального газа: $\bar{E}_k = \dfrac{3}{2}kT$ (это следует из распределения Максвелла и равнораспределения энергии по степеням свободы). Если в газе $N$ молекул, то суммарная кинетическая энергия всех молекул равна $U = N \cdot \bar{E}_k = N \cdot \dfrac{3}{2}kT = \dfrac{3}{2}NkT$.
+                    </div>
                 </div>
                 <p>Учитывая, что $N = \nu N_A$ и $kN_A = R$, получаем:</p>
                 <div class="formula-block">
                     <span class="f">$U = \dfrac{3}{2}\nu RT = \dfrac{3}{2}\dfrac{m}{M}RT$</span>
                     <span class="f-label">— внутренняя энергия идеального газа</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Из формулы $U = \dfrac{3}{2}NkT$ заменим $N = \nu N_A$ (число молекул через количество вещества и постоянную Авогадро). Получим $U = \dfrac{3}{2}\nu N_A kT$. Поскольку $N_A k = R$ (универсальная газовая постоянная), получаем $U = \dfrac{3}{2}\nu RT$. А так как $\nu = \dfrac{m}{M}$, то $U = \dfrac{3}{2}\dfrac{m}{M}RT$.
+                    </div>
                 </div>
                 <p>где:</p>
                 <ul>
@@ -780,9 +842,9 @@ a, button, div, span, label, input, textarea, select {
                 <p><strong>Важные свойства внутренней энергии:</strong></p>
                 <ul>
                     <li>Зависит только от <strong>температуры</strong> и <strong>количества вещества</strong> (для одноатомного идеального газа).</li>
-                    <li><strong>Не зависит</strong> от объёма и давления по отдельности — только от $T$ (и $\nu$).</li>
+                    <li><strong>Не зависит</strong> от объёма и давления по отдельности — только от $T$, $\nu$ и типа газа (числа степеней свободы $i$). Для идеального газа потенциальная энергия взаимодействия молекул равна нулю, поэтому $U$ не зависит от $V$.</li>
                     <li>Если температура не меняется — внутренняя энергия не меняется (<strong>изотермический процесс</strong>).</li>
-                    <li>При <strong>абсолютном нуле</strong> ($T = 0$ К $= -273$ °C) внутренняя энергия идеального газа равна нулю — молекулы остановились.</li>
+                    <li>При <strong>абсолютном нуле</strong> ($T = 0$ К $= -273$ °C) в классической модели идеального газа внутренняя энергия обращается в нуль — молекулы «останавливаются». (В реальности квантовые эффекты оставляют так называемую нулевую энергию, но в школьной модели ею пренебрегают.)</li>
                 </ul>
             </div>
         </div>
@@ -797,6 +859,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$U = \dfrac{i}{2}\nu RT$</span>
                     <span class="f-label">— общая формула внутренней энергии</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        По теореме о равнораспределении энергии по степеням свободы на каждую степень свободы молекулы приходится энергия $\dfrac{1}{2}kT$. Если у молекулы $i$ степеней свободы, то средняя энергия одной молекулы $\bar{E} = \dfrac{i}{2}kT$. Для $N$ молекул: $U = N \cdot \dfrac{i}{2}kT = \dfrac{i}{2}\nu RT$. Для одноатомного газа $i=3$ (только поступательные), для двухатомного $i=5$ (3 поступательные + 2 вращательные), для многоатомного $i=6$ (3 поступательные + 3 вращательные).
+                    </div>
                 </div>
                 <p>где $i$ — число степеней свободы молекулы:</p>
                 <ul>
@@ -833,6 +899,7 @@ a, button, div, span, label, input, textarea, select {
                     <span class="f">$Q = \Delta U + A_{газа}$</span>
                     <span class="f-label">— теплота идёт на изменение энергии и работу</span>
                 </div>
+                <p><strong>Важно:</strong> $A_{внеш}$ — работа <em>внешних сил над газом</em> (положительна, если газ сжимают). $A_{газа}$ — работа <em>самого газа</em> (положительна, если газ расширяется). Они связаны: $A_{газа} = -A_{внеш}$. Поэтому $\Delta U = Q + A_{внеш} = Q - A_{газа}$.</p>
             </div>
         </div>
     </div>
@@ -1015,7 +1082,7 @@ a, button, div, span, label, input, textarea, select {
                 </div>
                     <div class="step"><strong>Шаг 1.</strong> $\bar{E}_k = \dfrac{3}{2}kT = \dfrac{3}{2} \cdot 1{,}38 \cdot 10^{-23} \cdot 500 \approx 1{,}04 \cdot 10^{-20} \text{ Дж}$</div>
                     <div class="step"><strong>Шаг 2.</strong> $N = \nu N_A = 1 \cdot 6{,}02 \cdot 10^{23} = 6{,}02 \cdot 10^{23}$.</div>
-                    <div class="step"><strong>Шаг 3.</strong> Проверка: $U = N \bar{E}_k = 6{,}02 \cdot 10^{23} \cdot 1{,}04 \cdot 10^{-20} \approx 6260$ Дж. Совпадает с формулой $\dfrac{3}{2}\nu RT = \dfrac{3}{2} \cdot 8{,}31 \cdot 500 \approx 6233$ Дж.</div>
+                    <div class="step"><strong>Шаг 3.</strong> Проверка: $U = N \bar{E}_k = 6{,}02 \cdot 10^{23} \cdot 1{,}04 \cdot 10^{-20} \approx 6260$ Дж. Примерно совпадает с формулой $\dfrac{3}{2}\nu RT = \dfrac{3}{2} \cdot 8{,}31 \cdot 500 \approx 6233$ Дж (расхождение из-за округления).</div>
                     <div class="step explanation"><strong>Пояснение:</strong> Оба пути дают один и тот же результат — это хорошая проверка.</div>
                     <div class="answer">✅ Ответ: $\bar{E}_k \approx 1{,}04 \cdot 10^{-20}$ Дж; $N = 6{,}02 \cdot 10^{23}$</div>
                 </div>
@@ -1175,14 +1242,18 @@ a, button, div, span, label, input, textarea, select {
 <script>
     function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
 
-    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+    (function(){
+    if(localStorage.getItem('physicsTheme')==='light'){
+        document.documentElement.classList.add('light-mode');
+        var btn = document.getElementById('themeBtn');
+        if (btn) btn.textContent = '☀️';
+    }
+})();
 
 </script>
 
 <!-- 3D-модель внутренней энергии -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-internal');
@@ -1391,7 +1462,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();

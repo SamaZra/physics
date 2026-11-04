@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -134,6 +134,18 @@
             h1{font-size:1.1rem;}
             .section-title{font-size:0.95rem;}
         }
+                .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -146,7 +158,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
     <style id="titles-center-fix">
         /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
         .section-title {
@@ -796,12 +850,20 @@
                 <div class="formula-block">
                     <span class="f">$\vec{E} = \dfrac{\vec{F}}{q_0}$</span>
                     <span class="f-label">— напряжённость (Н/Кл или В/м)</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Электрическое поле невидимо, поэтому его характеризуют по действию на пробный заряд. Пробный заряд \(q_0\) — это маленький положительный заряд, который не искажает поле. Сила, действующая на него, зависит от величины заряда. Чтобы получить характеристику самого поля (не зависящую от заряда), делят силу на этот заряд: \(E = F/q_0\). Единица измерения Н/Кл эквивалентна В/м.
+                    </div>
                 </div>
                 <p>Напряжённость — <strong>векторная величина</strong>. Направление вектора $\vec{E}$ совпадает с направлением силы, действующей на <strong>положительный</strong> заряд.</p>
                 <p>Для поля точечного заряда $q$ напряжённость равна:</p>
                 <div class="formula-block">
                     <span class="f">$E = k \dfrac{|q|}{r^2}$</span>
                     <span class="f-label">— напряжённость поля точечного заряда</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Подставим в определение \(E = F/q_0\) силу Кулона, действующую на пробный заряд: \(F = k \cdot (|q| \cdot q_0) / r^2\). Тогда \(E = \frac{k \cdot |q| \cdot q_0 / r^2}{q_0}\). Пробный заряд сокращается, и остаётся \(E = k |q| / r^2\). Это значит, что поле зависит только от заряда-источника и расстояния до него.
+                    </div>
                 </div>
                 <p><strong>Принцип суперпозиции:</strong> напряжённость поля системы зарядов равна векторной сумме напряжённостей полей каждого заряда:</p>
                 <div class="formula-block">
@@ -1304,11 +1366,7 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 1: ВЕКТОР НАПРЯЖЁННОСТИ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-vector');
         const canvas = document.getElementById('canvas-vector');
@@ -1322,7 +1380,7 @@
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1353,7 +1411,7 @@
 
         // Центральный заряд
         const sourceCharge = new THREE.Mesh(
-            new THREE.SphereGeometry(0.8, 32, 32),
+            new THREE.SphereGeometry(0.8, window.qualitySettings3D.segments, window.qualitySettings3D.segments),
             new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111 })
         );
         group.add(sourceCharge);
@@ -1430,7 +1488,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1448,11 +1506,7 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 2: ПОЛЯРИЗАЦИЯ ДИЭЛЕКТРИКА ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-dielectric');
         const canvas = document.getElementById('canvas-dielectric');
@@ -1466,7 +1520,7 @@
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1515,7 +1569,7 @@
             div.style.color = color;
             div.style.fontSize = '2rem';
             div.style.fontWeight = 'bold';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.set(-4.5, yPos, 0);
             return lbl;
         }
@@ -1561,9 +1615,9 @@
             const molGroup = new THREE.Group();
 
             // Положительный заряд снизу, отрицательный сверху
-            const pos = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), posMat);
+            const pos = new THREE.Mesh(new THREE.SphereGeometry(0.2, window.qualitySettings3D.segments, window.qualitySettings3D.segments), posMat);
             pos.position.y = -0.3;
-            const neg = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), negMat);
+            const neg = new THREE.Mesh(new THREE.SphereGeometry(0.2, window.qualitySettings3D.segments, window.qualitySettings3D.segments), negMat);
             neg.position.y = 0.3;
 
             molGroup.add(pos);
@@ -1625,7 +1679,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1658,11 +1712,7 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 3: ОДНОРОДНОЕ ПОЛЕ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-uniform');
         const canvas = document.getElementById('canvas-uniform');
@@ -1676,7 +1726,7 @@
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1725,7 +1775,7 @@
             div.style.color = color;
             div.style.fontSize = '2rem';
             div.style.fontWeight = 'bold';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.set(-3.5, yPos, 0);
             return lbl;
         }
@@ -1791,7 +1841,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1809,11 +1859,7 @@
 </script>
 
 <!-- ===== МОДЕЛЬ 4: СТРОЕНИЕ ДИЭЛЕКТРИКА ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-structure');
         const canvas = document.getElementById('canvas-structure');
@@ -1827,7 +1873,7 @@
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1876,7 +1922,7 @@
             div.style.color = color;
             div.style.fontSize = '2rem';
             div.style.fontWeight = 'bold';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.set(-4.5, yPos, 0);
             return lbl;
         }
@@ -1895,11 +1941,11 @@
             const atom = new THREE.Group();
 
             // Ядро (положительное) - остаётся на месте
-            const nucleus = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), nucleusMat);
+            const nucleus = new THREE.Mesh(new THREE.SphereGeometry(0.15, window.qualitySettings3D.segments, window.qualitySettings3D.segments), nucleusMat);
             atom.add(nucleus);
 
             // Электронное облако (отрицательное) - смещается вверх при подаче поля
-            const electron = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), electronMat.clone());
+            const electron = new THREE.Mesh(new THREE.SphereGeometry(0.3, window.qualitySettings3D.segments, window.qualitySettings3D.segments), electronMat.clone());
             electron.material.transparent = true;
             electron.material.opacity = 0.6;
             atom.add(electron);
@@ -1950,7 +1996,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();

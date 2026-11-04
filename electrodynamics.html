@@ -136,7 +136,7 @@
             transition: max-height 0.4s ease;
             background: var(--submenu-level);
         }
-        .submenu.open { max-height: 1400px; }
+        .submenu.open { max-height: 2500px; }
 
         .submenu-item {
     display: flex;
@@ -1218,7 +1218,19 @@ a, button, div, span, label, input, textarea, select {
 })();
 </script>
 <script src="page-search.js"></script>
-<script src="physics-data.js"></script></body>
+<script src="physics-data.js"></script>
+// Подсветка текущей страницы в меню
+document.addEventListener('DOMContentLoaded', function() {
+var currentPage = window.location.pathname.split('/').pop();
+document.querySelectorAll('.submenu-item').forEach(function(link) {
+if (link.getAttribute('href') === currentPage) {
+link.style.borderLeftColor = 'var(--accent)';
+link.style.background = 'var(--menu-item-hover)';
+link.style.boxShadow = 'inset 4px 0 0 0 var(--accent)';
+}
+});
+});
+</body>
 </html>
 
 

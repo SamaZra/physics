@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Законы постоянного тока — задачи с профессиональной направленностью</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+            --badge-welder: #ff6644;
+            --badge-electric: #ffcc00;
+            --badge-auto: #44aaff;
+            --badge-mech: #aa66ff;
+            --badge-it: #44ff88;
+            --self-border: #3b82f6;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+            --badge-welder: #dc2626;
+            --badge-electric: #ca8a04;
+            --badge-auto: #2563eb;
+            --badge-mech: #7c3aed;
+            --badge-it: #059669;
+            --self-border: #2563eb;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .intro-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:14px 16px;margin:12px 0;transition:background 0.3s;}
+        .intro-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .intro-card ul{color:var(--text);padding-left:20px;line-height:1.8;}
+        .intro-card .important{color:var(--special-border);font-weight:700;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:600000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .prof-header{display:flex;align-items:center;gap:10px;background:var(--info-bg);border-left:5px solid var(--special-border);border-radius:14px;padding:12px 16px;margin:18px 0 10px 0;}
+        .prof-header .prof-icon{font-size:1.8rem;}
+        .prof-header .prof-title{font-size:1.1rem;font-weight:700;color:var(--text);}
+        .prof-header .prof-sub{font-size:0.8rem;color:var(--text-secondary);margin-top:2px;}
+        .prof-header.welder{border-left-color:var(--badge-welder);}
+        .prof-header.electric{border-left-color:var(--badge-electric);}
+        .prof-header.auto{border-left-color:var(--badge-auto);}
+        .prof-header.mech{border-left-color:var(--badge-mech);}
+        .prof-header.it{border-left-color:var(--badge-it);}
+        .prof-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;margin-left:auto;}
+        .prof-badge.welder{background:var(--badge-welder);}
+        .prof-badge.electric{background:var(--badge-electric);}
+        .prof-badge.auto{background:var(--badge-auto);}
+        .prof-badge.mech{background:var(--badge-mech);}
+        .prof-badge.it{background:var(--badge-it);}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block.hard{border-left:5px solid #ff4444;background:linear-gradient(135deg, var(--task-bg) 0%, rgba(255,68,68,0.05) 100%);}
+        .task-block.self{border-left:5px solid var(--self-border);background:linear-gradient(135deg, var(--task-bg) 0%, rgba(59,130,246,0.06) 100%);}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .hard-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:#ff4444;margin-left:8px;vertical-align:middle;}
+        .self-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;color:white;background:var(--self-border);margin-left:8px;vertical-align:middle;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid var(--self-border);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:var(--self-border);}
+        .hint-box mjx-container{font-size:1rem !important;}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        @media(max-width:700px){
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech  { background: #3b82f6; }
+        .search-result-category.cat-thermo{ background: #f59e0b; }
+        .search-result-category.cat-elec  { background: #eab308; }
+        .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index"> body.is-index .nav-back-btn { display: none !important; } </style>
+    <style id="bottom-nav-autohide">
+        .bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; }
+        body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+    </style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; }
+        .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+        .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+        .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right"> .bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; } </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; }
+        a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Законы постоянного тока — задачи с профессиональной направленностью</h1>
+
+    <div class="intro-card">
+        <p><strong>📌 О разделе.</strong> Задачи по теме «Законы постоянного тока», связанные с реальными профессиональными ситуациями.</p>
+        <p>По каждой специальности — <strong>5 задач</strong>:</p>
+        <ul>
+            <li>🔴 1 задача <strong>сложная</strong> — с подробным решением.</li>
+            <li>🟠 2 задачи <strong>обычные</strong> — с подробным решением.</li>
+            <li>🔵 2 задачи <strong>для самостоятельного решения</strong> — только условие и подсказка.</li>
+        </ul>
+    </div>
+
+    <!-- ===== СВАРЩИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔧 Задачи для сварщика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header welder">
+                <div class="prof-icon">🔧</div>
+                <div>
+                    <div class="prof-title">Сварочное производство</div>
+                    <div class="prof-sub">Сварочный ток, сопротивление, нагрев</div>
+                </div>
+                <span class="prof-badge welder">Сварщик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Сила тока при сварке</div>
+                <div class="task-condition"><strong>Ситуация:</strong> При ручной дуговой сварке через электрод проходит заряд $q = 600$ Кл за время $t = 2$ мин. Найдите силу сварочного тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('w1')">📖 Показать решение</button>
+                <div id="w1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 600$ Кл, $t = 2$ мин = 120 с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Сила тока: $I = \dfrac{q}{t}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{600}{120} = 5 \text{ А}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 5 А — малый сварочный ток, обычно для сварки тонкого металла.</div>
+                    <div class="answer">✅ Ответ: $I = 5$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Сопротивление сварочного кабеля</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Сварочный кабель длиной $l = 20$ м имеет сечение $S = 25$ мм². Удельное сопротивление меди $\rho = 0{,}017$ Ом·мм²/м. Найдите сопротивление кабеля.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('w2')">📖 Показать решение</button>
+                <div id="w2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $l = 20$ м, $S = 25$ мм², $\rho = 0{,}017$ Ом·мм²/м</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = \rho \dfrac{l}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 0{,}017 \cdot \dfrac{20}{25} = 0{,}0136 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Малое сопротивление — важно, чтобы кабель не грелся.</div>
+                    <div class="answer">✅ Ответ: $R \approx 0{,}0136$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Нагрев кабеля при сварке <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Сварочный ток $I = 200$ А, сопротивление кабеля $R = 0{,}0136$ Ом. Сварка длится $t = 30$ с. Найдите: а) количество теплоты, выделившееся в кабеле; б) мощность нагрева.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('w3')">📖 Показать решение</button>
+                <div id="w3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $I = 200$ А, $R = 0{,}0136$ Ом, $t = 30$ с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $Q$, $P$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Закон Джоуля–Ленца: $Q = I^2 R t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$Q = 200^2 \cdot 0{,}0136 \cdot 30 = 40000 \cdot 0{,}408 = 16320 \text{ Дж} \approx 16{,}3 \text{ кДж}$</span></div>
+                    <div class="step"><strong>Шаг 3.</strong> Мощность: $P = I^2 R = 40000 \cdot 0{,}0136 = 544$ Вт.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Кабель нагревается на 544 Вт — поэтому сварочные кабели делают толстыми.</div>
+                    <div class="answer">✅ Ответ: $Q \approx 16{,}3$ кДж; $P \approx 544$ Вт</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Падение напряжения на кабеле <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Сварочный ток $I = 150$ А, сопротивление кабеля $R = 0{,}02$ Ом. Найдите падение напряжения на кабеле.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> По закону Ома $U = I \cdot R$. Подставьте ток и сопротивление.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Работа сварочного тока <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> При напряжении дуги $U = 25$ В и токе $I = 180$ А сварка длится $t = 1$ мин. Найдите работу электрического тока.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Работа тока $A = U \cdot I \cdot t$. Переведите минуты в секунды.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ЭЛЕКТРИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚡ Задачи для электрика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header electric">
+                <div class="prof-icon">⚡</div>
+                <div>
+                    <div class="prof-title">Электротехника</div>
+                    <div class="prof-sub">Закон Ома, соединения, мощность</div>
+                </div>
+                <span class="prof-badge electric">Электрик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Закон Ома для участка цепи</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Электрик измеряет напряжение на участке цепи $U = 220$ В, сопротивление участка $R = 44$ Ом. Найдите силу тока.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('e1')">📖 Показать решение</button>
+                <div id="e1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U = 220$ В, $R = 44$ Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Закон Ома: $I = \dfrac{U}{R}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{220}{44} = 5 \text{ А}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 5 А — типичный ток для бытового нагревателя.</div>
+                    <div class="answer">✅ Ответ: $I = 5$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Параллельное соединение</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Два резистора $R_1 = 10$ Ом и $R_2 = 15$ Ом соединены параллельно. Найдите общее сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('e2')">📖 Показать решение</button>
+                <div id="e2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R_1 = 10$ Ом, $R_2 = 15$ Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R_{общ}$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $\dfrac{1}{R_{общ}} = \dfrac{1}{R_1} + \dfrac{1}{R_2}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R_{общ} = \dfrac{R_1 R_2}{R_1 + R_2} = \dfrac{10 \cdot 15}{10 + 15} = \dfrac{150}{25} = 6 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Общее сопротивление меньше наименьшего — типично для параллели.</div>
+                    <div class="answer">✅ Ответ: $R_{общ} = 6$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Смешанное соединение <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Цепь: $R_1 = 4$ Ом и $R_2 = 6$ Ом последовательно, к ним параллельно подключён $R_3 = 10$ Ом. Напряжение на всей цепи $U = 20$ В. Найдите: а) общее сопротивление; б) общий ток; в) ток через $R_3$.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('e3')">📖 Показать решение</button>
+                <div id="e3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R_1 = 4$ Ом, $R_2 = 6$ Ом, $R_3 = 10$ Ом, $U = 20$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R_{общ}$, $I$, $I_3$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R_{12} = R_1 + R_2 = 4 + 6 = 10$ Ом (последовательно).</div>
+                    <div class="step"><strong>Шаг 2.</strong> $R_{общ} = \dfrac{R_{12} \cdot R_3}{R_{12} + R_3} = \dfrac{10 \cdot 10}{10 + 10} = 5$ Ом (параллельно).</div>
+                    <div class="step"><strong>Шаг 3.</strong> Общий ток: $I = \dfrac{U}{R_{общ}} = \dfrac{20}{5} = 4$ А.</div>
+                    <div class="step"><strong>Шаг 4.</strong> Ток через $R_3$: $I_3 = \dfrac{U}{R_3} = \dfrac{20}{10} = 2$ А.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> При параллельном соединении напряжение на ветвях одинаково и равно 20 В. Ток 4 А делится пополам, так как сопротивления ветвей равны (10 Ом и 10 Ом).</div>
+                    <div class="answer">✅ Ответ: $R_{общ} = 5$ Ом; $I = 4$ А; $I_3 = 2$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Мощность нагревателя <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Электрик проверяет нагреватель: напряжение $U = 220$ В, ток $I = 10$ А. Найдите мощность нагревателя.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Мощность тока $P = U \cdot I$.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Работа тока за сутки <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Лампа мощностью $P = 100$ Вт горит $t = 24$ ч. Найдите работу тока в кВт·ч.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $A = P \cdot t$. Если $P$ в кВт, а $t$ в часах, работа сразу получится в кВт·ч. Переведите 100 Вт = 0,1 кВт.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== АВТОМЕХАНИК ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🚗 Задачи для автомеханика (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header auto">
+                <div class="prof-icon">🚗</div>
+                <div>
+                    <div class="prof-title">Автосервис</div>
+                    <div class="prof-sub">Аккумулятор, стартер, бортовые цепи</div>
+                </div>
+                <span class="prof-badge auto">Автомеханик</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Ток стартера</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Стартер автомобиля при напряжении $U = 12$ В имеет сопротивление $R = 0{,}04$ Ом. Найдите силу тока при запуске.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('a1')">📖 Показать решение</button>
+                <div id="a1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $U = 12$ В, $R = 0{,}04$ Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $I = \dfrac{U}{R}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{12}{0{,}04} = 300 \text{ А}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 300 А — огромный ток, поэтому аккумулятор и провода стартера делают мощными.</div>
+                    <div class="answer">✅ Ответ: $I = 300$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Ёмкость аккумулятора</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Аккумулятор имеет ёмкость $q = 60$ А·ч. Сколько времени он сможет питать лампу током $I = 5$ А?</div>
+                <button class="show-solution-btn" onclick="toggleSolution('a2')">📖 Показать решение</button>
+                <div id="a2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $q = 60$ А·ч, $I = 5$ А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $t$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $q = I \cdot t \Rightarrow t = \dfrac{q}{I}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$t = \dfrac{60}{5} = 12 \text{ ч}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 12 часов — типичный расчёт для бортовой сети.</div>
+                    <div class="answer">✅ Ответ: $t = 12$ ч</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Закон Ома для полной цепи <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Аккумулятор с ЭДС $\mathcal{E} = 12$ В и внутренним сопротивлением $r = 0{,}5$ Ом подключён к лампе $R = 5{,}5$ Ом. Найдите: а) ток в цепи; б) напряжение на лампе; в) КПД источника.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('a3')">📖 Показать решение</button>
+                <div id="a3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $\mathcal{E} = 12$ В, $r = 0{,}5$ Ом, $R = 5{,}5$ Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$, $U_R$, $\eta$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> Закон Ома для полной цепи: $I = \dfrac{\mathcal{E}}{R + r} = \dfrac{12}{5{,}5 + 0{,}5} = 2$ А.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Напряжение на лампе: $U_R = I \cdot R = 2 \cdot 5{,}5 = 11$ В.</div>
+                    <div class="step"><strong>Шаг 3.</strong> КПД: $\eta = \dfrac{U_R}{\mathcal{E}} = \dfrac{11}{12} \approx 0{,}917 = 91{,}7\%$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Часть ЭДС «теряется» на внутреннем сопротивлении ($I r = 1$ В).</div>
+                    <div class="answer">✅ Ответ: $I = 2$ А; $U_R = 11$ В; $\eta \approx 91{,}7\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Мощность лампы <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Лампа ближнего света подключена к $U = 12$ В, ток $I = 4{,}5$ А. Найдите мощность лампы.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $P = U \cdot I$.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Сопротивление провода <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Медный провод длиной $l = 2$ м и сечением $S = 1{,}5$ мм² ($\rho = 0{,}017$ Ом·мм²/м). Найдите сопротивление.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $R = \rho \dfrac{l}{S}$.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== МАШИНОСТРОЕНИЕ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">⚙️ Задачи для машиностроения (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header mech">
+                <div class="prof-icon">⚙️</div>
+                <div>
+                    <div class="prof-title">Машиностроение</div>
+                    <div class="prof-sub">Электродвигатели, нагрев, цепи</div>
+                </div>
+                <span class="prof-badge mech">Машиностроение</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Ток электродвигателя</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Электродвигатель станка мощностью $P = 2{,}2$ кВт работает при напряжении $U = 380$ В. Найдите ток.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('m1')">📖 Показать решение</button>
+                <div id="m1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $P = 2200$ Вт, $U = 380$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $P = U \cdot I \Rightarrow I = \dfrac{P}{U}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{2200}{380} \approx 5{,}79 \text{ А}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Около 5,8 А — типичный ток для промышленного двигателя.</div>
+                    <div class="answer">✅ Ответ: $I \approx 5{,}79$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Последовательное соединение</div>
+                <div class="task-condition"><strong>Ситуация:</strong> В цепи станка последовательно соединены $R_1 = 20$ Ом и $R_2 = 30$ Ом. Ток в цепи $I = 2$ А. Найдите общее напряжение.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('m2')">📖 Показать решение</button>
+                <div id="m2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R_1 = 20$ Ом, $R_2 = 30$ Ом, $I = 2$ А</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $U$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R_{общ} = R_1 + R_2 = 50$ Ом.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$U = I \cdot R_{общ} = 2 \cdot 50 = 100 \text{ В}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 100 В — сумма падений напряжений на резисторах (40 В + 60 В).</div>
+                    <div class="answer">✅ Ответ: $U = 100$ В</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Нагрев обмотки двигателя <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Обмотка электродвигателя имеет сопротивление $R = 2$ Ом и работает при токе $I = 10$ А в течение $t = 1$ ч. Найдите: а) количество теплоты, выделившееся в обмотке; б) мощность потерь.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('m3')">📖 Показать решение</button>
+                <div id="m3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $R = 2$ Ом, $I = 10$ А, $t = 1$ ч = 3600 с</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $Q$, $P_{пот}$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $Q = I^2 R t = 100 \cdot 2 \cdot 3600 = 720000 \text{ Дж} = 720 \text{ кДж}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> Мощность потерь: $P_{пот} = I^2 R = 100 \cdot 2 = 200$ Вт.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 200 Вт уходит в нагрев обмотки — поэтому двигатели охлаждают.</div>
+                    <div class="answer">✅ Ответ: $Q = 720$ кДж; $P_{пот} = 200$ Вт</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Сопротивление провода <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Алюминиевый провод ($\rho = 0{,}028$ Ом·мм²/м) длиной $l = 100$ м и сечением $S = 10$ мм². Найдите сопротивление.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $R = \rho \dfrac{l}{S}$.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Работа двигателя <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Двигатель мощностью $P = 1{,}5$ кВт работает $t = 8$ ч. Найдите работу тока в кВт·ч.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $A = P \cdot t$. При $P$ в кВт и $t$ в часах работа сразу в кВт·ч.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ИНФОРМАЦИОННЫЕ СИСТЕМЫ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">💻 Задачи для информационных систем (5 задач)</div>
+        <div class="section-content">
+
+            <div class="prof-header it">
+                <div class="prof-icon">💻</div>
+                <div>
+                    <div class="prof-title">Информационные системы</div>
+                    <div class="prof-sub">Блоки питания, серверные, цепи</div>
+                </div>
+                <span class="prof-badge it">ИС</span>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Ток блока питания</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Блок питания сервера выдаёт мощность $P = 500$ Вт при напряжении $U = 220$ В. Найдите потребляемый ток.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('i1')">📖 Показать решение</button>
+                <div id="i1" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $P = 500$ Вт, $U = 220$ В</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $I = \dfrac{P}{U}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$I = \dfrac{500}{220} \approx 2{,}27 \text{ А}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Около 2,3 А — типичный ток для серверного БП.</div>
+                    <div class="answer">✅ Ответ: $I \approx 2{,}27$ А</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Сопротивление кабеля Ethernet</div>
+                <div class="task-condition"><strong>Ситуация:</strong> Медный провод витой пары длиной $l = 50$ м, сечение $S = 0{,}2$ мм² ($\rho = 0{,}017$ Ом·мм²/м). Найдите сопротивление.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('i2')">📖 Показать решение</button>
+                <div id="i2" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $l = 50$ м, $S = 0{,}2$ мм², $\rho = 0{,}017$ Ом·мм²/м</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $R$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $R = \rho \dfrac{l}{S}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$R = 0{,}017 \cdot \dfrac{50}{0{,}2} = 4{,}25 \text{ Ом}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> 4,25 Ом — потери в кабеле при передаче сигнала.</div>
+                    <div class="answer">✅ Ответ: $R = 4{,}25$ Ом</div>
+                </div>
+            </div>
+
+            <div class="task-block hard">
+                <div class="task-title">📘 Задача 3. Расчёт ИБП <span class="hard-badge">СЛОЖНАЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> ИБП с ЭДС $\mathcal{E} = 24$ В и внутренним сопротивлением $r = 0{,}2$ Ом питает нагрузку $R = 4{,}8$ Ом. Найдите: а) ток; б) напряжение на нагрузке; в) КПД ИБП.</div>
+                <button class="show-solution-btn" onclick="toggleSolution('i3')">📖 Показать решение</button>
+                <div id="i3" class="task-solution">
+                    <div class="task-given-find">
+                        <div class="given"><strong>📌 Дано:</strong> $\mathcal{E} = 24$ В, $r = 0{,}2$ Ом, $R = 4{,}8$ Ом</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $I$, $U_R$, $\eta$</div>
+                    </div>
+                    <div class="step"><strong>Шаг 1.</strong> $I = \dfrac{\mathcal{E}}{R + r} = \dfrac{24}{4{,}8 + 0{,}2} = \dfrac{24}{5} = 4{,}8$ А.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $U_R = I \cdot R = 4{,}8 \cdot 4{,}8 = 23{,}04$ В.</div>
+                    <div class="step"><strong>Шаг 3.</strong> $\eta = \dfrac{U_R}{\mathcal{E}} = \dfrac{23{,}04}{24} = 0{,}96 = 96\%$.</div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Высокий КПД — внутреннее сопротивление мало по сравнению с нагрузкой.</div>
+                    <div class="answer">✅ Ответ: $I = 4{,}8$ А; $U_R = 23{,}04$ В; $\eta = 96\%$</div>
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 4. Энергопотребление сервера <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Сервер потребляет $P = 0{,}4$ кВт в течение $t = 24$ ч. Найдите расход электроэнергии в кВт·ч.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> $A = P \cdot t$. При $P$ в кВт и $t$ в часах — сразу кВт·ч.
+                </div>
+            </div>
+
+            <div class="task-block self">
+                <div class="task-title">📘 Задача 5. Ток в цепи подсветки <span class="self-badge">ДЛЯ САМОСТОЯТЕЛЬНОГО РЕШЕНИЯ</span></div>
+                <div class="task-condition"><strong>Ситуация:</strong> Светодиодная подсветка подключена к $U = 12$ В через резистор $R = 6$ Ом. Найдите ток в цепи.</div>
+                <div class="hint-box">
+                    <strong>💡 Подсказка:</strong> Закон Ома: $I = \dfrac{U}{R}$.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+<script>
+    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
+</script>
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+        </svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</nav>
+<script>
+    /* ==== 5. Скелетоны для формул MathJax ==== */
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
+
+    /* ==== 6. Чипы категорий в результатах поиска ==== */
+    (function(){
+        function classify(cat){
+            var c = (cat||'').toLowerCase();
+            if (c.indexOf('механик') >= 0) return 'cat-mech';
+            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+            if (c.indexOf('электр') >= 0) return 'cat-elec';
+            return 'cat-other';
+        }
+        function decorate(){
+            document.querySelectorAll('.search-result-category').forEach(function(el){
+                if (el.dataset.chip) return;
+                el.dataset.chip = '1';
+                el.classList.add(classify(el.textContent));
+            });
+        }
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                decorate();
+            };
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+        else decorate();
+    })();
+
+    /* ==== 10. Анимация смены темы «как на iPhone» ==== */
+    (function(){
+        function animateThemeChange(x, y){
+            var circle = document.createElement('div');
+            circle.className = 'theme-circle';
+            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+            circle.style.width = circle.style.height = (maxR*2) + 'px';
+            circle.style.left = (x - maxR) + 'px';
+            circle.style.top  = (y - maxR) + 'px';
+            document.body.appendChild(circle);
+            requestAnimationFrame(function(){ circle.classList.add('expand'); });
+            setTimeout(function(){ circle.remove(); }, 700);
+        }
+        document.addEventListener('click', function(e){
+            var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+            if (!t) return;
+            var r = t.getBoundingClientRect();
+            animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+        }, true);
+    })();
+
+    /* ==== 2. Ripple при тапе ==== */
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){
+            document.querySelectorAll(sel).forEach(bind);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                setTimeout(bindAll, 30);
+            };
+        }
+    })();
+</script>
+<script src="search-overlay.js"></script>
+<!-- bottom-nav-autohide-script -->
+<script>
+    /* Автоскрытие нижней панели при скролле */
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 8;
+        var ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
+        }
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>
+</body>
+</html>

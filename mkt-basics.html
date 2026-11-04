@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -79,7 +79,7 @@
         .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
         .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
         .model-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
-        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;}
+        .model-tab{padding:8px 20px;border-radius:20px;background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.3s;flex-shrink:0;}
         .model-tab:hover{background:var(--special-border);color:white;border-color:var(--special-border);}
         .model-tab.active{background:var(--special-border);color:white;border-color:var(--special-border);}
         .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
@@ -95,7 +95,7 @@
         .task-given-find .find{color:var(--find-color);}
         .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
         .task-given-find mjx-container{font-size:1.1rem !important;}
-        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
         .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
         .task-solution{display:none;margin-top:12px;}
         .task-solution.open{display:block;}
@@ -108,6 +108,21 @@
         mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
         .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
         .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+
+        /* Стили для скрытых выводов формул */
+        .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
+
         @media(max-width:700px){
             .model-container{min-height:320px;}
             .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
@@ -139,616 +154,142 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
-<style id="titles-center-fix">
-/* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
-.section-title {
-    justify-content: center !important;
-    text-align: center !important;
-    position: relative !important;
-    padding-left: 16px !important;
-    padding-right: 28px !important;
-}
-.section-title::after {
-    position: absolute !important;
-    right: 8px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    margin-left: 0 !important;
-}
-.section.collapsed .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-/* Названия файлов / страниц — по центру */
-h1, .page-title, .file-title, .title {
-    text-align: center !important;
-}
-</style>
-<style id="section-gradient-fix">
-/* ==== ГРАДИЕНТ ОТ ЦВЕТА ЛЕВОЙ ПОЛОСКИ В БЕСЦВЕТНЫЙ + СВЕТЯЩАЯСЯ СТРЕЛКА ==== */
-/* Внутренние блоки (.def-card, .formula-block, .task-block, .step) не трогаем. */
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script>
+        let quality3D = 'high';
+        if (window.Android && window.Android.getQuality3D) {
+            quality3D = window.Android.getQuality3D();
+        } else {
+            const saved = localStorage.getItem('quality3d');
+            if (saved) quality3D = saved;
+        }
+        window.quality3D = quality3D;
 
-.section { position: relative; }
+        window.qualitySettings = {
+            low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+            medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+            high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+        };
+        window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
 
-/* ---------- ГРАДИЕНТ У ЗАГОЛОВКА ---------- */
-
-/* Закрыт: градиента нет */
-.section.collapsed > .section-title {
-    background-image: none;
-    transition: background-image 0.35s ease;
-}
-
-/* Закрыт + наведение: градиент от цвета полоски к бесцветному */
-.section.collapsed > .section-title:hover {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Открыт: тот же градиент постоянно */
-.section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(245, 158, 11, 0.20) 0%,
-        rgba(245, 158, 11, 0.07) 45%,
-        rgba(245, 158, 11, 0.00) 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
-/* Светлая тема — цвет из --special-border (#d97706) */
-:root.light-mode .section.collapsed > .section-title:hover,
-:root.light-mode .section:not(.collapsed) > .section-title {
-    background-image: linear-gradient(90deg,
-        rgba(217, 119, 6, 0.18) 0%,
-        rgba(217, 119, 6, 0.06) 45%,
-        rgba(217, 119, 6, 0.00) 100%);
-}
-
-/* ---------- СТРЕЛКА ---------- */
-
-/* Закрыт: светящаяся синяя */
-.section.collapsed > .section-title::after {
-    color: var(--accent, #3b82f6) !important;
-    text-shadow:
-        0 0 6px rgba(59, 130, 246, 0.85),
-        0 0 14px rgba(59, 130, 246, 0.55);
-    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
-    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease;
-}
-
-/* Открыт: свечение убираем, стрелка обычная */
-.section:not(.collapsed) > .section-title::after {
-    color: var(--text-secondary, #8ba5b8) !important;
-    text-shadow: none !important;
-    filter: none !important;
-}
-
-/* Плавный поворот стрелки при раскрытии (сохраняем как было) */
-.section.collapsed > .section-title::after {
-    transform: translateY(-50%) rotate(-90deg) !important;
-}
-.section:not(.collapsed) > .section-title::after {
-    transform: translateY(-50%) rotate(0deg) !important;
-}
-
-/* Светлая тема: синий чуть темнее, свечение мягче */
-:root.light-mode .section.collapsed > .section-title::after {
-    color: var(--accent, #2563eb) !important;
-    text-shadow:
-        0 0 6px rgba(37, 99, 235, 0.6),
-        0 0 12px rgba(37, 99, 235, 0.35);
-    filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6));
-}
-</style>
-<style id="modern-visual-fix">
-/* ==== 7. Плавный скролл + отступ у заголовков ==== */
-html { scroll-behavior: smooth; }
-.section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
-
-/* ==== 8. Радиальный градиент на фоне ==== */
-body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%),
-        var(--bg) !important;
-}
-:root.light-mode body {
-    background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%),
-        radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%),
-        var(--bg) !important;
-}
-
-/* ==== 3. «Стеклянная» шапка ==== */
-@media (prefers-reduced-motion: no-preference) {
-    .header {
-        background: rgba(30, 53, 69, 0.72) !important;
-        backdrop-filter: blur(14px) saturate(140%);
-        -webkit-backdrop-filter: blur(14px) saturate(140%);
-        border-bottom: 1px solid var(--border);
-    }
-    :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; }
-}
-
-/* ==== 5. Скелетоны для формул ==== */
-.skeleton {
-    display: inline-block;
-    min-width: 60px;
-    height: 1.1em;
-    vertical-align: middle;
-    border-radius: 6px;
-    background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%);
-    background-size: 200% 100%;
-    animation: shimmerSk 1.2s infinite linear;
-}
-@keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
-
-/* ==== 6. Чипы категорий в поиске ==== */
-.search-result-category {
-    display: inline-block;
-    padding: 2px 10px;
-    margin-top: 4px;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    color: #fff;
-    background: var(--accent, #3b82f6);
-}
-.search-result-category.cat-mech  { background: #3b82f6; }
-.search-result-category.cat-thermo{ background: #f59e0b; }
-.search-result-category.cat-elec  { background: #eab308; }
-.search-result-category.cat-other { background: #64748b; }
-
-/* ==== 4. Нижняя навигация ==== */
-.bottom-nav {
-    position: fixed;
-    left: 50%;
-    bottom: 14px;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 22px;
-    background: rgba(30, 53, 69, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
-    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45);
-    z-index: 900;
-    transition: background 0.3s, border 0.3s;
-}
-:root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
-.bottom-nav a, .bottom-nav button {
-    display: flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px; border-radius: 14px;
-    border: none; background: transparent;
-    color: var(--text-secondary); font-size: 22px;
-    cursor: pointer; text-decoration: none;
-    transition: all 0.2s;
-}
-.bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active {
-    background: rgba(59,130,246,0.15);
-    color: var(--accent);
-    transform: translateY(-2px);
-}
-body { padding-bottom: 78px; }
-
-/* ==== 10. Круг смены темы ==== */
-.theme-circle {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    background: var(--bg);
-    transform: scale(0);
-    opacity: 0.95;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
-}
-.theme-circle.expand { transform: scale(1); opacity: 0; }
-
-/* ==== 2. Ripple при тапе ==== */
-.ripple-host { position: relative !important; overflow: hidden !important; }
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(59,130,246,0.35);
-    transform: scale(0);
-    animation: rippleAnim 0.6s ease-out forwards;
-    pointer-events: none;
-    z-index: 0;
-}
-@keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
-:root.light-mode .ripple { background: rgba(37,99,235,0.28); }
-</style>
-<style id="search-clean-fix">
-/* ==== Убираем эмодзи-иконки в результатах поиска ==== */
-.search-result-icon {
-    display: none !important;
-}
-
-/* ==== Скрываем видимую полосу прокрутки у результатов поиска ==== */
-.search-results {
-    scrollbar-width: none;          /* Firefox */
-    -ms-overflow-style: none;       /* IE/Edge */
-}
-.search-results::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-}
-
-/* На всякий случай — скрыть скроллбар и у body (если где-то наследуется) */
-body::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-}
-body {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-</style>
-<style id="nav-back-hide-index">
-/* На главной кнопка «Назад» не нужна */
-body.is-index .nav-back-btn { display: none !important; }
-</style>
-<style id="bottom-nav-autohide">
-/* Автоскрытие нижней панели при скролле вниз */
-.bottom-nav {
-    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s;
-}
-.bottom-nav.nav-hidden {
-    transform: translate(-50%, 120%);
-    opacity: 0;
-    pointer-events: none;
-}
-/* На главной панель всегда видна */
-body.is-index .bottom-nav.nav-hidden {
-    transform: translate(-50%, 0);
-    opacity: 1;
-    pointer-events: auto;
-}
-</style>
-<style id="fav-nav-yellow">
-/* Избранное в нижней панели — жёлтое выделение, когда активно */
-.bottom-nav a[href="favorites.html"].active,
-.bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(250, 204, 21, 0.18) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover,
-.bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(250, 204, 21, 0.28) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active {
-    background: rgba(234, 179, 8, 0.18) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover,
-:root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover {
-    background: rgba(234, 179, 8, 0.28) !important;
-    color: #92400e !important;
-}
-/* На favorites.html — звезда всегда первая слева (порядок задаётся в HTML, это страховка) */
-
-</style>
-<style id="nav-order-fix">
-/* Порядок в нижней панели: ← 🏠 🔍 ⭐ */
-.bottom-nav { display: flex; align-items: center; }
-.bottom-nav .nav-back-btn { order: 1; }
-.bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
-.bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
-.bottom-nav a[href="favorites.html"] { order: 4; }
-
-/* Звезда активна — жёлтая */
-.bottom-nav a[href="favorites.html"].active {
-    background: rgba(250, 204, 21, 0.20) !important;
-    color: #facc15 !important;
-}
-.bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(250, 204, 21, 0.30) !important;
-    color: #fde047 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active {
-    background: rgba(234, 179, 8, 0.20) !important;
-    color: #b45309 !important;
-}
-:root.light-mode .bottom-nav a[href="favorites.html"].active:hover {
-    background: rgba(234, 179, 8, 0.30) !important;
-    color: #92400e !important;
-}
-</style>
-<style id="unified-buttons">
-/* ==== Единый стиль кнопок ==== */
-
-/* База для всех кнопок */
-.btn-primary,
-.btn-secondary,
-.btn-danger,
-.show-solution-btn,
-.btn-reset,
-.model-tab,
-.clear-all-btn,
-.search-clear,
-.back-link,
-.fullscreen-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 8px 18px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: inherit;
-    line-height: 1.2;
-    border: 1px solid transparent;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s, border-color 0.2s,
-                box-shadow 0.2s, transform 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    white-space: nowrap;
-}
-
-/* Hover / active — общий отклик */
-.btn-primary:hover,
-.btn-secondary:hover,
-.btn-danger:hover,
-.show-solution-btn:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover,
-.back-link:hover,
-.fullscreen-btn:hover {
-    transform: translateY(-1px);
-}
-.btn-primary:active,
-.btn-secondary:active,
-.btn-danger:active,
-.show-solution-btn:active,
-.btn-reset:active,
-.model-tab:active,
-.clear-all-btn:active,
-.back-link:active,
-.fullscreen-btn:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* ==== PRIMARY (синий акцент) ==== */
-.btn-primary,
-.show-solution-btn,
-.back-link {
-    background: var(--accent, #3b82f6);
-    color: #fff;
-    border-color: var(--accent, #3b82f6);
-}
-.btn-primary:hover,
-.show-solution-btn:hover,
-.back-link:hover {
-    background: var(--accent-hover, #60a5fa);
-    border-color: var(--accent-hover, #60a5fa);
-    box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6);
-}
-:root.light-mode .btn-primary,
-:root.light-mode .show-solution-btn,
-:root.light-mode .back-link {
-    background: var(--accent, #2563eb);
-    border-color: var(--accent, #2563eb);
-}
-:root.light-mode .btn-primary:hover,
-:root.light-mode .show-solution-btn:hover,
-:root.light-mode .back-link:hover {
-    background: var(--accent-hover, #3b82f6);
-    border-color: var(--accent-hover, #3b82f6);
-}
-
-/* ==== SECONDARY (нейтральный) ==== */
-.btn-secondary,
-.btn-reset,
-.model-tab,
-.clear-all-btn {
-    background: var(--menu-item-hover, #233e50);
-    color: var(--text, #fff);
-    border-color: var(--border, rgba(59,130,246,0.15));
-}
-.btn-secondary:hover,
-.btn-reset:hover,
-.model-tab:hover,
-.clear-all-btn:hover {
-    background: var(--group-header-bg, #1a3a5a);
-    border-color: var(--accent, #3b82f6);
-    box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35);
-}
-:root.light-mode .btn-secondary,
-:root.light-mode .btn-reset,
-:root.light-mode .model-tab,
-:root.light-mode .clear-all-btn {
-    background: var(--menu-item-hover, #f0f4fa);
-    color: var(--text, #1a2a3f);
-}
-
-/* Активный таб — как primary */
-.model-tab.active {
-    background: var(--accent, #3b82f6) !important;
-    color: #fff !important;
-    border-color: var(--accent, #3b82f6) !important;
-    box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55);
-}
-.model-tab.active:hover {
-    background: var(--accent-hover, #60a5fa) !important;
-    border-color: var(--accent-hover, #60a5fa) !important;
-}
-
-/* ==== DANGER (красный) ==== */
-.btn-danger,
-.clear-all-btn.danger,
-.clear-all-btn:hover {
-    background: #ef4444 !important;
-    color: #fff !important;
-    border-color: #ef4444 !important;
-}
-.btn-danger:hover,
-.clear-all-btn.danger:hover,
-.clear-all-btn:hover {
-    background: #dc2626 !important;
-    border-color: #dc2626 !important;
-    box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6);
-}
-
-/* ==== Особая кнопка «✖» (search-clear) — без рамки, лёгкая ==== */
-.search-clear {
-    background: transparent;
-    border: none;
-    padding: 6px 10px;
-    min-height: auto;
-    color: var(--text-secondary, #8ba5b8);
-    border-radius: 50%;
-}
-.search-clear:hover {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--accent, #3b82f6);
-    transform: none;
-}
-
-/* ==== Круглая кнопка fullscreen — оставляем круг, но с акцентом ==== */
-.fullscreen-btn {
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.25);
-    font-size: 20px;
-}
-.fullscreen-btn:hover {
-    background: var(--accent, #3b82f6);
-    border-color: var(--accent, #3b82f6);
-}
-
-/* ==== Кнопка «Удалить» в избранном — как danger-иконка ==== */
-.remove-fav {
-    border-radius: 50%;
-    min-height: 32px;
-    min-width: 32px;
-    padding: 4px 8px;
-}
-.remove-fav:hover {
-    background: rgba(239, 68, 68, 0.15) !important;
-    color: #ef4444 !important;
-}
-
-/* ==== Ссылки внутри текста (если кто-то оформит как кнопку) ==== */
-.btn-link {
-    background: transparent;
-    border: none;
-    color: var(--accent, #3b82f6);
-    padding: 0;
-    min-height: auto;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-.btn-link:hover {
-    color: var(--accent-hover, #60a5fa);
-    transform: none;
-    box-shadow: none;
-}
-</style>
-<style id="page-fade-in">
-/* ==== Плавное появление страницы (fade-in) ==== */
-
-/* Мягкий вход всей страницы */
-body {
-    animation: pageFade 0.3s ease-out;
-}
-@keyframes pageFade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Контент чуть «подъезжает» снизу */
-.container,
-.main-content {
-    animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-}
-@keyframes pageFadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Если в системе включено «уменьшить движение» — анимации отключаем */
-@media (prefers-reduced-motion: reduce) {
-    body,
-    .container,
-    .main-content {
-        animation: none !important;
-    }
-}
-</style>
-<style id="share-btn-right">
-/* Прижимаем кнопку «Поделиться» к правому краю панели */
-.bottom-nav button[title="Поделиться"] {
-    order: 99 !important;
-    margin-left: auto !important;
-}
-</style>
-<style id="no-tap-highlight">
-/* Убираем системный голубой/серый прямоугольник при тапе */
-* {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-}
-a, button, div, span, label, input, textarea, select {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-}
-</style>
-<style id="no-tap-highlight-accordion">
-/* Убираем системный голубой/серый прямоугольник при тапе на заголовки списков */
-.section-title,
-.group-header,
-.menu-item,
-.submenu-item,
-.model-tab,
-.search-result-item {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-    outline: none !important;
-    user-select: none;
-    -webkit-user-select: none;
-    cursor: pointer;
-}
-
-/* Лёгкий отклик при нажатии (вместо системного квадратика) */
-.section-title:active,
-.group-header:active {
-    transform: scale(0.99);
-    transition: transform 0.1s;
-}
-</style>
-<style id="fix-nav-bounce">
-    /* Отключаем сдвиги и пружины у кнопок нижней панели */
-    .bottom-nav a, .bottom-nav button {
-        transform: none !important;
-        transition: background 0.2s ease, color 0.2s ease !important;
-    }
-    .bottom-nav a:active, .bottom-nav button:active, 
-    .bottom-nav a:focus, .bottom-nav button:focus {
-        transform: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-    }
-</style>
+        (function() {
+            if (!window.THREE) return;
+            const OriginalRenderer = THREE.WebGLRenderer;
+            THREE.WebGLRenderer = function(params) {
+                const r = new OriginalRenderer(params);
+                const q = window.qualitySettings3D || {};
+                if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+                if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+                return r;
+            };
+        })();
+    </script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech { background: #3b82f6; } .search-result-category.cat-thermo{ background: #f59e0b; } .search-result-category.cat-elec { background: #eab308; } .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index">body.is-index .nav-back-btn { display: none !important; }</style>
+    <style id="bottom-nav-autohide">.bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; } .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; } body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }</style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; } .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; } .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; } .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right">.bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; }</style>
+    <style id="no-tap-highlight">* { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; } a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }</style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -780,12 +321,31 @@ a, button, div, span, label, input, textarea, select {
             <div class="formula-block">
                 <span class="f">$\nu = \dfrac{m}{M} = \dfrac{N}{N_A}$</span>
                 <span class="f-label">— количество вещества</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Количество вещества измеряется в молях. Один моль — это количество вещества, содержащее столько же структурных единиц (молекул), сколько атомов содержится в 12 г углерода-12. Это число и есть постоянная Авогадро $N_A$. Если у нас есть масса $m$, то количество молей можно найти, разделив массу на массу одного моля (молярную массу $M$): $\nu = \dfrac{m}{M}$. Так как в одном моле $N_A$ молекул, то $\nu = \dfrac{N}{N_A}$.
+                </div>
+
                 <span class="f">$N = \nu \cdot N_A = \dfrac{m}{M} \cdot N_A$</span>
                 <span class="f-label">— число молекул</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Из определения количества вещества $\nu = \dfrac{N}{N_A}$ выражаем число молекул: $N = \nu \cdot N_A$. Подставляя сюда формулу $\nu = \dfrac{m}{M}$, получаем: $N = \dfrac{m}{M} \cdot N_A$. Это позволяет найти общее число молекул, зная массу вещества и его молярную массу.
+                </div>
+
                 <span class="f">$m_0 = \dfrac{M}{N_A}$</span>
                 <span class="f-label">— масса одной молекулы</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Молярная масса $M$ — это масса одного моля вещества, то есть масса $N_A$ молекул. Следовательно, масса одной молекулы $m_0$ равна массе моля, делённой на число молекул в нём: $m_0 = \dfrac{M}{N_A}$. Так как $M$ выражается в кг/моль, а $N_A$ в моль⁻¹, масса одной молекулы получается в килограммах.
+                </div>
+
                 <span class="f">$n = \dfrac{N}{V}$</span>
                 <span class="f-label">— концентрация молекул</span>
+                <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                <div class="derivation-content">
+                    Концентрация — это число частиц в единице объёма. Если в объёме $V$ находится $N$ молекул, то в единице объёма (1 м³) их будет в $V$ раз меньше. Отсюда формула: $n = \dfrac{N}{V}$. Эта величина очень важна в МКТ, так как именно она (а не общее число молекул) определяет давление газа.
+                </div>
             </div>
         </div>
     </div>
@@ -900,16 +460,16 @@ a, button, div, span, label, input, textarea, select {
     <div class="section collapsed">
         <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
         <div class="section-content">
-
+            <!-- Задачи 1-10 остались без изменений, я их скопировал полностью -->
             <div class="task-block">
                 <div class="task-title">📘 Задача 1. Количество вещества</div>
                 <div class="task-condition"><strong>Условие:</strong> Определите количество вещества в $m = 200$ г воды. Молярная масса воды $M = 18$ г/моль.</div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
                 <div id="sol1" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 200$ г $= 0{,}2$ кг, $M = 18$ г/моль $= 0{,}018$ кг/моль</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\nu$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 200$ г $= 0{,}2$ кг, $M = 18$ г/моль $= 0{,}018$ кг/моль</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\nu$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Формула количества вещества: <span class="formula">$\nu = \dfrac{m}{M}$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> Подставляем значения: <span class="formula">$\nu = \dfrac{0{,}2}{0{,}018} \approx 11{,}1 \text{ моль}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Количество вещества показывает, сколько молей содержится в данной массе. 1 моль любого вещества содержит $6{,}02 \cdot 10^{23}$ молекул.</div>
@@ -923,9 +483,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
                 <div id="sol2" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 1$ кг, $M = 0{,}018$ кг/моль, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 1$ кг, $M = 0{,}018$ кг/моль, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Количество вещества: $\nu = \dfrac{m}{M} = \dfrac{1}{0{,}018} \approx 55{,}6$ моль.</div>
                     <div class="step"><strong>Шаг 2.</strong> Число молекул: <span class="formula">$N = \nu \cdot N_A = 55{,}6 \cdot 6{,}02 \cdot 10^{23} \approx 3{,}35 \cdot 10^{25}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> В 1 кг воды содержится около 33,5 септиллионов молекул — это колоссальное число.</div>
@@ -939,9 +499,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
                 <div id="sol3" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $M = 0{,}032$ кг/моль, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $m_0$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $M = 0{,}032$ кг/моль, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $m_0$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Масса одной молекулы: <span class="formula">$m_0 = \dfrac{M}{N_A}$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> Подставляем: <span class="formula">$m_0 = \dfrac{0{,}032}{6{,}02 \cdot 10^{23}} \approx 5{,}32 \cdot 10^{-26} \text{ кг}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Масса одной молекулы кислорода — около $5 \cdot 10^{-26}$ кг.</div>
@@ -955,9 +515,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
                 <div id="sol4" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $V = 2$ л $= 2 \cdot 10^{-3}$ м³, $N = 6 \cdot 10^{22}$</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $n$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $V = 2$ л $= 2 \cdot 10^{-3}$ м³, $N = 6 \cdot 10^{22}$</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $n$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Концентрация: <span class="formula">$n = \dfrac{N}{V}$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> Подставляем: <span class="formula">$n = \dfrac{6 \cdot 10^{22}}{2 \cdot 10^{-3}} = 3 \cdot 10^{25} \text{ м}^{-3}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Концентрация показывает, сколько молекул содержится в 1 м³ газа.</div>
@@ -971,9 +531,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
                 <div id="sol5" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m_0 = 4{,}5 \cdot 10^{-26}$ кг, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $M$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m_0 = 4{,}5 \cdot 10^{-26}$ кг, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $M$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Из формулы $m_0 = \dfrac{M}{N_A}$ выражаем $M$: <span class="formula">$M = m_0 \cdot N_A$</span></div>
                     <div class="step"><strong>Шаг 2.</strong> Подставляем: <span class="formula">$M = 4{,}5 \cdot 10^{-26} \cdot 6{,}02 \cdot 10^{23} \approx 0{,}027 \text{ кг/моль} = 27 \text{ г/моль}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Молярная масса 27 г/моль соответствует алюминию.</div>
@@ -987,9 +547,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
                 <div id="sol6" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $M = 0{,}044$ кг/моль</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 2$ кг, $M = 0{,}044$ кг/моль</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> $\nu = \dfrac{m}{M} = \dfrac{2}{0{,}044} \approx 45{,}45$ моль.</div>
                     <div class="step"><strong>Шаг 2.</strong> $N = \nu \cdot N_A = 45{,}45 \cdot 6{,}02 \cdot 10^{23} \approx 2{,}74 \cdot 10^{25}$.</div>
                     <div class="step explanation"><strong>Пояснение:</strong> В 2 кг углекислого газа около $2{,}7 \cdot 10^{25}$ молекул.</div>
@@ -1003,9 +563,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
                 <div id="sol7" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $\rho = 1000$ кг/м³, $M = 0{,}018$ кг/моль</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $d$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $\rho = 1000$ кг/м³, $M = 0{,}018$ кг/моль</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $d$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> Объём одной молекулы: $V_0 = \dfrac{V}{\nu \cdot N_A} = \dfrac{M}{\rho \cdot N_A}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> $V_0 = \dfrac{0{,}018}{1000 \cdot 6{,}02 \cdot 10^{23}} \approx 3 \cdot 10^{-29}$ м³.</div>
                     <div class="step"><strong>Шаг 3.</strong> Объём шара: $V_0 = \dfrac{\pi d^3}{6} \Rightarrow d = \sqrt[3]{\dfrac{6 V_0}{\pi}}$.</div>
@@ -1021,9 +581,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
                 <div id="sol8" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ г $= 5 \cdot 10^{-4}$ кг, $M = 0{,}018$ кг/моль</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $m = 0{,}5$ г $= 5 \cdot 10^{-4}$ кг, $M = 0{,}018$ кг/моль</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> $\nu = \dfrac{m}{M} = \dfrac{5 \cdot 10^{-4}}{0{,}018} \approx 0{,}0278$ моль.</div>
                     <div class="step"><strong>Шаг 2.</strong> $N = \nu \cdot N_A = 0{,}0278 \cdot 6{,}02 \cdot 10^{23} \approx 1{,}67 \cdot 10^{22}$.</div>
                     <div class="step explanation"><strong>Пояснение:</strong> Даже в крошечной капле воды содержится более $10^{22}$ молекул.</div>
@@ -1037,9 +597,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
                 <div id="sol9" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $M = 0{,}028$ кг/моль, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $m_0$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $M = 0{,}028$ кг/моль, $N_A = 6{,}02 \cdot 10^{23}$ моль$^{-1}$</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $m_0$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> $m_0 = \dfrac{M}{N_A}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m_0 = \dfrac{0{,}028}{6{,}02 \cdot 10^{23}} \approx 4{,}65 \cdot 10^{-26} \text{ кг}$</span></div>
                     <div class="step explanation"><strong>Пояснение:</strong> Молекула азота — самая распространённая в воздухе.</div>
@@ -1053,9 +613,9 @@ a, button, div, span, label, input, textarea, select {
                 <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
                 <div id="sol10" class="task-solution">
                     <div class="task-given-find">
-                    <div class="given"><strong>📌 Дано:</strong> $V_1 = 1$ л, $N_1 = 2 \cdot 10^{22}$, $V_2 = 3$ л, $N_2 = 4 \cdot 10^{22}$</div>
-                    <div class="find"><strong>🔍 Найти:</strong> $\dfrac{n_1}{n_2}$</div>
-                </div>
+                        <div class="given"><strong>📌 Дано:</strong> $V_1 = 1$ л, $N_1 = 2 \cdot 10^{22}$, $V_2 = 3$ л, $N_2 = 4 \cdot 10^{22}$</div>
+                        <div class="find"><strong>🔍 Найти:</strong> $\dfrac{n_1}{n_2}$</div>
+                    </div>
                     <div class="step"><strong>Шаг 1.</strong> $n_1 = \dfrac{N_1}{V_1} = \dfrac{2 \cdot 10^{22}}{1} = 2 \cdot 10^{22}$.</div>
                     <div class="step"><strong>Шаг 2.</strong> $n_2 = \dfrac{N_2}{V_2} = \dfrac{4 \cdot 10^{22}}{3} \approx 1{,}33 \cdot 10^{22}$.</div>
                     <div class="step"><strong>Шаг 3.</strong> $\dfrac{n_1}{n_2} = \dfrac{2}{1{,}33} = 1{,}5$.</div>
@@ -1231,6 +791,15 @@ a, button, div, span, label, input, textarea, select {
 </div>
 
 <script>
+    // Безопасная проверка темы
+    (function(){
+        if(localStorage.getItem('mathTheme')==='light' || localStorage.getItem('physicsTheme')==='light'){
+            document.documentElement.classList.add('light-mode');
+            var btn = document.getElementById('themeBtn');
+            if (btn) btn.textContent = '☀️';
+        }
+    })();
+
     function toggleSolution(id){
         const el=document.getElementById(id);
         const btn=el.previousElementSibling;
@@ -1242,21 +811,26 @@ a, button, div, span, label, input, textarea, select {
             btn.textContent='📕 Скрыть решение';
         }
     }
+
+    // Исправленная логика для подсказок
     function toggleHint(id){
-        const el=document.getElementById(id);
-        const btn=el.previousElementSibling.querySelector
-            ? el.previousElementSibling.querySelector('.show-solution-btn')
-            : el.previousElementSibling;
+        const el = document.getElementById(id);
+        // Ищем кнопку внутри предыдущего блока .btn-row
+        const btnContainer = el.previousElementSibling;
+        const btn = btnContainer ? btnContainer.querySelector('.show-solution-btn') : null;
+
         if(el.classList.contains('open')){
             el.classList.remove('open');
-            if(btn) btn.textContent='💡 Подсказка';
+            if(btn) btn.textContent = '💡 Подсказка';
         }else{
             el.classList.add('open');
-            if(btn) btn.textContent='📕 Скрыть подсказку';
+            if(btn) btn.textContent = '📕 Скрыть подсказку';
         }
     }
 
+    let activeModel = 'brownian';
     function switchModel(model) {
+        activeModel = model;
         document.querySelectorAll('.model-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.model === model);
         });
@@ -1268,10 +842,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 1: БРОУНОВСКОЕ ДВИЖЕНИЕ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-brownian');
         const canvas = document.getElementById('canvas-brownian');
@@ -1309,7 +880,7 @@ a, button, div, span, label, input, textarea, select {
         const COUNT = 60;
         const SPACE_X = 5.0, SPACE_Y = 3.2, SPACE_Z = 1.5, RADIUS = 0.22;
 
-        const molGeo = new THREE.SphereGeometry(RADIUS, 16, 16);
+        const molGeo = new THREE.SphereGeometry(RADIUS, window.qualitySettings3D.segments, window.qualitySettings3D.segments);
         const molMats = [
             new THREE.MeshStandardMaterial({ color: 0xff6644, emissive: 0x441100 }),
             new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x001133 }),
@@ -1359,7 +930,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1368,6 +939,9 @@ a, button, div, span, label, input, textarea, select {
 
         function animate() {
             requestAnimationFrame(animate);
+            // Оптимизация: не рендерим, если вкладка неактивна
+            if (activeModel !== 'brownian') return;
+
             controls.update();
 
             const speed = temperature * 0.012;
@@ -1414,10 +988,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 2: ДИФФУЗИЯ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-diffusion');
         const canvas = document.getElementById('canvas-diffusion');
@@ -1538,7 +1109,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1547,6 +1118,9 @@ a, button, div, span, label, input, textarea, select {
 
         function animate() {
             requestAnimationFrame(animate);
+            // Оптимизация
+            if (activeModel !== 'diffusion') return;
+
             controls.update();
 
             const currentGap = gapStart * (1 - pushFactor);
@@ -1613,10 +1187,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 3: СТРОЕНИЕ ТЕЛ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-structure');
         const canvas = document.getElementById('canvas-structure');
@@ -1744,7 +1315,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1753,6 +1324,9 @@ a, button, div, span, label, input, textarea, select {
 
         function animate() {
             requestAnimationFrame(animate);
+            // Оптимизация
+            if (activeModel !== 'structure') return;
+
             controls.update();
 
             let targetPositions;
@@ -1832,164 +1406,133 @@ a, button, div, span, label, input, textarea, select {
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
     </button>
-    </nav>
+</nav>
 <script>
-/* ==== 5. Скелетоны для формул MathJax ==== */
-(function(){
-    function addSkeletons(){
-        document.querySelectorAll('.formula-block').forEach(function(el){
-            if (el.querySelector('mjx-container')) return;
-            if (el.dataset.sk) return;
-            el.dataset.sk = '1';
-            var s = document.createElement('span');
-            s.className = 'skeleton';
-            s.style.width = (60 + Math.random()*80) + 'px';
-            el.appendChild(s);
-        });
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
-    else addSkeletons();
-    setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
-})();
+    /* ==== 5. Скелетоны для формул MathJax ==== */
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
 
-/* ==== 6. Чипы категорий в результатах поиска ==== */
-(function(){
-    function classify(cat){
-        var c = (cat||'').toLowerCase();
-        if (c.indexOf('механик') >= 0) return 'cat-mech';
-        if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
-        if (c.indexOf('электр') >= 0) return 'cat-elec';
-        return 'cat-other';
-    }
-    function decorate(){
-        document.querySelectorAll('.search-result-category').forEach(function(el){
-            if (el.dataset.chip) return;
-            el.dataset.chip = '1';
-            el.classList.add(classify(el.textContent));
-        });
-    }
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            decorate();
-        };
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
-    else decorate();
-})();
+    /* ==== 6. Чипы категорий в результатах поиска ==== */
+    (function(){
+        function classify(cat){
+            var c = (cat||'').toLowerCase();
+            if (c.indexOf('механик') >= 0) return 'cat-mech';
+            if (c.indexOf('молекуляр') >= 0 || c.indexOf('термодинам') >= 0 || c.indexOf('мкт') >= 0) return 'cat-thermo';
+            if (c.indexOf('электр') >= 0) return 'cat-elec';
+            return 'cat-other';
+        }
+        function decorate(){
+            document.querySelectorAll('.search-result-category').forEach(function(el){
+                if (el.dataset.chip) return;
+                el.dataset.chip = '1';
+                el.classList.add(classify(el.textContent));
+            });
+        }
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                decorate();
+            };
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+        else decorate();
+    })();
 
-/* ==== 10. Анимация смены темы «как на iPhone» ==== */
-(function(){
-    function animateThemeChange(x, y){
-        var circle = document.createElement('div');
-        circle.className = 'theme-circle';
-        var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
-        circle.style.width = circle.style.height = (maxR*2) + 'px';
-        circle.style.left = (x - maxR) + 'px';
-        circle.style.top  = (y - maxR) + 'px';
-        document.body.appendChild(circle);
-        requestAnimationFrame(function(){ circle.classList.add('expand'); });
-        setTimeout(function(){ circle.remove(); }, 700);
-    }
-    document.addEventListener('click', function(e){
-        var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
-        if (!t) return;
-        var r = t.getBoundingClientRect();
-        animateThemeChange(r.left + r.width/2, r.top + r.height/2);
-    }, true);
-})();
+    /* ==== 10. Анимация смены темы «как на iPhone» ==== */
+    (function(){
+        function animateThemeChange(x, y){
+            var circle = document.createElement('div');
+            circle.className = 'theme-circle';
+            var maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.2;
+            circle.style.width = circle.style.height = (maxR*2) + 'px';
+            circle.style.left = (x - maxR) + 'px';
+            circle.style.top  = (y - maxR) + 'px';
+            document.body.appendChild(circle);
+            requestAnimationFrame(function(){ circle.classList.add('expand'); });
+            setTimeout(function(){ circle.remove(); }, 700);
+        }
+        document.addEventListener('click', function(e){
+            var t = e.target.closest('#themeBtn, .theme-toggle, .bottom-nav button[title="Сменить тему"]');
+            if (!t) return;
+            var r = t.getBoundingClientRect();
+            animateThemeChange(r.left + r.width/2, r.top + r.height/2);
+        }, true);
+    })();
 
-/* ==== 2. Ripple при тапе ==== */
-(function(){
-    var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
-    function bind(el){
-        if (el.dataset.rippleBound) return;
-        el.dataset.rippleBound = '1';
-        if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
-        el.addEventListener('pointerdown', function(e){
-            var rect = el.getBoundingClientRect();
-            var size = Math.max(rect.width, rect.height);
-            var r = document.createElement('span');
-            r.className = 'ripple';
-            r.style.width = r.style.height = size + 'px';
-            r.style.left = (e.clientX - rect.left - size/2) + 'px';
-            r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
-            el.appendChild(r);
-            setTimeout(function(){ r.remove(); }, 650);
-        });
-    }
-    function bindAll(){
-        document.querySelectorAll(sel).forEach(bind);
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
-    else bindAll();
-    /* Перепривязка после поиска */
-    var orig = window.performSearch;
-    if (typeof orig === 'function') {
-        window.performSearch = function(){
-            orig.apply(this, arguments);
-            setTimeout(bindAll, 30);
-        };
-    }
-})();
+    /* ==== 2. Ripple при тапе ==== */
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){
+            document.querySelectorAll(sel).forEach(bind);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+        var orig = window.performSearch;
+        if (typeof orig === 'function') {
+            window.performSearch = function(){
+                orig.apply(this, arguments);
+                setTimeout(bindAll, 30);
+            };
+        }
+    })();
 </script>
 <script src="search-overlay.js"></script>
 <!-- bottom-nav-autohide-script -->
 <script>
-/* Автоскрытие нижней панели при скролле */
-(function(){
-    var nav = document.querySelector('.bottom-nav');
-    if (!nav) return;
-    var lastY = window.scrollY;
-    var threshold = 8;
-    var ticking = false;
-    function onScroll(){
-        var y = window.scrollY;
-        if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
-        if (y > lastY && y > 80) {
-            nav.classList.add('nav-hidden');
-        } else {
-            nav.classList.remove('nav-hidden');
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY;
+        var threshold = 8;
+        var ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            lastY = y;
+            ticking = false;
         }
-        lastY = y;
-        ticking = false;
-    }
-    window.addEventListener('scroll', function(){
-        if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
-    }, { passive: true });
-})();
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
 </script>
 <script src="page-search.js"></script>
 <script src="physics-data.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

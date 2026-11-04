@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -134,6 +134,18 @@
             h1{font-size:1.1rem;}
             .section-title{font-size:0.95rem;}
         }
+                .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -146,7 +158,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
 .section-title {
@@ -770,6 +824,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$A = qEd$</span>
                     <span class="f-label">— работа поля (для однородного поля)</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        В однородном поле сила, действующая на заряд, постоянна: \(F = qE\). Работа силы по перемещению заряда равна \(A = F \cdot s \cdot \cos\alpha\). Если заряд движется вдоль силовой линии (угол \(0°\)), то \(\cos\alpha = 1\), а перемещение \(s\) равно расстоянию \(d\) между точками. Получаем \(A = qEd\).
+                    </div>
                 </div>
                 <p>где $E$ — напряжённость поля, $d$ — проекция перемещения на силовую линию (расстояние между пластинами).</p>
                 <p><strong>Важно:</strong> работа поля не зависит от формы траектории, а зависит только от начального и конечного положения заряда. Это свойство консервативных сил.</p>
@@ -791,6 +849,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$\varphi = \dfrac{W_p}{q}$</span>
                     <span class="f-label">— потенциал (В)</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Потенциал — это энергия, которой обладал бы единичный положительный заряд в данной точке поля. Поскольку потенциальная энергия \(W_p\) зависит от величины заряда (чем больше заряд, тем больше энергия), для характеристики самого поля делят энергию на заряд: \(\varphi = W_p/q\). Это позволяет сравнивать «энергетическую высоту» разных точек поля независимо от того, какой заряд мы туда поместим.
+                    </div>
                 </div>
                 <p><strong>Потенциал поля точечного заряда:</strong></p>
                 <div class="formula-block">
@@ -850,6 +912,11 @@ a, button, div, span, label, input, textarea, select {
                         <label>Заряд $q$ (мкКл)</label>
                         <input type="range" id="work-q-slider" min="1" max="10" step="1" value="2">
                         <span class="control-value" id="work-q-value">2</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Напряжение $U$ (В)</label>
+                        <input type="range" id="work-U-slider" min="10" max="200" step="10" value="100">
+                        <span class="control-value" id="work-U-value">100</span>
                     </div>
                     <button class="btn-toggle" id="work-move-btn" style="background:#22c55e;">▶ Переместить</button>
                     <button class="btn-reset" id="work-reset">⟳ Сброс</button>
@@ -938,7 +1005,7 @@ a, button, div, span, label, input, textarea, select {
                     <p style="margin-top:12px;"><strong>2. Связь работы и потенциала</strong><br>Вспомните, что работа поля по переносу заряда \(A = q \cdot U\). Конденсатор — это как раз то место, где мы можем создавать заданное напряжение. Если вы возьмёте одну из предыдущих моделей (например, шарик) и поместите его в этот конденсатор, то при большем напряжении поле совершит бóльшую работу и шарик разгонится сильнее.</p>
                     
                     <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
-                        <strong>💡 Вывод:</strong> Чем сильнее сближены пластины (меньше \(d\)) или чем больше напряжение \(U\), тем сильнее электрическое поле внутри конденсатора. Именно поэтому в технике стремятся делать конденсаторы с тонкими диэлектриками, чтобы накапливать большой заряд.
+                        <strong>💡 Вывод:</strong> Чем меньше расстояние между пластинами \(d\) или чем больше напряжение \(U\), тем сильнее электрическое поле. Но здесь есть предел: если поле превысит напряжение пробоя, диэлектрик «прошьёт» искрой. Поэтому в технике ищут баланс — делают диэлектрик достаточно тонким для большой ёмкости, но достаточно прочным, чтобы выдержать рабочее напряжение.
                     </p>
                 </div>
             </div>
@@ -1246,11 +1313,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 1: РАБОТА ПОЛЯ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-work');
         const canvas = document.getElementById('canvas-work');
@@ -1264,7 +1327,7 @@ a, button, div, span, label, input, textarea, select {
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1293,23 +1356,25 @@ a, button, div, span, label, input, textarea, select {
         const group = new THREE.Group();
         scene.add(group);
 
-        // Пластины (сверху +, снизу -)
         const plateGeo = new THREE.BoxGeometry(8, 0.2, 4);
         const topPlate = new THREE.Mesh(plateGeo, new THREE.MeshStandardMaterial({ color: 0xff4444 }));
         topPlate.position.set(0, 4, 0); group.add(topPlate);
         const bottomPlate = new THREE.Mesh(plateGeo, new THREE.MeshStandardMaterial({ color: 0x4444ff }));
         bottomPlate.position.set(0, -4, 0); group.add(bottomPlate);
 
-        // Подписи пластин
         function makeLabel(text, color, yPos) {
             const div = document.createElement('div');
-            div.textContent = text; div.style.color = color; div.style.fontSize = '2rem'; div.style.fontWeight = 'bold';
-            const lbl = new CSS2DObject(div); lbl.position.set(-4.5, yPos, 0); return lbl;
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = '2rem';
+            div.style.fontWeight = 'bold';
+            const lbl = new THREE.CSS2DObject(div);
+            lbl.position.set(-4.5, yPos, 0);
+            return lbl;
         }
         group.add(makeLabel('+', '#ffcccc', 4));
         group.add(makeLabel('−', '#ccccff', -4));
 
-        // Линии поля
         const linesGroup = new THREE.Group();
         group.add(linesGroup);
         for (let x = -3; x <= 3; x += 1.5) {
@@ -1320,37 +1385,32 @@ a, button, div, span, label, input, textarea, select {
             }
         }
 
-        // Траектория движения
         const pathMat = new THREE.LineBasicMaterial({ color: 0x44ff44, linewidth: 2 });
         const pathPoints = [];
         const pathLine = new THREE.Line(new THREE.BufferGeometry(), pathMat);
         group.add(pathLine);
 
-        // Шарик заряда
         const chargeMat = new THREE.MeshStandardMaterial({ color: 0xffcc00, emissive: 0x664400 });
-        const chargeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), chargeMat);
+        const chargeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, window.qualitySettings3D.segments, window.qualitySettings3D.segments), chargeMat);
         chargeMesh.position.set(0, 3.5, 0);
         group.add(chargeMesh);
 
-        // Свечение (вспышка) при движении
         const glowMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0 });
-        const glowMesh = new THREE.Mesh(new THREE.SphereGeometry(0.8, 32, 32), glowMat);
+        const glowMesh = new THREE.Mesh(new THREE.SphereGeometry(0.8, window.qualitySettings3D.segments, window.qualitySettings3D.segments), glowMat);
         group.add(glowMesh);
 
         const qSlider = document.getElementById('work-q-slider');
         const qValue = document.getElementById('work-q-value');
         const A_Display = document.getElementById('work-A');
-        
-        // Добавляем ползунок напряжения прямо в HTML панели (если его нет)
+
         if (!document.getElementById('work-U-slider')) {
             const controlGroup = document.querySelector('#model-work .controls-panel .control-group');
             const uGroup = document.createElement('div');
             uGroup.className = 'control-group';
-            uGroup.innerHTML = `
-                <label>Напряжение U (В)</label>
-                <input type="range" id="work-U-slider" min="10" max="200" step="10" value="100">
-                <span class="control-value" id="work-U-value">100</span>
-            `;
+            uGroup.innerHTML =
+                '<label>Напряжение U (В)</label>' +
+                '<input type="range" id="work-U-slider" min="10" max="200" step="10" value="100">' +
+                '<span class="control-value" id="work-U-value">100</span>';
             controlGroup.parentNode.insertBefore(uGroup, controlGroup.nextSibling);
         }
 
@@ -1361,8 +1421,7 @@ a, button, div, span, label, input, textarea, select {
         let currentY = 3.5;
         let q = 2;
         let U = 100;
-
-        let currentSpeed = 0.05; // Переменная скорости
+        let currentSpeed = 0.05;
 
         function updateInfo() {
             q = parseFloat(qSlider.value);
@@ -1372,13 +1431,11 @@ a, button, div, span, label, input, textarea, select {
             const A = (q * 1e-6) * U;
             A_Display.textContent = A.toExponential(2);
 
-            // Меняем размер шарика в зависимости от заряда (q от 1 до 10)
-            const scale = 0.5 + (q / 10) * 0.8; // от 0.58 до 1.3
+            const scale = 0.5 + (q / 10) * 0.8;
             chargeMesh.scale.set(scale, scale, scale);
             glowMesh.scale.set(scale, scale, scale);
 
-            // Меняем скорость полета в зависимости от напряжения (U от 10 до 200)
-            currentSpeed = 0.02 + (U / 200) * 0.08; // от 0.024 до 0.1
+            currentSpeed = 0.02 + (U / 200) * 0.08;
         }
 
         qSlider.addEventListener('input', updateInfo);
@@ -1414,7 +1471,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1430,12 +1487,11 @@ a, button, div, span, label, input, textarea, select {
                 if (currentY <= -3.5) {
                     currentY = -3.5;
                     isMoving = false;
-                    glowMat.opacity = 0; // Гасим свечение при остановке
+                    glowMat.opacity = 0;
                 }
                 chargeMesh.position.set(0, currentY, 0);
                 glowMesh.position.set(0, currentY, 0);
-                
-                // Пульсирующее свечение во время полета
+
                 if (isMoving) {
                     glowMat.opacity = 0.4 + Math.sin(Date.now() * 0.01) * 0.3;
                 }
@@ -1450,10 +1506,10 @@ a, button, div, span, label, input, textarea, select {
         }
         animate();
     })();
-</script><!-- ===== МОДЕЛЬ 2: ЭКВИПОТЕНЦИАЛИ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+</script>
+
+<!-- ===== МОДЕЛЬ 2: ЭКВИПОТЕНЦИАЛИ ===== -->
+<script>
 
     (function() {
         const container = document.getElementById('container-equipotential');
@@ -1491,7 +1547,7 @@ a, button, div, span, label, input, textarea, select {
 
         // Центральный заряд
         const charge = new THREE.Mesh(
-            new THREE.SphereGeometry(0.6, 32, 32),
+            new THREE.SphereGeometry(0.6, window.qualitySettings3D.segments, window.qualitySettings3D.segments),
             new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111 })
         );
         group.add(charge);
@@ -1540,15 +1596,15 @@ a, button, div, span, label, input, textarea, select {
             }
 
             // Новая эквипотенциальная сфера
-            const sphereGeo = new THREE.SphereGeometry(r, 32, 32);
+            const sphereGeo = new THREE.SphereGeometry(r, window.qualitySettings3D.segments, window.qualitySettings3D.segments);
             const sphereMat = new THREE.MeshStandardMaterial({
-                color: 0x44aaff, transparent: true, opacity: 0.12, side: THREE.DoubleSide
+                color: 0x44aaff, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity, side: THREE.DoubleSide
             });
             const eqSphere = new THREE.Mesh(sphereGeo, sphereMat);
             dynamicGroup.add(eqSphere);
 
             // Новое жёлтое кольцо
-            const ringGeo = new THREE.TorusGeometry(r, 0.03, 16, 100);
+            const ringGeo = new THREE.TorusGeometry(r, 0.03, window.qualitySettings3D.segments, 100);
             const ringMat = new THREE.MeshStandardMaterial({ color: 0x44aaff });
             const ring = new THREE.Mesh(ringGeo, ringMat);
             ring.rotation.x = Math.PI / 2;
@@ -1578,7 +1634,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1593,11 +1649,7 @@ a, button, div, span, label, input, textarea, select {
         animate();
     })();
 </script><!-- ===== МОДЕЛЬ 3: КОНДЕНСАТОР ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
-
+<script>
     (function() {
         const container = document.getElementById('container-capacitor');
         const canvas = document.getElementById('canvas-capacitor');
@@ -1611,7 +1663,7 @@ a, button, div, span, label, input, textarea, select {
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const labelRenderer = new CSS2DRenderer();
+        const labelRenderer = new THREE.CSS2DRenderer();
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         labelRenderer.domElement.style.left = '0px';
@@ -1660,7 +1712,7 @@ a, button, div, span, label, input, textarea, select {
             div.style.color = color;
             div.style.fontSize = '2rem';
             div.style.fontWeight = 'bold';
-            const lbl = new CSS2DObject(div);
+            const lbl = new THREE.CSS2DObject(div);
             lbl.position.set(-3.5, yPos, 0);
             return lbl;
         }
@@ -1726,7 +1778,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();

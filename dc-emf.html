@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -114,12 +114,66 @@
         .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
         .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
         .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+            .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
     <style id="titles-center-fix">
         .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
         .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
@@ -155,6 +209,10 @@
                 <div class="formula-block">
                     <span class="f">$\mathcal{E} = \dfrac{A_{\text{стор}}}{q}$</span>
                     <span class="f-label">— электродвижущая сила (Вольт, В)</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        ЭДС численно равна работе, которую совершают сторонние силы (химические реакции в аккумуляторе, магнитное поле в генераторе) при перемещении единичного положительного заряда внутри источника. По аналогии с напряжением (где $U = A_{\text{кул}}/q$), ЭДС показывает работу не кулоновских, а сторонних сил.
+                    </div>
                 </div>
                 <p><strong>Источник тока</strong> (гальванический элемент, аккумулятор, генератор) — это устройство, в котором действуют сторонние силы.</p>
                 <p><strong>Внутреннее сопротивление</strong> $r$ — это сопротивление самого источника тока. Оно всегда присутствует (даже у идеальной батарейки), потому что электролит или обмотка генератора тоже оказывают сопротивление току.</p>
@@ -170,6 +228,10 @@
                 <div class="formula-block">
                     <span class="f">$I = \dfrac{\mathcal{E}}{R + r}$</span>
                     <span class="f-label">— закон Ома для полной цепи</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Полная работа сторонних сил по перемещению заряда $q$ по всей цепи: $A_{\text{стор}} = \mathcal{E} \cdot q$. С другой стороны, эта работа идёт на выделение теплоты на внешнем участке (закон Джоуля-Ленца): $Q_{\text{внеш}} = I^2 R t$, и на нагрев источника: $Q_{\text{внутр}} = I^2 r t$. То есть $A_{\text{стор}} = Q_{\text{внеш}} + Q_{\text{внутр}}$. Подставляем $A_{\text{стор}}$ и $q = I \cdot t$: $\mathcal{E} I t = I^2 R t + I^2 r t$. Сокращаем на $I \cdot t$ и получаем $\mathcal{E} = I(R + r)$, откуда $I = \mathcal{E}/(R + r)$.
+                    </div>
                 </div>
                 <p>где $R$ — сопротивление внешней цепи (нагрузки), $r$ — внутреннее сопротивление источника.</p>
                 <p><strong>Как это понять физически:</strong> ЭДС — это «толчок», который создает источник. Полное сопротивление цепи ($R+r$) мешает току. Поэтому чем больше ЭДС и чем меньше общее сопротивление, тем больше ток.</p>
@@ -238,11 +300,26 @@
                     <button class="btn-reset" id="c-reset">⟳ Сброс</button>
                 </div>
                 <div class="def-card">
-                    <p><strong>Как пользоваться моделью?</strong></p>
-                    <p><strong>1. ЭДС (\(\mathcal{E}\))</strong> — «сила» источника. Чем больше ЭДС, тем больше ток \(I = \frac{\mathcal{E}}{R+r}\) и напряжение \(U\) на нагрузке.</p>
-                    <p><strong>2. Внутреннее сопротивление (\(r\))</strong> — потери внутри источника. Если \(r\) растёт (например, батарейка садится), ток падает, а напряжение на клеммах \(U = \mathcal{E} - I \cdot r\) уменьшается.</p>
-                    <p><strong>3. Внешнее сопротивление (\(R\))</strong> — нагрузка. Если \(R\) очень большое (разомкнутая цепь), ток почти нулевой, а напряжение \(U \approx \mathcal{E}\). Если \(R\) маленькое, ток большой, но напряжение \(U\) падает.</p>
-                    <p style="margin-top:8px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;"><strong>💡 Вывод:</strong> Свет (и нагрев) лампочки зависит от напряжения. При большой нагрузке (малом \(R\)) лампа горит ярко, но батарейка быстро «садится» (растёт \(r\)). Внутреннее сопротивление всегда крадёт часть ЭДС.</p>
+                    <h4 style="color:var(--special-border); margin-bottom:8px; margin-top:0;">🔍 Как пользоваться моделью и что наблюдать</h4>
+                    <p><strong>1. ЭДС (</strong>\(\mathcal{E}\)<strong>)</strong> — «сила» источника. Чем больше ЭДС, тем больше ток \(I = \frac{\mathcal{E}}{R+r}\) и напряжение \(U\) на нагрузке.</p>
+
+                    <p style="margin-top:8px;"><strong>2. Что будет, если крутить ползунок \(r\) (внутреннее сопротивление)?</strong></p>
+                    <ul>
+                        <li><strong>\(r \to\) минимум:</strong> Источник идеальный. Ток максимальный, напряжение на клеммах \(U\) почти равно ЭДС. Батарейка почти не греется.</li>
+                        <li><strong>\(r \to\) максимум:</strong> Батарейка «села» или внутри плохой контакт. Ток падает, лампа тускнеет. Напряжение \(U\) сильно проседает, а сам резистор \(r\) раскаляется (оранжевое свечение).</li>
+                    </ul>
+
+                    <p style="margin-top:8px;"><strong>3. Что будет, если крутить ползунок \(R\) (внешнее сопротивление)?</strong></p>
+                    <ul>
+                        <li><strong>\(R \to\) максимум (разрыв цепи):</strong> Ток падает почти до нуля. Напряжение \(U\) становится равным ЭДС (вольтметр покажет максимум), но лампочка не горит, так как тока нет.</li>
+                        <li><strong>\(R \to\) минимум (короткое замыкание):</strong> Ток вырастает до огромных значений. Напряжение на нагрузке падает почти до нуля, вся энергия выделяется на внутреннем сопротивлении \(r\) (батарейка закипает).</li>
+                    </ul>
+
+                    <p style="margin-top:12px; background:rgba(59,130,246,0.1); padding:8px; border-radius:8px;">
+                        <strong>💡 Вывод (какое отношение \(R\) и \(r\) лучше подобрать?):</strong><br>
+                        Если сделать \(R = r\), то полезная мощность будет <strong>максимальной</strong>, но КПД составит всего 50% (половина энергии уходит в нагрев источника).<br>
+                        На практике (в технике и лабораториях) нагрузку \(R\) подбирают так, чтобы она была в <strong>5–10 раз больше</strong> внутреннего сопротивления \(r\). Тогда КПД будет от 83% до 91% (потери маленькие), а мощность останется на приемлемом уровне.
+                    </p>
                 </div>
             </div>
 
@@ -381,7 +458,7 @@
 
             <div class="task-block">
                 <div class="task-title">📘 Задача 7. Полезная мощность</div>
-                <div class="task-condition">При токе 2000 мА и напряжении на нагрузке 10 В. Найдите полезную мощность.</div>
+                <div class="task-condition">При токе 2000 мА и напряжении на нагрузке 10 В найдите полезную мощность.</div>
                 <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
                 <div id="sol7" class="task-solution">
                     <div class="task-given-find">
@@ -575,9 +652,7 @@
 </script>
 
 <!-- МОДЕЛЬ 1: ПОЛНАЯ ЦЕПЬ (ИСПРАВЛЕННАЯ) -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-circuit');
@@ -707,9 +782,17 @@
             new THREE.MeshStandardMaterial({ color: 0x8ba5b8 })
         );
         lampGroup.add(lampBase);
+                const lampBulbMat = new THREE.MeshStandardMaterial({
+            color: 0xeeeeee,
+            emissive: 0xffdd44,
+            emissiveIntensity: 0,
+            transparent: true,
+            opacity: 0.85,
+            roughness: 0.1
+        });
         const lampBulb = new THREE.Mesh(
-            new THREE.SphereGeometry(0.55, 16, 16),
-            new THREE.MeshStandardMaterial({ color: 0x555555, emissive: 0x000000, transparent: true, opacity: 0.85 })
+            new THREE.SphereGeometry(0.55, window.qualitySettings3D.segments, window.qualitySettings3D.segments),
+            lampBulbMat
         );
         lampBulb.position.set(0, 0.7, 0);
         lampGroup.add(lampBulb);
@@ -758,7 +841,7 @@
         const electrons = [];
         const N = 30;
         const eGeo = new THREE.SphereGeometry(0.1, 8, 8);
-        const eMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x111144 });
+        const eMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x331100 });
 
         const perimeter = [];
         const corners = [
@@ -876,7 +959,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -892,7 +975,7 @@
             const R = parseFloat(R_slider.value);
             const I = EMF / (R + r);
 
-            const speed = 0.0003 + I * 0.0001;
+            const speed = Math.max(0.0001, I * 0.0012);
             electrons.forEach(e => {
                 e.t = (e.t + speed) % 1;
                 e.mesh.position.copy(pointOnPerimeter(e.t));
@@ -905,9 +988,7 @@
 </script>
 
 <!-- МОДЕЛЬ 2: КПД (Поток энергии) -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-efficiency');
@@ -1002,7 +1083,7 @@
         // --- 2. ТРУБЫ ДЛЯ ЭНЕРГИИ ---
         // Полезная мощность (идет вправо-вверх)
         const usefulPipeGeo = new THREE.CylinderGeometry(0.4, 0.4, 6, 16);
-        const usefulPipeMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x112244, transparent: true, opacity: 0.85 });
+        const usefulPipeMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x112244, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity });
         const usefulPipe = new THREE.Mesh(usefulPipeGeo, usefulPipeMat);
         usefulPipe.position.set(2.1, 0.6, 0); // Смещена вправо
         usefulPipe.rotation.z = -Math.PI / 3.5; // Наклон
@@ -1010,7 +1091,7 @@
 
         // Потери мощности (идет влево-вверх)
         const lossPipeGeo = new THREE.CylinderGeometry(0.4, 0.4, 6, 16);
-        const lossPipeMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111, transparent: true, opacity: 0.85 });
+        const lossPipeMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x441111, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity });
         const lossPipe = new THREE.Mesh(lossPipeGeo, lossPipeMat);
         lossPipe.position.set(-2.1, 0.6, 0); // Смещена влево
         lossPipe.rotation.z = Math.PI / 3.5; // Наклон
@@ -1131,7 +1212,7 @@
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();

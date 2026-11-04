@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Электрический ток в жидкостях. Закон электролиза</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c;
+            --card-bg: #1e3545;
+            --text: #ffffff;
+            --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1);
+            --special-border: #f59e0b;
+            --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff;
+            --formula-bg: #1e3545;
+            --info-bg: #1e3545;
+            --input-bg: #2a4a5a;
+            --task-bg: #1e3545;
+            --task-border: #f59e0b;
+            --slider-track: #2a4a5a;
+            --slider-thumb: #f59e0b;
+            --given-color: #60a5fa;
+            --find-color: #facc15;
+            --card-shadow: rgba(0,0,0,0.2);
+        }
+        :root.light-mode {
+            --bg: #f0f4fa;
+            --card-bg: #ffffff;
+            --text: #1a2a3f;
+            --text-secondary: #5a7a94;
+            --border: #d0d8e0;
+            --canvas-bg: #eef2f8;
+            --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc;
+            --info-bg: #e8f0fe;
+            --special-border: #d97706;
+            --input-bg: #e8f0fe;
+            --task-bg: #f5f8fc;
+            --task-border: #d97706;
+            --slider-track: #d0d8e0;
+            --slider-thumb: #d97706;
+            --given-color: #3b82f6;
+            --find-color: #eab308;
+            --card-shadow: rgba(0,0,0,0.08);
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.4rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s;}
+        .section-title:hover{opacity:0.8;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary);}
+        .section.collapsed .section-title::after{transform:rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card .important{color:var(--special-border);font-weight:700;}
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+        .model-container{text-align:center;margin:16px 0;position:relative;border-radius:24px;overflow:hidden;background:var(--canvas-bg);box-shadow:0 4px 12px var(--card-shadow);width:100%;aspect-ratio:16/9;min-height:450px;transition:background 0.3s;}
+        .model-canvas{display:block;width:100%;height:100%;background:transparent;border-radius:20px;touch-action:none;}
+        .fullscreen-btn{position:absolute;bottom:15px;right:15px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:20;color:white;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
+        .fullscreen-btn:hover{background:var(--special-border);transform:scale(1.05);}
+        .controls-panel{background:var(--info-bg);border-radius:16px;padding:12px 16px;margin:8px 0 12px 0;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .control-group label{color:var(--text);font-size:0.85rem;font-weight:600;min-width:20px;transition:color 0.3s;}
+        .control-group input[type="range"]{width:140px;height:6px;-webkit-appearance:none;background:var(--slider-track);border-radius:3px;outline:none;transition:background 0.3s;}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-group input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--slider-thumb);cursor:pointer;border:2px solid var(--special-border);}
+        .control-value{color:var(--text);font-size:0.85rem;font-weight:600;min-width:60px;text-align:center;background:var(--input-bg);padding:2px 8px;border-radius:12px;transition:color 0.3s,background 0.3s;}
+        .control-label{color:var(--text-secondary);font-size:0.75rem;transition:color 0.3s;}
+        .btn-reset{background:#666;color:white;border:none;padding:6px 18px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;min-height:34px;}
+        .btn-reset:hover{transform:scale(1.05);opacity:0.9;}
+        .info-display{position:absolute;top:12px;right:12px;background:var(--info-bg);backdrop-filter:blur(8px);padding:6px 14px;border-radius:12px;color:var(--text);font-size:0.7rem;z-index:15;text-align:left;border:1px solid var(--special-border);box-shadow:0 2px 10px var(--card-shadow);transition:background 0.3s,color 0.3s,border 0.3s;min-width:160px;}
+        .info-display div{margin:2px 0;}
+        .info-display .val{font-weight:700;color:var(--special-border);}
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+        .task-block{background:var(--task-bg);border-radius:18px;padding:16px 18px;margin:16px 0;border-left:4px solid var(--task-border);border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-block .task-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px;transition:color 0.3s;}
+        .task-block .task-condition{font-size:0.95rem;color:var(--text);line-height:1.8;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;transition:color 0.3s,background 0.3s;}
+        .task-block .task-condition strong{color:var(--special-border);}
+        .task-block .task-condition mjx-container{font-size:1.1rem !important;}
+        .task-given-find{display:flex;flex-wrap:wrap;gap:20px 40px;padding:10px 14px;background:var(--card-bg);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);transition:background 0.3s,border 0.3s;}
+        .task-given-find .given{color:var(--given-color);}
+        .task-given-find .find{color:var(--find-color);}
+        .task-given-find .given strong,.task-given-find .find strong{font-weight:700;font-size:1rem;}
+        .task-given-find mjx-container{font-size:1.1rem !important;}
+        .show-solution-btn{background:var(--special-border);color:white;border:none;padding:8px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .show-solution-btn:hover{transform:scale(1.03);opacity:0.9;}
+        .task-solution{display:none;margin-top:12px;}
+        .task-solution.open{display:block;}
+        .task-solution .step{padding:10px 16px;margin:8px 0;background:var(--card-bg);border-radius:10px;border-left:3px solid var(--special-border);font-size:0.95rem;color:var(--text);line-height:1.8;overflow-x:auto;transition:background 0.3s,color 0.3s;}
+        .task-solution .step .formula{display:block;text-align:center;font-size:1.3rem;padding:6px 0;font-family:'Times New Roman',serif;font-style:italic;color:var(--special-border);}
+        .task-solution .step .formula mjx-container{font-size:1.3rem !important;}
+        .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
+        .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
+        .derivation-btn { background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary); font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer; margin-top: 8px; transition: all 0.2s; display: inline-block; }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content { display: none; margin-top: 10px; padding: 12px; background: var(--card-bg); border-left: 3px solid var(--text-secondary); border-radius: 8px; font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left; }
+        .derivation-content.open { display: block; }
+        .btn-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+        .hint-box{background:rgba(59,130,246,0.08);border-left:3px solid #3b82f6;border-radius:10px;padding:10px 14px;margin:10px 0;font-size:0.9rem;color:var(--text);line-height:1.6;transition:background 0.3s,color 0.3s;}
+        .hint-box strong{color:#3b82f6;}
+        .hint-box mjx-container{font-size:1rem !important;}
+        mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
+        .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
+        .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
+        @media(max-width:700px){
+            .model-container{min-height:320px;}
+            .fullscreen-btn{width:38px;height:38px;font-size:18px;bottom:12px;right:12px;}
+            .controls-panel{flex-direction:column;gap:10px;align-items:stretch;}
+            .control-group{justify-content:space-between;}
+            .control-group input[type="range"]{width:100%;max-width:200px;}
+            .task-solution .step .formula{font-size:1.1rem;white-space:normal;}
+            .task-given-find{flex-direction:column;gap:6px;}
+            .formula-block{font-size:0.95rem;padding:10px 12px;}
+            .formula-block .f{font-size:1.1rem;}
+            .info-display{font-size:0.6rem;padding:4px 10px;min-width:120px;top:8px;right:8px;}
+        }
+        @media(max-width:450px){
+            .model-container{min-height:260px;}
+            .container{padding:10px;padding-top:44px;}
+            h1{font-size:1.1rem;}
+            .section-title{font-size:0.95rem;}
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: { scale: 1.2 }
+        };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script>
+        let quality3D = 'high';
+        if (window.Android && window.Android.getQuality3D) {
+            quality3D = window.Android.getQuality3D();
+        } else {
+            const saved = localStorage.getItem('quality3d');
+            if (saved) quality3D = saved;
+        }
+        window.quality3D = quality3D;
+        window.qualitySettings = {
+            low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+            medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+            high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+        };
+        window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+        (function() {
+            if (!window.THREE) return;
+            const OriginalRenderer = THREE.WebGLRenderer;
+            THREE.WebGLRenderer = function(params) {
+                const r = new OriginalRenderer(params);
+                const q = window.qualitySettings3D || {};
+                if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+                if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+                return r;
+            };
+        })();
+        window.applyQualitySegments = function() {
+            if (!window.THREE || !window.qualitySettings3D) return;
+            return window.qualitySettings3D.segments;
+        };
+    </script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        @media (prefers-reduced-motion: no-preference) { .header { background: rgba(30, 53, 69, 0.72) !important; backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--border); } :root.light-mode .header { background: rgba(255, 255, 255, 0.72) !important; } }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .search-result-category { display: inline-block; padding: 2px 10px; margin-top: 4px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3px; color: #fff; background: var(--accent, #3b82f6); }
+        .search-result-category.cat-mech  { background: #3b82f6; }
+        .search-result-category.cat-thermo{ background: #f59e0b; }
+        .search-result-category.cat-elec  { background: #eab308; }
+        .search-result-category.cat-other { background: #64748b; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: translateY(-2px); }
+        body { padding-bottom: 78px; }
+        .theme-circle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; background: var(--bg); transform: scale(0); opacity: 0.95; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s; }
+        .theme-circle.expand { transform: scale(1); opacity: 0; }
+        .ripple-host { position: relative !important; overflow: hidden !important; }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(59,130,246,0.35); transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 0; }
+        @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        :root.light-mode .ripple { background: rgba(37,99,235,0.28); }
+    </style>
+    <style id="search-clean-fix">
+        .search-result-icon { display: none !important; }
+        .search-results { scrollbar-width: none; -ms-overflow-style: none; }
+        .search-results::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        body::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+        body { scrollbar-width: none; -ms-overflow-style: none; }
+    </style>
+    <style id="nav-back-hide-index"> body.is-index .nav-back-btn { display: none !important; } </style>
+    <style id="bottom-nav-autohide">
+        .bottom-nav { transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 120%); opacity: 0; pointer-events: none; }
+        body.is-index .bottom-nav.nav-hidden { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+    </style>
+    <style id="fav-nav-yellow">
+        .bottom-nav a[href="favorites.html"].active, .bottom-nav a[href="favorites.html"].fav-active { background: rgba(250, 204, 21, 0.18) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover, .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(250, 204, 21, 0.28) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active { background: rgba(234, 179, 8, 0.18) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover, :root.light-mode .bottom-nav a[href="favorites.html"].fav-active:hover { background: rgba(234, 179, 8, 0.28) !important; color: #92400e !important; }
+    </style>
+    <style id="nav-order-fix">
+        .bottom-nav { display: flex; align-items: center; }
+        .bottom-nav .nav-back-btn { order: 1; }
+        .bottom-nav a[href="index.html"]:not(.nav-back-btn) { order: 2; }
+        .bottom-nav button[title="Поиск"], .bottom-nav a[title="Поиск"] { order: 3; }
+        .bottom-nav a[href="favorites.html"] { order: 4; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a[href="favorites.html"].active:hover { background: rgba(250, 204, 21, 0.30) !important; color: #fde047 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active { background: rgba(234, 179, 8, 0.20) !important; color: #b45309 !important; }
+        :root.light-mode .bottom-nav a[href="favorites.html"].active:hover { background: rgba(234, 179, 8, 0.30) !important; color: #92400e !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .back-link, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .back-link:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .back-link:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn, .back-link { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover, .back-link:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn, :root.light-mode .back-link { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover, :root.light-mode .back-link:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right"> .bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; } </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; }
+        a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Электрический ток в жидкостях. Закон электролиза</h1>
+
+    <!-- ===== ТЕОРИЯ 1 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Электролиты и электролитическая диссоциация</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Электролиты</strong> — вещества, растворы или расплавы которых <span class="important">проводят электрический ток</span>. К ним относятся кислоты, щёлочи и соли.</p>
+                <p><strong>Почему они проводят ток?</strong> При растворении в воде молекулы электролита распадаются на <span class="important">ионы</span> — положительные (катионы) и отрицательные (анионы). Этот процесс называется <strong>электролитической диссоциацией</strong>.</p>
+                <p><strong>Пример:</strong> поваренная соль NaCl в воде распадается на ионы Na⁺ и Cl⁻. Именно эти ионы и переносят заряд — в отличие от металлов, где заряд переносят электроны.</p>
+                <p><strong>Носители заряда в электролитах:</strong></p>
+                <ul>
+                    <li><strong>катионы</strong> (положительные ионы) — движутся к катоду (минусу);</li>
+                    <li><strong>анионы</strong> (отрицательные ионы) — движутся к аноду (плюсу).</li>
+                </ul>
+                <p><strong>Важно:</strong> в электролитах <span class="important">нет свободных электронов</span>. Ток переносят только ионы, которые движутся в противоположных направлениях.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 2 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Электролиз. Закон Фарадея</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Электролиз</strong> — процесс выделения чистого вещества на электродах при прохождении тока через раствор или расплав электролита.</p>
+                <p><strong>Как это происходит:</strong> положительные ионы (например, Cu²⁺) подходят к катоду, принимают электроны и <span class="important">восстанавливаются</span> до чистого металла. Отрицательные ионы (например, Cl⁻) подходят к аноду, отдают электроны и <span class="important">окисляются</span> (выделяются в виде газа или растворяются).</p>
+
+                <p><strong>Закон электролиза (закон Фарадея):</strong> масса вещества, выделившегося на электроде, прямо пропорциональна заряду, прошедшему через электролит:</p>
+                <div class="formula-block">
+                    <span class="f">$m = k \cdot q = k \cdot I \cdot t$</span>
+                    <span class="f-label">— закон электролиза Фарадея</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Каждый ион переносит строго определённый заряд. Значит, число ионов, дошедших до электрода, пропорционально общему заряду $q = I \cdot t$, прошедшему через раствор. Масса одного иона зависит от вещества, поэтому вводится коэффициент пропорциональности $k$ — электрохимический эквивалент. Он показывает, какая масса вещества выделяется при прохождении заряда в 1 Кл.
+                    </div>
+                </div>
+                <p>где:</p>
+                <ul>
+                    <li>$m$ — масса выделившегося вещества (кг);</li>
+                    <li>$k$ — электрохимический эквивалент (кг/Кл);</li>
+                    <li>$q = I \cdot t$ — заряд, прошедший через электролит (Кл).</li>
+                </ul>
+                <p><strong>Связь с валентностью:</strong> электрохимический эквивалент можно выразить через молярную массу $M$ и валентность $n$:</p>
+                <div class="formula-block">
+                    <span class="f">$k = \dfrac{M}{n F}$</span>
+                    <span class="f-label">— связь электрохимического эквивалента с валентностью</span>
+                </div>
+                <p>где $F = 96485$ Кл/моль — <span class="important">постоянная Фарадея</span>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ТЕОРИЯ 3 ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Применение электролиза</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Где применяют электролиз:</strong></p>
+                <ul>
+                    <li><strong>Гальваностегия</strong> — покрытие одного металла другим (хромирование, никелирование, золочение, серебрение).</li>
+                    <li><strong>Гальванопластика</strong> — получение точных металлических копий с предметов (например, при изготовлении монет или деталей).</li>
+                    <li><strong>Электрометаллургия</strong> — получение чистых металлов (медь, алюминий, цинк) из руд.</li>
+                    <li><strong>Рафинирование</strong> — очистка металлов от примесей.</li>
+                    <li><strong>Электролиз воды</strong> — получение водорода и кислорода.</li>
+                </ul>
+                <p><strong>График зависимости массы от времени:</strong></p>
+                <svg viewBox="0 0 360 240" width="100%" style="display:block;margin:12px auto;max-width:400px;">
+                    <defs>
+                        <marker id="arrowAxis2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#8ba5b8"/>
+                        </marker>
+                    </defs>
+                    <line x1="40" y1="200" x2="340" y2="200" stroke="#8ba5b8" stroke-width="1.5" marker-end="url(#arrowAxis2)"/>
+                    <line x1="40" y1="220" x2="40" y2="20" stroke="#8ba5b8" stroke-width="1.5" marker-end="url(#arrowAxis2)"/>
+                    <text x="330" y="220" fill="#8ba5b8" font-size="13" font-weight="bold">t</text>
+                    <text x="15" y="30" fill="#8ba5b8" font-size="13" font-weight="bold">m</text>
+                    <line x1="40" y1="200" x2="300" y2="40" stroke="#44ff88" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="300" cy="40" r="4" fill="#44ff88"/>
+                    <text x="180" y="100" fill="#44ff88" font-size="14" font-weight="bold">m = k I t</text>
+                    <text x="180" y="120" fill="#c0d0e0" font-size="12">прямая линия</text>
+                </svg>
+                <p><strong>💡 Это интересно:</strong> В 1836 году английский физик Джон Даниель изобрёл первый химический источник тока (элемент Даниеля), в котором цинк растворялся в серной кислоте, а медь выделялась на катоде. Сегодня электролиз — основа всей цветной металлургии: алюминий, медь, цинк и другие металлы получают именно с его помощью. А гальваностегия позволяет покрывать обычные детали тонким слоем золота или хрома, делая их красивыми и устойчивыми к коррозии.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3D-МОДЕЛЬ ===== -->
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🪐 Интерактивная 3D-модель</div>
+        <div class="section-content">
+            <div class="model-container" id="container-liq">
+                <canvas id="canvas-liq" class="model-canvas"></canvas>
+                <button class="fullscreen-btn" id="fs-liq">⛶</button>
+                <div class="info-display">
+                    <div>Сила тока: <span class="val" id="liq-I">0,0</span> А</div>
+                    <div>Масса: <span class="val" id="liq-mass">0,00</span> г</div>
+                    <div>Время: <span class="val" id="liq-time">0</span> с</div>
+                </div>
+            </div>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Напряжение $U$ (В)</label>
+                    <input type="range" id="liq-U-slider" min="1" max="12" step="1" value="6">
+                    <span class="control-value" id="liq-U-value">6</span>
+                </div>
+                <button class="btn-reset" id="liq-reset">⟳ Сброс</button>
+                <span class="control-label">⬤ Чем больше ток и время — тем больше масса на катоде</span>
+            </div>
+            <div class="def-card">
+                <p><strong>Модель электролиза.</strong> В растворе находятся <strong>катионы</strong> (синие шарики, движутся к <strong>катоду (−)</strong>) и <strong>анионы</strong> (оранжевые шарики, движутся к <strong>аноду (+)</strong>).</p>
+                <p>На катоде катионы <strong>восстанавливаются</strong> — там оседает металл (оранжевые точки на синем электроде). При увеличении <strong>напряжения</strong> растёт ток, ионы движутся быстрее, и масса осадка растёт быстрее.</p>
+                <p>Табло показывает ток, массу выделившегося вещества и время. Кнопка «Сброс» очищает катод и обнуляет счётчики.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАДАЧИ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Задачи с подробным решением (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 1. Заряд через электролит</div>
+                <div class="task-condition"><strong>Условие:</strong> Через раствор электролита за $t = 10$ мин прошёл ток $I = 2$ А. Найдите заряд, прошедший через электролит.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $I = 2$ А, $t = 10$ мин = 600 с</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $q$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol1')">📖 Показать решение</button>
+                <div id="sol1" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $q = I \cdot t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$q = 2 \cdot 600 = 1200 \text{ Кл}$</span></div>
+                    <div class="answer">✅ Ответ: $q = 1200$ Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 2. Масса меди на катоде</div>
+                <div class="task-condition"><strong>Условие:</strong> При электролизе раствора медного купороса через него прошёл заряд $q = 100$ Кл. Электрохимический эквивалент меди $k = 0{,}33$ мг/Кл. Найдите массу выделившейся меди.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 100$ Кл, $k = 0{,}33 \cdot 10^{-6}$ кг/Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol2')">📖 Показать решение</button>
+                <div id="sol2" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $m = k \cdot q$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = 0{,}33 \cdot 10^{-6} \cdot 100 = 3{,}3 \cdot 10^{-5} \text{ кг} = 33 \text{ мг}$</span></div>
+                    <div class="answer">✅ Ответ: $m = 33$ мг</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 3. Время электролиза</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько времени нужно пропускать ток $I = 5$ А, чтобы выделить $m = 1{,}65$ г меди ($k = 0{,}33$ мг/Кл)?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $I = 5$ А, $m = 1{,}65$ г = $1{,}65 \cdot 10^{-3}$ кг, $k = 0{,}33 \cdot 10^{-6}$ кг/Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol3')">📖 Показать решение</button>
+                <div id="sol3" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $m = k I t \Rightarrow t = \dfrac{m}{k I}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$t = \dfrac{1{,}65 \cdot 10^{-3}}{0{,}33 \cdot 10^{-6} \cdot 5} = \dfrac{1{,}65 \cdot 10^{-3}}{1{,}65 \cdot 10^{-6}} = 1000 \text{ с}$</span></div>
+                    <div class="answer">✅ Ответ: $t = 1000$ с $\approx 16{,}7$ мин</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 4. Электрохимический эквивалент</div>
+                <div class="task-condition"><strong>Условие:</strong> При прохождении заряда $q = 200$ Кл на катоде выделилось $m = 0{,}12$ г вещества. Найдите электрохимический эквивалент.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 200$ Кл, $m = 0{,}12 \cdot 10^{-3}$ кг</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $k$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol4')">📖 Показать решение</button>
+                <div id="sol4" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $k = \dfrac{m}{q}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$k = \dfrac{0{,}12 \cdot 10^{-3}}{200} = 6 \cdot 10^{-7} \text{ кг/Кл}$</span></div>
+                    <div class="answer">✅ Ответ: $k = 6 \cdot 10^{-7}$ кг/Кл</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 5. Масса серебра</div>
+                <div class="task-condition"><strong>Условие:</strong> При серебрении изделия ток $I = 2$ А пропускали $t = 30$ мин. Электрохимический эквивалент серебра $k = 1{,}12$ мг/Кл. Найдите массу серебра.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $I = 2$ А, $t = 1800$ с, $k = 1{,}12 \cdot 10^{-6}$ кг/Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol5')">📖 Показать решение</button>
+                <div id="sol5" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $m = k I t$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = 1{,}12 \cdot 10^{-6} \cdot 2 \cdot 1800 = 4{,}032 \cdot 10^{-3} \text{ кг} \approx 4{,}03 \text{ г}$</span></div>
+                    <div class="answer">✅ Ответ: $m \approx 4{,}03$ г</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 6. Заряд через ионы</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько ионов Cu²⁺ осело на катоде, если через раствор прошёл заряд $q = 10$ Кл? Заряд одного иона $2e = 3{,}2 \cdot 10^{-19}$ Кл.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $q = 10$ Кл, $q_0 = 3{,}2 \cdot 10^{-19}$ Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $N$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol6')">📖 Показать решение</button>
+                <div id="sol6" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $N = \dfrac{q}{q_0}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$N = \dfrac{10}{3{,}2 \cdot 10^{-19}} \approx 3{,}125 \cdot 10^{19}$</span></div>
+                    <div class="answer">✅ Ответ: $N \approx 3{,}1 \cdot 10^{19}$ ионов</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 7. Масса через постоянную Фарадея</div>
+                <div class="task-condition"><strong>Условие:</strong> При электролизе воды ($M = 18$ г/моль, валентность водорода $n = 1$) через раствор прошёл заряд $q = 96485$ Кл. Найдите массу выделившегося водорода. $F = 96485$ Кл/моль.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $M = 0{,}018$ кг/моль, $n = 1$, $q = 96485$ Кл, $F = 96485$ Кл/моль</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol7')">📖 Показать решение</button>
+                <div id="sol7" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $k = \dfrac{M}{nF}$, $m = k q = \dfrac{M q}{n F}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m = \dfrac{0{,}018 \cdot 96485}{1 \cdot 96485} = 0{,}018 \text{ кг} = 18 \text{ г}$</span></div>
+                    <div class="step explanation"><strong>Пояснение:</strong> Если $q = F$, то $m = M/n$ — это масса одного моля эквивалента.</div>
+                    <div class="answer">✅ Ответ: $m = 18$ г</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 8. Сопротивление электролита</div>
+                <div class="task-condition"><strong>Условие:</strong> Через электролит сопротивлением $R = 10$ Ом течёт ток $I = 0{,}5$ А. Найдите напряжение и мощность нагрева.</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $R = 10$ Ом, $I = 0{,}5$ А</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $U$, $P$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol8')">📖 Показать решение</button>
+                <div id="sol8" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $U = I R = 0{,}5 \cdot 10 = 5$ В.</div>
+                    <div class="step"><strong>Шаг 2.</strong> $P = I^2 R = 0{,}25 \cdot 10 = 2{,}5$ Вт.</div>
+                    <div class="answer">✅ Ответ: $U = 5$ В; $P = 2{,}5$ Вт</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 9. Время для 1 грамма меди</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько времени нужно пропускать ток $I = 1$ А, чтобы выделить $m = 1$ г меди ($k = 0{,}33$ мг/Кл)?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $I = 1$ А, $m = 10^{-3}$ кг, $k = 0{,}33 \cdot 10^{-6}$ кг/Кл</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $t$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol9')">📖 Показать решение</button>
+                <div id="sol9" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> $t = \dfrac{m}{k I}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$t = \dfrac{10^{-3}}{0{,}33 \cdot 10^{-6} \cdot 1} \approx 3030 \text{ с} \approx 50{,}5 \text{ мин}$</span></div>
+                    <div class="answer">✅ Ответ: $t \approx 3030$ с $\approx 50{,}5$ мин</div>
+                </div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">📘 Задача 10. Масса при изменении тока</div>
+                <div class="task-condition"><strong>Условие:</strong> При токе $I_1 = 2$ А за время $t$ выделилось $m_1 = 4$ г меди. Какая масса выделится при токе $I_2 = 4$ А за то же время?</div>
+                <div class="task-given-find">
+                    <div class="given"><strong>📌 Дано:</strong> $I_1 = 2$ А, $m_1 = 4$ г, $I_2 = 4$ А</div>
+                    <div class="find"><strong>🔍 Найти:</strong> $m_2$</div>
+                </div>
+                <button class="show-solution-btn" onclick="toggleSolution('sol10')">📖 Показать решение</button>
+                <div id="sol10" class="task-solution">
+                    <div class="step"><strong>Шаг 1.</strong> Масса пропорциональна току: $\dfrac{m_2}{m_1} = \dfrac{I_2}{I_1}$.</div>
+                    <div class="step"><strong>Шаг 2.</strong> <span class="formula">$m_2 = m_1 \cdot \dfrac{I_2}{I_1} = 4 \cdot \dfrac{4}{2} = 8 \text{ г}$</span></div>
+                    <div class="answer">✅ Ответ: $m_2 = 8$ г</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== САМОСТОЯТЕЛЬНОЕ РЕШЕНИЕ ===== -->
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🧩 Задачи для самостоятельного решения (10 задач)</div>
+        <div class="section-content">
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 1. Заряд через электролит</div>
+                <div class="task-condition"><strong>Условие:</strong> Через раствор прошёл ток $I = 3$ А за $t = 5$ мин. Найдите заряд.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s1')">💡 Подсказка</button></div>
+                <div id="s1" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $q = I \cdot t$, время в секундах.</div><div class="answer">✅ Ответ: $q = 900$ Кл</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 2. Масса меди</div>
+                <div class="task-condition"><strong>Условие:</strong> Через раствор медного купороса прошёл заряд $q = 200$ Кл. $k = 0{,}33$ мг/Кл. Найдите массу меди.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s2')">💡 Подсказка</button></div>
+                <div id="s2" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $m = k q$.</div><div class="answer">✅ Ответ: $m = 66$ мг</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 3. Время для 2 г меди</div>
+                <div class="task-condition"><strong>Условие:</strong> Ток $I = 2$ А, нужно выделить $m = 2$ г меди ($k = 0{,}33$ мг/Кл). Найдите время.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s3')">💡 Подсказка</button></div>
+                <div id="s3" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $t = \dfrac{m}{k I}$.</div><div class="answer">✅ Ответ: $t \approx 3030$ с $\approx 50{,}5$ мин</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 4. Электрохимический эквивалент</div>
+                <div class="task-condition"><strong>Условие:</strong> При заряде $q = 150$ Кл выделилось $m = 0{,}09$ г вещества. Найдите $k$.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s4')">💡 Подсказка</button></div>
+                <div id="s4" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $k = \dfrac{m}{q}$, переведите г в кг.</div><div class="answer">✅ Ответ: $k = 6 \cdot 10^{-7}$ кг/Кл</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 5. Масса серебра</div>
+                <div class="task-condition"><strong>Условие:</strong> Серебрение при токе $I = 1$ А в течение $t = 1$ ч. $k = 1{,}12$ мг/Кл. Найдите массу.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s5')">💡 Подсказка</button></div>
+                <div id="s5" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $m = k I t$, время в секундах.</div><div class="answer">✅ Ответ: $m \approx 4{,}03$ г</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 6. Число ионов</div>
+                <div class="task-condition"><strong>Условие:</strong> Сколько ионов Cu²⁺ осело на катоде при заряде $q = 20$ Кл? $q_0 = 3{,}2 \cdot 10^{-19}$ Кл.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s6')">💡 Подсказка</button></div>
+                <div id="s6" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $N = q / q_0$.</div><div class="answer">✅ Ответ: $N \approx 6{,}25 \cdot 10^{19}$</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 7. Масса через постоянную Фарадея</div>
+                <div class="task-condition"><strong>Условие:</strong> Алюминий ($M = 27$ г/моль, $n = 3$) при заряде $q = 96485$ Кл. Найдите массу. $F = 96485$ Кл/моль.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s7')">💡 Подсказка</button></div>
+                <div id="s7" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $m = \dfrac{M q}{n F}$.</div><div class="answer">✅ Ответ: $m = 9$ г</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 8. Мощность электролиза</div>
+                <div class="task-condition"><strong>Условие:</strong> Электролит сопротивлением $R = 5$ Ом при токе $I = 1$ А. Найдите напряжение и мощность.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s8')">💡 Подсказка</button></div>
+                <div id="s8" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $U = I R$, $P = I^2 R$.</div><div class="answer">✅ Ответ: $U = 5$ В; $P = 5$ Вт</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 9. Время для 3 г меди</div>
+                <div class="task-condition"><strong>Условие:</strong> Ток $I = 3$ А, $m = 3$ г, $k = 0{,}33$ мг/Кл. Найдите время.</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s9')">💡 Подсказка</button></div>
+                <div id="s9" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $t = \dfrac{m}{k I}$.</div><div class="answer">✅ Ответ: $t \approx 3030$ с</div></div></div>
+            </div>
+
+            <div class="task-block">
+                <div class="task-title">🧩 Задача 10. Изменение массы</div>
+                <div class="task-condition"><strong>Условие:</strong> При токе $I_1 = 1$ А выделилось $m_1 = 2$ г. Какая масса выделится при $I_2 = 3$ А за то же время?</div>
+                <div class="btn-row"><button class="show-solution-btn" onclick="toggleHint('s10')">💡 Подсказка</button></div>
+                <div id="s10" class="task-solution"><div class="step"><div class="explanation"><strong>Подсказка:</strong> $m_2 = m_1 \cdot \dfrac{I_2}{I_1}$.</div><div class="answer">✅ Ответ: $m_2 = 6$ г</div></div></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="electrodynamics.html" class="back-link">← Назад</a>
+    </div>
+</div>
+
+<script>
+    function findButton(el){
+        const block = el.closest('.task-block');
+        if (!block) return null;
+        return block.querySelector('.show-solution-btn');
+    }
+    function toggleSolution(id){
+        const el = document.getElementById(id);
+        const btn = findButton(el);
+        if (!btn) return;
+        if (el.classList.contains('open')) { el.classList.remove('open'); btn.textContent = '📖 Показать решение'; }
+        else { el.classList.add('open'); btn.textContent = '📕 Скрыть решение'; }
+    }
+    function toggleHint(id){
+        const el = document.getElementById(id);
+        const btn = findButton(el);
+        if (!btn) return;
+        if (el.classList.contains('open')) { el.classList.remove('open'); btn.textContent = '💡 Подсказка'; }
+        else { el.classList.add('open'); btn.textContent = '📕 Скрыть подсказку'; }
+    }
+    (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');}})();
+</script>
+
+<!-- 3D-модель электролиза (с подписями и осаждением металла) -->
+<script>
+    (function() {
+        const container = document.getElementById('container-liq');
+        const canvas = document.getElementById('canvas-liq');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.set(7, 5, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const labelRenderer = new THREE.CSS2DRenderer();
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.style.position = 'relative';
+        container.appendChild(labelRenderer.domElement);
+
+        function makeLabel(text, color, pos, fs = '0.8rem') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.color = color;
+            div.style.fontSize = fs;
+            div.style.fontWeight = 'bold';
+            div.style.fontFamily = "'Segoe UI', sans-serif";
+            div.style.background = 'rgba(0,0,0,0.5)';
+            div.style.padding = '2px 8px';
+            div.style.borderRadius = '8px';
+            div.style.whiteSpace = 'nowrap';
+            const lbl = new THREE.CSS2DObject(div);
+            lbl.position.copy(pos);
+            return lbl;
+        }
+
+        function updateSize() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800;
+            if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize()).observe(container);
+        setTimeout(updateSize, 100);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        const key = new THREE.DirectionalLight(0xffffff, 1.0);
+        key.position.set(5, 8, 6);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const BOX_W = 12;
+        const BOX_H = 6;
+        const BOX_D = 6;
+
+        // ===== ЭЛЕКТРОДЫ =====
+        const electrodeGeo = new THREE.BoxGeometry(0.4, BOX_H, BOX_D);
+        const cathodeMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x003366, metalness: 0.5, roughness: 0.4 });
+        const anodeMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x661111, metalness: 0.5, roughness: 0.4 });
+
+        const cathode = new THREE.Mesh(electrodeGeo, cathodeMat);
+        cathode.position.set(-BOX_W / 2 + 0.5, 0, 0);
+        group.add(cathode);
+
+        const anode = new THREE.Mesh(electrodeGeo, anodeMat);
+        anode.position.set(BOX_W / 2 - 0.5, 0, 0);
+        group.add(anode);
+
+        // Подписи электродов
+        const cathodeLabel = makeLabel('Катод (−)', '#44aaff', new THREE.Vector3(-BOX_W / 2 + 0.5, BOX_H / 2 + 0.6, 0), '0.85rem');
+        group.add(cathodeLabel);
+        const anodeLabel = makeLabel('Анод (+)', '#ff4444', new THREE.Vector3(BOX_W / 2 - 0.5, BOX_H / 2 + 0.6, 0), '0.85rem');
+        group.add(anodeLabel);
+
+        // ===== ИОНЫ =====
+        const ions = [];
+        const ionGeo = new THREE.SphereGeometry(0.15, 12, 12);
+        const catMat = new THREE.MeshStandardMaterial({ color: 0x44aaff, emissive: 0x003366 });
+        const anMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x553311 });
+
+        const N_IONS = 60;
+        for (let i = 0; i < N_IONS; i++) {
+            const isCat = Math.random() > 0.5;
+            const m = new THREE.Mesh(ionGeo, isCat ? catMat : anMat);
+            m.position.set(
+                (Math.random() - 0.5) * (BOX_W - 2),
+                (Math.random() - 0.5) * (BOX_H - 1),
+                (Math.random() - 0.5) * (BOX_D - 1)
+            );
+            group.add(m);
+            ions.push({
+                mesh: m,
+                isCation: isCat,
+                vx: (Math.random() - 0.5) * 0.1,
+                vy: (Math.random() - 0.5) * 0.1
+            });
+        }
+
+        // ===== ВИЗУАЛИЗАЦИЯ ОСАЖДЕНИЯ МЕТАЛЛА =====
+        const deposits = [];
+        const depositGeo = new THREE.SphereGeometry(0.12, 8, 8);
+        const depositMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x553311 });
+
+        function addDeposit() {
+            const d = new THREE.Mesh(depositGeo, depositMat);
+            // Осаждаем на поверхности катода (со стороны раствора)
+            d.position.set(
+                -BOX_W / 2 + 0.8,
+                (Math.random() - 0.5) * (BOX_H - 1),
+                (Math.random() - 0.5) * (BOX_D - 1)
+            );
+            group.add(d);
+            deposits.push(d);
+            if (deposits.length > 40) {
+                const old = deposits.shift();
+                group.remove(old);
+            }
+        }
+
+        // ===== UI =====
+        const USlider = document.getElementById('liq-U-slider');
+        const UValue = document.getElementById('liq-U-value');
+        const IDisplay = document.getElementById('liq-I');
+        const massDisplay = document.getElementById('liq-mass');
+        const timeDisplay = document.getElementById('liq-time');
+
+        let U = 6;
+        let mass = 0;
+        let time = 0;
+        let lastTime = performance.now();
+
+        function updateUI() {
+            const I = U / 6 * 2;
+            IDisplay.textContent = I.toFixed(1).replace('.', ',');
+            UValue.textContent = U;
+            massDisplay.textContent = (mass * 1000).toFixed(1).replace('.', ',');
+            timeDisplay.textContent = Math.floor(time);
+        }
+
+        USlider.addEventListener('input', () => {
+            U = parseFloat(USlider.value);
+        });
+
+        document.getElementById('liq-reset').addEventListener('click', () => {
+            mass = 0;
+            time = 0;
+            USlider.value = 6;
+            U = 6;
+            deposits.forEach(d => group.remove(d));
+            deposits.length = 0;
+            updateUI();
+        });
+
+        document.getElementById('fs-liq').addEventListener('click', async () => {
+            if (!document.fullscreenElement) { await container.requestFullscreen(); }
+            else { await document.exitFullscreen(); }
+            updateSize();
+        });
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        updateUI();
+        let depositCounter = 0;
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const dt = (now - lastTime) / 1000;
+            lastTime = now;
+
+            const I = U / 6 * 2;
+            mass += I * dt * 0.001;
+            time += dt;
+
+            // Осаждение каждые ~0.3 секунды
+            depositCounter += dt;
+            if (depositCounter > 0.3 && deposits.length < 40) {
+                depositCounter = 0;
+                addDeposit();
+            }
+
+            const speed = U / 6 * 0.08;
+            ions.forEach(ion => {
+                if (ion.isCation) {
+                    ion.mesh.position.x += speed;
+                    if (ion.mesh.position.x > BOX_W / 2 - 0.8) ion.mesh.position.x = -BOX_W / 2 + 0.8;
+                } else {
+                    ion.mesh.position.x -= speed;
+                    if (ion.mesh.position.x < -BOX_W / 2 + 0.8) ion.mesh.position.x = BOX_W / 2 - 0.8;
+                }
+                ion.mesh.position.y += ion.vy;
+                if (Math.abs(ion.mesh.position.y) > BOX_H / 2 - 0.3) ion.vy *= -1;
+            });
+
+            updateUI();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        requestAnimationFrame(animate);
+    })();
+</script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V21h14V9.5"/>
+            <path d="M9.5 21v-6h5v6"/>
+        </svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+        </svg>
+    </button>
+        <a href="favorites.html" title="Избранное" aria-label="Избранное">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/>
+            </svg>
+        </a>
+        <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+        </button>
+</nav>
+<script>
+    (function(){
+        function addSkeletons(){
+            document.querySelectorAll('.formula-block').forEach(function(el){
+                if (el.querySelector('mjx-container')) return;
+                if (el.dataset.sk) return;
+                el.dataset.sk = '1';
+                var s = document.createElement('span');
+                s.className = 'skeleton';
+                s.style.width = (60 + Math.random()*80) + 'px';
+                el.appendChild(s);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addSkeletons);
+        else addSkeletons();
+        setTimeout(function(){ document.querySelectorAll('.skeleton').forEach(function(s){ s.remove(); }); }, 2500);
+    })();
+
+    (function(){
+        var sel = '.menu-item, .submenu-item, .search-result-item, .section-title, .model-tab, .show-solution-btn, .back-link, .bottom-nav a, .bottom-nav button';
+        function bind(el){
+            if (el.dataset.rippleBound) return;
+            el.dataset.rippleBound = '1';
+            if (!el.classList.contains('ripple-host')) el.classList.add('ripple-host');
+            el.addEventListener('pointerdown', function(e){
+                var rect = el.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height);
+                var r = document.createElement('span');
+                r.className = 'ripple';
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = (e.clientX - rect.left - size/2) + 'px';
+                r.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+                el.appendChild(r);
+                setTimeout(function(){ r.remove(); }, 650);
+            });
+        }
+        function bindAll(){ document.querySelectorAll(sel).forEach(bind); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindAll);
+        else bindAll();
+    })();
+</script>
+<script src="search-overlay.js"></script>
+<script>
+    (function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY, threshold = 8, ticking = false;
+        function onScroll(){
+            var y = window.scrollY;
+            if (Math.abs(y - lastY) < threshold) { ticking = false; return; }
+            if (y > lastY && y > 80) nav.classList.add('nav-hidden');
+            else nav.classList.remove('nav-hidden');
+            lastY = y; ticking = false;
+        }
+        window.addEventListener('scroll', function(){
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+    })();
+</script>
+<script src="page-search.js"></script>
+<script src="physics-data.js"></script>
+</body>
+</html>

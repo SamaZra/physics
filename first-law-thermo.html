@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -133,6 +133,18 @@
             h1{font-size:1.1rem;}
             .section-title{font-size:0.95rem;}
         }
+        .derivation-btn {
+    background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+    font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+    margin-top: 8px; transition: all 0.2s; display: inline-block;
+}
+.derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+.derivation-content {
+    display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+    border-left: 3px solid var(--text-secondary); border-radius: 8px;
+    font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+}
+.derivation-content.open { display: block; }
     </style>
     <script>
         MathJax = {
@@ -145,7 +157,49 @@
         };
     </script>
     <script src="es5/tex-chtml.js" async></script>
-    <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
+    <script src="./three/build/three.min.js"></script>
+<script src="./three/examples/js/controls/OrbitControls.js"></script>
+<script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+    // ===== Настройка качества 3D (как в математике) =====
+    let quality3D = 'high';
+    if (window.Android && window.Android.getQuality3D) {
+        quality3D = window.Android.getQuality3D();
+    } else {
+        const saved = localStorage.getItem('quality3d');
+        if (saved) quality3D = saved;
+    }
+    window.quality3D = quality3D;
+
+    window.qualitySettings = {
+        low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+        medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+        high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+    };
+    window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+
+    // Обёртка над WebGLRenderer: применяет pixelRatio и shadowMap по качеству
+    (function() {
+        if (!window.THREE) return;
+        const OriginalRenderer = THREE.WebGLRenderer;
+        THREE.WebGLRenderer = function(params) {
+            const r = new OriginalRenderer(params);
+            const q = window.qualitySettings3D || {};
+            if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+            if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+            return r;
+        };
+    })();
+
+    // Применяет segments из качества к сферам/ториодам в уже созданных сценах
+    window.applyQualitySegments = function() {
+        if (!window.THREE || !window.qualitySettings3D) return;
+        const seg = window.qualitySettings3D.segments;
+        // Ничего не трогаем автоматически — сцены должны сами использовать
+        // window.qualitySettings3D.segments при создании геометрии.
+        return seg;
+    };
+</script>
 <style id="titles-center-fix">
 /* Заголовки раскрывающихся списков — по центру, полоска слева и стрелка справа сохраняются */
 .section-title {
@@ -770,6 +824,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$Q = \Delta U + A_{газа}$</span>
                     <span class="f-label">— первое начало термодинамики</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Первое начало — это закон сохранения энергии для тепловых процессов. Если газу передать теплоту $Q$, она может пойти на две вещи: увеличить внутреннюю энергию газа $\Delta U$ (нагрев) и на совершение газом работы $A$ (расширение). Ничего не теряется и не появляется — $Q = \Delta U + A$. Знаки величин учитывают направление: если газ отдаёт теплоту, $Q < 0$; если над газом совершают работу, $A < 0$.
+                    </div>
                 </div>
 
                 <p>где:</p>
@@ -796,6 +854,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$A = p\Delta V = p(V_2 - V_1)$</span>
                     <span class="f-label">— работа при постоянном давлении</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Работа газа — это сила давления, умноженная на перемещение поршня. Давление $p = F/S$, значит сила $F = pS$. Перемещение поршня $h = \Delta V / S$. Тогда $A = F \cdot h = pS \cdot (\Delta V / S) = p\Delta V$. При постоянном давлении $A = p(V_2 - V_1)$. Геометрически это площадь прямоугольника под графиком $p(V)$.
+                    </div>
                 </div>
 
                 <p><strong>Геометрический смысл работы:</strong> работа газа численно равна <strong>площади под графиком</strong> $p(V)$.</p>
@@ -860,6 +922,10 @@ a, button, div, span, label, input, textarea, select {
                 <div class="formula-block">
                     <span class="f">$pV^\gamma = \text{const}$</span>
                     <span class="f-label">— уравнение адиабаты</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Уравнение Пуассона получается из первого начала $dQ = dU + p\,dV = 0$ (адиабата) с учётом $dU = \frac{i}{2}\nu R\,dT$ и уравнения Менделеева-Клапейрона $pV = \nu RT$. После разделения переменных и интегрирования получается $pV^\gamma = \text{const}$, где $\gamma = C_p/C_V = (i+2)/i$ — показатель адиабаты.
+                    </div>
                 </div>
                 <p>где $\gamma = \dfrac{C_p}{C_V}$ — показатель адиабаты (для одноатомного газа $\gamma \approx 1{,}67$, для двухатомного $\gamma \approx 1{,}4$).</p>
 
@@ -1132,7 +1198,8 @@ a, button, div, span, label, input, textarea, select {
                     </div>
                     <div class="step"><strong>Шаг 3. Проверяем через первое начало.</strong> Запишем первое начало для всего цикла:
                         <span class="formula">$Q_{цикл} = \Delta U_{цикл} + A_{цикл}$</span>
-                        Поскольку $\Delta U_{цикл} = 0$, получаем $Q_{цикл} = A_{цикл}$. Вся подведённая за цикл теплота превращается в работу.</div>
+                        Поскольку $\Delta U_{цикл} = 0$, работа за цикл равна <em>суммарной</em> теплоте цикла: $A_{цикл} = Q_{цикл}$. Обрати внимание: $Q = 800$ Дж — это теплота, <strong>подведённая</strong> на изобарном участке; на изохорном участке газ теплоту <strong>отдаёт</strong>, поэтому суммарная теплота цикла меньше 800 Дж. Данные $A_1 = 500$ Дж и $Q = 800$ Дж в этой задаче — для проверки понимания, что $\Delta U$ за цикл не зависит от пути.
+                    </div>
                     <div class="step explanation"><strong>Пояснение:</strong> Это важнейший вывод термодинамики. Именно на нём основана работа всех тепловых машин: чтобы получать полезную работу за цикл, нужно подводить теплоту, а внутренняя энергия рабочего тела по завершении цикла возвращается к исходному значению.</div>
                     <div class="answer">✅ Ответ: $\Delta U = 0$</div>
                 </div>
@@ -1372,7 +1439,19 @@ a, button, div, span, label, input, textarea, select {
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleSolution(id){
+        const el = document.getElementById(id);
+        const btn = el.previousElementSibling;
+        const isOpen = el.classList.contains('open');
+        if (isOpen) {
+            el.classList.remove('open');
+            btn.textContent = btn.dataset.origText || '📖 Показать решение';
+        } else {
+            if (!btn.dataset.origText) btn.dataset.origText = btn.textContent;
+            el.classList.add('open');
+            btn.textContent = '📕 Скрыть решение';
+        }
+    }
 
     (function(){if(localStorage.getItem('physicsTheme')==='light'){document.documentElement.classList.add('light-mode');document.getElementById('themeBtn').textContent='☀️';}})();
 
@@ -1389,9 +1468,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 1: ИЗОТЕРМИЧЕСКИЙ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-isothermal');
@@ -1438,8 +1515,8 @@ a, button, div, span, label, input, textarea, select {
         const cylGeo = new THREE.CylinderGeometry(RADIUS, RADIUS, HEIGHT_MAX, 64, 1, true);
         const cylMat = new THREE.MeshStandardMaterial({
             color: 0x88bbff,
-            transparent: true,
-            opacity: 0.22,
+            transparent: window.qualitySettings3D.transparent,
+            opacity: window.qualitySettings3D.opacity,
             side: THREE.DoubleSide,
             metalness: 0.2,
             roughness: 0.35,
@@ -1518,6 +1595,7 @@ a, button, div, span, label, input, textarea, select {
         }
 
         let V = 8;
+        let V0 = 8; // начальный объём (фиксируется при загрузке / сбросе)
         let currentPistonY = 4;
         const volSlider = document.getElementById('iso-volume');
         const volValue = document.getElementById('iso-volume-value');
@@ -1530,8 +1608,8 @@ a, button, div, span, label, input, textarea, select {
             volValue.textContent = V.toFixed(1);
             currentPistonY = 0.5 + (V / 16) * 7.5;
 
-            const A = Math.max(0, (V - 8) * 50);
-            const Q = A;
+            const A = (V - V0) * 50;   // может быть отрицательной при сжатии
+            const Q = A;                // изотерма: Q = A
             QDisplay.textContent = Q.toFixed(0);
             AUDisplay.textContent = '0';
             ADisplay.textContent = A.toFixed(0);
@@ -1540,6 +1618,7 @@ a, button, div, span, label, input, textarea, select {
         volSlider.addEventListener('input', updateFromVolume);
         document.getElementById('iso-reset').addEventListener('click', () => {
             volSlider.value = 8;
+            V0 = 8;
             updateFromVolume();
         });
 
@@ -1549,7 +1628,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 4, 0);
         controls.update();
@@ -1587,9 +1666,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 2: ИЗОХОРНЫЙ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-isochoric');
@@ -1675,7 +1752,7 @@ a, button, div, span, label, input, textarea, select {
             currentSpeed = 0.03 + (T / 600) * 0.10;
 
             const dT = T - 300;
-            const dU = Math.max(0, dT * 5);
+            const dU = dT * 5;   // может быть отрицательной при охлаждении
             QDisplay.textContent = dU.toFixed(0);
             AUDisplay.textContent = dU.toFixed(0);
             ADisplay.textContent = '0';
@@ -1693,7 +1770,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 0, 0);
         controls.update();
@@ -1724,9 +1801,7 @@ a, button, div, span, label, input, textarea, select {
 </script>
 
 <!-- ===== МОДЕЛЬ 3: АДИАБАТНЫЙ ===== -->
-<script type="module">
-    import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+<script>
 
     (function() {
         const container = document.getElementById('container-adiabatic');
@@ -1772,8 +1847,8 @@ a, button, div, span, label, input, textarea, select {
         const cylGeo = new THREE.CylinderGeometry(RADIUS, RADIUS, HEIGHT_MAX, 64, 1, true);
         const cylMat = new THREE.MeshStandardMaterial({
             color: 0xffaa66,
-            transparent: true,
-            opacity: 0.22,
+            transparent: window.qualitySettings3D.transparent,
+            opacity: window.qualitySettings3D.opacity,
             side: THREE.DoubleSide,
             metalness: 0.2,
             roughness: 0.35,
@@ -1853,6 +1928,7 @@ a, button, div, span, label, input, textarea, select {
         }
 
         let V = 8;
+        let V0 = 8; // начальный объём
         let currentPistonY = 4;
         let currentSpeed = 0.06;
         let currentTemp = 300;
@@ -1884,7 +1960,7 @@ a, button, div, span, label, input, textarea, select {
                 m.mat.emissive.setRGB(r * 0.3, 0.15, b * 0.3);
             });
 
-            const A = (8 - V) * 40;
+            const A = (V0 - V) * 40;   // при расширении (V > V0) газ совершает положительную работу
             const dU = -A;
             QDisplay.textContent = '0';
             AUDisplay.textContent = dU.toFixed(0);
@@ -1894,6 +1970,7 @@ a, button, div, span, label, input, textarea, select {
         volSlider.addEventListener('input', updateFromVolume);
         document.getElementById('ad-reset').addEventListener('click', () => {
             volSlider.value = 8;
+            V0 = 8;
             updateFromVolume();
         });
 
@@ -1903,7 +1980,7 @@ a, button, div, span, label, input, textarea, select {
             updateSize();
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.target.set(0, 4, 0);
         controls.update();
