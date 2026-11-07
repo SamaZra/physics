@@ -108,6 +108,20 @@
         .task-solution .step .explanation{background:var(--info-bg);padding:6px 12px;border-radius:6px;margin:6px 0;font-style:italic;color:var(--text-secondary);font-size:0.9rem;border-left:2px solid var(--special-border);transition:background 0.3s,color 0.3s;}
         .task-solution .answer{padding:12px 18px;background:var(--special-border);color:white;border-radius:12px;font-weight:700;font-size:1.15rem;text-align:center;margin-top:10px;}
 
+        /* Стили для кнопок вывода формул */
+        .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
+
         mjx-container{font-size:1.2em !important;overflow-x:auto !important;max-width:100% !important;}
         .model-container:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border-radius:0;background:var(--canvas-bg) !important;aspect-ratio:auto;}
         .model-container:fullscreen .model-canvas{width:100vw;height:100vh;border-radius:0;}
@@ -323,6 +337,10 @@
                 <div class="formula-block">
                     <span class="f">$Q = Lm$</span>
                     <span class="f-label">— теплота парообразования / конденсации</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Количество теплоты, необходимое для парообразования, пропорционально массе жидкости. Коэффициент пропорциональности $L$ называется удельной теплотой парообразования. Он показывает, сколько энергии нужно, чтобы превратить 1 кг жидкости в пар при температуре кипения. Формула $Q = Lm$ является следствием этого определения.
+                    </div>
                 </div>
                 <p>Для воды: $L = 2{,}3 \cdot 10^6$ Дж/кг. Это очень много — поэтому ожоги паром опаснее ожогов кипятком.</p>
             </div>
@@ -346,15 +364,11 @@
                 <div class="formula-block">
                     <span class="f">$p_{нас} = p_{внеш}$</span>
                     <span class="f-label">— условие кипения</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Внутри жидкости всегда есть микропузырьки пара. Пузырёк растёт, только если давление пара внутри него не меньше внешнего давления, сжимающего пузырёк: $p_{нас} \geq p_{внеш}$. Пока $p_{нас} < p_{внеш}$ — пузырёк схлопывается, кипения нет. Как только при нагревании $p_{нас}$ достигает $p_{внеш}$ — пузырьки растут и всплывают: жидкость кипит.
+                    </div>
                 </div>
-
-                <p><strong>Почему кипение начинается при $p_{нас} = p_{внеш}$?</strong></p>
-                <p>Внутри жидкости всегда есть микропузырьки пара. Пузырёк растёт, только если давление пара внутри него не меньше внешнего давления, сжимающего пузырёк:</p>
-                <div class="formula-block">
-                    <span class="f">$p_{нас} \geq p_{внеш}$</span>
-                    <span class="f-label">— условие роста пузырька</span>
-                </div>
-                <p>Пока $p_{нас} < p_{внеш}$ — пузырёк схлопывается, кипения нет. Как только при нагревании $p_{нас}$ достигает $p_{внеш}$ — пузырьки растут и всплывают: жидкость кипит. Поэтому при понижении внешнего давления (в горах) кипение наступает при более низкой температуре.</p>
 
                 <p><strong>Температура кипения зависит от внешнего давления:</strong></p>
                 <ul>
@@ -376,6 +390,10 @@
                 <div class="formula-block">
                     <span class="f">$\varphi = \dfrac{\rho}{\rho_{нас}} \cdot 100\% = \dfrac{p}{p_{нас}} \cdot 100\%$</span>
                     <span class="f-label">— относительная влажность</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        Из уравнения Менделеева–Клапейрона $pV = \dfrac{m}{M}RT$ для водяного пара: плотность $\rho = \dfrac{m}{V} = \dfrac{pM}{RT}$. При данной температуре $T$ множитель $\dfrac{M}{RT}$ постоянен. Поэтому отношение плотностей равно отношению давлений: $\dfrac{\rho}{\rho_{нас}} = \dfrac{p}{p_{нас}}$. Отсюда обе формы записи $\varphi$ эквивалентны.
+                    </div>
                 </div>
                 <p>где:</p>
                 <ul>
@@ -384,18 +402,6 @@
                     <li>$p$ — парциальное давление водяного пара (Па);</li>
                     <li>$p_{нас}$ — давление насыщенного пара при данной температуре (Па).</li>
                 </ul>
-
-                <p><strong>Почему $\varphi$ можно считать и через плотность, и через давление?</strong></p>
-                <p>Из уравнения Менделеева–Клапейрона $pV = \dfrac{m}{M}RT$ для водяного пара:</p>
-                <div class="formula-block">
-                    <span class="f">$\rho = \dfrac{m}{V} = \dfrac{pM}{RT}$</span>
-                    <span class="f-label">— связь плотности и давления пара</span>
-                </div>
-                <p>При данной температуре $T$ множитель $\dfrac{M}{RT}$ постоянен. Поэтому отношение плотностей равно отношению давлений:</p>
-                <div class="formula-block">
-                    <span class="f">$\dfrac{\rho}{\rho_{нас}} = \dfrac{p}{p_{нас}}$</span>
-                    <span class="f-label">— обе формы записи $\varphi$ эквивалентны</span>
-                </div>
 
                 <p><strong>Точка росы</strong> — температура, при которой пар становится насыщенным (при охлаждении начинается конденсация — выпадает роса).</p>
 
@@ -803,9 +809,19 @@
 </div>
 
 <script>
-    function toggleSolution(id){const el=document.getElementById(id);const btn=el.previousElementSibling;if(el.classList.contains('open')){el.classList.remove('open');btn.textContent='📖 Показать решение';}else{el.classList.add('open');btn.textContent='📕 Скрыть решение';}}
+    function toggleSolution(id){
+        const el=document.getElementById(id);
+        const btn=el.previousElementSibling;
+        if(el.classList.contains('open')){
+            el.classList.remove('open');
+            btn.textContent='📖 Показать решение';
+        }else{
+            el.classList.add('open');
+            btn.textContent='📕 Скрыть решение';
+        }
+    }
 
-    // Безопасная инициализация темы — без вылета, если #themeBtn нет
+    // Безопасная инициализация темы
     (function(){
         if (localStorage.getItem('physicsTheme') === 'light') {
             document.documentElement.classList.add('light-mode');
@@ -819,9 +835,12 @@
         document.querySelectorAll('.model-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.model === model);
         });
-        document.getElementById('model-evaporation').style.display = model === 'evaporation' ? 'block' : 'none';
-        document.getElementById('model-boiling').style.display = model === 'boiling' ? 'block' : 'none';
-        document.getElementById('model-condensation').style.display = model === 'condensation' ? 'block' : 'none';
+        const elEvap = document.getElementById('model-evaporation');
+        const elBoil = document.getElementById('model-boiling');
+        const elCond = document.getElementById('model-condensation');
+        if (elEvap) elEvap.style.display = model === 'evaporation' ? 'block' : 'none';
+        if (elBoil) elBoil.style.display = model === 'boiling' ? 'block' : 'none';
+        if (elCond) elCond.style.display = model === 'condensation' ? 'block' : 'none';
         setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
     }
 </script>
@@ -862,7 +881,6 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        // Жидкость внизу
         const liquidGeo = new THREE.BoxGeometry(10, 0.4, 4);
         const liquidMat = new THREE.MeshStandardMaterial({
             color: 0x3388ff, transparent: window.qualitySettings3D.transparent, opacity: window.qualitySettings3D.opacity,

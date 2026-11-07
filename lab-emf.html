@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Лабораторная работа: Измерение ЭДС и внутреннего сопротивления</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c; --card-bg: #1e3545; --text: #ffffff; --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1); --special-border: #f59e0b; --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff; --formula-bg: #1e3545; --info-bg: #1e3545;
+            --input-bg: #2a4a5a; --card-shadow: rgba(0,0,0,0.2); --accent: #3b82f6;
+            --accent-hover: #60a5fa; --menu-item-hover: #233e50; --group-header-bg: #1a3a5a;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa; --card-bg: #ffffff; --text: #1a2a3f; --text-secondary: #5a7a94;
+            --border: #d0d8e0; --canvas-bg: #eef2f8; --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc; --info-bg: #e8f0fe; --special-border: #d97706;
+            --input-bg: #e8f0fe; --card-shadow: rgba(0,0,0,0.08); --accent: #2563eb;
+            --accent-hover: #3b82f6; --menu-item-hover: #f0f4fa; --group-header-bg: #e8edf5;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;padding-bottom:78px;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.3rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s; justify-content: center; position: relative;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary); position: absolute; right: 8px; top: 50%; transform: translateY(-50%);}
+        .section.collapsed .section-title::after{transform:translateY(-50%) rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul, .def-card ol{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card li { margin-bottom: 6px; }
+
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+
+        .ref-scheme-wrap {
+            margin: 14px 0 6px; padding: 14px; border-radius: 16px;
+            background: var(--formula-bg); border: 1px dashed var(--special-border);
+            text-align: center; color: var(--text); transition: background 0.3s, color 0.3s;
+        }
+        .ref-scheme-title { font-weight: 700; margin-bottom: 8px; color: var(--text); font-size: 0.98rem; }
+        .ref-scheme { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; color: var(--text); }
+
+        .simulator-area { position: relative; width: 100%; height: 450px; background: var(--canvas-bg); border-radius: 20px; overflow: hidden; border: 2px solid var(--border); margin: 16px 0; touch-action: none; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 20px 20px;}
+
+        /* ИСПРАВЛЕНО: Убраны системные выделения и голубые рамки */
+        .component {
+            position: absolute;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            z-index: 10;
+            transition: box-shadow 0.2s, transform 0.1s;
+        }
+        .component:active { cursor: grabbing; transform: scale(1.02); }
+        .component svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+            pointer-events: none;
+        }
+
+        .terminal { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); border: 2px solid #475569; z-index: 20; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3); }
+        .terminal:hover { background: #3b82f6; border-color: #fff; transform: scale(1.2); }
+
+        .toolbar { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
+        .tool-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 85px; height: 85px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .tool-btn:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 6px 12px var(--card-shadow); }
+        .tool-btn svg { width: 55px; height: 55px; pointer-events: none; }
+
+        .btn { padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; color: white; transition: all 0.2s; }
+        .btn-red { background: #ef4444; }
+        .btn-green { background: #22c55e; }
+        .btn-blue { background: #3b82f6; }
+        .btn:hover { transform: scale(1.05); opacity: 0.9; }
+
+        .notebook-example { background: var(--formula-bg); border: 2px dashed var(--special-border); border-radius: 14px; padding: 16px; margin: 16px 0; font-family: 'Times New Roman', serif; color: var(--text); line-height: 1.8; }
+        .notebook-example .blank { display: inline-block; min-width: 50px; border-bottom: 2px solid var(--text-secondary); text-align: center; font-weight: bold; color: var(--special-border); }
+
+        .table-responsive{overflow-x:auto; margin: 12px 0;}
+        table{width:100%;border-collapse:collapse;font-size:0.9rem;background:var(--card-bg);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px var(--card-shadow);}
+        th,td{padding:10px;text-align:center;border:1px solid var(--border);color:var(--text);}
+        th{background:var(--menu-item-hover);font-weight:600;}
+        td{background:var(--info-bg);}
+
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+        .back-link{display:inline-block;padding:10px 20px;background:var(--special-border);color:white;text-decoration:none;font-weight:bold;border-radius:20px;font-size:0.95rem;transition:background 0.2s;}
+        .back-link:hover{background:#b45309;}
+
+        /* Нижняя навигация */
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s, transform 0.3s; max-width: 340px; width: auto; flex: 0 0 auto; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px !important; height: 46px !important; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; padding: 0 !important; transform: none !important; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+    </style>
+
+    <!-- ===== СТИЛИ ИЗ ЭТАЛОНА (humidity) ===== -->
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+
+        /* Синее свечение закрытых треугольников */
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+
+    <style id="nav-clean-final">
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px !important; height: 46px !important; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; padding: 0 !important; transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: none !important; }
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; max-width: 340px; width: auto; flex: 0 0 auto; transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, border 0.3s !important; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+        .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+    </style>
+    <!-- ===== /СТИЛИ ИЗ ЭТАЛОНА ===== -->
+
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+    <h1>Лабораторная работа № 3<br>«Измерение ЭДС и внутреннего сопротивления источника тока»</h1>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🎯 Цель работы и оборудование</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Цель работы:</strong> измерить ЭДС источника тока и косвенными измерениями определить его внутреннее сопротивление.</p>
+                <p><strong>Приборы и материалы:</strong> источник тока (батарейка), вольтметр (0–6 В, погрешность \(\Delta U = 0{,}2\) В), амперметр (0–2 А, погрешность \(\Delta I = 0{,}1\) А), реостат, ключ, соединительные провода.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Теоретическая часть</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p>Согласно закону Ома для полной цепи, сила тока \(I\) в цепи равна:</p>
+                <div class="formula-block">
+                    <span class="f">\(I = \frac{E}{R + r}\)</span>
+                </div>
+                <p>где \(E\) — ЭДС источника, \(r\) — его внутреннее сопротивление, \(R\) — сопротивление внешней цепи (реостата).</p>
+
+                <p><strong>1. Измерение ЭДС.</strong> При разомкнутом ключе тока в цепи нет (\(I=0\)). Напряжение на полюсах источника равно ЭДС. Вольтметр подключается параллельно источнику:</p>
+                <div class="formula-block">
+                    <span class="f">\(E_{пр} = U_{разомкнутого}\)</span>
+                </div>
+
+                <p><strong>2. Измерение внутреннего сопротивления.</strong> При замыкании ключа в цепи течет ток \(I\), а вольтметр показывает напряжение на внешнем участке \(U\). Из закона Ома для полной цепи:</p>
+                <div class="formula-block">
+                    <span class="f">\(E = U + I \cdot r\)</span>
+                </div>
+                <p>Отсюда расчетная формула для внутреннего сопротивления:</p>
+                <div class="formula-block">
+                    <span class="f">\(r = \frac{E - U}{I}\)</span>
+                </div>
+
+                <p><strong>3. Расчет погрешностей.</strong></p>
+                <p>Погрешности приборов: \(\Delta U = 0{,}2\) В, \(\Delta I = 0{,}1\) А, \(\Delta E = \Delta U = 0{,}2\) В (т.к. ЭДС измеряем вольтметром).</p>
+                <p>Относительная погрешность ЭДС:</p>
+                <div class="formula-block">
+                    <span class="f">\(\varepsilon_E = \frac{\Delta E}{E} \cdot 100\%\)</span>
+                </div>
+                <p>Относительная погрешность внутреннего сопротивления:</p>
+                <div class="formula-block">
+                    <span class="f">\(\varepsilon_r = \frac{\Delta E + \Delta U}{E - U} \cdot 100\% + \frac{\Delta I}{I} \cdot 100\%\)</span>
+                </div>
+                <p>Абсолютные погрешности:</p>
+                <div class="formula-block">
+                    <span class="f">\(\Delta r = \frac{r \cdot \varepsilon_r}{100\%}\)</span>
+                </div>
+                <p>Результат записывается в виде: \(E = (E_{пр} \pm \Delta E)\) В; \(r = (r_{пр} \pm \Delta r)\) Ом.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔬 Практическая часть (Сборка цепи)</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Правила сборки:</strong> Соберите цепь. Вольтметр включается <strong>параллельно источнику тока</strong>, амперметр — <strong>последовательно</strong> с реостатом. В цепи не должно быть лишних приборов.</p>
+                <p><em>Инструкция:</em> Перетащите приборы на поле. Нажмите на клеммы (кружки), чтобы соединить их проводом. Нажмите на провод, чтобы удалить. Щелкните по ключу, чтобы замкнуть/разомкнуть его.</p>
+
+                <!-- ===== ИСПРАВЛЕННАЯ СХЕМА (С ВЕРТИКАЛЬНОЙ БАТАРЕЕЙ) ===== -->
+                <div class="ref-scheme-wrap">
+                    <p class="ref-scheme-title">Схема цепи, которую нужно собрать:</p>
+                    <svg class="ref-scheme" viewBox="0 0 520 300" role="img" aria-label="Электрическая схема: батарея, ключ, амперметр и реостат соединены последовательно, вольтметр подключён параллельно батарее">
+                        <!-- Провода основного контура -->
+                        <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- От плюса батареи (сверху) до ключа -->
+                            <path d="M 100 70 H 150" />
+                            <!-- От ключа до амперметра -->
+                            <path d="M 180 70 H 250" />
+                            <!-- От амперметра до угла и вниз к реостату -->
+                            <path d="M 310 70 H 430 V 140 H 410" />
+                            <!-- От реостата вниз, налево и вверх к минусу батареи (снизу) -->
+                            <path d="M 370 140 H 340 V 190 H 100 V 160" />
+
+                            <!-- Ветка вольтметра (слева, параллельно вертикальной батарее) -->
+                            <!-- От верхней клеммы (+) влево и вниз -->
+                            <path d="M 100 70 H 40 V 90" />
+                            <!-- От нижней клеммы (-) влево и вверх -->
+                            <path d="M 100 160 H 40 V 140" />
+                        </g>
+
+                        <!-- Батарея (вертикальная) -->
+                        <g>
+                            <!-- Длинная линия (+) сверху -->
+                            <line x1="85" y1="90" x2="115" y2="90" stroke="currentColor" stroke-width="3" />
+                            <!-- Короткая линия (-) снизу -->
+                            <line x1="95" y1="110" x2="105" y2="110" stroke="currentColor" stroke-width="2" />
+
+                            <!-- Соединяем клеммы батареи с контуром -->
+                            <line x1="100" y1="70" x2="100" y2="90" stroke="currentColor" stroke-width="2.5" />
+                            <line x1="100" y1="110" x2="100" y2="160" stroke="currentColor" stroke-width="2.5" />
+
+                            <!-- Подписи полярности -->
+                            <text x="125" y="85" font-size="14" fill="currentColor" text-anchor="middle">+</text>
+                            <text x="125" y="120" font-size="14" fill="currentColor" text-anchor="middle">−</text>
+                            <text x="100" y="185" font-size="12" fill="currentColor" text-anchor="middle">Батарея</text>
+                        </g>
+
+                        <!-- Вольтметр (слева) -->
+                        <g>
+                            <circle cx="40" cy="115" r="25" fill="var(--card-bg)" stroke="currentColor" stroke-width="2.5" />
+                            <text x="40" y="122" font-size="18" font-weight="bold" fill="currentColor" text-anchor="middle">V</text>
+                            <text x="40" y="80" font-size="12" fill="currentColor" text-anchor="middle">Вольтметр</text>
+                        </g>
+
+                        <!-- Ключ -->
+                        <g>
+                            <circle cx="150" cy="70" r="4" fill="currentColor" />
+                            <circle cx="180" cy="70" r="4" fill="currentColor" />
+                            <line x1="150" y1="70" x2="170" y2="50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                            <text x="165" y="40" font-size="12" fill="currentColor" text-anchor="middle">Ключ</text>
+                        </g>
+
+                        <!-- Амперметр -->
+                        <g>
+                            <circle cx="280" cy="70" r="30" fill="none" stroke="currentColor" stroke-width="2.5" />
+                            <text x="280" y="76" font-size="20" font-weight="bold" fill="currentColor" text-anchor="middle">A</text>
+                            <text x="280" y="30" font-size="12" fill="currentColor" text-anchor="middle">Амперметр</text>
+                        </g>
+
+                        <!-- Реостат -->
+                        <g>
+                            <rect x="370" y="130" width="40" height="20" fill="none" stroke="currentColor" stroke-width="2.5" />
+                            <text x="390" y="120" font-size="12" fill="currentColor" text-anchor="middle">Реостат</text>
+                        </g>
+                    </svg>
+                    <p class="ref-scheme-note">Вольтметр — <strong>параллельно батарее</strong>, амперметр — <strong>последовательно</strong> с реостатом.</p>
+                </div>
+                <!-- ===== /ИСПРАВЛЕННАЯ СХЕМА ===== -->
+
+                <div class="simulator-area" id="sim-scene">
+                    <svg id="wires-svg" style="position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 15;">
+                        <g id="wires-group" style="pointer-events: auto;"></g>
+                    </svg>
+                </div>
+
+                <div class="toolbar">
+                    <div class="tool-btn" onclick="addComponent('battery')" title="Батарейка">
+                        <svg viewBox="0 0 60 60"><rect x="5" y="20" width="50" height="20" rx="3" fill="#222" stroke="#555" stroke-width="2"/><rect x="5" y="20" width="15" height="20" rx="3" fill="#d97706"/><rect x="40" y="20" width="15" height="20" rx="3" fill="#333"/><rect x="25" y="18" width="10" height="24" rx="2" fill="#ef4444"/><text x="12" y="35" font-size="16" fill="white" text-anchor="middle" font-weight="bold">-</text><text x="48" y="35" font-size="16" fill="white" text-anchor="middle" font-weight="bold">+</text></svg>
+                    </div>
+                    <div class="tool-btn" onclick="addComponent('ammeter')" title="Амперметр">
+                        <svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="25" fill="#f8f9fa" stroke="#333" stroke-width="3"/><path d="M 10 35 A 20 20 0 0 1 50 35" fill="none" stroke="#ccc" stroke-width="2"/><line x1="30" y1="35" x2="40" y2="15" stroke="red" stroke-width="2" stroke-linecap="round"/><circle cx="30" cy="35" r="3" fill="#333"/><text x="30" y="55" font-size="14" fill="#166534" text-anchor="middle" font-weight="bold">A</text></svg>
+                    </div>
+                    <div class="tool-btn" onclick="addComponent('voltmeter')" title="Вольтметр">
+                        <svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="25" fill="#f8f9fa" stroke="#333" stroke-width="3"/><path d="M 10 35 A 20 20 0 0 1 50 35" fill="none" stroke="#ccc" stroke-width="2"/><line x1="30" y1="35" x2="20" y2="15" stroke="red" stroke-width="2" stroke-linecap="round"/><circle cx="30" cy="35" r="3" fill="#333"/><text x="30" y="55" font-size="14" fill="#991b1b" text-anchor="middle" font-weight="bold">V</text></svg>
+                    </div>
+                    <div class="tool-btn" onclick="addComponent('rheostat')" title="Реостат">
+                        <svg viewBox="0 0 60 60"><rect x="10" y="25" width="40" height="10" fill="#475569" rx="2"/><rect x="20" y="15" width="20" height="10" fill="#94a3b8" rx="2"/><line x1="30" y1="25" x2="30" y2="15" stroke="#333" stroke-width="2"/></svg>
+                    </div>
+                    <div class="tool-btn" onclick="addComponent('switch')" title="Ключ">
+                        <svg viewBox="0 0 60 60"><rect x="10" y="25" width="40" height="10" fill="#e2e8f0" stroke="#475569" stroke-width="2" rx="2"/><line x1="20" y1="30" x2="45" y2="15" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="30" r="4" fill="#475569"/><circle cx="40" cy="30" r="4" fill="#475569"/></svg>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap:wrap;">
+                    <button class="btn btn-red" onclick="clearSim()">Сброс</button>
+                    <button class="btn btn-blue" id="btn-check-emf" onclick="checkCircuit('open')">🔌 Измерить ЭДС (Ключ разомкнут)</button>
+                    <button class="btn btn-green" id="btn-check-closed" onclick="checkCircuit('closed')" style="display:none;">⚡ Измерить U и I (Ключ замкнут)</button>
+                </div>
+
+                <div id="sim-status" style="text-align: center; font-weight: bold; margin-top: 15px; font-size: 1.1rem; color: var(--text);">Соберите цепь</div>
+
+                <div id="sim-result" style="display: none; text-align: center; background: var(--menu-item-hover); padding: 15px; border-radius: 12px; margin-top: 15px; border: 2px solid #44ff88;">
+                    <!-- Результаты -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Как оформить в тетради</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Внимание!</strong> Перепишите этот текст в тетрадь и заполните пустые места своими значениями, которые вы получили на экране.</p>
+
+                <div class="notebook-example">
+                    <p><strong>Ход работы:</strong></p>
+                    <p>1. Собрал цепь. Записал показания:</p>
+                    <p>ЭДС источника (при разомкнутом ключе): \(E_{пр} =\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> В.</p>
+                    <p>Напряжение при замкнутом ключе: \(U =\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> В.</p>
+                    <p>Сила тока: \(I =\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> А.</p>
+
+                    <p style="margin-top:10px;"><strong>2. Расчет внутреннего сопротивления:</strong></p>
+                    <p>\(r = \frac{E_{пр} - U}{I} = \frac{\text{______} - \text{______}}{\text{______}} =\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Ом.</p>
+
+                    <p style="margin-top:10px;"><strong>3. Расчет погрешностей:</strong></p>
+                    <p>Относительная погрешность ЭДС: \(\varepsilon_E = \frac{0,2}{E_{пр}} \cdot 100\% =\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> %</p>
+                    <p>Относительная погрешность сопротивления: \(\varepsilon_r = \left( \frac{0,2 + 0,2}{E_{пр} - U} + \frac{0,1}{I} \right) \cdot 100\% =\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> %</p>
+                    <p>Абсолютная погрешность: \(\Delta r = \frac{r \cdot \varepsilon_r}{100\%} =\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Ом.</p>
+
+                    <p style="margin-top:10px;"><strong>4. Итоговый результат:</strong></p>
+                    <p>\(E = (\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> \(\pm\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> \()\) В.</p>
+                    <p>\(r = (\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> \(\pm\) <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> \()\) Ом.</p>
+                </div>
+
+                <p style="margin-top:16px;"><strong>Задание 3.</strong> Начертите в тетради таблицу результатов.</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th rowspan="2">№<br>опыта</th>
+                            <th colspan="3">Измерено</th>
+                            <th colspan="3">Вычислено</th>
+                        </tr>
+                        <tr>
+                            <th>\(E_{пр}\), В</th>
+                            <th>\(U\), В</th>
+                            <th>\(I\), А</th>
+                            <th>\(r\), Ом</th>
+                            <th>\(\varepsilon_r\), %</th>
+                            <th>\(\Delta r\), Ом</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr><td>1</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Вывод и контрольные вопросы</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Задание 4. Сделайте вывод.</strong> В тетради напишите:</p>
+                <ul>
+                    <li>В ходе лабораторной работы я измерил ЭДС источника и его внутреннее сопротивление. С учетом погрешности: \(E = (E_{пр} \pm \Delta E)\) В, \(r = (r_{пр} \pm \Delta r)\) Ом.</li>
+                    <li>Полученное значение внутреннего сопротивления \(r\) характерно для (батарейки/аккумулятора).</li>
+                </ul>
+            </div>
+            <div class="def-card" style="margin-top:16px;">
+                <p><strong>Контрольные вопросы:</strong></p>
+                <ol>
+                    <li>Почему при разомкнутом ключе вольтметр показывает значение, равное ЭДС источника?</li>
+                    <li>Как изменится напряжение на внешней цепи, если увеличить сопротивление реостата?</li>
+                    <li>Почему реальная батарейка со временем "садится"? (Что происходит с её ЭДС и внутренним сопротивлением?)</li>
+                    <li>Можно ли измерить ЭДС идеальным вольтметром, сопротивление которого бесконечно велико? Почему?</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="labs.html" class="back-link">← Назад к списку работ</a>
+    </div>
+</div>
+
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
+    </a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/></svg>
+    </a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+</nav>
+
+<script>
+    const simScene = document.getElementById('sim-scene');
+    const wiresGroup = document.getElementById('wires-group');
+
+    let components = [];
+    let wires = [];
+    let selectedTerminal = null;
+
+    // Генерируем случайные параметры для источника тока (у каждого студента свои)
+    const TRUE_E = (Math.random() * 2.5 + 1.5).toFixed(1); // ЭДС от 1.5 до 4.0 В
+    const TRUE_R_INT = (Math.random() * 1.5 + 0.3).toFixed(2); // r от 0.3 до 1.8 Ом
+    const R_EXT = 2.0; // Фиксированное сопротивление внешней цепи
+
+    const componentTypes = {
+        battery: {
+            w: 80, h: 40,
+            html: `<svg viewBox="0 0 80 40"><defs><linearGradient id="battGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#333"/><stop offset="100%" stop-color="#111"/></linearGradient></defs><rect x="5" y="10" width="70" height="20" rx="3" fill="url(#battGrad)"/><rect x="10" y="10" width="15" height="20" fill="#d97706"/><rect x="55" y="10" width="15" height="20" fill="#333"/><rect x="25" y="8" width="30" height="24" rx="2" fill="#ef4444"/><text x="17" y="26" font-size="16" fill="white" text-anchor="middle" font-weight="bold">-</text><text x="62" y="26" font-size="16" fill="white" text-anchor="middle" font-weight="bold">+</text></svg>`,
+            terminals: [{x: 0, y: 20, id: 'in'}, {x: 80, y: 20, id: 'out'}]
+        },
+        ammeter: {
+            w: 70, h: 70,
+            html: `<svg viewBox="0 0 70 70"><defs><radialGradient id="meterGrad" cx="50%" cy="30%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#d1d5db"/></radialGradient></defs><circle cx="35" cy="35" r="32" fill="#333"/><circle cx="35" cy="35" r="28" fill="url(#meterGrad)" stroke="#666" stroke-width="1"/><path d="M 15 40 A 20 20 0 0 1 55 40" fill="none" stroke="#999" stroke-width="2"/><line x1="35" y1="40" x2="45" y2="20" stroke="#dc2626" stroke-width="2" stroke-linecap="round"/><circle cx="35" cy="40" r="4" fill="#333"/><text x="35" y="60" font-size="16" fill="#166534" text-anchor="middle" font-weight="bold">A</text></svg>`,
+            terminals: [{x: 0, y: 35, id: 'in'}, {x: 70, y: 35, id: 'out'}]
+        },
+        voltmeter: {
+            w: 70, h: 70,
+            html: `<svg viewBox="0 0 70 70"><defs><radialGradient id="meterGrad2" cx="50%" cy="30%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#d1d5db"/></radialGradient></defs><circle cx="35" cy="35" r="32" fill="#333"/><circle cx="35" cy="35" r="28" fill="url(#meterGrad2)" stroke="#666" stroke-width="1"/><path d="M 15 40 A 20 20 0 0 1 55 40" fill="none" stroke="#999" stroke-width="2"/><line x1="35" y1="40" x2="25" y2="20" stroke="#dc2626" stroke-width="2" stroke-linecap="round"/><circle cx="35" cy="40" r="4" fill="#333"/><text x="35" y="60" font-size="16" fill="#991b1b" text-anchor="middle" font-weight="bold">V</text></svg>`,
+            terminals: [{x: 0, y: 35, id: 'in'}, {x: 70, y: 35, id: 'out'}]
+        },
+        rheostat: {
+            w: 110, h: 40,
+            html: `<svg viewBox="0 0 110 40"><rect x="10" y="20" width="90" height="15" fill="#475569" rx="2"/><rect x="35" y="5" width="40" height="15" fill="#94a3b8" rx="2" stroke="#64748b" stroke-width="1"/><line x1="55" y1="20" x2="55" y2="5" stroke="#333" stroke-width="3"/><path d="M 40 15 L 70 15" stroke="#333" stroke-width="2" stroke-dasharray="2 2"/></svg>`,
+            terminals: [{x: 0, y: 27, id: 'in'}, {x: 110, y: 27, id: 'out'}]
+        },
+        switch: {
+            w: 80, h: 30,
+            html: `<svg viewBox="0 0 80 30"><rect x="10" y="10" width="60" height="10" fill="#e2e8f0" stroke="#475569" stroke-width="2" rx="2"/><line x1="20" y1="15" x2="50" y2="5" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="15" r="4" fill="#475569"/><circle cx="60" cy="15" r="4" fill="#475569"/></svg>`,
+            terminals: [{x: 0, y: 15, id: 'in'}, {x: 80, y: 15, id: 'out'}],
+            isSwitch: true
+        }
+    };
+
+    function addComponent(type) {
+        const props = componentTypes[type];
+        const id = 'comp-' + Date.now() + Math.random().toString(36).substr(2, 5);
+
+        const startX = Math.random() * 200 + 50;
+        const startY = Math.random() * 100 + 50;
+
+        const el = document.createElement('div');
+        el.id = id;
+        el.className = 'component';
+        el.style.width = props.w + 'px';
+        el.style.height = props.h + 'px';
+        el.style.left = startX + 'px';
+        el.style.top = startY + 'px';
+        el.innerHTML = props.html;
+
+        if (props.isSwitch) {
+            el.addEventListener('click', function(e) {
+                if (e.target.classList.contains('terminal')) return;
+                const lever = this.querySelector('line');
+                if (this.dataset.closed === 'true') {
+                    this.dataset.closed = 'false';
+                    lever.setAttribute('x2', '50'); lever.setAttribute('y2', '5');
+                    lever.setAttribute('stroke', '#94a3b8');
+                    document.getElementById('btn-check-emf').style.display = 'inline-block';
+                    document.getElementById('btn-check-closed').style.display = 'none';
+                    document.getElementById('sim-result').style.display = 'none';
+                } else {
+                    this.dataset.closed = 'true';
+                    lever.setAttribute('x2', '60'); lever.setAttribute('y2', '15');
+                    lever.setAttribute('stroke', '#22c55e');
+                    document.getElementById('btn-check-emf').style.display = 'none';
+                    document.getElementById('btn-check-closed').style.display = 'inline-block';
+                    document.getElementById('sim-result').style.display = 'none';
+                }
+            });
+            el.dataset.closed = 'false';
+        }
+
+        props.terminals.forEach((t, index) => {
+            const term = document.createElement('div');
+            term.className = 'terminal';
+            term.dataset.compId = id;
+            term.dataset.termId = t.id;
+            term.style.left = (t.x - 8) + 'px';
+            term.style.top = (t.y - 8) + 'px';
+
+            term.addEventListener('pointerdown', (e) => {
+                e.stopPropagation();
+                handleTerminalClick(term, el);
+            });
+            el.appendChild(term);
+        });
+
+        makeDraggable(el);
+        simScene.appendChild(el);
+        components.push({ id, type, el });
+    }
+
+    function makeDraggable(el) {
+        let isDragging = false, startX, startY, initialX, initialY;
+        el.addEventListener('pointerdown', (e) => {
+            if (e.target.classList.contains('terminal')) return;
+            isDragging = true; startX = e.clientX; startY = e.clientY;
+            initialX = el.offsetLeft; initialY = el.offsetTop; el.style.zIndex = 100;
+        });
+        document.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            el.style.left = (initialX + e.clientX - startX) + 'px';
+            el.style.top = (initialY + e.clientY - startY) + 'px';
+            updateWires();
+        });
+        document.addEventListener('pointerup', () => { if (isDragging) { isDragging = false; el.style.zIndex = 10; } });
+    }
+
+    function handleTerminalClick(termEl) {
+        if (!selectedTerminal) {
+            selectedTerminal = termEl; termEl.style.background = '#facc15';
+        } else {
+            if (selectedTerminal === termEl) { selectedTerminal.style.background = ''; selectedTerminal = null; return; }
+            const t1 = selectedTerminal, t2 = termEl;
+            const exists = wires.some(w => (w.t1 === t1 && w.t2 === t2) || (w.t1 === t2 && w.t2 === t1));
+            if (!exists) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('stroke', '#3b82f6'); line.setAttribute('stroke-width', '6'); line.setAttribute('stroke-linecap', 'round');
+                line.style.cursor = 'pointer';
+                line.addEventListener('pointerdown', (e) => {
+                    e.stopPropagation();
+                    wires = wires.filter(w => w.line !== line); line.remove();
+                    t1.style.background = ''; t2.style.background = '';
+                });
+                wiresGroup.appendChild(line); wires.push({ t1, t2, line });
+                t1.style.background = '#facc15'; t2.style.background = '#facc15';
+            }
+            selectedTerminal = null; updateWires();
+        }
+    }
+
+    function updateWires() {
+        wires.forEach(w => {
+            const r1 = w.t1.getBoundingClientRect(), r2 = w.t2.getBoundingClientRect();
+            const sRect = simScene.getBoundingClientRect();
+            w.line.setAttribute('x1', r1.left - sRect.left + 8);
+            w.line.setAttribute('y1', r1.top - sRect.top + 8);
+            w.line.setAttribute('x2', r2.left - sRect.left + 8);
+            w.line.setAttribute('y2', r2.top - sRect.top + 8);
+        });
+    }
+
+    function clearSim() {
+        simScene.querySelectorAll('.component').forEach(el => el.remove());
+        wiresGroup.innerHTML = '';
+        components = []; wires = []; selectedTerminal = null;
+        const statusEl = document.getElementById('sim-status');
+        statusEl.textContent = 'Соберите цепь';
+        statusEl.style.color = 'var(--text)';
+        document.getElementById('sim-result').style.display = 'none';
+        document.getElementById('btn-check-emf').style.display = 'inline-block';
+        document.getElementById('btn-check-closed').style.display = 'none';
+    }
+
+    // ================= ПРОВЕРКА ЦЕПИ (BFS) =================
+    function termKey(termEl) { return termEl.dataset.compId + '::' + termEl.dataset.termId; }
+
+    function buildGraph(includeInternal) {
+        const graph = new Map();
+        const addEdge = (a, b) => {
+            if (!graph.has(a)) graph.set(a, new Set());
+            if (!graph.has(b)) graph.set(b, new Set());
+            graph.get(a).add(b); graph.get(b).add(a);
+        };
+        wires.forEach(w => {
+            const a = termKey(w.t1), b = termKey(w.t2);
+            if (a !== b) addEdge(a, b);
+        });
+        if (includeInternal) {
+            components.forEach(c => {
+                if (c.type === 'voltmeter') return;
+                const inKey = c.id + '::in';
+                const outKey = c.id + '::out';
+                if (c.type === 'switch') {
+                    if (c.el.dataset.closed === 'true') addEdge(inKey, outKey);
+                } else {
+                    addEdge(inKey, outKey);
+                }
+            });
+        }
+        return graph;
+    }
+
+    function bfs(graph, startKey, blockedKeys) {
+        const visited = new Set();
+        if (!graph.has(startKey)) return visited;
+        const queue = [startKey]; visited.add(startKey);
+        while (queue.length) {
+            const cur = queue.shift();
+            for (const next of graph.get(cur)) {
+                if (visited.has(next)) continue;
+                if (blockedKeys && blockedKeys.has(next)) continue;
+                visited.add(next); queue.push(next);
+            }
+        }
+        return visited;
+    }
+
+    function getTerm(comp, termId) {
+        return comp.el.querySelector(`.terminal[data-term-id="${termId}"]`);
+    }
+
+    function checkCircuit(mode) {
+        const status = document.getElementById('sim-status');
+        const result = document.getElementById('sim-result');
+        const setStatus = (text, color) => {
+            status.textContent = text;
+            status.style.color = color;
+            result.style.display = 'none';
+        };
+
+        // В этой лабе строгий список приборов (лишние запрещены)
+        const types = components.map(c => c.type);
+        const required = ['battery', 'ammeter', 'voltmeter', 'rheostat', 'switch'];
+        const missing = required.filter(r => !types.includes(r));
+        if (missing.length) {
+            setStatus('❌ Ошибка: не хватает приборов (батарея, амперметр, вольтметр, реостат, ключ).', '#ef4444'); return;
+        }
+        if (types.length > 5) {
+            setStatus('❌ Ошибка: в цепи есть лишние приборы.', '#ef4444'); return;
+        }
+
+        // Топология
+        const battery = components.find(c => c.type === 'battery');
+        const ammeter = components.find(c => c.type === 'ammeter');
+        const rheostat = components.find(c => c.type === 'rheostat');
+        const voltmeter = components.find(c => c.type === 'voltmeter');
+        const switchComp = components.find(c => c.type === 'switch');
+
+        const batOut = getTerm(battery, 'out');
+        const batIn  = getTerm(battery, 'in');
+        const amIn   = getTerm(ammeter, 'in');
+        const amOut  = getTerm(ammeter, 'out');
+        const resIn  = getTerm(rheostat, 'in');
+        const resOut = getTerm(rheostat, 'out');
+        const volIn  = getTerm(voltmeter, 'in');
+        const volOut = getTerm(voltmeter, 'out');
+
+        const volKeys = new Set([termKey(volIn), termKey(volOut)]);
+        const graph = buildGraph(true);
+        const wireGraph = buildGraph(false);
+
+        // 1. Проверяем основной контур (вольтметр не должен разрывать его)
+        const mainReachable = bfs(graph, termKey(batOut), volKeys);
+
+        if (!mainReachable.has(termKey(amIn)) || !mainReachable.has(termKey(amOut))) {
+            setStatus('❌ Ошибка: амперметр должен быть последовательно включён в основной контур.', '#ef4444'); return;
+        }
+        if (!mainReachable.has(termKey(resIn)) || !mainReachable.has(termKey(resOut))) {
+            setStatus('❌ Ошибка: реостат должен быть последовательно включён в основной контур.', '#ef4444'); return;
+        }
+
+        if (mode === 'open') {
+            if (mainReachable.has(termKey(swIn)) || mainReachable.has(termKey(swOut))) {
+                // Если путь идет через ключ, значит он замкнут или обойден
+                // Но мы проверяем именно топологию
+            }
+            if (!mainReachable.has(termKey(batIn))) {
+                 setStatus('❌ Ошибка: основной контур не замкнут на минус батареи.', '#ef4444'); return;
+            }
+        } else {
+            // Если замкнут, проверяем что ключ В КОНТУРЕ
+            if (!mainReachable.has(termKey(batIn))) {
+                 setStatus('❌ Ошибка: цепь не замкнута (проверьте ключ).', '#ef4444'); return;
+            }
+        }
+
+        // 2. Проверяем вольтметр (параллельно батарее)
+        const fullFromBatOut = bfs(wireGraph, termKey(batOut), null);
+        const fullFromBatIn = bfs(wireGraph, termKey(batIn), null);
+
+        const volInWithBatOut = fullFromBatOut.has(termKey(volIn));
+        const volOutWithBatIn = fullFromBatIn.has(termKey(volOut));
+        const volInWithBatIn = fullFromBatIn.has(termKey(volIn));
+        const volOutWithBatOut = fullFromBatOut.has(termKey(volOut));
+
+        const parallelDirect = (volInWithBatOut && volOutWithBatIn) || (volInWithBatIn && volOutWithBatOut);
+
+        if (!parallelDirect) {
+            setStatus('❌ Ошибка: вольтметр должен быть подключён параллельно батарее.', '#ef4444'); return;
+        }
+
+        // ===== УСПЕХ =====
+        status.textContent = '✅ Схема собрана абсолютно верно!';
+        status.style.color = '#44ff88';
+
+        const E = parseFloat(TRUE_E);
+        const r = parseFloat(TRUE_R_INT);
+
+        if (mode === 'open') {
+            result.innerHTML = `<h3 style="color: #44ff88; margin-bottom:10px;">Результат: Измерение ЭДС</h3>
+                                <p style="font-size:1.1rem;">Вольтметр (ЭДС): <strong>${E.toFixed(1).replace('.', ',')}</strong> В</p>
+                                <p style="font-size:0.9rem; margin-top:10px; color:var(--text-secondary);">Теперь замкните ключ и нажмите зелёную кнопку.</p>`;
+            result.style.display = 'block';
+        } else {
+            // Закон Ома для полной цепи
+            const I = E / (R_EXT + r);
+            const U = I * R_EXT;
+
+            result.innerHTML = `<h3 style="color: #44ff88; margin-bottom:10px;">Результат: Измерение U и I</h3>
+                                <p style="font-size:1.1rem;">Вольтметр (U): <strong>${U.toFixed(1).replace('.', ',')}</strong> В</p>
+                                <p style="font-size:1.1rem;">Амперметр (I): <strong>${I.toFixed(2).replace('.', ',')}</strong> А</p>`;
+            result.style.display = 'block';
+        }
+    }
+</script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY, threshold = 5, ticking = false;
+        window.addEventListener('scroll', function(){
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    var y = window.scrollY;
+                    if (Math.abs(y - lastY) >= threshold) {
+                        if (y > lastY && y > 50) nav.classList.add('nav-hidden');
+                        else nav.classList.remove('nav-hidden');
+                        lastY = y;
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    });
+</script>
+<script src="physics-data.js"></script>
+<script src="search-overlay.js"></script>
+</body>
+</html>

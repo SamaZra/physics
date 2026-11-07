@@ -1198,6 +1198,25 @@ a, button, div, span, label, input, textarea, select {
         outline: none !important;
         box-shadow: none !important;
     }
+    /* Компактный график на мобильных */
+#container-graphs { min-height: 320px; }
+@media(max-width:700px){
+    #container-graphs { min-height: 260px; aspect-ratio: auto; }
+    #container-graphs .controls-panel { gap: 8px; }
+}
+@media(max-width:450px){
+    #container-graphs { min-height: 220px; }
+}
+    /* Активная кнопка-пресет графика */
+.graph-preset.active {
+    background: var(--special-border);
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
+}
+:root.light-mode .graph-preset.active {
+    background: var(--special-border);
+    color: #fff;
+}
 </style>
 </head>
 <body>
@@ -1276,31 +1295,21 @@ a, button, div, span, label, input, textarea, select {
                     <span class="area-value" id="graph-area-value">$S = 0.0$ м</span>
                 </div>
             </div>
-            <div class="controls-panel">
-                <div class="control-group">
-                    <label>$t$ (с)</label>
-                    <input type="range" id="graph-time" min="0.5" max="6" step="0.1" value="3">
-                    <span class="control-value" id="graph-time-value">3.0</span>
-                </div>
-                <div class="control-group">
-                    <label>$a$ (м/с²)</label>
-                    <input type="range" id="graph-accel" min="-3" max="3" step="0.1" value="1.0">
-                    <span class="control-value" id="graph-accel-value">1.0</span>
-                </div>
-                <div class="control-group">
-                    <label>$v_0$ (м/с)</label>
-                    <input type="range" id="graph-v0" min="-5" max="5" step="0.1" value="0.5">
-                    <span class="control-value" id="graph-v0-value">0.5</span>
-                </div>
-                <button class="btn-play" id="graph-preset-uniform">Равномерное</button>
-                <button class="btn-play" id="graph-preset-accel">Разгон</button>
-                <button class="btn-play" id="graph-preset-brake">Торможение</button>
-                <button class="btn-play" id="graph-preset-back">Назад</button>
-                <button class="btn-play" id="graph-preset-back-brake">Назад + торм.</button>
-                <span class="control-label">⬤ Площадь под графиком = перемещение (с учётом знака)</span>
+            <div class="controls-panel" id="graph-presets-panel">
+                <button class="btn-play graph-preset" data-preset="uniform">Равномерное</button>
+                <button class="btn-play graph-preset" data-preset="accel">Разгон</button>
+                <button class="btn-play graph-preset" data-preset="brake">Торможение</button>
+                <button class="btn-play graph-preset" data-preset="combo">Равномерное + разгон + торможение</button>
+                <button class="btn-play graph-preset" data-preset="back">Движение назад</button>
+                <button class="btn-play graph-preset" data-preset="back-combo">Назад: равноускор. + равнозамедл.</button>
+                <button class="btn-play graph-preset" data-preset="multi">Сложный: 5 участков</button>
+                <button class="btn-play graph-preset" data-preset="change-dir">Смена направления</button>
+            </div>
+            <div class="def-card" id="graph-preset-desc">
+                <p><span class="important">Как читать график:</span> выберите кнопку-пресет. Красная линия — скорость $v(t)$, закрашенная область — перемещение (с учётом знака: ниже оси $t$ — минус). Наклон линии = ускорение. Площадь = перемещение.</p>
             </div>
             <div class="def-card">
-                <p><span class="important">Как читать график:</span> Ось X — время ($t$), ось Y — скорость ($v$). <span class="important">Закрашенная область</span> под графиком = перемещение. Если график ниже оси $t$ (скорость отрицательна) — тело движется <strong>назад</strong>, и перемещение отрицательно (на графике выделяется синим). Двигайте ползунки или используйте кнопки-пресеты.</p>
+                <p><span class="important">Как читать график:</span> Ось X — время ($t$), ось Y — скорость ($v$). <span class="important">Закрашенная область</span> под графиком = перемещение. Если график ниже оси $t$ (скорость отрицательна) — тело движется <strong>назад</strong>, и перемещение отрицательно (на графике выделяется синим). Выберите один из пресетов ниже, чтобы увидеть разные типы движения.</p>
             </div>
         </div>
     </div>
@@ -1841,218 +1850,398 @@ a, button, div, span, label, input, textarea, select {
     
 </script>
 
-<!-- 3D-модель 1: Графики -->
+<!-- Модель 1: График v(t) на 2D-canvas с комбинированными пресетами -->
 <script>
     (function() {
         const container = document.getElementById('container-graphs');
         const canvas = document.getElementById('canvas-graphs');
         if (!container || !canvas) return;
+        const ctx = canvas.getContext('2d');
 
-        const scene = new THREE.Scene();
-        scene.background = null;
-        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-        camera.position.set(0, 0, 10); // Камера смотрит ровно в центр
-
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const labelRenderer = new THREE.CSS2DRenderer();
-        labelRenderer.domElement.style.position = 'absolute';
-        labelRenderer.domElement.style.top = '0px';
-        labelRenderer.domElement.style.left = '0px';
-        labelRenderer.domElement.style.pointerEvents = 'none';
-        container.style.position = 'relative';
-        container.appendChild(labelRenderer.domElement);
-
-        function makeLabel(text, color, pos, fs = '1rem') {
-            const div = document.createElement('div');
-            div.textContent = text;
-            if (color === '#ffffff' || color === '#888888') {
-                div.style.color = 'var(--text)'; // Адаптация под тему
-            } else {
-                div.style.color = color;
-            }
-            div.style.fontSize = fs;
-            div.style.fontWeight = 'bold';
-            div.style.fontFamily = "'Segoe UI', sans-serif";
-            const lbl = new THREE.CSS2DObject(div);
-            lbl.position.copy(pos);
-            return lbl;
-        }
-
-        function updateSize() {
-            const rect = container.getBoundingClientRect();
-            let w = rect.width, h = rect.height;
-            if (w < 10) w = 800;
-            if (h < 10) h = 450;
-            canvas.width = w;
-            canvas.height = h;
-            renderer.setSize(w, h);
-            labelRenderer.setSize(w, h);
-            camera.aspect = w / h;
-            camera.updateProjectionMatrix();
-        }
-        new ResizeObserver(() => updateSize()).observe(container);
-        setTimeout(updateSize, 100);
-
-        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
-        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
-        key.position.set(2, 5, 2);
-        scene.add(key);
-
-        const group = new THREE.Group();
-        scene.add(group);
-
-        const timeSlider = document.getElementById('graph-time');
-        const accelSlider = document.getElementById('graph-accel');
-        const v0Slider = document.getElementById('graph-v0');
-        const timeValue = document.getElementById('graph-time-value');
-        const accelValue = document.getElementById('graph-accel-value');
-        const v0Value = document.getElementById('graph-v0-value');
         const areaValue = document.getElementById('graph-area-value');
+        const descBox = document.getElementById('graph-preset-desc');
 
-        // Настройки осей
-        const AXIS_LEFT = -5.0;
-        const AXIS_RIGHT = 5.0;
-        const AXIS_BOTTOM = -3.0;
-        const AXIS_TOP = 3.0;
+        const isLight = () => document.documentElement.classList.contains('light-mode');
 
-        let graphElements = [];
-
-        function clearGraph() {
-            graphElements.forEach(el => group.remove(el));
-            graphElements = [];
+        function cssVar(name, fallback) {
+            const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+            return v || fallback;
         }
 
-        // Создаем статичные оси и подписи один раз
-        const axesGroup = new THREE.Group();
+        let W = 800, H = 450, DPR = 1;
 
-        // Вертикальная ось (v)
-        axesGroup.add(new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(AXIS_LEFT, AXIS_BOTTOM, 0),
-                new THREE.Vector3(AXIS_LEFT, AXIS_TOP, 0)
-            ]),
-            new THREE.LineBasicMaterial({ color: 0x888888 })
-        ));
+        function resize() {
+            const rect = container.getBoundingClientRect();
+            W = Math.max(10, rect.width);
+            H = Math.max(10, rect.height);
+            DPR = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.round(W * DPR);
+            canvas.height = Math.round(H * DPR);
+            canvas.style.width = W + 'px';
+            canvas.style.height = H + 'px';
+            draw();
+        }
 
-        // Горизонтальная ось (t) на уровне v=0
-        axesGroup.add(new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(AXIS_LEFT, 0, 0),
-                new THREE.Vector3(AXIS_RIGHT, 0, 0)
-            ]),
-            new THREE.LineBasicMaterial({ color: 0x888888 })
-        ));
-
-        // Подписи осей
-        axesGroup.add(makeLabel('v (м/с)', '#ffffff', new THREE.Vector3(AXIS_LEFT - 0.5, AXIS_TOP, 0), '1rem'));
-        axesGroup.add(makeLabel('t (с)', '#ffffff', new THREE.Vector3(AXIS_RIGHT + 0.5, 0, 0), '1rem'));
-        axesGroup.add(makeLabel('0', '#888888', new THREE.Vector3(AXIS_LEFT - 0.3, -0.2, 0), '0.8rem'));
-
-        group.add(axesGroup);
-
-        function buildGraph() {
-            clearGraph();
-
-            const t = parseFloat(timeSlider.value);
-            const a = parseFloat(accelSlider.value);
-            const v0 = parseFloat(v0Slider.value);
-
-            timeValue.textContent = t.toFixed(1);
-            accelValue.textContent = a.toFixed(1);
-            v0Value.textContent = v0.toFixed(1);
-
-            const SCALE_X = 0.8;
-            const SCALE_Y = 0.6;
-
-            // Линия графика
-            const pts = [];
-            const steps = 100;
-            const maxT = 6;
-            for (let i = 0; i <= steps; i++) {
-                const ti = (i / steps) * maxT;
-                const vi = v0 + a * ti;
-                const x = AXIS_LEFT + ti * SCALE_X;
-                const y = 0 + vi * SCALE_Y;
-                pts.push(new THREE.Vector3(x, y, 0));
+        const PRESETS = {
+            uniform: {
+                title: 'Равномерное движение',
+                segments: [ { t0: 0, v0: 3, t1: 5, v1: 3, label: 'равномерное' } ],
+                desc: 'График — горизонтальная прямая. Скорость не меняется ($v = 3$ м/с), ускорение $a = 0$. Перемещение = площадь прямоугольника: $S = v \\cdot t = 15$ м.'
+            },
+            accel: {
+                title: 'Разгон (равноускоренное движение)',
+                segments: [ { t0: 0, v0: 0, t1: 4, v1: 8, label: 'разгон' } ],
+                desc: 'Прямая с положительным наклоном. Скорость растёт от 0 до 8 м/с. Ускорение $a = 2$ м/с². Площадь = треугольник: $S = 16$ м.'
+            },
+            brake: {
+                title: 'Торможение (равнозамедленное движение)',
+                segments: [ { t0: 0, v0: 8, t1: 4, v1: 0, label: 'торможение' } ],
+                desc: 'Прямая с отрицательным наклоном. Скорость падает от 8 до 0 м/с. Ускорение $a = -2$ м/с². Площадь = треугольник: $S = 16$ м.'
+            },
+            combo: {
+                title: 'Равномерное + разгон + торможение',
+                segments: [
+                    { t0: 0, v0: 2, t1: 3, v1: 2, label: 'равномерное' },
+                    { t0: 3, v0: 2, t1: 6, v1: 8, label: 'разгон' },
+                    { t0: 6, v0: 8, t1: 9, v1: 2, label: 'торможение' }
+                ],
+                desc: '1) $0$–$3$ с: $v = 2$, $a = 0$ — равномерное. 2) $3$–$6$ с: $v$ растёт $2 \\to 8$, $a = 2$ — разгон. 3) $6$–$9$ с: $v$ падает $8 \\to 2$, $a = -2$ — торможение. $S = 6 + 15 + 15 = 36$ м.'
+            },
+            back: {
+                title: 'Движение назад',
+                segments: [ { t0: 0, v0: -2, t1: 5, v1: -6, label: 'разгон назад' } ],
+                desc: 'Скорость отрицательна — тело движется назад. $v$ от $-2$ до $-6$ м/с, $a = -0.8$ м/с². Площадь ниже оси $t$: $S = -20$ м.'
+            },
+            'back-combo': {
+                title: 'Назад: равноускоренное + равнозамедленное',
+                segments: [
+                    { t0: 0, v0: -2, t1: 3, v1: -8, label: 'разгон назад' },
+                    { t0: 3, v0: -8, t1: 6, v1: -2, label: 'торможение назад' }
+                ],
+                desc: 'Оба участка ниже оси $t$. 1) $0$–$3$ с: разгон назад $a = -2$. 2) $3$–$6$ с: торможение назад $a = 2$. Тело всё время движется в отрицательном направлении. $S = -30$ м.'
+            },
+            multi: {
+                title: 'Сложный график: 5 участков',
+                segments: [
+                    { t0: 0, v0: 0, t1: 2, v1: 4, label: 'разгон' },
+                    { t0: 2, v0: 4, t1: 4, v1: 4, label: 'равномерное' },
+                    { t0: 4, v0: 4, t1: 6, v1: 0, label: 'торможение' },
+                    { t0: 6, v0: 0, t1: 8, v1: -4, label: 'разгон назад' },
+                    { t0: 8, v0: -4, t1: 10, v1: 0, label: 'торможение назад' }
+                ],
+                desc: '1) $0$–$2$ с: разгон, $a = 2$. 2) $2$–$4$ с: равномерное, $a = 0$. 3) $4$–$6$ с: торможение, $a = -2$ (остановка). 4) $6$–$8$ с: разгон назад, $a = -2$. 5) $8$–$10$ с: торможение назад, $a = 2$. $S = 4 + 8 + 4 - 4 - 4 = 8$ м.'
+            },
+            'change-dir': {
+                title: 'Смена направления движения',
+                segments: [ { t0: 0, v0: 6, t1: 6, v1: -6, label: 'смена направления' } ],
+                desc: 'Прямая пересекает ось $t$ в $t = 3$ с — тело останавливается и меняет направление. Вперёд: площадь $+9$ м, назад: $-9$ м. Перемещение $= 0$, путь $= 18$ м.'
             }
-            const geo = new THREE.BufferGeometry().setFromPoints(pts);
-            const graphLine = new THREE.Line(
-                geo,
-                new THREE.LineBasicMaterial({ color: 0xff2222 })
-            );
-            graphElements.push(graphLine);
+        };
 
-            // Площадь под графиком
-            const tScaled = t * SCALE_X;
-            const vEnd = v0 + a * t;
-            const vStartScaled = v0 * SCALE_Y;
-            const vEndScaled = vEnd * SCALE_Y;
+        let activePreset = 'combo';
+        let currentSegments = PRESETS[activePreset].segments;
 
-            const vertices = new Float32Array([
-                AXIS_LEFT, vStartScaled, 0,
-                AXIS_LEFT + tScaled, vEndScaled, 0,
-                AXIS_LEFT + tScaled, 0, 0,
-                AXIS_LEFT, 0, 0
-            ]);
-            const triGeo = new THREE.BufferGeometry();
-            triGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-            triGeo.setIndex([0, 1, 2, 0, 2, 3]);
+        function getA(seg) {
+            return (seg.v1 - seg.v0) / (seg.t1 - seg.t0);
+        }
 
-            const areaVal = v0 * t + (a * t * t) / 2;
-            const areaColor = areaVal >= 0 ? 0xff2222 : 0x2222ff;
+        function totalDisplacement() {
+            let S = 0;
+            for (const s of currentSegments) {
+                S += (s.v0 + s.v1) / 2 * (s.t1 - s.t0);
+            }
+            return S;
+        }
 
-            const areaMat = new THREE.MeshBasicMaterial({
-                color: areaColor,
-                transparent: true,
-                opacity: 0.15,
-                side: THREE.DoubleSide
+        function totalPath() {
+            let L = 0;
+            for (const s of currentSegments) {
+                const crosses = (s.v0 > 0 && s.v1 < 0) || (s.v0 < 0 && s.v1 > 0);
+                if (!crosses) {
+                    L += Math.abs((s.v0 + s.v1) / 2 * (s.t1 - s.t0));
+                } else {
+                    const a = getA(s);
+                    const tz = s.t0 - s.v0 / a;
+                    const s1 = (s.v0 + 0) / 2 * (tz - s.t0);
+                    const s2 = (0 + s.v1) / 2 * (s.t1 - tz);
+                    L += Math.abs(s1) + Math.abs(s2);
+                }
+            }
+            return L;
+        }
+
+        function draw() {
+            if (!ctx) return;
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+            ctx.clearRect(0, 0, W, H);
+
+            const textColor = cssVar('--text', '#fff');
+            const secondary = cssVar('--text-secondary', '#8ba5b8');
+            const gridColor = isLight() ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
+            const axisColor = isLight() ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.55)';
+
+            const isMobile = W < 600;
+
+            const padL = isMobile ? 38 : 50;
+            const padR = isMobile ? 42 : 58;
+            const padT = isMobile ? 30 : 40;
+            const padB = isMobile ? 28 : 32;
+
+            const plotW = W - padL - padR;
+            const plotH = H - padT - padB;
+            if (plotW <= 0 || plotH <= 0) return;
+
+            let maxT = 0, maxV = 0, minV = 0;
+            for (const s of currentSegments) {
+                maxT = Math.max(maxT, s.t1);
+                maxV = Math.max(maxV, s.v0, s.v1);
+                minV = Math.min(minV, s.v0, s.v1);
+            }
+            const T_MAX = Math.max(4, Math.ceil(maxT) + 1);
+            const V_MAX = Math.max(2, Math.ceil(maxV) + 1);
+            const V_MIN = Math.min(-2, Math.floor(minV) - 1);
+
+            const cols = T_MAX;
+            const rows = V_MAX - V_MIN;
+            const cellW = plotW / cols;
+            const cellH = plotH / rows;
+            const cell = Math.max(6, Math.min(cellW, cellH));
+
+            const graphW = cell * cols;
+            const graphH = cell * rows;
+
+            const originX = padL;
+            const originY = padT + (plotH - graphH) / 2 + (V_MAX * cell);
+
+            const xOf = (tt) => originX + tt * cell;
+            const yOf = (vv) => originY - vv * cell;
+
+            // Сетка
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = gridColor;
+            for (let i = 0; i <= cols; i++) {
+                const x = Math.round(originX + i * cell) + 0.5;
+                ctx.beginPath();
+                ctx.moveTo(x, originY - V_MAX * cell);
+                ctx.lineTo(x, originY + Math.abs(V_MIN) * cell);
+                ctx.stroke();
+            }
+            for (let j = 0; j <= rows; j++) {
+                const y = Math.round(originY - V_MAX * cell + j * cell) + 0.5;
+                ctx.beginPath();
+                ctx.moveTo(originX, y);
+                ctx.lineTo(originX + graphW, y);
+                ctx.stroke();
+            }
+
+            // Оси
+            ctx.strokeStyle = axisColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(originX + graphW, originY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(originX, originY - V_MAX * cell);
+            ctx.lineTo(originX, originY + Math.abs(V_MIN) * cell);
+            ctx.stroke();
+
+            // Стрелки осей
+            ctx.fillStyle = axisColor;
+            ctx.beginPath();
+            ctx.moveTo(originX + graphW, originY);
+            ctx.lineTo(originX + graphW - 10, originY - 5);
+            ctx.lineTo(originX + graphW - 10, originY + 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(originX, originY - V_MAX * cell);
+            ctx.lineTo(originX - 5, originY - V_MAX * cell + 10);
+            ctx.lineTo(originX + 5, originY - V_MAX * cell + 10);
+            ctx.closePath();
+            ctx.fill();
+
+            // ====== КРУПНЫЕ ЦИФРЫ НА ОСЯХ ======
+            ctx.fillStyle = textColor;
+            const fontSize = isMobile ? '12px' : '14px';
+            ctx.font = `bold ${fontSize} 'Segoe UI', sans-serif`;
+
+            // Цифры t
+            const tStep = T_MAX > 12 ? 2 : 1;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            for (let i = 1; i <= cols; i += tStep) {
+                const x = xOf(i);
+                ctx.fillText(String(i), x, originY + 8);
+            }
+            ctx.fillText('0', originX - 6, originY + 8);
+
+            // Цифры v
+            const vStep = rows > 16 ? 2 : 1;
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (let vv = V_MIN; vv <= V_MAX; vv += vStep) {
+                if (vv === 0) continue;
+                const y = yOf(vv);
+                ctx.fillText(String(vv), originX - 8, y);
+            }
+
+            // ====== ПОДПИСИ ОСЕЙ ======
+            ctx.fillStyle = textColor;
+            const axisFontSize = isMobile ? '13px' : '15px';
+            ctx.font = `bold ${axisFontSize} 'Segoe UI', sans-serif`;
+
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText('v, м/с', originX + 8, originY - V_MAX * cell - 6);
+
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('t, с', originX + graphW + 8, originY);
+
+            // ====== РИСУЕМ ГРАФИК ======
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(originX, originY - V_MAX * cell, graphW, graphH);
+            ctx.clip();
+
+            // Заливка площади
+            for (const s of currentSegments) {
+                const a = getA(s);
+                const crosses = (s.v0 > 0 && s.v1 < 0) || (s.v0 < 0 && s.v1 > 0);
+                const pieces = [];
+                if (!crosses) {
+                    pieces.push({ ta: s.t0, va: s.v0, tb: s.t1, vb: s.v1 });
+                } else {
+                    const tz = s.t0 - s.v0 / a;
+                    pieces.push({ ta: s.t0, va: s.v0, tb: tz, vb: 0 });
+                    pieces.push({ ta: tz, va: 0, tb: s.t1, vb: s.v1 });
+                }
+                for (const p of pieces) {
+                    const sign = (p.va + p.vb) / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(xOf(p.ta), yOf(p.va));
+                    ctx.lineTo(xOf(p.tb), yOf(p.vb));
+                    ctx.lineTo(xOf(p.tb), yOf(0));
+                    ctx.lineTo(xOf(p.ta), yOf(0));
+                    ctx.closePath();
+                    ctx.fillStyle = sign >= 0 ? 'rgba(255, 34, 34, 0.22)' : 'rgba(59, 130, 246, 0.28)';
+                    ctx.fill();
+                }
+            }
+
+            // Линия
+            ctx.beginPath();
+            ctx.moveTo(xOf(currentSegments[0].t0), yOf(currentSegments[0].v0));
+            for (const s of currentSegments) {
+                ctx.lineTo(xOf(s.t1), yOf(s.v1));
+            }
+            ctx.strokeStyle = '#ff2222';
+            ctx.lineWidth = 2.6;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Точки изломов
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#ff2222';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < currentSegments.length - 1; i++) {
+                const s = currentSegments[i];
+                const x = xOf(s.t1);
+                const y = yOf(s.v1);
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // Пунктиры
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = secondary;
+            ctx.lineWidth = 1;
+            for (let i = 0; i < currentSegments.length - 1; i++) {
+                const s = currentSegments[i];
+                const x = xOf(s.t1);
+                ctx.beginPath();
+                ctx.moveTo(x, yOf(0));
+                ctx.lineTo(x, yOf(s.v1));
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // ====== ПОДПИСИ УЧАСТКОВ (ЦИФРЫ 1, 2, 3...) ======
+            ctx.font = `bold ${isMobile ? '14px' : '16px'} 'Segoe UI', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let i = 0; i < currentSegments.length; i++) {
+                const s = currentSegments[i];
+                const tm = (s.t0 + s.t1) / 2;
+                const vm = (s.v0 + s.v1) / 2;
+                const x = xOf(tm);
+                const y = yOf(vm);
+
+                // Кружок с номером
+                const r = isMobile ? 10 : 12;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                // В зависимости от знака скорости — цвет кружка
+                ctx.fillStyle = vm >= 0 ? '#ff2222' : '#3b82f6';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Номер участка
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(String(i + 1), x, y + 1);
+            }
+
+            ctx.restore();
+
+            // ====== ИТОГИ ======
+            const S = totalDisplacement();
+            const L = totalPath();
+            const sign = S >= 0 ? '' : '−';
+            areaValue.innerHTML = `S = ${sign}${Math.abs(S).toFixed(1)} м`
+                + (Math.abs(Math.abs(S) - L) > 0.05 ? ` &nbsp;|&nbsp; L = ${L.toFixed(1)} м` : '');
+        }
+
+                function applyPreset(name) {
+            if (!PRESETS[name]) return;
+            activePreset = name;
+            currentSegments = PRESETS[name].segments;
+
+            document.querySelectorAll('.graph-preset').forEach(b => {
+                b.classList.toggle('active', b.dataset.preset === name);
             });
-            graphElements.push(new THREE.Mesh(triGeo, areaMat));
 
-            // Подпись площади со знаком
-            const sign = areaVal >= 0 ? '' : '−';
-            areaValue.textContent = `S = ${sign}${Math.abs(areaVal).toFixed(1)} м`;
+            if (descBox) {
+                let html = `<p><strong>${PRESETS[name].title}.</strong></p>`;
+                html += `<ul style="margin:8px 0 0 18px; padding:0; font-size:0.9rem; line-height:1.6;">`;
+                currentSegments.forEach((s, i) => {
+                    html += `<li><strong>${i + 1}:</strong> ${s.label} (от $t=${s.t0}$ до $t=${s.t1}$ с)</li>`;
+                });
+                html += `</ul>`;
+                html += `<p style="margin-top:8px;">${PRESETS[name].desc}</p>`;
+                descBox.innerHTML = html;
 
-            // Точка на конце
-            const dotGeo = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(AXIS_LEFT + tScaled, vEndScaled, 0)
-            ]);
-            graphElements.push(new THREE.Points(dotGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 })));
-
-            // Пунктир от точки до оси t
-            const dashLine = new THREE.Line(
-                new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(AXIS_LEFT + tScaled, 0, 0),
-                    new THREE.Vector3(AXIS_LEFT + tScaled, vEndScaled, 0)
-                ]),
-                new THREE.LineDashedMaterial({ color: 0x888888, dashSize: 0.05, gapSize: 0.05 })
-            );
-            dashLine.computeLineDistances();
-            graphElements.push(dashLine);
-
-            // Подписи значений
-            graphElements.push(makeLabel(`${t.toFixed(1)}с`, '#888888', new THREE.Vector3(AXIS_LEFT + tScaled, -0.3, 0), '0.9rem'));
-            graphElements.push(makeLabel(`${vEnd.toFixed(1)}м/с`, '#888888', new THREE.Vector3(AXIS_LEFT - 0.7, vEndScaled, 0), '0.9rem'));
-
-            graphElements.forEach(el => group.add(el));
+                // Пересчитываем формулы MathJax в новом HTML
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([descBox]).catch(function (err) {
+                        console.error('MathJax error:', err);
+                    });
+                } else if (window.MathJax && MathJax.typeset) {
+                    MathJax.typeset([descBox]);
+                }
+            }
+            draw();
         }
 
-        timeSlider.addEventListener('input', buildGraph);
-        accelSlider.addEventListener('input', buildGraph);
-        v0Slider.addEventListener('input', buildGraph);
-
-        function setPreset(t, a, v0) {
-            timeSlider.value = t;
-            accelSlider.value = a;
-            v0Slider.value = v0;
-            buildGraph();
-        }
-
-        document.getElementById('graph-preset-uniform').addEventListener('click', () => setPreset(3, 0, 3));
-        document.getElementById('graph-preset-accel').addEventListener('click', () => setPreset(3, 1.5, 0));
-        document.getElementById('graph-preset-brake').addEventListener('click', () => setPreset(3, -1.5, 4));
-        document.getElementById('graph-preset-back').addEventListener('click', () => setPreset(3, 0, -3));
-        document.getElementById('graph-preset-back-brake').addEventListener('click', () => setPreset(3, 1.5, -4));
+        document.querySelectorAll('.graph-preset').forEach(btn => {
+            btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+        });
 
         document.getElementById('fs-graphs').addEventListener('click', async () => {
             if (!document.fullscreenElement) {
@@ -2060,21 +2249,17 @@ a, button, div, span, label, input, textarea, select {
             } else {
                 await document.exitFullscreen();
             }
-            updateSize();
+            setTimeout(resize, 50);
         });
 
-        // Отключаем вращение
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enabled = false;
+        const ro = new ResizeObserver(() => resize());
+        ro.observe(container);
 
-        buildGraph();
+        const themeObserver = new MutationObserver(() => draw());
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
-        }
-        animate();
+        applyPreset('combo');
+        resize();
     })();
 </script>
 

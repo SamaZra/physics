@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Лабораторная работа: Определение ускорения свободного падения</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root {
+            --bg: #1a2d3c; --card-bg: #1e3545; --text: #ffffff; --text-secondary: #8ba5b8;
+            --border: rgba(245, 158, 11, 0.1); --special-border: #f59e0b; --canvas-bg: #1a2d3c;
+            --formula-color: #ffffff; --formula-bg: #1e3545; --info-bg: #1e3545;
+            --input-bg: #2a4a5a; --card-shadow: rgba(0,0,0,0.2); --accent: #3b82f6;
+            --accent-hover: #60a5fa; --menu-item-hover: #233e50; --group-header-bg: #1a3a5a;
+            --slider-track: #2a4a5a; --slider-thumb: #f59e0b;
+            --label-bg: #1e3545; --label-color: #ffffff;
+        }
+        :root.light-mode {
+            --bg: #f0f4fa; --card-bg: #ffffff; --text: #1a2a3f; --text-secondary: #5a7a94;
+            --border: #d0d8e0; --canvas-bg: #eef2f8; --formula-color: #1a2a3f;
+            --formula-bg: #f8fafc; --info-bg: #e8f0fe; --special-border: #d97706;
+            --input-bg: #e8f0fe; --card-shadow: rgba(0,0,0,0.08); --accent: #2563eb;
+            --accent-hover: #3b82f6; --menu-item-hover: #f0f4fa; --group-header-bg: #e8edf5;
+            --slider-track: #d0d8e0; --slider-thumb: #d97706;
+            --label-bg: #ffffff; --label-color: #1a2a3f;
+        }
+        body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);padding:8px;transition:background 0.3s;padding-bottom:78px;}
+        .container{max-width:1200px;margin:0 auto;background:var(--card-bg);border-radius:24px;padding:16px;padding-top:50px;position:relative;transition:background 0.3s;box-shadow:0 4px 20px var(--card-shadow);}
+        h1{font-size:1.3rem;color:var(--text);margin:0 auto 16px auto;padding-bottom:8px;border-bottom:4px solid var(--special-border);text-align:center;transition:color 0.3s;line-height:1.3;}
+        .section{margin-bottom:14px;}
+        .section-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--special-border);padding-left:12px;cursor:pointer;user-select:none;transition:color 0.3s; justify-content: center; position: relative;}
+        .section-title::after{content:"▼";margin-left:auto;font-size:0.9rem;transition:transform 0.3s;color:var(--text-secondary); position: absolute; right: 8px; top: 50%; transform: translateY(-50%);}
+        .section.collapsed .section-title::after{transform:translateY(-50%) rotate(-90deg);}
+        .section-content{max-height:200000px;overflow:hidden;transition:max-height 0.4s ease;}
+        .section.collapsed .section-content{max-height:0;}
+
+        .def-card{background:var(--info-bg);border-left:4px solid var(--special-border);border-radius:14px;padding:12px 14px;margin:8px 0;transition:background 0.3s;}
+        .def-card p{margin:4px 0;font-size:0.95rem;line-height:1.6;color:var(--text);transition:color 0.3s;}
+        .def-card ul, .def-card ol{color:var(--text);padding-left:20px;line-height:1.8;font-size:0.95rem;transition:color 0.3s;}
+        .def-card li { margin-bottom: 6px; }
+
+        .formula-block{background:var(--formula-bg);padding:14px 18px;border-radius:16px;margin:10px 0;border-left:5px solid var(--special-border);overflow-x:auto;text-align:center;font-size:1.1rem;font-weight:500;color:var(--formula-color);line-height:2.2;transition:background 0.3s,color 0.3s;}
+        .formula-block .f{display:block;font-size:1.3rem;font-family:'Times New Roman',serif;font-style:italic;padding:2px 0;color:var(--special-border);}
+        .formula-block .f-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);font-style:normal;margin-top:4px;}
+
+        .derivation-btn {
+            background: transparent; border: 1px dashed var(--special-border); color: var(--text-secondary);
+            font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+            margin-top: 8px; transition: all 0.2s; display: inline-block;
+        }
+        .derivation-btn:hover { background: var(--info-bg); color: var(--special-border); }
+        .derivation-content {
+            display: none; margin-top: 10px; padding: 12px; background: var(--card-bg);
+            border-left: 3px solid var(--text-secondary); border-radius: 8px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.6; text-align: left;
+        }
+        .derivation-content.open { display: block; }
+
+        .model-container {
+            text-align: center; margin: 16px 0; position: relative;
+            border-radius: 24px; overflow: hidden; background: var(--canvas-bg);
+            box-shadow: 0 4px 12px var(--card-shadow); width: 100%;
+            aspect-ratio: 16/9;
+            min-height: 600px;
+            transition: background 0.3s;
+        }
+        .model-canvas { display: block; width: 100%; height: 100%; background: transparent; border-radius: 20px; touch-action: none; }
+        .fullscreen-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; border-radius: 50%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 20; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .fullscreen-btn:hover { background: var(--special-border); transform: scale(1.05); }
+
+        .controls-panel { background: var(--info-bg); border-radius: 16px; padding: 12px 16px; margin: 8px 0 12px 0; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; border: 1px solid var(--border); transition: background 0.3s,border 0.3s; justify-content: center; }
+        .control-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .control-group label { color: var(--text); font-size: 0.85rem; font-weight: 600; min-width: 20px; transition: color 0.3s; }
+        .control-group input[type="range"] { width: 120px; height: 6px; -webkit-appearance: none; background: var(--slider-track); border-radius: 3px; outline: none; transition: background 0.3s; }
+        .control-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--slider-thumb); cursor: pointer; border: 2px solid var(--special-border); }
+        .control-group input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--slider-thumb); cursor: pointer; border: 2px solid var(--special-border); }
+        .control-value { color: var(--text); font-size: 0.85rem; font-weight: 600; min-width: 40px; text-align: center; background: var(--input-bg); padding: 2px 8px; border-radius: 12px; transition: color 0.3s,background 0.3s; }
+        .control-label { color: var(--text-secondary); font-size: 0.75rem; transition: color 0.3s; }
+
+        .btn-action, .btn-reset {
+            border: none; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; transition: opacity 0.2s, background 0.2s; min-height: 34px;
+            transform: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-action { background: var(--special-border); color: white; }
+        .btn-action:hover { opacity: 0.9; }
+        .btn-reset { background: #666; color: white; }
+        .btn-reset:hover { opacity: 0.9; }
+
+        .info-display { position: absolute; top: 12px; right: 12px; background: var(--label-bg); backdrop-filter: blur(8px); padding: 10px 14px; border-radius: 12px; color: var(--label-color); font-size: 0.75rem; z-index: 15; text-align: left; border: 1px solid var(--special-border); box-shadow: 0 2px 10px var(--card-shadow); transition: background 0.3s,color 0.3s,border 0.3s; min-width: 140px; }
+        .info-display div { margin: 3px 0; }
+        .info-display .val { font-weight: 700; color: var(--special-border); font-size: 1.1rem; }
+
+        .notebook-example { background: var(--formula-bg); border: 2px dashed var(--special-border); border-radius: 14px; padding: 16px; margin: 16px 0; font-family: 'Times New Roman', serif; color: var(--text); line-height: 1.8; }
+        .notebook-example .blank { display: inline-block; min-width: 50px; border-bottom: 2px solid var(--text-secondary); text-align: center; font-weight: bold; color: var(--special-border); }
+
+        .table-responsive{overflow-x:auto; margin: 12px 0;}
+        table{width:100%;border-collapse:collapse;font-size:0.9rem;background:var(--card-bg);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px var(--card-shadow);}
+        th,td{padding:10px;text-align:center;border:1px solid var(--border);color:var(--text);}
+        th{background:var(--menu-item-hover);font-weight:600;}
+        td{background:var(--info-bg);}
+
+        .back-link-wrapper{display:flex;justify-content:center;margin:16px 0 8px;}
+
+        /* Кнопка назад — как в других лабах */
+        .back-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--special-border);
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        .back-link:hover { background: #b45309; }
+
+        .bottom-nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px 12px; border-radius: 22px; background: rgba(30, 53, 69, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); z-index: 900; transition: background 0.3s, border 0.3s, transform 0.3s; max-width: 340px; width: auto; flex: 0 0 auto; }
+        :root.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; width: 46px !important; height: 46px !important; border-radius: 14px; border: none; background: transparent; color: var(--text-secondary); font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; padding: 0 !important; transform: none !important; }
+        .bottom-nav a:hover, .bottom-nav button:hover, .bottom-nav a.active { background: rgba(59,130,246,0.15); color: var(--accent); transform: none !important; }
+        .bottom-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; pointer-events: none !important; }
+        .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
+        .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
+
+        @media(max-width:700px){
+            .model-container { min-height: 480px; aspect-ratio: auto; }
+        }
+        @media(max-width:450px){
+            .model-container { min-height: 400px; }
+        }
+    </style>
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1.2 } };
+    </script>
+    <script src="es5/tex-chtml.js" async></script>
+    <script src="./three/build/three.min.js"></script>
+    <script src="./three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./three/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script>
+        let quality3D = 'high';
+        if (window.Android && window.Android.getQuality3D) { quality3D = window.Android.getQuality3D(); } else { const saved = localStorage.getItem('quality3d'); if (saved) quality3D = saved; }
+        window.quality3D = quality3D;
+        window.qualitySettings = {
+            low:    { segments: 24, opacity: 1.0,  transparent: false, pixelRatio: 0.75, shadows: false },
+            medium: { segments: 48, opacity: 0.25, transparent: true,  pixelRatio: 1,    shadows: true  },
+            high:   { segments: 96, opacity: 0.25, transparent: true,  pixelRatio: (window.devicePixelRatio || 1), shadows: true }
+        };
+        window.qualitySettings3D = window.qualitySettings[quality3D] || window.qualitySettings.high;
+        (function() {
+            if (!window.THREE) return;
+            const OriginalRenderer = THREE.WebGLRenderer;
+            THREE.WebGLRenderer = function(params) {
+                const r = new OriginalRenderer(params);
+                const q = window.qualitySettings3D || {};
+                if (typeof q.pixelRatio === 'number') r.setPixelRatio(q.pixelRatio);
+                if (typeof q.shadows === 'boolean') r.shadowMap.enabled = q.shadows;
+                return r;
+            };
+        })();
+    </script>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
+    <style id="section-gradient-fix">
+        .section { position: relative; }
+        .section.collapsed > .section-title { background-image: none; transition: background-image 0.35s ease; }
+        .section.collapsed > .section-title:hover { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.07) 45%, rgba(245, 158, 11, 0.00) 100%); background-repeat: no-repeat; background-size: 100% 100%; }
+        :root.light-mode .section.collapsed > .section-title:hover, :root.light-mode .section:not(.collapsed) > .section-title { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.18) 0%, rgba(217, 119, 6, 0.06) 45%, rgba(217, 119, 6, 0.00) 100%); }
+        .section.collapsed > .section-title::after { color: var(--accent, #3b82f6) !important; text-shadow: 0 0 6px rgba(59, 130, 246, 0.85), 0 0 14px rgba(59, 130, 246, 0.55); filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8)); transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease, transform 0.3s ease; }
+        .section:not(.collapsed) > .section-title::after { color: var(--text-secondary, #8ba5b8) !important; text-shadow: none !important; filter: none !important; }
+        .section.collapsed > .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        .section:not(.collapsed) > .section-title::after { transform: translateY(-50%) rotate(0deg) !important; }
+        :root.light-mode .section.collapsed > .section-title::after { color: var(--accent, #2563eb) !important; text-shadow: 0 0 6px rgba(37, 99, 235, 0.6), 0 0 12px rgba(37, 99, 235, 0.35); filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.6)); }
+    </style>
+    <style id="modern-visual-fix">
+        html { scroll-behavior: smooth; }
+        .section-title, h1, .def-card, .task-block { scroll-margin-top: 72px; }
+        body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,130,246,0.10), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.06), transparent 60%), var(--bg) !important; }
+        :root.light-mode body { background: radial-gradient(1200px 600px at 85% -10%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(217,119,6,0.05), transparent 60%), var(--bg) !important; }
+        .skeleton { display: inline-block; min-width: 60px; height: 1.1em; vertical-align: middle; border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--menu-item-hover, rgba(255,255,255,0.08)) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerSk 1.2s infinite linear; }
+        @keyframes shimmerSk { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+    </style>
+    <style id="no-tap-highlight">
+        * { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; }
+        a, button, div, span, label, input, textarea, select { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; }
+    </style>
+    <style id="no-tap-highlight-accordion">
+        .section-title, .group-header, .menu-item, .submenu-item, .model-tab, .search-result-item { -webkit-tap-highlight-color: transparent !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; outline: none !important; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .section-title:active, .group-header:active { transform: scale(0.99); transition: transform 0.1s; }
+    </style>
+    <style id="fix-nav-bounce">
+        .bottom-nav a, .bottom-nav button { transform: none !important; transition: background 0.2s ease, color 0.2s ease !important; }
+        .bottom-nav a:active, .bottom-nav button:active, .bottom-nav a:focus, .bottom-nav button:focus { transform: none !important; outline: none !important; box-shadow: none !important; }
+    </style>
+    <style id="unified-buttons">
+        .btn-primary, .btn-secondary, .btn-danger, .show-solution-btn, .btn-reset, .model-tab, .clear-all-btn, .search-clear, .fullscreen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 18px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; font-family: inherit; line-height: 1.2; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; white-space: nowrap; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .show-solution-btn:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover, .fullscreen-btn:hover { transform: translateY(-1px); }
+        .btn-primary:active, .btn-secondary:active, .btn-danger:active, .show-solution-btn:active, .btn-reset:active, .model-tab:active, .clear-all-btn:active, .fullscreen-btn:active { transform: translateY(0) scale(0.98); }
+        .btn-primary, .show-solution-btn { background: var(--accent, #3b82f6); color: #fff; border-color: var(--accent, #3b82f6); }
+        .btn-primary:hover, .show-solution-btn:hover { background: var(--accent-hover, #60a5fa); border-color: var(--accent-hover, #60a5fa); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.6); }
+        :root.light-mode .btn-primary, :root.light-mode .show-solution-btn { background: var(--accent, #2563eb); border-color: var(--accent, #2563eb); }
+        :root.light-mode .btn-primary:hover, :root.light-mode .show-solution-btn:hover { background: var(--accent-hover, #3b82f6); border-color: var(--accent-hover, #3b82f6); }
+        .btn-secondary, .btn-reset, .model-tab, .clear-all-btn { background: var(--menu-item-hover, #233e50); color: var(--text, #fff); border-color: var(--border, rgba(59,130,246,0.15)); }
+        .btn-secondary:hover, .btn-reset:hover, .model-tab:hover, .clear-all-btn:hover { background: var(--group-header-bg, #1a3a5a); border-color: var(--accent, #3b82f6); box-shadow: 0 4px 12px -6px rgba(59, 130, 246, 0.35); }
+        :root.light-mode .btn-secondary, :root.light-mode .btn-reset, :root.light-mode .model-tab, :root.light-mode .clear-all-btn { background: var(--menu-item-hover, #f0f4fa); color: var(--text, #1a2a3f); }
+        .model-tab.active { background: var(--accent, #3b82f6) !important; color: #fff !important; border-color: var(--accent, #3b82f6) !important; box-shadow: 0 4px 14px -6px rgba(59, 130, 246, 0.55); }
+        .model-tab.active:hover { background: var(--accent-hover, #60a5fa) !important; border-color: var(--accent-hover, #60a5fa) !important; }
+        .btn-danger, .clear-all-btn.danger, .clear-all-btn:hover { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; }
+        .btn-danger:hover, .clear-all-btn.danger:hover, .clear-all-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; box-shadow: 0 6px 18px -8px rgba(239, 68, 68, 0.6); }
+        .search-clear { background: transparent; border: none; padding: 6px 10px; min-height: auto; color: var(--text-secondary, #8ba5b8); border-radius: 50%; }
+        .search-clear:hover { background: rgba(59, 130, 246, 0.15); color: var(--accent, #3b82f6); transform: none; }
+        .fullscreen-btn { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-size: 20px; }
+        .fullscreen-btn:hover { background: var(--accent, #3b82f6); border-color: var(--accent, #3b82f6); }
+        .remove-fav { border-radius: 50%; min-height: 32px; min-width: 32px; padding: 4px 8px; }
+        .remove-fav:hover { background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; }
+        .btn-link { background: transparent; border: none; color: var(--accent, #3b82f6); padding: 0; min-height: auto; text-decoration: underline; text-underline-offset: 3px; }
+        .btn-link:hover { color: var(--accent-hover, #60a5fa); transform: none; box-shadow: none; }
+    </style>
+    <style id="page-fade-in">
+        body { animation: pageFade 0.3s ease-out; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+        .container, .main-content { animation: pageFadeUp 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+        @keyframes pageFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { body, .container, .main-content { animation: none !important; } }
+    </style>
+    <style id="share-btn-right">.bottom-nav button[title="Поделиться"] { order: 99 !important; margin-left: auto !important; }</style>
+</head>
+<body>
+<div class="container">
+    <h1>Лабораторная работа № 4<br>«Определение ускорения свободного падения при помощи математического маятника»</h1>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🎯 Цель работы и оборудование</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Цель работы:</strong> вычислить ускорение свободного падения при помощи математического маятника.</p>
+                <p><strong>Приборы и материалы:</strong> штатив с муфтой и кольцом, шарик с отверстием, нить, измерительная лента, часы с секундной стрелкой.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📖 Теоретическая часть</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Математический маятник</strong> — это материальная точка массой $m$, подвешенная на невесомой, нерастяжимой нити и совершающая гармонические колебания в вертикальной плоскости.</p>
+                <p>Период колебаний математического маятника выражается формулой Гюйгенса:</p>
+                <div class="formula-block">
+                    <span class="f">$T = 2\pi \sqrt{\frac{l}{g}}$</span>
+                    <span class="f-label">— период малых колебаний маятника</span>
+                    <button class="derivation-btn" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▼ Скрыть вывод' : '▶ Показать вывод'">▶ Показать вывод</button>
+                    <div class="derivation-content">
+                        При малых углах отклонения сила, возвращающая маятник в положение равновесия, пропорциональна отклонению. Это приводит к гармоническим колебаниям. Вывод формулы периода требует знания дифференциальных уравнений, но в школьном курсе её обычно принимают как данность. Из формулы видно, что период зависит только от длины нити и ускорения свободного падения, но не от массы шарика.
+                    </div>
+                </div>
+                <p>где $l$ — длина подвеса (м), $g$ — ускорение свободного падения (м/с²), $T$ — период малых колебаний (с).</p>
+                <p>Из этой формулы можно выразить ускорение свободного падения:</p>
+                <div class="formula-block">
+                    <span class="f">$g = \frac{4\pi^2 l}{T^2}$</span>
+                    <span class="f-label">— расчётная формула для ускорения свободного падения</span>
+                </div>
+                <p>Чтобы найти $g$, нужно измерить длину маятника $l$ и период его колебаний $T$. Период проще всего найти, измерив время $\Delta t$ большого числа $N$ полных колебаний:</p>
+                <div class="formula-block">
+                    <span class="f">$T = \frac{\Delta t}{N}$</span>
+                    <span class="f-label">— период через время и число колебаний</span>
+                </div>
+                <p><strong>Погрешности:</strong></p>
+                <p>Погрешность измерения времени $\Delta t = 0{,}2$ с (реакция человека + точность часов).</p>
+                <p>Погрешность длины нити $\Delta l = 0{,}5$ см = $0{,}005$ м (половина цены деления линейки).</p>
+                <p>Относительная погрешность:</p>
+                <div class="formula-block">
+                    <span class="f">$\varepsilon_g = \frac{\Delta l}{l} + 2\frac{\Delta T}{T}$</span>
+                    <span class="f-label">— относительная погрешность $g$</span>
+                </div>
+                <p>Абсолютная погрешность:</p>
+                <div class="formula-block">
+                    <span class="f">$\Delta g = g \cdot \varepsilon_g$</span>
+                    <span class="f-label">— абсолютная погрешность $g$</span>
+                </div>
+                <p>Результат записывается в виде: $g = (g_{cp} \pm \Delta g)$ м/с².</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">🔬 Практическая часть (Измерения)</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Задание 1.</strong> Нажмите «Сгенерировать длину». Модель маятника перестроится под вашу уникальную длину. Вращайте модель пальцем или мышкой.</p>
+                <div class="model-container" id="container-pendulum">
+                    <canvas id="canvas-pendulum" class="model-canvas"></canvas>
+                    <button class="fullscreen-btn" id="fs-pendulum">⛶</button>
+                    <div class="info-display">
+                        <div>$l$ = <span class="val" id="pend-length-disp">—</span> м</div>
+                        <div>Секундомер: <span class="val" id="pend-timer">0.0</span> с</div>
+                    </div>
+                </div>
+
+                <p><strong>Задание 2.</strong> Выберите угол отклонения, нажмите «Отклонить», затем «Пуск». Засеките время <strong>40 полных колебаний</strong> и остановите секундомер. Запишите это время $\Delta t$ и число колебаний $N = 40$.</p>
+                <div class="controls-panel">
+                    <button class="btn-action" id="btn-generate">🎲 Сгенерировать длину</button>
+                    <div class="control-group">
+                        <label>Угол (°)</label>
+                        <input type="range" id="angle-slider" min="5" max="80" step="1" value="30">
+                        <span class="control-value" id="angle-value">30</span>
+                    </div>
+                    <button class="btn-action" id="btn-deflect" style="background:#8b5cf6;">↩ Отклонить</button>
+                    <button class="btn-action" id="btn-start" style="background:#22c55e;">▶ Пуск</button>
+                    <button class="btn-reset" id="btn-stop" style="background:#ef4444; display:none;">⏹ Стоп</button>
+                    <button class="btn-reset" id="btn-reset-timer">⟳ Сброс</button>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:8px;">* Секундомер запускается вместе с маятником. Считайте полные колебания. Остановите, когда насчитаете достаточно.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">✍️ Как оформить в тетради</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Внимание!</strong> Перепишите этот текст в тетрадь и заполните пустые места своими значениями, которые вы получили на экране.</p>
+
+                <div class="notebook-example">
+                    <p><strong>Ход работы:</strong></p>
+                    <p>1. Собрали установку. Подвесили шарик на нити.</p>
+                    <p>2. Измерили длину подвеса: $l$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> м.</p>
+                    <p>3. Измерили время $N = 40$ полных колебаний: $\Delta t$ = <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> с.</p>
+                    <p>4. Вычислили период колебаний:</p>
+                    <p>$T = \frac{\Delta t}{N} = \frac{\text{______}}{40} =$ <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> с.</p>
+
+                    <p style="margin-top:10px;"><strong>5. Расчёт ускорения свободного падения:</strong></p>
+                    <p>$g = \frac{4\pi^2 l}{T^2} = \frac{4 \cdot 9{,}87 \cdot \text{______}}{\text{______}^2} =$ <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> м/с².</p>
+
+                    <p style="margin-top:10px;"><strong>6. Расчёт погрешностей:</strong></p>
+                    <p>Погрешность длины: $\Delta l = 0{,}005$ м.</p>
+                    <p>Погрешность времени: $\Delta t = 0{,}2$ с. Погрешность периода: $\Delta T = \frac{\Delta t}{N} = \frac{0{,}2}{40} =$ <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> с.</p>
+                    <p>Относительная погрешность: $\varepsilon_g = \frac{\Delta l}{l} + 2\frac{\Delta T}{T} = \frac{0{,}005}{\text{______}} + 2\frac{\text{______}}{\text{______}} =$ <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> %.</p>
+                    <p>Абсолютная погрешность: $\Delta g = g \cdot \varepsilon_g =$ <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> м/с².</p>
+
+                    <p style="margin-top:10px;"><strong>7. Итоговый результат:</strong></p>
+                    <p>$g = (g_{cp} \pm \Delta g)$ м/с² = (<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> ± <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span>) м/с².</p>
+                </div>
+
+                <p style="margin-top:16px;"><strong>Задание 3.</strong> Начертите в тетради таблицу результатов.</p>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>№ опыта</th>
+                            <th>$l$, м</th>
+                            <th>$N$</th>
+                            <th>$\Delta t$, с</th>
+                            <th>$T$, с</th>
+                            <th>$g$, м/с²</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr><td>1</td><td></td><td></td><td></td><td></td><td></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section collapsed">
+        <div class="section-title" onclick="this.closest('.section').classList.toggle('collapsed')">📝 Вывод и контрольные вопросы</div>
+        <div class="section-content">
+            <div class="def-card">
+                <p><strong>Задание 4. Сделайте вывод.</strong> В тетради напишите:</p>
+                <ul>
+                    <li>В ходе лабораторной работы измерили ускорение свободного падения с помощью математического маятника. С учетом погрешности оно равно: $g = (\dots \pm \dots)$ м/с².</li>
+                    <li>Сравните полученное значение с табличным $g = 9{,}8$ м/с².</li>
+                </ul>
+            </div>
+            <div class="def-card" style="margin-top:16px;">
+                <p><strong>Контрольные вопросы:</strong></p>
+                <ol>
+                    <li>Что называется математическим маятником?</li>
+                    <li>Что называется механическим колебанием?</li>
+                    <li>Чтобы помочь шоферу вытащить автомобиль, застрявший в грязи, несколько человек раскачивают автомобиль, причем толчки, как правило, производятся по команде. Важно ли, через какие промежутки времени подавать команду?</li>
+                    <li>Математический маятник за 10 с совершил 20 полных колебаний. Найти период колебаний.</li>
+                    <li>Во сколько раз изменится частота колебаний математического маятника при увеличении длины нити в 3 раза?</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-link-wrapper">
+        <a href="labs.html" class="back-link">← Назад к списку работ</a>
+    </div>
+</div>
+
+<script>
+    let currentLength = 0.7;
+    let currentAngle = 30;
+    let timerInterval = null;
+    let timeElapsed = 0;
+    let isRunning = false;
+
+    const pendLengthDisp = document.getElementById('pend-length-disp');
+    const pendTimerDisp = document.getElementById('pend-timer');
+    const angleSlider = document.getElementById('angle-slider');
+    const angleValue = document.getElementById('angle-value');
+
+    document.getElementById('btn-generate').addEventListener('click', () => {
+        currentLength = (Math.random() * 0.6 + 0.4); // от 0.4 до 1.0 м
+        pendLengthDisp.textContent = currentLength.toFixed(2);
+        if (window.updatePendulumLength) window.updatePendulumLength(currentLength);
+        resetTimer();
+    });
+
+    angleSlider.addEventListener('input', () => {
+        currentAngle = parseFloat(angleSlider.value);
+        angleValue.textContent = currentAngle;
+        if (window.updatePendulumAngle) window.updatePendulumAngle(currentAngle);
+    });
+
+    document.getElementById('btn-deflect').addEventListener('click', () => {
+        if (window.deflectPendulum) window.deflectPendulum(currentAngle);
+        resetTimer();
+    });
+
+    function startTimer() {
+        if (isRunning) return;
+        isRunning = true;
+        timeElapsed = 0;
+        pendTimerDisp.textContent = '0.0';
+        document.getElementById('btn-start').style.display = 'none';
+        document.getElementById('btn-stop').style.display = 'inline-block';
+        if (window.startPendulumMotion) window.startPendulumMotion(currentLength, currentAngle);
+        timerInterval = setInterval(() => {
+            timeElapsed += 0.1;
+            pendTimerDisp.textContent = timeElapsed.toFixed(1);
+        }, 100);
+    }
+
+    function stopTimer() {
+        if (!isRunning) return;
+        isRunning = false;
+        clearInterval(timerInterval);
+        document.getElementById('btn-start').style.display = 'inline-block';
+        document.getElementById('btn-stop').style.display = 'none';
+        if (window.stopPendulumMotion) window.stopPendulumMotion();
+    }
+
+    function resetTimer() {
+        stopTimer();
+        timeElapsed = 0;
+        pendTimerDisp.textContent = '0.0';
+    }
+
+    document.getElementById('btn-start').addEventListener('click', startTimer);
+    document.getElementById('btn-stop').addEventListener('click', stopTimer);
+    document.getElementById('btn-reset-timer').addEventListener('click', resetTimer);
+
+    (function() {
+        const container = document.getElementById('container-pendulum');
+        const canvas = document.getElementById('canvas-pendulum');
+        if (!container || !canvas) return;
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        // Камера смотрит на центр модели
+        camera.position.set(0, 0.8, 3.0);
+        camera.lookAt(0, 0.1, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+        function updateSize3D() {
+            const rect = container.getBoundingClientRect();
+            let w = rect.width, h = rect.height;
+            if (w < 10) w = 800; if (h < 10) h = 450;
+            canvas.width = w; canvas.height = h;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(() => updateSize3D()).observe(container);
+        setTimeout(updateSize3D, 100);
+
+        scene.add(new THREE.AmbientLight(0x40486c, 0.6));
+        const key = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        key.position.set(2, 5, 2);
+        scene.add(key);
+
+        const group = new THREE.Group();
+        group.position.y = 0;
+        scene.add(group);
+
+        // Штатив
+        const standMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.4 });
+
+        // Вертикальная стойка
+        const vertical = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.0, 16), standMat);
+        vertical.position.set(-0.5, 0, 0);
+        group.add(vertical);
+
+        // Основание
+        const base = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.5), standMat);
+        base.position.set(-0.5, -0.5, 0);
+        group.add(base);
+
+        // Горизонтальная перекладина
+        const horizontal = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.6, 16), standMat);
+        horizontal.rotation.x = Math.PI / 2;
+        horizontal.position.set(-0.5, 0.5, 0.1);
+        group.add(horizontal);
+
+        // Точка подвеса
+        const pivot = new THREE.Vector3(-0.5, 0.5, 0.25);
+        const pivotSphere = new THREE.Mesh(new THREE.SphereGeometry(0.03, 12, 12), new THREE.MeshStandardMaterial({ color: 0x60a5fa }));
+        pivotSphere.position.copy(pivot);
+        group.add(pivotSphere);
+
+        // Шарик и нить
+        let L = 0.7;
+        let alpha0 = 30 * Math.PI / 180;
+        let currentAmplitude = alpha0;
+        let currentAngle = alpha0;
+        let isMoving = false;
+        let t = 0;
+        const damping = 0.003;
+
+        const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.06, 24, 24), new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0x442200 }));
+        group.add(sphere);
+
+        let threadLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([pivot, pivot]), new THREE.LineBasicMaterial({ color: 0x888888, linewidth: 1 }));
+        group.add(threadLine);
+
+        function updatePositions() {
+            const x = pivot.x + L * Math.sin(currentAngle);
+            const y = pivot.y - L * Math.cos(currentAngle);
+            sphere.position.set(x, y, 0.25);
+            threadLine.geometry.dispose();
+            threadLine.geometry = new THREE.BufferGeometry().setFromPoints([pivot, sphere.position.clone()]);
+        }
+
+        window.updatePendulumLength = function(newL) {
+            L = newL;
+            updatePositions();
+        };
+
+        window.updatePendulumAngle = function(angleDeg) {
+            alpha0 = angleDeg * Math.PI / 180;
+            if (!isMoving) {
+                currentAmplitude = alpha0;
+                currentAngle = alpha0;
+                updatePositions();
+            }
+        };
+
+        window.deflectPendulum = function(angleDeg) {
+            alpha0 = angleDeg * Math.PI / 180;
+            currentAmplitude = alpha0;
+            currentAngle = alpha0;
+            isMoving = false;
+            t = 0;
+            updatePositions();
+        };
+
+        window.startPendulumMotion = function(len, angleDeg) {
+            L = len;
+            alpha0 = angleDeg * Math.PI / 180;
+            currentAmplitude = alpha0;
+            currentAngle = alpha0;
+            isMoving = true;
+            t = 0;
+        };
+
+        window.stopPendulumMotion = function() {
+            isMoving = false;
+        };
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(-0.25, 0.25, 0);
+        controls.update();
+
+        updatePositions();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (isMoving) {
+                const omega = Math.sqrt(9.8 / L);
+                t += 0.016;
+                currentAmplitude = alpha0 * Math.exp(-damping * t);
+                if (currentAmplitude < 0.005) {
+                    isMoving = false;
+                    currentAngle = 0;
+                } else {
+                    currentAngle = currentAmplitude * Math.cos(omega * t);
+                }
+                updatePositions();
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    })();
+</script>
+
+<script src="favorites.js"></script>
+<script src="theme.js"></script>
+<nav class="bottom-nav" aria-label="Быстрая навигация">
+    <a href="index.html" title="Главная" aria-label="Главная"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+    <button type="button" title="Поиск" aria-label="Поиск" onclick="if(window.openSearchOverlay) window.openSearchOverlay(); else location.href='index.html#search';"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <a href="favorites.html" title="Избранное" aria-label="Избранное"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9L12 3.5z"/></svg></a>
+    <button type="button" title="Настройки" aria-label="Настройки" onclick="if(window.Android && window.Android.openQualityDialog) { window.Android.openQualityDialog(); } else { alert('Настройки 3D доступны только в приложении'); }"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+</nav>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        var nav = document.querySelector('.bottom-nav');
+        if (!nav) return;
+        var lastY = window.scrollY, threshold = 5, ticking = false;
+        window.addEventListener('scroll', function(){
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    var y = window.scrollY;
+                    if (Math.abs(y - lastY) >= threshold) {
+                        if (y > lastY && y > 50) nav.classList.add('nav-hidden');
+                        else nav.classList.remove('nav-hidden');
+                        lastY = y;
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    });
+</script>
+<script src="physics-data.js"></script>
+<script src="search-overlay.js"></script>
+</body>
+</html>

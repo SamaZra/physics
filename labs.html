@@ -59,12 +59,12 @@
         .bottom-nav a[href="favorites.html"].active { background: rgba(250, 204, 21, 0.20) !important; color: #facc15 !important; }
         .bottom-nav a svg, .bottom-nav button svg { width: 22px !important; height: 22px !important; flex: 0 0 22px !important; }
     </style>
-<style id="titles-center-fix">
-.section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
-.section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
-.section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
-h1, .page-title, .file-title, .title { text-align: center !important; }
-</style>
+    <style id="titles-center-fix">
+        .section-title { justify-content: center !important; text-align: center !important; position: relative !important; padding-left: 16px !important; padding-right: 28px !important; }
+        .section-title::after { position: absolute !important; right: 8px !important; top: 50% !important; transform: translateY(-50%) !important; margin-left: 0 !important; }
+        .section.collapsed .section-title::after { transform: translateY(-50%) rotate(-90deg) !important; }
+        h1, .page-title, .file-title, .title { text-align: center !important; }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -86,16 +86,15 @@ h1, .page-title, .file-title, .title { text-align: center !important; }
         </a>
 
         <!-- Лабораторная 3 -->
-        <div class="menu-item" style="opacity: 0.6; cursor: not-allowed;">
+        <a href="lab-emf.html" class="menu-item">
             <div class="item-title">Определение ЭДС и внутреннего сопротивления источника тока</div>
-            <div class="item-desc">Лабораторная работа №3 (В разработке)</div>
-        </div>
-
+            <div class="item-desc">Лабораторная работа №3</div>
+        </a>
         <!-- Лабораторная 4 -->
-        <div class="menu-item" style="opacity: 0.6; cursor: not-allowed;">
+        <a href="lab-pendulum.html" class="menu-item">
             <div class="item-title">Определение ускорения свободного падения при помощи математического маятника</div>
-            <div class="item-desc">Лабораторная работа №4 (В разработке)</div>
-        </div>
+            <div class="item-desc">Лабораторная работа №4</div>
+        </a>
 
         <!-- Лабораторная 5 -->
         <div class="menu-item" style="opacity: 0.6; cursor: not-allowed;">
@@ -113,7 +112,7 @@ h1, .page-title, .file-title, .title { text-align: center !important; }
     <div class="back-link-wrapper">
         <a href="index.html" class="back-link">← На главную</a>
     </div>
-</div>
+</div> <!-- ЗДЕСЬ БЫЛ ПРОПУЩЕН ЗАКРЫВАЮЩИЙ ТЕГ -->
 
 <nav class="bottom-nav" aria-label="Быстрая навигация">
     <a href="index.html" title="Главная" aria-label="Главная"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
