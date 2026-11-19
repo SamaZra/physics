@@ -6,6 +6,20 @@
     <title>Лабораторная работа: Измерение ЭДС и внутреннего сопротивления</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
+        /* Убираем системную подсветку нажатия у всех кликабельных элементов — как в humidity */
+        button, .btn, .tool-btn, .terminal, a, [onclick] {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-appearance: none;
+            appearance: none;
+            outline: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        button:focus, .btn:focus, .tool-btn:focus, .terminal:focus, a:focus, [onclick]:focus {
+            outline: none;
+            box-shadow: none;
+        }
         :root {
             --bg: #1a2d3c; --card-bg: #1e3545; --text: #ffffff; --text-secondary: #8ba5b8;
             --border: rgba(245, 158, 11, 0.1); --special-border: #f59e0b; --canvas-bg: #1a2d3c;
@@ -47,7 +61,10 @@
         .ref-scheme-title { font-weight: 700; margin-bottom: 8px; color: var(--text); font-size: 0.98rem; }
         .ref-scheme { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; color: var(--text); }
 
-        .simulator-area { position: relative; width: 100%; height: 450px; background: var(--canvas-bg); border-radius: 20px; overflow: hidden; border: 2px solid var(--border); margin: 16px 0; touch-action: none; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 20px 20px;}
+        .simulator-area { position: relative; width: 100%; height: 450px; background: var(--canvas-bg); border-radius: 20px; overflow: hidden; border: 2px solid var(--border); margin: 16px 0; touch-action: none; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 20px 20px; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        .simulator-area.circuit-closed { border-color: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,0.25), 0 0 18px rgba(34,197,94,0.35); }
+        .simulator-area.circuit-correct { border-color: #44ff88; box-shadow: 0 0 0 3px rgba(68,255,136,0.35), 0 0 26px rgba(68,255,136,0.5); }
+        .simulator-area.circuit-error { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.25), 0 0 18px rgba(239,68,68,0.35); }
 
         /* ИСПРАВЛЕНО: Убраны системные выделения и голубые рамки */
         .component {
@@ -69,19 +86,23 @@
             pointer-events: none;
         }
 
-        .terminal { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); border: 2px solid #475569; z-index: 20; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3); }
+        .terminal { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); border: 2px solid #475569; z-index: 20; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3); -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; outline: none; }
         .terminal:hover { background: #3b82f6; border-color: #fff; transform: scale(1.2); }
 
         .toolbar { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
-        .tool-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 85px; height: 85px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .tool-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 85px; height: 85px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; outline: none; user-select: none; -webkit-user-select: none; }
         .tool-btn:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 6px 12px var(--card-shadow); }
+        .tool-btn:active { outline: none; }
         .tool-btn svg { width: 55px; height: 55px; pointer-events: none; }
 
-        .btn { padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; color: white; transition: all 0.2s; }
+        .btn { padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; color: white; transition: all 0.2s; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; -webkit-appearance: none; appearance: none; outline: none; user-select: none; -webkit-user-select: none; }
         .btn-red { background: #ef4444; }
         .btn-green { background: #22c55e; }
         .btn-blue { background: #3b82f6; }
         .btn:hover { transform: scale(1.05); opacity: 0.9; }
+        .btn:focus { outline: none; box-shadow: none; }
+        .btn:active { outline: none; box-shadow: none; }
+        .btn:disabled { -webkit-tap-highlight-color: transparent; }
 
         .notebook-example { background: var(--formula-bg); border: 2px dashed var(--special-border); border-radius: 14px; padding: 16px; margin: 16px 0; font-family: 'Times New Roman', serif; color: var(--text); line-height: 1.8; }
         .notebook-example .blank { display: inline-block; min-width: 50px; border-bottom: 2px solid var(--text-secondary); text-align: center; font-weight: bold; color: var(--special-border); }
@@ -192,6 +213,7 @@
                 <div class="formula-block">
                     <span class="f">\(\varepsilon_r = \frac{\Delta E + \Delta U}{E - U} \cdot 100\% + \frac{\Delta I}{I} \cdot 100\%\)</span>
                 </div>
+                <p><em>Обратите внимание:</em> в знаменателе стоит разность \(E - U\). Если напряжение \(U\) близко к ЭДС \(E\) (сопротивление реостата велико), то \(E - U\) мало, и относительная погрешность \(\varepsilon_r\) резко возрастает. Это нормально: чем меньше разность \(E - U\), тем хуже точность косвенного измерения \(r\). Поэтому в работе желательно выбирать такое сопротивление реостата, при котором \(U\) заметно меньше \(E\).</p>
                 <p>Абсолютные погрешности:</p>
                 <div class="formula-block">
                     <span class="f">\(\Delta r = \frac{r \cdot \varepsilon_r}{100\%}\)</span>
@@ -304,9 +326,9 @@
                 </div>
 
                 <div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap:wrap;">
-                    <button class="btn btn-red" onclick="clearSim()">Сброс</button>
                     <button class="btn btn-blue" id="btn-check-emf" onclick="checkCircuit('open')">🔌 Измерить ЭДС (Ключ разомкнут)</button>
-                    <button class="btn btn-green" id="btn-check-closed" onclick="checkCircuit('closed')" style="display:none;">⚡ Измерить U и I (Ключ замкнут)</button>
+                    <button class="btn btn-green" id="btn-check-closed" onclick="checkCircuit('closed')" disabled style="opacity:0.5; cursor:not-allowed;">⚡ Измерить U и I (Ключ замкнут)</button>
+                    <button class="btn btn-red" onclick="if (confirm('Сбросить схему и начать заново?')) clearSim();">Сброс</button>
                 </div>
 
                 <div id="sim-status" style="text-align: center; font-weight: bold; margin-top: 15px; font-size: 1.1rem; color: var(--text);">Соберите цепь</div>
@@ -422,10 +444,16 @@
     let wires = [];
     let selectedTerminal = null;
 
-    // Генерируем случайные параметры для источника тока (у каждого студента свои)
-    const TRUE_E = (Math.random() * 2.5 + 1.5).toFixed(1); // ЭДС от 1.5 до 4.0 В
-    const TRUE_R_INT = (Math.random() * 1.5 + 0.3).toFixed(2); // r от 0.3 до 1.8 Ом
-    const R_EXT = 2.0; // Фиксированное сопротивление внешней цепи
+    // Параметры источника генерируются заново при каждом измерении
+    let currentSource = null; // текущая «батарейка» для согласованных измерений
+
+    function generateSource() {
+        return {
+            E: (Math.random() * 2.5 + 1.5).toFixed(1),   // ЭДС от 1.5 до 4.0 В
+            r: (Math.random() * 1.5 + 0.3).toFixed(2),   // r от 0.3 до 1.8 Ом
+            R: (Math.random() * 3.0 + 1.0).toFixed(2)    // R реостата от 1.0 до 4.0 Ом
+        };
+    }
 
     const componentTypes = {
         battery: {
@@ -476,21 +504,22 @@
             el.addEventListener('click', function(e) {
                 if (e.target.classList.contains('terminal')) return;
                 const lever = this.querySelector('line');
+                const scene = document.getElementById('sim-scene');
                 if (this.dataset.closed === 'true') {
                     this.dataset.closed = 'false';
                     lever.setAttribute('x2', '50'); lever.setAttribute('y2', '5');
                     lever.setAttribute('stroke', '#94a3b8');
-                    document.getElementById('btn-check-emf').style.display = 'inline-block';
-                    document.getElementById('btn-check-closed').style.display = 'none';
-                    document.getElementById('sim-result').style.display = 'none';
+                    scene.classList.remove('circuit-closed');
                 } else {
                     this.dataset.closed = 'true';
                     lever.setAttribute('x2', '60'); lever.setAttribute('y2', '15');
                     lever.setAttribute('stroke', '#22c55e');
-                    document.getElementById('btn-check-emf').style.display = 'none';
-                    document.getElementById('btn-check-closed').style.display = 'inline-block';
-                    document.getElementById('sim-result').style.display = 'none';
+                    scene.classList.add('circuit-closed');
                 }
+                // Убираем подсветку «верно/ошибка» при любом переключении ключа
+                scene.classList.remove('circuit-correct', 'circuit-error');
+                // Скрываем прошлый результат
+                document.getElementById('sim-result').style.display = 'none';
             });
             el.dataset.closed = 'false';
         }
@@ -566,6 +595,7 @@
     }
 
     function clearSim() {
+        currentSource = null; // при новой сборке — новая батарейка
         simScene.querySelectorAll('.component').forEach(el => el.remove());
         wiresGroup.innerHTML = '';
         components = []; wires = []; selectedTerminal = null;
@@ -573,8 +603,13 @@
         statusEl.textContent = 'Соберите цепь';
         statusEl.style.color = 'var(--text)';
         document.getElementById('sim-result').style.display = 'none';
-        document.getElementById('btn-check-emf').style.display = 'inline-block';
-        document.getElementById('btn-check-closed').style.display = 'none';
+        // Сбрасываем подсветку симулятора
+        simScene.classList.remove('circuit-closed', 'circuit-correct', 'circuit-error');
+        // Отключаем зелёную кнопку до нового измерения ЭДС
+        const btnClosed = document.getElementById('btn-check-closed');
+        btnClosed.disabled = true;
+        btnClosed.style.opacity = '0.5';
+        btnClosed.style.cursor = 'not-allowed';
     }
 
     // ================= ПРОВЕРКА ЦЕПИ (BFS) =================
@@ -628,10 +663,21 @@
     function checkCircuit(mode) {
         const status = document.getElementById('sim-status');
         const result = document.getElementById('sim-result');
+        const scene = document.getElementById('sim-scene');
         const setStatus = (text, color) => {
             status.textContent = text;
             status.style.color = color;
             result.style.display = 'none';
+            // Подсветка симулятора: красная при ошибке, снимаем «верно» при любой проверке
+            scene.classList.remove('circuit-correct');
+            if (color === '#ef4444') {
+                scene.classList.add('circuit-error');
+            } else if (color === '#fbbf24') {
+                // Предупреждение (жёлтое) — не красим рамку, только текст
+                scene.classList.remove('circuit-error');
+            } else {
+                scene.classList.remove('circuit-error');
+            }
         };
 
         // В этой лабе строгий список приборов (лишние запрещены)
@@ -676,17 +722,28 @@
         }
 
         if (mode === 'open') {
-            if (mainReachable.has(termKey(swIn)) || mainReachable.has(termKey(swOut))) {
-                // Если путь идет через ключ, значит он замкнут или обойден
-                // Но мы проверяем именно топологию
+            // Ключ должен быть разомкнут: иначе просим разомкнуть
+            if (switchComp.el.dataset.closed === 'true') {
+                setStatus('⚠️ Разомкните ключ, чтобы измерить ЭДС.', '#fbbf24'); return;
+            }
+            // Основной контур должен доходить от + батареи до − через амперметр и реостат
+            if (!mainReachable.has(termKey(amIn)) || !mainReachable.has(termKey(amOut)) ||
+                !mainReachable.has(termKey(resIn)) || !mainReachable.has(termKey(resOut))) {
+                setStatus('❌ Ошибка: амперметр и реостат должны быть в основном контуре.', '#ef4444'); return;
             }
             if (!mainReachable.has(termKey(batIn))) {
-                 setStatus('❌ Ошибка: основной контур не замкнут на минус батареи.', '#ef4444'); return;
+                setStatus('❌ Ошибка: основной контур не замкнут на минус батареи.', '#ef4444'); return;
             }
         } else {
-            // Если замкнут, проверяем что ключ В КОНТУРЕ
+            // Режим замкнутого ключа
+            if (switchComp.el.dataset.closed !== 'true') {
+                setStatus('⚠️ Замкните ключ, чтобы измерить U и I.', '#fbbf24'); return;
+            }
+            if (!currentSource) {
+                setStatus('⚠️ Сначала измерьте ЭДС при разомкнутом ключе.', '#fbbf24'); return;
+            }
             if (!mainReachable.has(termKey(batIn))) {
-                 setStatus('❌ Ошибка: цепь не замкнута (проверьте ключ).', '#ef4444'); return;
+                setStatus('❌ Ошибка: цепь не замкнута (проверьте ключ).', '#ef4444'); return;
             }
         }
 
@@ -708,23 +765,38 @@
         // ===== УСПЕХ =====
         status.textContent = '✅ Схема собрана абсолютно верно!';
         status.style.color = '#44ff88';
+        scene.classList.remove('circuit-error');
+        scene.classList.add('circuit-correct');
 
-        const E = parseFloat(TRUE_E);
-        const r = parseFloat(TRUE_R_INT);
+        // При измерении ЭДС — новая батарейка.
+        // При измерении U и I — используем ту же, что показали для ЭДС.
+        if (mode === 'open' || !currentSource) {
+            currentSource = generateSource();
+        }
+        const E = parseFloat(currentSource.E);
+        const r = parseFloat(currentSource.r);
+        const R = parseFloat(currentSource.R);
 
         if (mode === 'open') {
             result.innerHTML = `<h3 style="color: #44ff88; margin-bottom:10px;">Результат: Измерение ЭДС</h3>
                                 <p style="font-size:1.1rem;">Вольтметр (ЭДС): <strong>${E.toFixed(1).replace('.', ',')}</strong> В</p>
                                 <p style="font-size:0.9rem; margin-top:10px; color:var(--text-secondary);">Теперь замкните ключ и нажмите зелёную кнопку.</p>`;
             result.style.display = 'block';
+            // Активируем зелёную кнопку — теперь можно измерять U и I
+            const btnClosed = document.getElementById('btn-check-closed');
+            btnClosed.disabled = false;
+            btnClosed.style.opacity = '1';
+            btnClosed.style.cursor = 'pointer';
         } else {
-            // Закон Ома для полной цепи
-            const I = E / (R_EXT + r);
-            const U = I * R_EXT;
+            // Закон Ома для полной цепи (R — случайное сопротивление реостата)
+            const I = E / (R + r);
+            const U = I * R;
 
             result.innerHTML = `<h3 style="color: #44ff88; margin-bottom:10px;">Результат: Измерение U и I</h3>
                                 <p style="font-size:1.1rem;">Вольтметр (U): <strong>${U.toFixed(1).replace('.', ',')}</strong> В</p>
-                                <p style="font-size:1.1rem;">Амперметр (I): <strong>${I.toFixed(2).replace('.', ',')}</strong> А</p>`;
+                                <p style="font-size:1.1rem;">Амперметр (I): <strong>${I.toFixed(2).replace('.', ',')}</strong> А</p>
+                                <p style="font-size:0.85rem; margin-top:8px; color:var(--text-secondary);">Сопротивление реостата: R = ${R.toFixed(2).replace('.', ',')} Ом</p>
+                                <p style="font-size:0.9rem; margin-top:10px; color:var(--text-secondary);">Запишите значения E, U, I в тетрадь и рассчитайте r = (E − U) / I.</p>`;
             result.style.display = 'block';
         }
     }

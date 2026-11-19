@@ -47,7 +47,9 @@
         .ref-scheme-title { font-weight: 700; margin-bottom: 8px; color: var(--text); font-size: 0.98rem; }
         .ref-scheme { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; color: var(--text); }
 
-        .simulator-area { position: relative; width: 100%; height: 450px; background: var(--canvas-bg); border-radius: 20px; overflow: hidden; border: 2px solid var(--border); margin: 16px 0; touch-action: none; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 20px 20px;}
+        .simulator-area { position: relative; width: 100%; height: 450px; background: var(--canvas-bg); border-radius: 20px; overflow: hidden; border: 2px solid var(--border); margin: 16px 0; touch-action: none; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 20px 20px; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        .simulator-area.circuit-correct { border-color: #44ff88; box-shadow: 0 0 0 3px rgba(68,255,136,0.35), 0 0 26px rgba(68,255,136,0.5); }
+        .simulator-area.circuit-error { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.25), 0 0 18px rgba(239,68,68,0.35); }
 
         /* Убраны системные выделения и голубые рамки */
         .component {
@@ -69,18 +71,20 @@
             pointer-events: none;
         }
 
-        .terminal { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); border: 2px solid #475569; z-index: 20; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3); }
+        .terminal { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); border: 2px solid #475569; z-index: 20; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3); -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; outline: none; }
         .terminal:hover { background: #3b82f6; border-color: #fff; transform: scale(1.2); }
 
         .toolbar { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
-        .tool-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 85px; height: 85px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .tool-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 85px; height: 85px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; outline: none; user-select: none; -webkit-user-select: none; }
         .tool-btn:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 6px 12px var(--card-shadow); }
+        .tool-btn:focus, .tool-btn:active { outline: none; box-shadow: none; }
         .tool-btn svg { width: 55px; height: 55px; pointer-events: none; }
 
-        .btn { padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; color: white; transition: all 0.2s; }
+        .btn { padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; color: white; transition: all 0.2s; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; -webkit-appearance: none; appearance: none; outline: none; user-select: none; -webkit-user-select: none; }
         .btn-red { background: #ef4444; }
         .btn-green { background: #22c55e; }
         .btn:hover { transform: scale(1.05); opacity: 0.9; }
+        .btn:focus, .btn:active { outline: none; box-shadow: none; }
 
         .notebook-example { background: var(--formula-bg); border: 2px dashed var(--special-border); border-radius: 14px; padding: 16px; margin: 16px 0; font-family: 'Times New Roman', serif; color: var(--text); line-height: 1.8; }
         .notebook-example .blank { display: inline-block; min-width: 50px; border-bottom: 2px solid var(--text-secondary); text-align: center; font-weight: bold; color: var(--special-border); }
@@ -327,7 +331,7 @@
                     <p>Напряжение (U): <strong id="out-U">0.0</strong> В</p>
                     <p>Сила тока (I): <strong id="out-I">0.0</strong> А</p>
                     <p>Длина проволоки (ℓ): <strong id="out-L">0</strong> мм</p>
-                    <p>Диаметр проволоки (d): <strong id="out-d">0.0</strong> мм</p>
+                    <p style="font-size:0.9rem; margin-top:10px; color:var(--text-secondary);">Запишите значения U, I, ℓ, d в тетрадь и рассчитайте ρ = π·U·d² / (4·I·ℓ).</p>
                 </div>
             </div>
         </div>
@@ -665,10 +669,18 @@
     function checkCircuit() {
         const status = document.getElementById('sim-status');
         const result = document.getElementById('sim-result');
+        const scene = document.getElementById('sim-scene');
         const setStatus = (text, color) => {
             status.textContent = text;
             status.style.color = color;
             result.style.display = 'none';
+            // Подсветка симулятора
+            scene.classList.remove('circuit-correct');
+            if (color === '#ef4444') {
+                scene.classList.add('circuit-error');
+            } else {
+                scene.classList.remove('circuit-error');
+            }
         };
 
         const types = components.map(c => c.type);
@@ -792,6 +804,8 @@
         // ===== УСПЕХ =====
         status.textContent = '✅ Цепь собрана абсолютно верно!';
         status.style.color = '#44ff88';
+        scene.classList.remove('circuit-error');
+        scene.classList.add('circuit-correct');
 
         // ИСПРАВЛЕННАЯ ГЕНЕРАЦИЯ ДАННЫХ
         const targetRho = 1.1e-6; // Нихром (110 * 10^-8)
@@ -836,6 +850,8 @@
         statusEl.textContent = 'Соберите цепь';
         statusEl.style.color = 'var(--text)';
         document.getElementById('sim-result').style.display = 'none';
+        // Сбрасываем подсветку симулятора
+        simScene.classList.remove('circuit-correct', 'circuit-error');
     }
 </script>
 
